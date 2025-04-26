@@ -1,0 +1,19 @@
+# Laravel files
+/vendor
+/node_modules
+/.env
+/public/storage
+/storage/*.key
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+/phpunit.result.cache
+/.phpunit.cache
+/.vscode
+/.idea
+.DS_Store
+
+# Docker volumes
+docker/mysql/data/
+/dbdata/
