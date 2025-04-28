@@ -142,6 +142,29 @@
 
         <x-toast-notification />
 
+        <script>
+            $(document).ready(function() {
+                var currentUrl = window.location.href;
+        
+                $('li.nav-item a').each(function() {
+                    if (this.href === currentUrl) {
+                        // 1. Active <a> current
+                        $(this).addClass('active');
+
+                        // 2. Active <li> parent
+                        $(this).closest('li.nav-item').addClass('active');
+
+                        // 3. If the link is inside a submenu (div.collapse)
+                        var $collapse = $(this).closest('div.collapse');
+                        if ($collapse.length) {
+                            $collapse.addClass('show'); // open submenu
+                            $collapse.prev('a.menu-link').addClass('active').attr('aria-expanded', 'true'); // active menu parent
+                        }
+                    }
+                });
+            });
+        </script>
+
         <!-- Page-specific JS -->
         @stack('scripts')
     </body>

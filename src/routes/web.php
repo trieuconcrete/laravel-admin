@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\UserController;
 
 use App\Http\Controllers\Admin\ForgotPasswordController;
 use App\Http\Controllers\Admin\ResetPasswordController;
+use App\Http\Controllers\Admin\DashboardController;
 
 
 Route::prefix('admin')->group(function () {
@@ -13,9 +14,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
     Route::middleware(['auth:admin'])->group(function () {
-        Route::get('/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('admin.dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     });
 });
 

@@ -9,8 +9,7 @@
                 <div class="col-12">
                     <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                         <div class="flex-grow-1">
-                            <h4 class="fs-16 mb-1">Good Morning, {{ request()->user()->full_name }}!</h4>
-                            <p class="text-muted mb-0">Have a nice day.</p>
+                            <h4 class="fs-16 mb-1">{{ greeting_message() }}</h4>
                         </div>
                         <div class="mt-3 mt-lg-0">
                             <div class="row g-3 mb-0 align-items-center">

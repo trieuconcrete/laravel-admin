@@ -6,7 +6,7 @@
             </div>
             <div class="col-sm-6">
                 <div class="text-sm-end d-none d-sm-block">
-                    Design & Develop by NguyenTrieu
+                    Develop by Nguyễn Triều
                 </div>
             </div>
         </div>
