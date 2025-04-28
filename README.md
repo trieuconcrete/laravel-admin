@@ -8,7 +8,6 @@ This project provides a clean Docker-based development environment for Laravel 1
 - Redis
 - Mailhog (for email testing)
 - Node.js (build frontend assets)
-- Composer (manage PHP dependencies)
 
 ## 📦 Prerequisites
 
@@ -59,7 +58,13 @@ This project provides a clean Docker-based development environment for Laravel 1
     make migrate
     ```
 
-7. Build frontend assets:
+7. Run seeder:
+
+    ```bash
+    make seed
+    ```
+
+8. Build frontend assets:
 
     ```bash
     make npm cmd=dev
@@ -89,7 +94,7 @@ This project provides a clean Docker-based development environment for Laravel 1
 
 | Service  | URL                  | Description       |
 |:---------|:----------------------|:------------------|
-| App      | http://localhost       | Laravel app       |
+| App      | http://localhost/admin/login       | Laravel app       |
 | Mailhog  | http://localhost:8025  | Email catcher     |
 | MySQL    | 127.0.0.1:3306         | Database          |
 | Redis    | 127.0.0.1:6379         | Cache / Queue     |
@@ -106,7 +111,3 @@ This project provides a clean Docker-based development environment for Laravel 1
 - Support for Composer and Node.js in isolated containers.
 
 ---
-
-## 📄 License
-
-This project is open-sourced software licensed under the [MIT license](LICENSE).

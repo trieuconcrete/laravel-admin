@@ -9,6 +9,9 @@ down:
 build:
 	docker-compose build
 
+start:
+	docker-compose start
+
 restart:
 	docker-compose down && docker-compose up -d
 
@@ -29,6 +32,9 @@ npm:
 
 migrate:
 	docker-compose exec app php artisan migrate
+
+seed:
+	docker-compose exec app php artisan db:seed
 
 fresh:
 	docker-compose exec app php artisan migrate:fresh --seed
