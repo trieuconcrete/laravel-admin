@@ -18,15 +18,6 @@ class UserSeeder extends Seeder
     {
         // 30 user random
         $roles = ['user', 'manager'];
-
-        for ($i = 1; $i <= 30; $i++) {
-            User::create([
-                'full_name' => 'User ' . $i,
-                'email' => 'user'.$i.'@test.com',
-                'password' => Hash::make('password123'),
-                'role' => $roles[array_rand($roles)], // random role user hoặc manager
-                'status' => rand(0, 1), // 1: active, 0: inactive
-            ]);
-        }
+        User::factory()->count(30)->create();
     }
 }

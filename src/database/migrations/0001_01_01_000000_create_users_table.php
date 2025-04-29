@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('birthday')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('phone', 12)->nullable();
             $table->string('role')->default('user')->comment('admin, user, manager');
             $table->boolean('status')->default(1); // 1: active, 0: inactive
             $table->string('avatar')->nullable();

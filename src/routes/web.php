@@ -3,9 +3,10 @@
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\Admin\UserController;
 
-use App\Http\Controllers\Admin\ForgotPasswordController;
-use App\Http\Controllers\Admin\ResetPasswordController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ResetPasswordController;
+use App\Http\Controllers\Admin\ForgotPasswordController;
 
 
 Route::prefix('admin')->group(function () {
@@ -25,6 +26,10 @@ Route::get('/login', function () {
 Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', UserController::class);
     Route::get('users-export', [UserController::class, 'export'])->name('users.export');
+
+    Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
 });
 
 

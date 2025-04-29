@@ -38,6 +38,23 @@
                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
+
+                                <!-- Birthday -->
+                                <div class="mb-4">
+                                    <label class="block text-gray-700">Birthday</label>
+                                    <input type="date" name="birthday" value="{{ old('birthday', $user->birthday ?? '') }}" class="form-control p-2 border rounded @error('birthday') border-red-500 @enderror">
+                                    @error('birthday')
+                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="block text-gray-700">Phone</label>
+                                    <input name="phone" type="text" placeholder="Phone" value="{{ old('phone', $user->phone ?? '') }}" class="form-control p-2 border rounded">
+                                    @error('phone')
+                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                    @enderror
+                                </div>
                         
                                 <div class="mb-4">
                                     <label class="block text-gray-700">Password</label>

@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use App\Exports\UsersExport;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class UserController extends Controller
@@ -50,6 +51,7 @@ class UserController extends Controller
                 'email' => 'required|email|unique:users',
                 'username' => 'nullable|max:100|unique:users,username',
                 'birthday' => 'nullable|date',
+                'phone' => 'nullable|string',
                 'password' => [
                     'required',
                     'confirmed',
@@ -101,6 +103,7 @@ class UserController extends Controller
                 'email' => 'required|email|unique:users,email,' . $user->id,
                 'username' => 'nullable|max:100|unique:users,username,' . ($user->id ?? 'NULL') . ',id',
                 'birthday' => 'nullable|date',
+                'phone' => 'nullable|string',
                 'role' => 'required',
                 'password' => [
                     'nullable',
@@ -118,6 +121,9 @@ class UserController extends Controller
             }
         
             if ($request->hasFile('avatar')) {
+                if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
                 $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
             }
         
