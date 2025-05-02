@@ -12,6 +12,9 @@ build:
 start:
 	docker-compose start
 
+stop:
+	docker-compose stop
+
 restart:
 	docker-compose down && docker-compose up -d
 
