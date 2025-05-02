@@ -77,8 +77,10 @@ This project provides a clean Docker-based development environment for Laravel 1
 | Command                  | Description                      |
 |:------------------------- |:---------------------------------|
 | `make up`                 | Start all docker services        |
-| `make down`               | Stop all services                |
+| `make down`               | Remove all services              |
 | `make build`              | Build Docker images              |
+| `make start`              | Start all services               |
+| `make stop`               | Stop all services                |
 | `make bash`               | SSH into the app container       |
 | `make artisan cmd="xxx"`  | Run an Artisan command           |
 | `make composer cmd="xxx"` | Run a Composer command           |
