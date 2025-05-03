@@ -27,7 +27,9 @@ class User extends Authenticatable
         'phone',
         'role',
         'status',
-        'avatar'
+        'avatar',
+        'bio',
+        'social_links',
     ];
 
     /**
@@ -50,6 +52,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'social_links' => 'array',
         ];
     }
 
@@ -62,5 +65,53 @@ class User extends Authenticatable
                 Storage::disk('public')->delete($user->avatar);
             }
         });
+    }
+
+    public function prompts()
+    {
+        return $this->hasMany(Prompt::class);
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function savedPrompts()
+    {
+        return $this->belongsToMany(Prompt::class, 'saved', 'user_id', 'prompt_id')
+            ->withTimestamps();
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function followers()
+    {
+        return $this->belongsToMany(User::class, 'followers', 'following_id', 'follower_id')
+            ->withTimestamps();
+    }
+
+    public function following()
+    {
+        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'following_id')
+            ->withTimestamps();
+    }
+
+    public function toSearchableArray()
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'username' => $this->username,
+            'bio' => $this->bio,
+        ];
     }
 }

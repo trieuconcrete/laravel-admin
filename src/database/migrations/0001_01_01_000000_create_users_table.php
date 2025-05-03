@@ -23,6 +23,8 @@ return new class extends Migration
             $table->string('role')->default('user')->comment('admin, user, manager');
             $table->boolean('status')->default(1); // 1: active, 0: inactive
             $table->string('avatar')->nullable();
+            $table->text('bio')->nullable();
+            $table->json('social_links')->nullable();
             $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();
