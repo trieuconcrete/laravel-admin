@@ -2,16 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\User;
-use App\Exports\UsersExport;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Hash;
-use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Models\User;
 
-class UserController extends Controller
+class DriverController extends Controller
 {
     use AuthorizesRequests;
     public function index(Request $request)
@@ -32,12 +29,12 @@ class UserController extends Controller
         }
 
         $users = $query->latest()->paginate(10);
-        return view('admin.users.index', compact('users'));
+        return view('admin.drivers.index', compact('users'));
     }
 
     public function create()
     {
-        return view('admin.users.create');
+        return view('admin.drivers.create');
     }
 
     public function store(Request $request)
@@ -49,29 +46,16 @@ class UserController extends Controller
             $request->validate([
                 'full_name' => 'required',
                 'email' => 'required|email|unique:users',
-                'username' => 'nullable|max:100|unique:users,username',
                 'birthday' => 'nullable|date',
                 'phone' => 'nullable|string',
-                'password' => [
-                    'required',
-                    'confirmed',
-                    'min:6'
-                ],
-                'role' => 'required',
                 'status' => 'required|boolean',
-                'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             ]);
 
-            $data = $request->only('full_name', 'email', 'role', 'status', 'birthday', 'username');
-            $data['password'] = Hash::make($request->password);
-
-            if ($request->hasFile('avatar')) {
-                $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
-            }
+            $data = $request->only('full_name', 'email', 'status', 'birthday');
 
             User::create($data);
 
-            return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+            return redirect()->route('admin.drivers.index')->with('success', 'User created successfully.');
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
@@ -81,14 +65,14 @@ class UserController extends Controller
     {
         $this->authorize('view', $user);
 
-        return view('admin.users.view', compact('user'));
+        return view('admin.drivers.view', compact('user'));
     }
 
     public function edit(User $user)
     {
         $this->authorize('update', $user);
 
-        return view('admin.users.edit', compact('user'));
+        return view('admin.drivers.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)
@@ -129,7 +113,7 @@ class UserController extends Controller
         
             $user->update($data);
         
-            return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
+            return redirect()->route('admin.drivers.index')->with('success', 'User updated successfully.');
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
@@ -141,10 +125,5 @@ class UserController extends Controller
 
         $user->delete();
         return back()->with('success', 'User deleted successfully.');
-    }
-
-    public function export()
-    {
-        return Excel::download(new UsersExport, 'users.xlsx');
     }
 }

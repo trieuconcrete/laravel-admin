@@ -13,7 +13,7 @@
                         <div class="mt-3 mt-lg-0">
                             <div class="row g-3 mb-0 align-items-center">
                                 <div class="col-auto">
-                                    <button type="button" class="btn btn-soft-success" data-bs-toggle="modal" data-bs-target=".add-user-model"><i class="ri-add-circle-line align-middle me-1"></i> Thêm người dùng mới</button>
+                                    <button type="button" class="btn btn-soft-success" data-bs-toggle="modal" data-bs-target=".add-user-model"><i class="ri-add-circle-line align-middle me-1"></i> Thêm tài xế mới</button>
                                 </div>
                                 <!--end col-->
                             </div>

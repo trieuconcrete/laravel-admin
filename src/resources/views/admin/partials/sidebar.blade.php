@@ -32,27 +32,38 @@
             <ul class="navbar-nav" id="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link menu-link" href="{{ route('admin.dashboard') }}">
-                        <i class="ri-dashboard-2-line"></i> </i> <span data-key="t-dashboards">{{ __('sidebar.dashboard') }}</span>
+                        <i class="ri-dashboard-line"></i> </i> <span data-key="t-dashboards">{{ __('sidebar.report') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link menu-link" href="#sidebarAuth" data-bs-toggle="collapse" role="button" aria-expanded="false" aria-controls="sidebarAuth">
-                        <i class="ri-account-circle-line"></i> <span data-key="t-authentication">{{ __('sidebar.users') }}</span>
+                    <a class="nav-link menu-link" href="{{ route('admin.drivers.index') }}">
+                        <i class="ri-group-line"></i> </i> <span data-key="t-drivers">{{ __('sidebar.driver_management') }}</span>
                     </a>
-                    <div class="collapse menu-dropdown" id="sidebarAuth">
-                        <ul class="nav nav-sm flex-column">
-                            <li class="nav-item">
-                                <a class="nav-link menu-link" href="{{ route('admin.users.create') }}">
-                                    <span data-key="t-create">{{ __('common.create') }}</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link menu-link" href="{{ route('admin.users.index') }}">
-                                    <span data-key="t-list">{{ __('common.list') }}</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="{{ route('admin.vehicles.index') }}">
+                        <i class="ri-truck-line"></i> </i> <span data-key="t-vehicles">{{ __('sidebar.vehicles_management') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="{{ route('admin.trips.index') }}">
+                        <i class="ri-route-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.trips_management') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#">
+                        <i class="ri-team-line"></i> </i> <span data-key="t-customers">{{ __('sidebar.customer_management') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#">
+                        <i class="ri-file-list-2-line"></i> </i> <span data-key="t-timekeeping">{{ __('sidebar.income_and_expense_management') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="#">
+                        <i class="ri-settings-2-line"></i> </i> <span data-key="t-settings">{{ __('sidebar.settings') }}</span>
+                    </a>
                 </li>
             </ul>
         </div>
