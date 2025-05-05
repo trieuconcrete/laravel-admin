@@ -18,6 +18,8 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('icon')->nullable();
             $table->string('color')->nullable();
+            $table->string('background_color')->nullable(); // Lưu mã màu hex cho background
+            $table->unsignedInteger('prompt_count')->default(0);
             $table->foreignId('parent_id')->nullable()->constrained('categories')->onDelete('set null');
             $table->timestamps();
         });

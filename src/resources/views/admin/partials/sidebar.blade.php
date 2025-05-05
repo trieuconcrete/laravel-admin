@@ -54,6 +54,11 @@
                         </ul>
                     </div>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="{{ route('admin.prompts.index') }}">
+                        <i class="ri-code-box-line"></i> </i> <span data-key="t-dashboards">{{ __('sidebar.prompts') }}</span>
+                    </a>
+                </li>
             </ul>
         </div>
         <!-- Sidebar -->

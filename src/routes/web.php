@@ -7,7 +7,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
-
+use App\Http\Controllers\Admin\PromptController;
 
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
@@ -30,8 +30,12 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
-});
 
+    // Prompts CRUD
+    Route::resource('prompts', PromptController::class);
+    Route::post('prompts/{prompt}/toggle-public', [PromptController::class, 'togglePublic'])
+        ->name('prompts.toggle-public');
+});
 
 Route::get('admin/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('admin.password.request');
 

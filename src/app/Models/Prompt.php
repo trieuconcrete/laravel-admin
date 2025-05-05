@@ -4,161 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Scout\Searchable;
 
 class Prompt extends Model
 {
-    <?php
-
-// app/Models/User.php
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Laravel\Scout\Searchable;
-
-class User extends Authenticatable
-{
-    use HasApiTokens, HasFactory, Notifiable, Searchable;
-
-    protected $fillable = [
-        'name',
-        'username',
-        'email',
-        'password',
-        'bio',
-        'avatar',
-        'social_links',
-    ];
-
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'social_links' => 'array',
-    ];
-
-    public function prompts()
-    {
-        return $this->hasMany(Prompt::class);
-    }
-
-    public function comments()
-    {
-        return $this->hasMany(Comment::class);
-    }
-
-    public function likes()
-    {
-        return $this->hasMany(Like::class);
-    }
-
-    public function savedPrompts()
-    {
-        return $this->belongsToMany(Prompt::class, 'saved', 'user_id', 'prompt_id')
-            ->withTimestamps();
-    }
-
-    public function ratings()
-    {
-        return $this->hasMany(Rating::class);
-    }
-
-    public function followers()
-    {
-        return $this->belongsToMany(User::class, 'followers', 'following_id', 'follower_id')
-            ->withTimestamps();
-    }
-
-    public function following()
-    {
-        return $this->belongsToMany(User::class, 'followers', 'follower_id', 'following_id')
-            ->withTimestamps();
-    }
-
-    public function toSearchableArray()
-    {
-        return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'username' => $this->username,
-            'bio' => $this->bio,
-        ];
-    }
-}
-
-// app/Models/Category.php
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Category extends Model
-{
     use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'slug',
-        'description',
-        'icon',
-        'color',
-        'parent_id',
-    ];
-
-    public function parent()
-    {
-        return $this->belongsTo(Category::class, 'parent_id');
-    }
-
-    public function children()
-    {
-        return $this->hasMany(Category::class, 'parent_id');
-    }
-
-    public function prompts()
-    {
-        return $this->hasMany(Prompt::class);
-    }
-}
-
-// app/Models/Tag.php
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Tag extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'slug',
-    ];
-
-    public function prompts()
-    {
-        return $this->belongsToMany(Prompt::class, 'prompt_tags');
-    }
-}
-
-// app/Models/Prompt.php
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Laravel\Scout\Searchable;
-
-class Prompt extends Model
-{
-    use HasFactory, Searchable;
 
     protected $fillable = [
         'user_id',
@@ -177,7 +26,35 @@ class Prompt extends Model
     protected $casts = [
         'variable_descriptions' => 'array',
         'is_public' => 'boolean',
+        
     ];
+    protected static function booted()
+    {
+        static::created(function ($prompt) {
+            $prompt->category->increment('prompt_count');
+        });
+
+        static::deleted(function ($prompt) {
+            $prompt->category->decrement('prompt_count');
+        });
+
+        // Nếu prompt có thể chuyển category
+        static::updating(function ($prompt) {
+            if ($prompt->isDirty('category_id')) {
+                // Giảm count ở category cũ
+                $oldCategory = Category::find($prompt->getOriginal('category_id'));
+                if ($oldCategory) {
+                    $oldCategory->decrement('prompt_count');
+                }
+                
+                // Tăng count ở category mới
+                $newCategory = Category::find($prompt->category_id);
+                if ($newCategory) {
+                    $newCategory->increment('prompt_count');
+                }
+            }
+        });
+    }
 
     public function user()
     {
