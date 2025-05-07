@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\Position;
 use App\Exports\UsersExport;
 use Illuminate\Http\Request;
+use App\Models\DriverLicense;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
@@ -20,11 +22,12 @@ class UserController extends Controller
 
         if ($request->filled('search')) {
             $query->where('full_name', 'like', '%' . $request->search . '%')
-                ->orWhere('email', 'like', '%' . $request->search . '%');
+                ->orWhere('email', 'like', '%' . $request->search . '%')
+                ->orWhere('employee_code', 'like', '%' . $request->search . '%');
         }
 
-        if ($request->filled('role')) {
-            $query->where('role', $request->role);
+        if ($request->filled('position_id')) {
+            $query->where('position_id', $request->position_id);
         }
 
         if ($request->filled('status')) {
@@ -32,7 +35,9 @@ class UserController extends Controller
         }
 
         $users = $query->latest()->paginate(10);
-        return view('admin.users.index', compact('users'));
+        $positions = Position::pluck('name', 'id');
+        $licenses = DriverLicense::getCarLicenseTypes();
+        return view('admin.users.index', compact('users', 'positions', 'licenses'));
     }
 
     public function create()

@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // 30 user random
-        $roles = ['user', 'manager', 'accountant', 'driver'];
+        $roles = ['admin', 'user', 'manager', 'staff', 'driver'];
         User::factory()->count(30)->create();
     }
 }

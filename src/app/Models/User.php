@@ -3,8 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Position;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -12,6 +15,15 @@ class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * Role constants
+     */
+    const ROLE_ADMIN = 'admin';
+    const ROLE_MANAGER = 'manager';
+    const ROLE_DRIVER = 'driver';
+    const ROLE_STAFF = 'staff';
+    const ROLE_USER = 'user';
 
     /**
      * The attributes that are mass assignable.
@@ -27,7 +39,9 @@ class User extends Authenticatable
         'phone',
         'role',
         'status',
-        'avatar'
+        'avatar',
+        'employee_code',
+        'position_id',
     ];
 
     /**
@@ -51,6 +65,82 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get all available roles
+     *
+     * @return array
+     */
+    public static function getRoles()
+    {
+        return [
+            self::ROLE_ADMIN => 'Quản trị viên',
+            self::ROLE_MANAGER => 'Quản lý',
+            self::ROLE_DRIVER => 'Tài xế',
+            self::ROLE_STAFF => 'Nhân viên',
+            self::ROLE_USER => 'Người dùng'
+        ];
+    }
+
+    /**
+     * Get the position that owns the user.
+     */
+    public function position(): BelongsTo
+    {
+        return $this->belongsTo(Position::class, 'position_id');
+    }
+
+    /**
+     * Get the driver that owns the license.
+     */
+    public function license(): HasOne
+    {
+        return $this->hasOne(DriverLicense::class, 'user_id');
+    }
+
+    /**
+     * Generate employee code for the user
+     *
+     * @return string|null
+     */
+    public function generateEmployeeCode(): ?string
+    {
+        // Nếu đã có mã, không tạo mới
+        if ($this->employee_code) {
+            return $this->employee_code;
+        }
+
+        // Nếu người dùng không có chức vụ, không tạo mã
+        if (!$this->position_id) {
+            return null;
+        }
+
+        // Tạo mã mới
+        $position = $this->position;
+        $this->employee_code = $position->getNextEmployeeCode();
+        $this->save();
+
+        return $this->employee_code;
+    }
+
+    /**
+     * Assign position to user
+     *
+     * @param int $positionId
+     * @param bool $generateCode
+     * @return bool
+     */
+    public function assignPosition($positionId, $generateCode = true): bool
+    {
+        $this->position_id = $positionId;
+        $saved = $this->save();
+
+        if ($saved && $generateCode) {
+            $this->generateEmployeeCode();
+        }
+
+        return $saved;
     }
 
     protected static function boot()

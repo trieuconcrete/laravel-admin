@@ -4,7 +4,6 @@ use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\Admin\TripController;
 
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -34,7 +33,6 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
 
-    Route::resource('drivers', DriverController::class);
     Route::resource('vehicles', VehicleController::class);
     Route::resource('trips', TripController::class);
 });

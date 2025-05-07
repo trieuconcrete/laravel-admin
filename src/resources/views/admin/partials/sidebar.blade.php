@@ -36,8 +36,8 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link menu-link" href="{{ route('admin.drivers.index') }}">
-                        <i class="ri-group-line"></i> </i> <span data-key="t-drivers">{{ __('sidebar.driver_management') }}</span>
+                    <a class="nav-link menu-link" href="{{ route('admin.users.index') }}">
+                        <i class="ri-group-line"></i> </i> <span data-key="t-users">{{ __('sidebar.driver_management') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">

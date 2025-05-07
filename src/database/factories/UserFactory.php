@@ -29,9 +29,11 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'phone' => fake()->randomNumber(9),
             'birthday' => fake()->date('Y-m-d', '2012-12-31'),
-            'role' => fake()->randomElement(['admin', 'manager', 'user']),
+            'role' => fake()->randomElement(['admin', 'manager', 'user', 'staff', 'driver']),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'id_number' => fake()->creditCardNumber(),
+            'join_date' => fake()->date('Y-m-d', now()),
         ];
     }
 
