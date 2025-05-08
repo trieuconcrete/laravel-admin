@@ -29,6 +29,7 @@ return new class extends Migration
             $table->boolean('status')->default(1); // 1: active, 0: inactive
             $table->string('avatar')->nullable();
             $table->string('profile_image')->nullable();
+            $table->decimal('salary_base', 12,2)->nullable();
             $table->tinyInteger('gender')->nullable();
             $table->softDeletes();
             $table->rememberToken();

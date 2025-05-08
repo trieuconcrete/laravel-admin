@@ -34,6 +34,7 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'id_number' => fake()->creditCardNumber(),
             'join_date' => fake()->date('Y-m-d', now()),
+            'salary_base' => fake()->numberBetween(6000000, 9000000),
         ];
     }
 

@@ -85,8 +85,10 @@ class UserController extends Controller
     public function show(User $user)
     {
         $this->authorize('view', $user);
+        $positions = Position::pluck('name', 'id');
+        $licenses = DriverLicense::getCarLicenseTypes();
 
-        return view('admin.users.view', compact('user'));
+        return view('admin.users.show', compact('user', 'positions', 'licenses'));
     }
 
     public function edit(User $user)

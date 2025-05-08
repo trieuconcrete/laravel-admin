@@ -46,13 +46,13 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link menu-link" href="{{ route('admin.trips.index') }}">
-                        <i class="ri-route-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.trips_management') }}</span>
+                    <a class="nav-link menu-link" href="#">
+                        <i class="ri-team-line"></i> </i> <span data-key="t-customers">{{ __('sidebar.customer_management') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
-                        <i class="ri-team-line"></i> </i> <span data-key="t-customers">{{ __('sidebar.customer_management') }}</span>
+                    <a class="nav-link menu-link" href="{{ route('admin.trips.index') }}">
+                        <i class="ri-route-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.trips_management') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">

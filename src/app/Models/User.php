@@ -42,6 +42,7 @@ class User extends Authenticatable
         'avatar',
         'employee_code',
         'position_id',
+        'salary_base'
     ];
 
     /**

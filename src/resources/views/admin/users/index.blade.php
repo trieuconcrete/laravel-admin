@@ -64,6 +64,7 @@
                                                 <th class="py-2 px-4">SDT</th>
                                                 <th class="py-2 px-4">Email</th>
                                                 <th class="py-2 px-4">Vị trí</th>
+                                                <th class="py-2 px-4">Lương cơ bản</th>
                                                 <th class="py-2 px-4">Loại bằng lái</th>
                                                 <th class="py-2 px-4">Hạn bằng lái</th>
                                                 <th class="py-2 px-4">Trạng thái</th>
@@ -78,6 +79,7 @@
                                                     <td class="py-2 px-4">{{ $user->phone }}</td>
                                                     <td class="py-2 px-4">{{ $user->email }}</td>
                                                     <td class="py-2 px-4">{{ ucfirst($user->position->name) }}</td>
+                                                    <td class="py-2 px-4">{{ number_format($user->salary_base) }}</td>
                                                     <td class="py-2 px-4">{{  optional($user->license)->license_type }}</td>
                                                     <td class="py-2 px-4">
                                                         @if (optional($user->license)->status == 'expired')
@@ -94,7 +96,7 @@
                                                     </td>
                                                     <td class="py-2 px-4 flex gap-2">
                                                         <div class="d-flex gap-2">
-                                                            <a cl href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-success edit-item-btn">Chi tiết</a>
+                                                            <a cl href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-success edit-item-btn">Chi tiết</a>
 
                                                             <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="delete-user-form">
                                                                 {{-- onsubmit="return confirm('Are you sure?')" --}}
@@ -178,6 +180,11 @@
                             <input type="date" class="form-control" value="" placeholder="Nhập hạn bằng lái">
                         </div>
                         <!--end col-->
+                        <div class="col-xxl-6">
+                            <label for="salaryBase" class="form-label">Lương cơ bản</label>
+                            <input type="text" class="form-control" name="salary_base" value="" placeholder="Nhập Lương cơ bản">
+                        </div>
+                        <!--end col-->
                         <div class="col-lg-12">
                             <label for="address" class="form-label">Địa chỉ</label>
                             <input type="text" class="form-control" placeholder="Nhập địa chỉ">
@@ -255,6 +262,11 @@
                                     @endif
                                 @endforeach
                             </select>
+                        </div>
+                        <!--end col-->
+                        <div class="col-xxl-6">
+                            <label for="salaryBase" class="form-label">Lương cơ bản</label>
+                            <input type="text" class="form-control" name="salary_base" value="" placeholder="Nhập Lương cơ bản">
                         </div>
                         <!--end col-->
                         <div class="col-lg-12">
