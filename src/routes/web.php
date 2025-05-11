@@ -1,15 +1,17 @@
 <?php
 
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\AdminAuthController;
-use App\Http\Controllers\Admin\TripController;
 
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\SalaryController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\VehicleController;
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\ShipmentController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
-
 
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
@@ -34,7 +36,10 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::post('profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
 
     Route::resource('vehicles', VehicleController::class);
-    Route::resource('trips', TripController::class);
+    Route::resource('customers', CustomerController::class);
+    Route::resource('contracts', ContractController::class);
+    Route::resource('shipments', ShipmentController::class);
+    Route::resource('salary', SalaryController::class);
 });
 
 

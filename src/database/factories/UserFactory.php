@@ -35,6 +35,7 @@ class UserFactory extends Factory
             'id_number' => fake()->creditCardNumber(),
             'join_date' => fake()->date('Y-m-d', now()),
             'salary_base' => fake()->numberBetween(6000000, 9000000),
+            'department_id' => fake()->randomNumber(8),
         ];
     }
 

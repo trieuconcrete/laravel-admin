@@ -26,6 +26,7 @@ class Vehicle extends Model
     protected $fillable = [
         'plate_number',
         'vehicle_type_id',
+        'driver_id',
         'capacity',
         'manufactured_year',
         'status'
@@ -71,6 +72,14 @@ class Vehicle extends Model
     }
 
     /**
+     * Quan hệ với tài xế
+     */
+    public function driver()
+    {
+        return $this->belongsTo(User::class, 'driver_id');
+    }
+
+    /**
      * Get the documents for the vehicle.
      */
     public function documents(): HasMany
@@ -84,14 +93,6 @@ class Vehicle extends Model
     public function maintenanceRecords(): HasMany
     {
         return $this->hasMany(MaintenanceRecord::class, 'vehicle_id');
-    }
-
-    /**
-     * Get the trips for the vehicle.
-     */
-    public function trips(): HasMany
-    {
-        return $this->hasMany(Trip::class, 'vehicle_id');
     }
 
     /**

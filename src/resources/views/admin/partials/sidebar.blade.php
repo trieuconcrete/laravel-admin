@@ -46,13 +46,23 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
+                    <a class="nav-link menu-link" href="{{ route('admin.customers.index') }}">
                         <i class="ri-team-line"></i> </i> <span data-key="t-customers">{{ __('sidebar.customer_management') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link menu-link" href="{{ route('admin.trips.index') }}">
-                        <i class="ri-route-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.trips_management') }}</span>
+                    <a class="nav-link menu-link" href="{{ route('admin.contracts.index') }}">
+                        <i class="ri-suitcase-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.contract_management') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="{{ route('admin.shipments.index') }}">
+                        <i class="ri-route-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.shipment_management') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="{{ route('admin.salary.index') }}">
+                        <i class="ri-currency-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.salary_management') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">

@@ -6,8 +6,10 @@ return [
     'user_management' => 'Quản lý nhân viên',
     'driver_management' => 'Quản lý tài xế và nhân viên',
     'vehicles_management' => 'Quản lý phương tiện',
-    'trips_management' => 'Quản lý chuyến hàng',
+    'contract_management' => 'Quản lý hợp đồng',
+    'shipment_management' => 'Quản lý chuyến hàng',
+    'salary_management' => 'Quản lý lương',
     'settings' => 'Cài đặt',
-    'customer_management' => 'Quản lý khách hàng và nhà cung cấp',
+    'customer_management' => 'Quản lý khách hàng',
     'income_and_expense_management'  => 'Quản lý thu chi và công nợ'
 ];

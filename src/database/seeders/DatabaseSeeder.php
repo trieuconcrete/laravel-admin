@@ -15,10 +15,20 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminSeeder::class,
-            UserSeeder::class,
             PositionsSeeder::class,
+            DepartmentSeeder::class,
+            UserSeeder::class,
             UpdateUsersWithPositionsSeeder::class,
             DriverLicensesSeeder::class,
+            VehiclesSeeder::class,
+            CustomerSeeder::class,
+            ContractSeeder::class,
+            ShipmentSeeder::class,
+
+            AllowanceTypeSeeder::class,
+            DeductionTypeSeeder::class,
+            SalaryPeriodSeeder::class,
+            SalarySeeder::class,
         ]);
     }
 }

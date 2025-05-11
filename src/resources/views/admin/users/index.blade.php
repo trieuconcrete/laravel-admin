@@ -9,7 +9,7 @@
                 <div class="col-12">
                     <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                         <div class="flex-grow-1">
-                            <h4 class="fs-16 mb-1">Quản lý tài xế và nhân viên</h4>
+                            <h4><i class="ri-group-fill fs-1"></i>Quản lý tài xế và nhân viên</h4>
                         </div>
                         <div class="mt-3 mt-lg-0">
                             <div class="row g-3 mb-0 align-items-center">
@@ -48,7 +48,7 @@
                                 </select>
                             </div>
                             <div class="col-xxl-3 col-md-6">
-                                <button type="submit" class="btn rounded-pill btn-secondary waves-effect">Tìm kiếm</button>
+                                <button type="submit" class="btn btn-outline-primary w-100">Tìm kiếm</button>
                             </div>
                         </div>
                     </form>
@@ -95,14 +95,13 @@
                                                         @endif
                                                     </td>
                                                     <td class="py-2 px-4 flex gap-2">
-                                                        <div class="d-flex gap-2">
-                                                            <a cl href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-success edit-item-btn">Chi tiết</a>
-
+                                                        <div class="btn-group">
+                                                            <a cl href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
+                                                            <button type="button" class="btn btn-sm btn-outline-danger delete-user-btn">xóa</button>
                                                             <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="delete-user-form">
                                                                 {{-- onsubmit="return confirm('Are you sure?')" --}}
                                                                 @csrf
                                                                 @method('DELETE')
-                                                                <button type="button" class="btn btn-sm btn-danger remove-item-btn delete-user-btn">xóa</button>
                                                             </form>
                                                         </div>
                                                     </td>
@@ -302,7 +301,7 @@
         $('.delete-user-btn').click(function (e) {
             e.preventDefault();
     
-            var form = $(this).closest('.delete-user-form');
+            var form = $('.delete-user-form');
     
             Swal.fire({
                 title: 'Bạn chắc chắn muốn xóa?',
