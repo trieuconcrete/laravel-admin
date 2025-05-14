@@ -267,7 +267,7 @@
 </div>
 <!-- container-fluid -->
 
-<!-- Create Trip Modal -->
+<!-- Create Shipment Modal -->
 <div class="modal fade" id="createShipmentModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">

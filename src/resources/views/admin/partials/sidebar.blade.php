@@ -65,11 +65,11 @@
                         <i class="ri-currency-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.salary_management') }}</span>
                     </a>
                 </li>
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a class="nav-link menu-link" href="#">
                         <i class="ri-file-list-2-line"></i> </i> <span data-key="t-timekeeping">{{ __('sidebar.income_and_expense_management') }}</span>
                     </a>
-                </li>
+                </li> --}}
                 <li class="nav-item">
                     <a class="nav-link menu-link" href="#">
                         <i class="ri-settings-2-line"></i> </i> <span data-key="t-settings">{{ __('sidebar.settings') }}</span>
