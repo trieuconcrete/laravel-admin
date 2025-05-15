@@ -76,13 +76,13 @@
                                                 <tr>
                                                     <td class="py-2 px-4 flex gap-2">
                                                         <div class="btn-group">
+                                                            <a cl href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
                                                             <button type="button" class="btn btn-sm btn-outline-danger delete-user-btn">xóa</button>
                                                             <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="delete-user-form">
                                                                 {{-- onsubmit="return confirm('Are you sure?')" --}}
                                                                 @csrf
                                                                 @method('DELETE')
                                                             </form>
-                                                            <a cl href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
                                                         </div>
                                                     </td>
                                                     <td class="py-2 px-4">{{ $user->employee_code }}</td>

@@ -137,17 +137,27 @@
                         <table class="table table-hover align-middle">
                             <thead class="table-light">
                                 <tr>
+                                    <th>Thao tác</th>
                                     <th>Mã chuyến</th>
                                     <th>Tuyến đường</th>
                                     <th>Tài xế</th>
                                     <th>Phương tiện</th>
                                     <th>Thời gian</th>
                                     <th>Trạng thái</th>
-                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#tripDetailModal">
+                                                Chi tiết
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    </td>
                                     <td><strong>TR-00128</strong></td>
                                     <td>HCM - Hà Nội</td>
                                     <td>
@@ -161,6 +171,8 @@
                                         <div>DK: 04/05/2025 17:00</div>
                                     </td>
                                     <td><span class="badge bg-success">Đang hoạt động</span></td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#tripDetailModal">
@@ -171,8 +183,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td><strong>TR-00127</strong></td>
                                     <td>HCM - Đà Nẵng</td>
                                     <td>
@@ -186,6 +196,8 @@
                                         <div>DK: 03/05/2025 14:00</div>
                                     </td>
                                     <td><span class="badge bg-success">Đang hoạt động</span></td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#tripDetailModal">
@@ -196,8 +208,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td><strong>TR-00124</strong></td>
                                     <td>HCM - Cần Thơ</td>
                                     <td>
@@ -211,16 +221,6 @@
                                         <div>DK: 01/05/2025 13:30</div>
                                     </td>
                                     <td><span class="badge bg-secondary">Hoàn thành</span></td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#tripDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             </tbody>
                         </table>

@@ -60,6 +60,7 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
+                                    <th>Thao tác</th>
                                     <th>Mã HD</th>
                                     <th>Tên khách hàng</th>
                                     <th>Ngày ký</th>
@@ -68,11 +69,20 @@
                                     <th>Tổng giá trị</th>
                                     <th>Đã thanh toán</th>
                                     <th>Còn lại</th>
-                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
+                                                Chi tiết
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    </td>
                                     <td>HD001</td>
                                     <td>Công ty TNHH ABC</td>
                                     <td>10/10/2025</td>
@@ -81,6 +91,8 @@
                                     <td>{{ number_format(123456789) }}</td>
                                     <td>{{ number_format(12345678) }}</td>
                                     <td>{{ number_format(123456789-12345678) }}</td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
@@ -91,8 +103,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td>HD002</td>
                                     <td>Công ty TNHH XYZ</td>
                                     <td>10/11/2025</td>
@@ -101,6 +111,8 @@
                                     <td>{{ number_format(3456789324) }}</td>
                                     <td>{{ number_format(675363653) }}</td>
                                     <td>{{ number_format(3456789324-675363653) }}</td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
@@ -111,8 +123,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td>HD003</td>
                                     <td>Công ty TNHH 123</td>
                                     <td>10/06/2025</td>
@@ -121,16 +131,6 @@
                                     <td>{{ number_format(345678543) }}</td>
                                     <td>{{ number_format(345678543) }}</td>
                                     <td></td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             </tbody>
                         </table>

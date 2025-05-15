@@ -196,6 +196,7 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
+                                    <th>Thao tác</th>
                                     <th>Mã NV</th>
                                     <th>Họ và tên</th>
                                     <th>Bộ phận</th>
@@ -205,11 +206,20 @@
                                     <th>Khấu trừ</th>
                                     <th>Tổng lương</th>
                                     <th>Trạng thái</th>
-                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewSalaryModal">
+                                                Chi tiết
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    </td>
                                     <td>NV001</td>
                                     <td>Nguyễn Văn A</td>
                                     <td>Tài xế</td>
@@ -219,6 +229,8 @@
                                     <td>1,200,000 ₫</td>
                                     <td>19,300,000 ₫</td>
                                     <td><span class="status-indicator status-paid text-success">Đã thanh toán</span></td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewSalaryModal">
@@ -229,8 +241,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td>NV015</td>
                                     <td>Trần Thị B</td>
                                     <td>Văn phòng</td>
@@ -240,6 +250,8 @@
                                     <td>800,000 ₫</td>
                                     <td>20,700,000 ₫</td>
                                     <td><span class="status-indicator status-paid text-success"> Đã thanh toán</span></td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewSalaryModal">
@@ -250,8 +262,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td>NV032</td>
                                     <td>Phạm Văn C</td>
                                     <td>Kỹ thuật</td>
@@ -261,6 +271,8 @@
                                     <td>1,500,000 ₫</td>
                                     <td>21,000,000 ₫</td>
                                     <td><span class="status-indicator status-pending text-warning"> Chờ duyệt</span></td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewSalaryModal">
@@ -271,8 +283,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td>NV048</td>
                                     <td>Lê Thị D</td>
                                     <td>Quản lý</td>
@@ -282,16 +292,6 @@
                                     <td>2,200,000 ₫</td>
                                     <td>30,800,000 ₫</td>
                                     <td><span class="status-indicator status-unpaid text-danger">Chưa thanh toán</span></td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewSalaryModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             </tbody>
                         </table>

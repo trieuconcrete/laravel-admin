@@ -65,23 +65,35 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
+                                    <th>Thao tác</th>
                                     <th>Mã KH</th>
                                     <th>Tên khách hàng</th>
                                     <th>Loại</th>
                                     <th>Điện thoại</th>
                                     <th>Email</th>
                                     <th>Trạng thái</th>
-                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
+                                                Chi tiết
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    </td>
                                     <td>KH001</td>
                                     <td>Công ty TNHH ABC</td>
                                     <td><span class="badge bg-primary">Doanh nghiệp</span></td>
                                     <td>0901234567</td>
                                     <td>contact@abccompany.com</td>
                                     <td><span class="badge bg-success">Đang hoạt động</span></td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
@@ -92,14 +104,14 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td>KH002</td>
                                     <td>Nguyễn Văn A</td>
                                     <td><span class="badge bg-info">Cá nhân</span></td>
                                     <td>0912345678</td>
                                     <td>nguyenvana@gmail.com</td>
                                     <td><span class="badge bg-success">Đang hoạt động</span></td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
@@ -110,14 +122,14 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td>KH003</td>
                                     <td>Cơ sở sản xuất XYZ</td>
                                     <td><span class="badge bg-primary">Doanh nghiệp</span></td>
                                     <td>0978123456</td>
                                     <td>xyz@example.com</td>
                                     <td><span class="badge bg-success">Đang hoạt động</span></td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
@@ -128,24 +140,12 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td>KH004</td>
                                     <td>Trần Thị B</td>
                                     <td><span class="badge bg-info">Cá nhân</span></td>
                                     <td>0987654321</td>
                                     <td>tranthib@gmail.com</td>
                                     <td><span class="badge bg-danger">Không hoạt động</span></td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             </tbody>
                         </table>

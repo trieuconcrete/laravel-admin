@@ -147,6 +147,7 @@
                         <table class="table table-hover">
                             <thead class="table-light">
                                 <tr>
+                                    <th>Thao tác</th>
                                     <th>Biển số</th>
                                     <th>Loại xe</th>
                                     <th>Tài xế</th>
@@ -154,11 +155,20 @@
                                     <th>Trạng thái</th>
                                     <th>Đăng kiểm</th>
                                     <th>Bảo hiểm</th>
-                                    <th>Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#vehicleDetailModal">
+                                                Chi tiết
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    </td>
                                     <td>51C-123.45</td>
                                     <td>Xe tải</td>
                                     <td>Nguyen Van A</td>
@@ -166,6 +176,8 @@
                                     <td><span class="status-indicator status-active"></span> Hoạt động</td>
                                     <td>Còn hạn (05/12/2025)</td>
                                     <td>Còn hạn (15/08/2025)</td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#vehicleDetailModal">
@@ -176,8 +188,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td>51D-456.78</td>
                                     <td>Container</td>
                                     <td>Nguyen Van B</td>
@@ -185,6 +195,8 @@
                                     <td><span class="status-indicator status-maintenance"></span> Bảo trì</td>
                                     <td>Còn hạn (18/09/2025)</td>
                                     <td>Còn hạn (30/11/2025)</td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#vehicleDetailModal">
@@ -195,8 +207,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td>51H-789.01</td>
                                     <td>Xe thùng</td>
                                     <td>Nguyen Van C</td>
@@ -204,6 +214,8 @@
                                     <td><span class="status-indicator status-active"></span> Hoạt động</td>
                                     <td>Sắp hết hạn (30/06/2025)</td>
                                     <td>Còn hạn (22/07/2025)</td>
+                                </tr>
+                                <tr>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#vehicleDetailModal">
@@ -214,8 +226,6 @@
                                             </button>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
                                     <td>51A-345.67</td>
                                     <td>Xe tải</td>
                                     <td>Nguyen Van D</td>
@@ -223,16 +233,6 @@
                                     <td><span class="status-indicator status-expired"></span> Hết hạn đăng kiểm</td>
                                     <td><span class="text-danger">Hết hạn (15/04/2025)</span></td>
                                     <td>Còn hạn (10/09/2025)</td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#vehicleDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
                                 </tr>
                             </tbody>
                         </table>
