@@ -131,6 +131,13 @@
                                             <textarea row=3 class="form-control" placeholder="Nhập ghi chú"></textarea>
                                         </div>
                                     </div>
+                                    <div class="col-xxl-6">
+                                        <label for="salaryBase" class="form-label">Trạng thái làm việc</label>
+                                        <select class="form-select">
+                                            <option value="active">Đang làm việc</option>
+                                            <option value="inactive">Đã nghỉ việc</option>
+                                        </select>
+                                    </div>
                                     <!--end col-->
                                     <div class="col-lg-6">
                                         <div class="mb-4">

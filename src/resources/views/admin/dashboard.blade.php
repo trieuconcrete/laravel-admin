@@ -156,6 +156,17 @@
                                 <option value="51H-789.01">HD003 - Cty TNHH 123</option>
                             </select>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái</label>
+                            <select class="form-select">
+                                <option value="pending">Chờ xác nhận</option>
+                                <option value="in_transit">Đang vận chuyển</option>
+                                <option value="delivered">Đã giao hàng</option>
+                                <option value="cancelled">Đã hủy</option>
+                                <option value="delayed">Bị trễ</option>
+                                <option value="completed">Hoàn thành</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">

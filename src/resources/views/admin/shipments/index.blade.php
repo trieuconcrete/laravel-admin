@@ -143,7 +143,6 @@
                                     <th>Phương tiện</th>
                                     <th>Thời gian</th>
                                     <th>Trạng thái</th>
-                                    <th>Tiến độ</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
@@ -162,12 +161,6 @@
                                         <div>DK: 04/05/2025 17:00</div>
                                     </td>
                                     <td><span class="badge bg-success">Đang hoạt động</span></td>
-                                    <td>
-                                        <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar bg-success" role="progressbar" style="width: 75%"></div>
-                                        </div>
-                                        <small class="text-muted">75%</small>
-                                    </td>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#tripDetailModal">
@@ -194,12 +187,6 @@
                                     </td>
                                     <td><span class="badge bg-success">Đang hoạt động</span></td>
                                     <td>
-                                        <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar bg-success" role="progressbar" style="width: 40%"></div>
-                                        </div>
-                                        <small class="text-muted">40%</small>
-                                    </td>
-                                    <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#tripDetailModal">
                                                 Chi tiết
@@ -224,12 +211,6 @@
                                         <div>DK: 01/05/2025 13:30</div>
                                     </td>
                                     <td><span class="badge bg-secondary">Hoàn thành</span></td>
-                                    <td>
-                                        <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar bg-secondary" role="progressbar" style="width: 100%"></div>
-                                        </div>
-                                        <small class="text-muted">100%</small>
-                                    </td>
                                     <td>
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#tripDetailModal">
@@ -287,6 +268,17 @@
                                 <option value="51C-123.45">HD001 - Cty TNHH ABC</option>
                                 <option value="51D-456.78">HD002 - Cty TNHH XYZ</option>
                                 <option value="51H-789.01">HD003 - Cty TNHH 123</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái</label>
+                            <select class="form-select">
+                                <option value="pending">Chờ xác nhận</option>
+                                <option value="in_transit">Đang vận chuyển</option>
+                                <option value="delivered">Đã giao hàng</option>
+                                <option value="cancelled">Đã hủy</option>
+                                <option value="delayed">Bị trễ</option>
+                                <option value="completed">Hoàn thành</option>
                             </select>
                         </div>
                     </div>

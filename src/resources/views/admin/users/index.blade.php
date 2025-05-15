@@ -59,21 +59,32 @@
                                     <table class="table align-middle table-nowrap mb-0">
                                         <thead class="table-light">
                                             <tr class="bg-gray-100">
+                                                <th class="py-2 px-4">Thao tác</th>
                                                 <th class="py-2 px-4">Mã NV</th>
                                                 <th class="py-2 px-4">Họ tên</th>
-                                                <th class="py-2 px-4">SDT</th>
+                                                <th class="py-2 px-4">SĐT</th>
                                                 <th class="py-2 px-4">Email</th>
                                                 <th class="py-2 px-4">Vị trí</th>
                                                 <th class="py-2 px-4">Lương cơ bản</th>
                                                 <th class="py-2 px-4">Loại bằng lái</th>
                                                 <th class="py-2 px-4">Hạn bằng lái</th>
                                                 <th class="py-2 px-4">Trạng thái</th>
-                                                <th class="py-2 px-4"></th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @foreach ($users as $user)
                                                 <tr>
+                                                    <td class="py-2 px-4 flex gap-2">
+                                                        <div class="btn-group">
+                                                            <button type="button" class="btn btn-sm btn-outline-danger delete-user-btn">xóa</button>
+                                                            <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="delete-user-form">
+                                                                {{-- onsubmit="return confirm('Are you sure?')" --}}
+                                                                @csrf
+                                                                @method('DELETE')
+                                                            </form>
+                                                            <a cl href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
+                                                        </div>
+                                                    </td>
                                                     <td class="py-2 px-4">{{ $user->employee_code }}</td>
                                                     <td class="py-2 px-4">{{ $user->full_name }}</td>
                                                     <td class="py-2 px-4">{{ $user->phone }}</td>
@@ -93,17 +104,6 @@
                                                         @else
                                                         <span class="badge bg-danger-subtle text-danger">Đã nghỉ việc</span>
                                                         @endif
-                                                    </td>
-                                                    <td class="py-2 px-4 flex gap-2">
-                                                        <div class="btn-group">
-                                                            <a cl href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
-                                                            <button type="button" class="btn btn-sm btn-outline-danger delete-user-btn">xóa</button>
-                                                            <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="delete-user-form">
-                                                                {{-- onsubmit="return confirm('Are you sure?')" --}}
-                                                                @csrf
-                                                                @method('DELETE')
-                                                            </form>
-                                                        </div>
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -182,6 +182,13 @@
                         <div class="col-xxl-6">
                             <label for="salaryBase" class="form-label">Lương cơ bản</label>
                             <input type="text" class="form-control" name="salary_base" value="" placeholder="Nhập Lương cơ bản">
+                        </div>
+                        <div class="col-xxl-6">
+                            <label for="status" class="form-label">Trạng thái làm việc</label>
+                            <select class="form-select">
+                                <option value="active">Đang làm việc</option>
+                                <option value="inactive">Đã nghỉ việc</option>
+                            </select>
                         </div>
                         <!--end col-->
                         <div class="col-lg-12">
@@ -266,6 +273,13 @@
                         <div class="col-xxl-6">
                             <label for="salaryBase" class="form-label">Lương cơ bản</label>
                             <input type="text" class="form-control" name="salary_base" value="" placeholder="Nhập Lương cơ bản">
+                        </div>
+                        <div class="col-xxl-6">
+                            <label for="status" class="form-label">Trạng thái làm việc</label>
+                            <select class="form-select">
+                                <option value="active">Đang làm việc</option>
+                                <option value="inactive">Đã nghỉ việc</option>
+                            </select>
                         </div>
                         <!--end col-->
                         <div class="col-lg-12">
