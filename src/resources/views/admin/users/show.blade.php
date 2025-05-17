@@ -21,7 +21,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#shipment" role="tab">
-                                <i class="far fa-user"></i> Xe đi trong tháng({{ date('m/Y') }})
+                                <i class="far fa-user"></i> Xe đi trong tháng
                             </a>
                         </li>
                         <li class="nav-item">
