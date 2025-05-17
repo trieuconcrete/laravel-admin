@@ -118,7 +118,6 @@
             </div>
         </div> <!-- end col -->
     </div>
-
 </div>
 <!-- container-fluid -->
 

@@ -48,3 +48,35 @@ if (!function_exists('shorten_text')) {
         return strlen($text) > $limit ? substr($text, 0, $limit) . '...' : $text;
     }
 }
+
+if (!function_exists('months_list')) {
+    /**
+     * Trả về danh sách các tháng từ tháng hiện tại đến tháng trở về trước
+     * 
+     * @param int $monthsBack Số tháng trở về trước (mặc định là 12)
+     * @param string $format Định dạng tháng (mặc định là 'm/Y')
+     * @param bool $includeKeys Có bao gồm key là timestamp hay không
+     * @return array Mảng danh sách các tháng
+     */
+    function months_list(int $monthsBack = 12, string $format = 'm/Y', bool $includeKeys = false): array
+    {
+        $months = [];
+        $currentDate = now();
+        
+        for ($i = 0; $i < $monthsBack; $i++) {
+            // Tính toán ngày đầu tiên của tháng
+            $date = (clone $currentDate)->subMonths($i)->startOfMonth();
+            
+            if ($includeKeys) {
+                // Sử dụng timestamp làm key
+                $months[$date->timestamp] = $date->format($format);
+            } else {
+                // Mảng tuần tự không có key
+                $months[] = $date->format($format);
+            }
+        }
+        
+        return $months;
+    }
+}
+
