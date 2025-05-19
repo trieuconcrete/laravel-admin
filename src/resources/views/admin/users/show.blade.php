@@ -433,10 +433,20 @@
                                 <div class="row g-2">
                                     <div class="col-lg-4">
                                         <div>
-                                            <label for="passwordInput" class="form-label">Password <span class="text-danger">*</span></label>
-                                            <input type="password" class="form-control" name="password" id="passwordInput" placeholder="Enter password">
+                                            <label for="passwordInput" class="form-label">Mật khẩu hiện tại <span class="text-danger">*</span></label>
+                                            <input type="password" class="form-control" name="current_password" id="passwordInput" placeholder="Enter password">
                                         </div>
-                                        @error('password')
+                                        @error('current_password')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-lg-4">
+                                        <div>
+                                            <label for="passwordInput" class="form-label">Password <span class="text-danger">*</span></label>
+                                            <input type="password" class="form-control" name="new_password" id="passwordInput" placeholder="Enter password">
+                                        </div>
+                                        @error('new_password')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
@@ -444,9 +454,9 @@
                                     <div class="col-lg-4">
                                         <div>
                                             <label for="confirmpasswordInput" class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                                            <input type="password" class="form-control" name="password_confirmation" id="confirmpasswordInput" placeholder="Confirm password">
+                                            <input type="password" class="form-control" name="new_password_confirmation" id="confirmpasswordInput" placeholder="Confirm password">
                                         </div>
-                                        @error('password_confirmation')
+                                        @error('new_password_confirmation')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
