@@ -38,9 +38,9 @@ class UpdateUserRequest extends FormRequest
             $rules = [
                 'full_name' => 'required|max:255',
                 'email' => 'required|email|unique:users,email,' . $this->user->id,
-                'username' => 'nullable|max:100|unique:users,username,' . $this->user->id,
+                'username' => 'required|max:100|unique:users,username,' . $this->user->id,
                 'birthday' => 'nullable|date',
-                'phone' => 'nullable|string',
+                'phone' => 'required|string',
                 'role' => 'required',
                 'password' => ['nullable', 'confirmed', 'min:6'],
                 'status' => 'required|boolean',

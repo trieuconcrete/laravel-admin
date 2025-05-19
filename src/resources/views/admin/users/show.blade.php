@@ -60,7 +60,7 @@
                                         <div class="row">
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
-                                                    <label for="fullnameInput" class="form-label">Họ và tên</label>
+                                                    <label for="fullnameInput" class="form-label">Họ và tên <span class="text-danger">*</span></label>
                                                     <input type="text" class="form-control" name="full_name" id="fullnameInput" placeholder="Enter your Full name" value="{{ old('full_name', $user->full_name) }}">
                                                     @error('full_name')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -70,7 +70,7 @@
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
-                                                    <label for="emailInput" class="form-label">Email</label>
+                                                    <label for="emailInput" class="form-label">Email <span class="text-danger">*</span></label>
                                                     <input type="email" class="form-control" name="email" id="emailInput" placeholder="Enter your Email" value="{{ old('email', $user->email) }}">
                                                     @error('email')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -80,7 +80,7 @@
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
-                                                    <label for="phonenumberInput" class="form-label">Số điện thoại</label>
+                                                    <label for="phonenumberInput" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
                                                     <input type="text" class="form-control" name="phone" id="phonenumberInput" placeholder="Enter your phone number" value="{{ old('phone', $user->phone) }}">
                                                     @error('phone')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -90,7 +90,7 @@
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
-                                                    <label for="birthdayInput" class="form-label">Ngày sinh</label>
+                                                    <label for="birthdayInput" class="form-label">Ngày sinh <span class="text-danger">*</span></label>
                                                     <input type="date" class="form-control" name="birthday" id="birthdayInput" placeholder="Enter your email" value="{{ old('birthday', $user->birthday) }}">
                                                     @error('birthday')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -100,7 +100,7 @@
                                             <!--end col-->
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
-                                                    <label for="idNumber" class="form-label">CCCD/CMND</label>
+                                                    <label for="idNumber" class="form-label">CCCD/CMND <span class="text-danger">*</span></label>
                                                     <input type="text" class="form-control" name="id_number" placeholder="Nhập CCCD/CMND" value="{{ old('id_number', $user->id_number) }}">
                                                     @error('id_number')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -109,7 +109,7 @@
                                             </div>
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
-                                                    <label for="salaryBase" class="form-label">Lương cơ bản</label>
+                                                    <label for="salaryBase" class="form-label">Lương cơ bản <span class="text-danger">*</span></label>
                                                     <input type="text" class="form-control" name="salary_base" placeholder="Nhập Lương cơ bản" value="{{ old('salary_base', $user->salary_base) }}">
                                                     @error('salary_base')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -119,7 +119,7 @@
                                             <!--end col-->
                                             <div class="col-lg-12">
                                                 <div class="mb-3">
-                                                    <label for="address" class="form-label">Địa chỉ</label>
+                                                    <label for="address" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
                                                     <input type="text" class="form-control" placeholder="Nhập địa chỉ" name="address" value="{{ old('address', $user->address) }}">
                                                     @error('address')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -182,7 +182,7 @@
                                 <div class="row">
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="" class="form-label">Số bằng lái</label>
+                                            <label for="" class="form-label">Số bằng lái <span class="text-danger">*</span></label>
                                             <input type="text" name="license_number" class="form-control" value="{{ old('license_number', optional($user->license)->license_number) }}" placeholder="Nhập Số bằng lái">
                                             @error('license_number')
                                                 <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -192,7 +192,7 @@
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="licenseType" class="form-label">Loại bằng lái</label>
+                                            <label for="licenseType" class="form-label">Loại bằng lái <span class="text-danger">*</span></label>
                                             <select name="license_type" class="form-control">
                                                 <option value="">Chọn bằng lái</option>
                                                 @foreach ($licenses as $key => $val )
@@ -210,7 +210,7 @@
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="date" class="form-label">Ngày cấp</label>
+                                            <label for="date" class="form-label">Ngày cấp <span class="text-danger">*</span></label>
                                             <input 
                                                 type="date"
                                                 class="form-control"
@@ -225,7 +225,7 @@
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="date" class="form-label">Ngày hết hạng</label>
+                                            <label for="date" class="form-label">Ngày hết hạng <span class="text-danger">*</span></label>
                                             <input 
                                                 type="date"
                                                 class="form-control"
@@ -240,7 +240,7 @@
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="date" class="form-label">Nơi cấp</label>
+                                            <label for="date" class="form-label">Nơi cấp <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control" value="{{ old('issued_by', optional($user->license)->issued_by) }}" name="issued_by" placeholder="Nhập nơi cấp">
                                             @error('issued_by')
                                                 <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -433,7 +433,7 @@
                                 <div class="row g-2">
                                     <div class="col-lg-4">
                                         <div>
-                                            <label for="passwordInput" class="form-label">Password*</label>
+                                            <label for="passwordInput" class="form-label">Password <span class="text-danger">*</span></label>
                                             <input type="password" class="form-control" name="password" id="passwordInput" placeholder="Enter password">
                                         </div>
                                         @error('password')
@@ -443,7 +443,7 @@
                                     <!--end col-->
                                     <div class="col-lg-4">
                                         <div>
-                                            <label for="confirmpasswordInput" class="form-label">Confirm Password*</label>
+                                            <label for="confirmpasswordInput" class="form-label">Confirm Password <span class="text-danger">*</span></label>
                                             <input type="password" class="form-control" name="password_confirmation" id="confirmpasswordInput" placeholder="Confirm password">
                                         </div>
                                         @error('password_confirmation')
@@ -504,5 +504,28 @@
             reader.readAsDataURL(file);
         }
     });
+
+    $('input[name="salary_base"]').on('input', function () {
+        let value = $(this).val();
+
+        value = value.replace(/[^0-9.]/g, '');
+
+        let parts = value.split('.');
+        let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+
+        $(this).val(integerPart + decimalPart);
+    });
+
+    let salaryInput = $('input[name="salary_base"]');
+    let initial = salaryInput.val().replace(/[^0-9.]/g, '');
+    if (initial) {
+        let parts = initial.split('.');
+        let formatted = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        if (parts[1]) {
+            formatted += '.' + parts[1].slice(0, 2);
+        }
+        salaryInput.val(formatted);
+    }
 </script>
 @endpush

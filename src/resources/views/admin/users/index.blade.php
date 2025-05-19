@@ -16,6 +16,7 @@
                                 <div class="col-auto">
                                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target=".add-driver-model"><i class="ri-add-circle-line align-middle me-1"></i> Thêm tài xế</button>
                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target=".add-user-model"><i class="ri-add-circle-line align-middle me-1"></i> Thêm nhân viên</button>
+                                    <button type="button" class="btn btn-outline-secondary" id="export-user-btn"><i class="las la-file-export align-middle me-1"></i> Xuất dữ liệu</button>
                                 </div>
                                 <!--end col-->
                             </div>
@@ -144,37 +145,37 @@
                     <input hidden type="text" name="add_driver" value="1" class="form-control">
                     <div class="row g-3">
                         <div class="col-xxl-6">
-                            <label class="form-label">Họ và tên</label>
+                            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
                             <input type="text" name="full_name" class="form-control" placeholder="Nhập họ và tên">
                             <div class="text-danger error" data-field="full_name"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Số điện thoại</label>
+                            <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
                             <input type="text" name="phone" class="form-control" placeholder="Nhập số điện thoại">
                             <div class="text-danger error" data-field="phone"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">CCCD/CMND</label>
+                            <label class="form-label">CCCD/CMND <span class="text-danger">*</span></label>
                             <input type="text" name="id_number" class="form-control" placeholder="Nhập CCCD/CMND">
                             <div class="text-danger error" data-field="id_number"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Email</label>
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
                             <input type="email" name="email" class="form-control" placeholder="Nhập email">
                             <div class="text-danger error" data-field="email"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Ngày sinh</label>
+                            <label class="form-label">Ngày sinh <span class="text-danger">*</span></label>
                             <input type="date" name="birthday" class="form-control">
                             <div class="text-danger error" data-field="birthday"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Ngày vào làm</label>
+                            <label class="form-label">Ngày vào làm <span class="text-danger">*</span></label>
                             <input type="date" name="join_date" class="form-control">
                             <div class="text-danger error" data-field="join_date"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Loại bằng lái</label>
+                            <label class="form-label">Loại bằng lái <span class="text-danger">*</span></label>
                             <select name="license_type" class="form-control">
                                 <option value="">Chọn bằng lái</option>
                                 @foreach ($licenses as $key => $val)
@@ -184,12 +185,12 @@
                             <div class="text-danger error" data-field="license_type"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Hạn bằng lái</label>
+                            <label class="form-label">Hạn bằng lái <span class="text-danger">*</span></label>
                             <input type="date" name="license_expire_date" class="form-control">
                             <div class="text-danger error" data-field="license_expire_date"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Lương cơ bản</label>
+                            <label class="form-label">Lương cơ bản <span class="text-danger">*</span></label>
                             <input type="text" name="salary_base" class="form-control" placeholder="Nhập lương cơ bản">
                             <div class="text-danger error" data-field="salary_base"></div>
                         </div>
@@ -203,7 +204,7 @@
                             <div class="text-danger error" data-field="status"></div>
                         </div>
                         <div class="col-lg-12">
-                            <label class="form-label">Địa chỉ</label>
+                            <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
                             <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ">
                             <div class="text-danger error" data-field="address"></div>
                         </div>
@@ -241,22 +242,22 @@
                     <input hidden type="text" name="add_driver" value="0" class="form-control">
                     <div class="row g-3">
                         <div class="col-xxl-6">
-                            <label class="form-label">Họ và tên</label>
+                            <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
                             <input type="text" name="full_name" class="form-control" placeholder="Nhập họ và tên">
                             <div class="text-danger error" data-field="full_name"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Số điện thoại</label>
+                            <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
                             <input type="text" name="phone" class="form-control" placeholder="Nhập số điện thoại">
                             <div class="text-danger error" data-field="phone"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">CCCD/CMND</label>
+                            <label class="form-label">CCCD/CMND <span class="text-danger">*</span></label>
                             <input type="text" name="id_number" class="form-control" placeholder="Nhập CCCD/CMND">
                             <div class="text-danger error" data-field="id_number"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Email</label>
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
                             <input type="email" name="email" class="form-control" placeholder="Nhập email">
                             <div class="text-danger error" data-field="email"></div>
                         </div>
@@ -266,12 +267,12 @@
                             <div class="text-danger error" data-field="birthday"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Ngày vào làm</label>
+                            <label class="form-label">Ngày vào làm <span class="text-danger">*</span></label>
                             <input type="date" name="join_date" class="form-control">
                             <div class="text-danger error" data-field="join_date"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Vị trí</label>
+                            <label class="form-label">Vị trí <span class="text-danger">*</span></label>
                             <select name="position" class="form-control">
                                 <option value="">Chọn vị trí</option>
                                 @foreach ($positions as $key => $val)
@@ -283,7 +284,7 @@
                             <div class="text-danger error" data-field="position"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Lương cơ bản</label>
+                            <label class="form-label">Lương cơ bản <span class="text-danger">*</span></label>
                             <input type="text" name="salary_base" class="form-control" placeholder="Nhập lương cơ bản">
                             <div class="text-danger error" data-field="salary_base"></div>
                         </div>
@@ -297,7 +298,7 @@
                             <div class="text-danger error" data-field="status"></div>
                         </div>
                         <div class="col-lg-12">
-                            <label class="form-label">Địa chỉ</label>
+                            <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
                             <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ">
                             <div class="text-danger error" data-field="address"></div>
                         </div>
@@ -406,5 +407,59 @@
         });
 
     });
-    </script>
+
+    $('input[name="salary_base"]').on('input', function () {
+        let value = $(this).val();
+
+        value = value.replace(/[^0-9.]/g, '');
+
+        let parts = value.split('.');
+        let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+
+        $(this).val(integerPart + decimalPart);
+    });
+
+    let salaryInput = $('input[name="salary_base"]');
+    let initial = salaryInput.val().replace(/[^0-9.]/g, '');
+    if (initial) {
+        let parts = initial.split('.');
+        let formatted = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        if (parts[1]) {
+            formatted += '.' + parts[1].slice(0, 2);
+        }
+        salaryInput.val(formatted);
+    }
+
+    $('#export-user-btn').click(function () {
+        Swal.fire({
+            title: 'Đang xử lý...',
+            text: 'Vui lòng chờ trong giây lát',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+
+                const link = document.createElement('a');
+                link.href = "{{ route('admin.users.export') }}";
+                link.download = '';
+                document.body.appendChild(link);
+
+                // when click wil call route download
+                link.click();
+
+                document.body.removeChild(link);
+
+                setTimeout(() => {
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Xuất dữ liệu thành công',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }, 3000); // timeout
+            }
+        });
+    });
+</script>
 @endpush

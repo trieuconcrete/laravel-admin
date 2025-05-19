@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Models\Position;
-use App\Exports\UsersExport;
+use App\Exports\UserExport;
 use Illuminate\Http\Request;
 use App\Models\DriverLicense;
 use App\Http\Controllers\Controller;
@@ -19,7 +19,11 @@ use Illuminate\Http\JsonResponse;
 use App\Enum\UserStatus as EnumUserStatus;
 use App\Http\Requests\User\UpdateUserRequest;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
+/**
+ * Summary of UserController
+ */
 class UserController extends Controller
 {
     use AuthorizesRequests;
@@ -140,8 +144,15 @@ class UserController extends Controller
         return back()->with('success', 'User deleted successfully.');
     }
 
+    /**
+     * Summary of export
+     */
     public function export()
     {
-        return Excel::download(new UsersExport, 'users.xlsx');
+        $users = User::all();
+        $timestamp = Carbon::now()->format('Ymd_His');
+        $fileName = 'users_' . $timestamp . '.xlsx';
+
+        return Excel::download(new UserExport($users), $fileName);
     }
 }
