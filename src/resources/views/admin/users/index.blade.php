@@ -210,8 +210,8 @@
                         </div>
                         <div class="col-lg-12">
                             <label class="form-label">Ghi chú</label>
-                            <textarea name="note" rows="3" class="form-control" placeholder="Nhập ghi chú"></textarea>
-                            <div class="text-danger error" data-field="note"></div>
+                            <textarea name="notes" rows="3" class="form-control" placeholder="Nhập ghi chú"></textarea>
+                            <div class="text-danger error" data-field="notes"></div>
                         </div>
                         <div class="col-lg-12">
                             <div class="hstack gap-2 justify-content-end mt-3">
@@ -304,8 +304,8 @@
                         </div>
                         <div class="col-lg-12">
                             <label class="form-label">Ghi chú</label>
-                            <textarea name="note" rows="3" class="form-control" placeholder="Nhập ghi chú"></textarea>
-                            <div class="text-danger error" data-field="note"></div>
+                            <textarea name="notes" rows="3" class="form-control" placeholder="Nhập ghi chú"></textarea>
+                            <div class="text-danger error" data-field="notes"></div>
                         </div>
                     </div>
                 </div>

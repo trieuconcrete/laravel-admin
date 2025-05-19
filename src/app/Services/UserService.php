@@ -34,6 +34,7 @@ class UserService
     {
         try {
             $data = $request->all();
+            $data['salary_base'] = str_replace(',', '', $request->salary_base);
             // general password
             $data['password'] = $request->password ? Hash::make($request->password) : Hash::make('password');
 
@@ -82,6 +83,7 @@ class UserService
     public function update(Request $request, User $user): User
     {
         $data = $request->all();
+        $data['salary_base'] = str_replace(',', '', $request->salary_base);
 
         // Handle password
         if ($request->filled('password')) {

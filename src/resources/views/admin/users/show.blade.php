@@ -90,7 +90,7 @@
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
-                                                    <label for="birthdayInput" class="form-label">Ngày sinh <span class="text-danger">*</span></label>
+                                                    <label for="birthdayInput" class="form-label">Ngày sinh</label>
                                                     <input type="date" class="form-control" name="birthday" id="birthdayInput" placeholder="Enter your email" value="{{ old('birthday', $user->birthday) }}">
                                                     @error('birthday')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -130,8 +130,8 @@
                                             <div class="col-lg-12">
                                                 <div class="mb-3">
                                                     <label for="address" class="form-label">Ghi chú</label>
-                                                    <textarea row=3 class="form-control" name="note" placeholder="Nhập ghi chú"></textarea>
-                                                    @error('note')
+                                                    <textarea row=3 class="form-control" name="notes" placeholder="Nhập ghi chú">{!! old('notes', $user->notes ) !!}</textarea>
+                                                    @error('notes')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                                     @enderror
                                                 </div>

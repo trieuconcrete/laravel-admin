@@ -33,7 +33,7 @@ class StoreUserRequest extends FormRequest
             'salary_base' => ['nullable', 'numeric'],
             'status' => ['required'],
             'address' => ['nullable', 'string', 'max:255'],
-            'note' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string'],
         ];
 
         // case license

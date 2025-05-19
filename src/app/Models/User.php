@@ -48,6 +48,7 @@ class User extends Authenticatable
         'profile_image',
         'address',
         'gender',
+        'notes'
     ];
 
     /**

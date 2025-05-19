@@ -17,6 +17,17 @@ class UpdateUserRequest extends FormRequest
     }
 
     /**
+     * Summary of prepareForValidation
+     * @return void
+     */
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'salary_base' => str_replace(',', '', $this->salary_base),
+        ]);
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -37,14 +48,16 @@ class UpdateUserRequest extends FormRequest
         } else {
             $rules = [
                 'full_name' => 'required|max:255',
-                'email' => 'required|email|unique:users,email,' . $this->user->id,
-                'username' => 'required|max:100|unique:users,username,' . $this->user->id,
-                'birthday' => 'nullable|date',
                 'phone' => 'required|string',
-                'role' => 'required',
+                'email' => 'required|email|unique:users,email,' . $this->user->id,
+                'birthday' => 'nullable|date',
                 'password' => ['nullable', 'confirmed', 'min:6'],
                 'status' => 'required|boolean',
                 'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+                'notes' => ['nullable', 'string'],
+                'id_number' => 'required|max:20',
+                'salary_base' => ['required', 'numeric', 'min:0'],
+                'address' => 'nullable|max:100',
             ];
         }
     
