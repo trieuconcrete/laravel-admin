@@ -54,69 +54,103 @@
                                     </div>
                                 </div>
                                 <div class="col-xxl-9">
-                                    <form action="{{ route('admin.profile.update', $user) }}" method="POST" enctype="multipart/form-data">
-                                        @csrf
+                                <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    @method('PUT')
                                         <div class="row">
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
-                                                    <label for="fullnameInput" class="form-label">Họ và tên</label>
-                                                    <input type="text" class="form-control" name="full_name" id="fullnameInput" placeholder="Enter your Full name" value="{{ $user->full_name }}">
+                                                    <label for="fullnameInput" class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="full_name" id="fullnameInput" placeholder="Enter your Full name" value="{{ old('full_name', $user->full_name) }}">
+                                                    @error('full_name')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
-                                                    <label for="emailInput" class="form-label">Email</label>
-                                                    <input type="email" class="form-control" name="email" id="emailInput" placeholder="Enter your Email" value="{{ $user->email }}">
+                                                    <label for="emailInput" class="form-label">Email <span class="text-danger">*</span></label>
+                                                    <input type="email" class="form-control" name="email" id="emailInput" placeholder="Enter your Email" value="{{ old('email', $user->email) }}">
+                                                    @error('email')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
-                                                    <label for="phonenumberInput" class="form-label">Số điện thoại</label>
-                                                    <input type="text" class="form-control" name="phone" id="phonenumberInput" placeholder="Enter your phone number" value="{{ $user->phone }}">
+                                                    <label for="phonenumberInput" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="phone" id="phonenumberInput" placeholder="Enter your phone number" value="{{ old('phone', $user->phone) }}">
+                                                    @error('phone')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
                                                     <label for="birthdayInput" class="form-label">Ngày sinh</label>
-                                                    <input type="date" class="form-control" name="birthday" id="birthdayInput" placeholder="Enter your email" value="{{ $user->birthday }}">
+                                                    <input type="date" class="form-control" name="birthday" id="birthdayInput" placeholder="Enter your email" value="{{ old('birthday', $user->birthday) }}">
+                                                    @error('birthday')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
-                                                    <label for="idNumber" class="form-label">CCCD/CMND</label>
-                                                    <input type="text" class="form-control" name="id_number" placeholder="Nhập CCCD/CMND">
+                                                    <label for="idNumber" class="form-label">CCCD/CMND <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="id_number" placeholder="Nhập CCCD/CMND" value="{{ old('id_number', $user->id_number) }}">
+                                                    @error('id_number')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
                                             </div>
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
-                                                    <label for="salaryBase" class="form-label">Lương cơ bản</label>
-                                                    <input type="text" class="form-control" name="salary_base" value="" placeholder="Nhập Lương cơ bản">
+                                                    <label for="salaryBase" class="form-label">Lương cơ bản <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="salary_base" placeholder="Nhập Lương cơ bản" value="{{ old('salary_base', $user->salary_base) }}">
+                                                    @error('salary_base')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-12">
                                                 <div class="mb-3">
-                                                    <label for="address" class="form-label">Địa chỉ</label>
-                                                    <input type="text" class="form-control" placeholder="Nhập địa chỉ">
+                                                    <label for="address" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" placeholder="Nhập địa chỉ" name="address" value="{{ old('address', $user->address) }}">
+                                                    @error('address')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-12">
                                                 <div class="mb-3">
                                                     <label for="address" class="form-label">Ghi chú</label>
-                                                    <textarea row=3 class="form-control" placeholder="Nhập ghi chú"></textarea>
+                                                    <textarea row=3 class="form-control" name="notes" placeholder="Nhập ghi chú">{!! old('notes', $user->notes ) !!}</textarea>
+                                                    @error('notes')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
                                                 </div>
                                             </div>
                                             <div class="col-xxl-6">
-                                                <label for="salaryBase" class="form-label">Trạng thái làm việc</label>
-                                                <select class="form-select">
-                                                    <option value="active">Đang làm việc</option>
-                                                    <option value="inactive">Đã nghỉ việc</option>
-                                                </select>
+                                                <div class="mb-4">
+                                                    <label for="salaryBase" class="form-label">Trạng thái làm việc</label>
+                                                    <select name="status" class="form-select">
+                                                        @foreach($statuses as $key => $label)
+                                                            <option value="{{ $key }}"
+                                                                {{ (string) old('status', $user->status) === (string) $key ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('status')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-6">
@@ -141,61 +175,101 @@
                         </div>
                         <!--end tab-pane-->
                         <div class="tab-pane" id="driverLicense" role="tabpanel">
-                            <form action="#" method="POST">
+                            <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
+                                @method('PUT')
+                                <input hidden type="text" name="driver_license" value="1" class="form-control">
                                 <div class="row">
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="" class="form-label">Số bằng lái</label>
-                                            <input type="text" class="form-control" value="" placeholder="Nhập Số bằng lái">
+                                            <label for="" class="form-label">Số bằng lái <span class="text-danger">*</span></label>
+                                            <input type="text" name="license_number" class="form-control" value="{{ old('license_number', optional($user->license)->license_number) }}" placeholder="Nhập Số bằng lái">
+                                            @error('license_number')
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="licenseType" class="form-label">Loại bằng lái</label>
+                                            <label for="licenseType" class="form-label">Loại bằng lái <span class="text-danger">*</span></label>
                                             <select name="license_type" class="form-control">
                                                 <option value="">Chọn bằng lái</option>
                                                 @foreach ($licenses as $key => $val )
-                                                    <option value="{{ $key }}" {{ request('license_type') == $key ? 'selected' : '' }}>{{ $val }}</option>
+                                                    <option value="{{ $key }}"
+                                                        {{ (string) old('license_type', optional($user->license)->license_type) === (string) $key ? 'selected' : '' }}>
+                                                        {{ $val }}
+                                                    </option>
                                                 @endforeach
                                             </select>
+                                            @error('license_type')
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="date" class="form-label">Ngày cấp</label>
-                                            <input type="date" class="form-control" value="" placeholder="Nhập ngày cấp">
+                                            <label for="date" class="form-label">Ngày cấp <span class="text-danger">*</span></label>
+                                            <input 
+                                                type="date"
+                                                class="form-control"
+                                                name="issue_date"
+                                                value="{{ old('issue_date', optional($user->license)->issue_date ? optional($user->license)->issue_date->format('Y-m-d') : '') }}"
+                                            >
+                                            @error('issue_date')
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="date" class="form-label">Ngày hết hạng</label>
-                                            <input type="date" class="form-control" value="" placeholder="Nhập ngày hết hạn">
+                                            <label for="date" class="form-label">Ngày hết hạng <span class="text-danger">*</span></label>
+                                            <input 
+                                                type="date"
+                                                class="form-control"
+                                                name="expiry_date"
+                                                value="{{ old('expiry_date', optional($user->license)->expiry_date ? optional($user->license)->expiry_date->format('Y-m-d') : '') }}"
+                                            >
+                                            @error('expiry_date')
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="date" class="form-label">Nơi cấp</label>
-                                            <input type="text" class="form-control" value="" placeholder="Nhập nơi cấp">
+                                            <label for="date" class="form-label">Nơi cấp <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" value="{{ old('issued_by', optional($user->license)->issued_by) }}" name="issued_by" placeholder="Nhập nơi cấp">
+                                            @error('issued_by')
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
                                             <label for="" class="form-label">Trạng thái</label>
-                                            <input type="text" class="form-control" readonly value="">
+                                            <select name="license_status" class="form-select">
+                                                @foreach($licenseStatuses as $key => $label)
+                                                    <option value="{{ $key }}"
+                                                        {{ (string) old('license_status', optional($user->license)->status) === (string) $key ? 'selected' : '' }}>
+                                                        {{ $label }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('license_status')
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <!--end col-->
                                     <div class="col-lg-6">
                                         <div class="mb-4">
                                             <label class="block text-gray-700">Hình ảnh bằng lái</label>
-                                            <input type="file" name="avatar" id="avatarInput" class="form-control mt-1 border p-2 rounded">
-                                            <img id="avatarPreview" src="{{ (isset($user) && $user->avatar) ? asset('storage/' . $user->avatar) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
+                                            <input type="file" name="license_file" id="license_file_input" class="form-control mt-1 border p-2 rounded">
+                                            <img id="license_file_preview" src="{{ (isset($user->license) && $user->license->license_file) ? asset('storage/' . $user->license->license_file) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
                                         </div>
                                     </div>
                                     <!--end col-->
@@ -210,6 +284,7 @@
                             </form>
                         </div>
                         <!--end tab-pane-->
+
                         <div class="tab-pane" id="shipment" role="tabpanel">
                             <div class="col-xxl-2 mb-5">
                                 <label for="salaryBase" class="form-label">Tháng</label>
@@ -358,20 +433,30 @@
                                 <div class="row g-2">
                                     <div class="col-lg-4">
                                         <div>
-                                            <label for="passwordInput" class="form-label">Password*</label>
-                                            <input type="password" class="form-control" name="password" id="passwordInput" placeholder="Enter password">
+                                            <label for="passwordInput" class="form-label">Mật khẩu hiện tại <span class="text-danger">*</span></label>
+                                            <input type="password" class="form-control" name="current_password" id="passwordInput" placeholder="Enter password">
                                         </div>
-                                        @error('password')
+                                        @error('current_password')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-lg-4">
+                                        <div>
+                                            <label for="passwordInput" class="form-label">Password <span class="text-danger">*</span></label>
+                                            <input type="password" class="form-control" name="new_password" id="passwordInput" placeholder="Enter password">
+                                        </div>
+                                        @error('new_password')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
                                     <!--end col-->
                                     <div class="col-lg-4">
                                         <div>
-                                            <label for="confirmpasswordInput" class="form-label">Confirm Password*</label>
-                                            <input type="password" class="form-control" name="password_confirmation" id="confirmpasswordInput" placeholder="Confirm password">
+                                            <label for="confirmpasswordInput" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                                            <input type="password" class="form-control" name="new_password_confirmation" id="confirmpasswordInput" placeholder="Confirm password">
                                         </div>
-                                        @error('password_confirmation')
+                                        @error('new_password_confirmation')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
@@ -415,5 +500,42 @@
             reader.readAsDataURL(file);
         }
     });
+
+    document.getElementById('license_file_input').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+    
+        if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                document.getElementById('license_file_preview').src = e.target.result;
+            }
+            
+            reader.readAsDataURL(file);
+        }
+    });
+
+    $('input[name="salary_base"]').on('input', function () {
+        let value = $(this).val();
+
+        value = value.replace(/[^0-9.]/g, '');
+
+        let parts = value.split('.');
+        let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+
+        $(this).val(integerPart + decimalPart);
+    });
+
+    let salaryInput = $('input[name="salary_base"]');
+    let initial = salaryInput.val().replace(/[^0-9.]/g, '');
+    if (initial) {
+        let parts = initial.split('.');
+        let formatted = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        if (parts[1]) {
+            formatted += '.' + parts[1].slice(0, 2);
+        }
+        salaryInput.val(formatted);
+    }
 </script>
 @endpush

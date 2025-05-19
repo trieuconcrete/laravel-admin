@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Models\Position;
-use App\Exports\UsersExport;
+use App\Exports\UserExport;
 use Illuminate\Http\Request;
 use App\Models\DriverLicense;
 use App\Http\Controllers\Controller;
@@ -12,10 +12,24 @@ use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Services\UserService;
+use App\Http\Requests\User\StoreUserRequest;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
+use App\Enum\UserStatus as EnumUserStatus;
+use App\Http\Requests\User\UpdateUserRequest;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
+/**
+ * Summary of UserController
+ */
 class UserController extends Controller
 {
     use AuthorizesRequests;
+
+    public function __construct(protected UserService $userService) {}
+
     public function index(Request $request)
     {
         $query = User::query();
@@ -34,10 +48,17 @@ class UserController extends Controller
             $query->where('status', $request->status);
         }
 
-        $users = $query->latest()->paginate(10);
+        $users = $query->whereNull('deleted_at')->latest()->paginate(10);
         $positions = Position::pluck('name', 'id');
         $licenses = DriverLicense::getCarLicenseTypes();
-        return view('admin.users.index', compact('users', 'positions', 'licenses'));
+        $statuses = EnumUserStatus::options();
+        
+        return view('admin.users.index', compact([
+            'users',
+            'positions', 
+            'licenses',
+            'statuses'
+        ]));
     }
 
     public function create()
@@ -45,40 +66,24 @@ class UserController extends Controller
         return view('admin.users.create');
     }
 
-    public function store(Request $request)
+    /**
+     * Summary of store
+     * @param \App\Http\Requests\User\StoreUserRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(StoreUserRequest $request): JsonResponse
     {
+        DB::beginTransaction();
         try {
-            $request->merge([
-                'status' => $request->has('status') ? 1 : 0,
-            ]);
-            $request->validate([
-                'full_name' => 'required',
-                'email' => 'required|email|unique:users',
-                'username' => 'nullable|max:100|unique:users,username',
-                'birthday' => 'nullable|date',
-                'phone' => 'nullable|string',
-                'password' => [
-                    'required',
-                    'confirmed',
-                    'min:6'
-                ],
-                'role' => 'required',
-                'status' => 'required|boolean',
-                'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            ]);
+            $this->userService->store($request);
 
-            $data = $request->only('full_name', 'email', 'role', 'status', 'birthday', 'username');
-            $data['password'] = Hash::make($request->password);
+            DB::commit();
 
-            if ($request->hasFile('avatar')) {
-                $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
-            }
-
-            User::create($data);
-
-            return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+            return response()->json(['message' => 'User created successfully.'], 200);
         } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('User creation failed', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
         }
     }
 
@@ -87,8 +92,10 @@ class UserController extends Controller
         $this->authorize('view', $user);
         $positions = Position::pluck('name', 'id');
         $licenses = DriverLicense::getCarLicenseTypes();
+        $statuses = EnumUserStatus::options();
+        $licenseStatuses = DriverLicense::getStatuses();
 
-        return view('admin.users.show', compact('user', 'positions', 'licenses'));
+        return view('admin.users.show', compact('user', 'positions', 'licenses', 'statuses', 'licenseStatuses'));
     }
 
     public function edit(User $user)
@@ -98,50 +105,37 @@ class UserController extends Controller
         return view('admin.users.edit', compact('user'));
     }
 
-    public function update(Request $request, User $user)
+    /**
+     * Summary of update
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\User $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function update(UpdateUserRequest $request, User $user)
     {
+        DB::beginTransaction();
         try {
             $this->authorize('update', $user);
-            $request->merge([
-                'status' => $request->has('status') ? 1 : 0,
-            ]);
-            $request->validate([
-                'full_name' => 'required|max:255',
-                'email' => 'required|email|unique:users,email,' . $user->id,
-                'username' => 'nullable|max:100|unique:users,username,' . ($user->id ?? 'NULL') . ',id',
-                'birthday' => 'nullable|date',
-                'phone' => 'nullable|string',
-                'role' => 'required',
-                'password' => [
-                    'nullable',
-                    'confirmed',
-                    'min:6'
-                ],
-                'status' => 'required|boolean',
-                'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-            ]);
-        
-            $data = $request->only('full_name', 'email', 'role', 'status', 'birthday', 'username');
-        
-            if ($request->filled('password')) {
-                $data['password'] = Hash::make($request->password);
-            }
-        
-            if ($request->hasFile('avatar')) {
-                if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-                    Storage::disk('public')->delete($user->avatar);
-                }
-                $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
-            }
-        
-            $user->update($data);
-        
+
+            $this->userService->update($request, $user);
+
+            DB::commit();
+            
             return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
         } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('User creation failed', ['error' => $e->getMessage()]);
+
             return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
 
+    /**
+     * Summary of destroy
+     * @param \App\Models\User $user
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(User $user)
     {
         $this->authorize('delete', $user);
@@ -150,8 +144,15 @@ class UserController extends Controller
         return back()->with('success', 'User deleted successfully.');
     }
 
+    /**
+     * Summary of export
+     */
     public function export()
     {
-        return Excel::download(new UsersExport, 'users.xlsx');
+        $users = User::all();
+        $timestamp = Carbon::now()->format('Ymd_His');
+        $fileName = 'users_' . $timestamp . '.xlsx';
+
+        return Excel::download(new UserExport($users), $fileName);
     }
 }

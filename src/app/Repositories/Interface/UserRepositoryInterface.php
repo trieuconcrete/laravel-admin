@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Interface;
 
-interface UserRepositoryInterface
+interface UserRepositoryInterface extends BaseRepositoryInterface
 {
     public function getUsers();
     public function activeUsers();
