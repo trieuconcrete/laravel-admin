@@ -43,7 +43,11 @@ class User extends Authenticatable
         'employee_code',
         'position_id',
         'department_id',
-        'salary_base'
+        'salary_base',
+        'id_number',
+        'profile_image',
+        'address',
+        'gender',
     ];
 
     /**

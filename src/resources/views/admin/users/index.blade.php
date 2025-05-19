@@ -76,10 +76,18 @@
                                                 <tr>
                                                     <td class="py-2 px-4 flex gap-2">
                                                         <div class="btn-group">
-                                                            <a cl href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
-                                                            <button type="button" class="btn btn-sm btn-outline-danger delete-user-btn">xóa</button>
-                                                            <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="delete-user-form">
-                                                                {{-- onsubmit="return confirm('Are you sure?')" --}}
+                                                            <a href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
+                                                            
+                                                            <button type="button"
+                                                                    class="btn btn-sm btn-outline-danger delete-user-btn"
+                                                                    data-user-id="{{ $user->id }}">
+                                                                Xóa
+                                                            </button>
+                                                            
+                                                            <form action="{{ route('admin.users.destroy', $user->id) }}"
+                                                                method="POST"
+                                                                class="delete-user-form"
+                                                                id="delete-form-{{ $user->id }}">
                                                                 @csrf
                                                                 @method('DELETE')
                                                             </form>
@@ -89,7 +97,7 @@
                                                     <td class="py-2 px-4">{{ $user->full_name }}</td>
                                                     <td class="py-2 px-4">{{ $user->phone }}</td>
                                                     <td class="py-2 px-4">{{ $user->email }}</td>
-                                                    <td class="py-2 px-4">{{ ucfirst($user->position->name) }}</td>
+                                                    <td class="py-2 px-4">{{ ucfirst(optional($user->position)->name) }}</td>
                                                     <td class="py-2 px-4">{{ number_format($user->salary_base) }}</td>
                                                     <td class="py-2 px-4">{{  optional($user->license)->license_type }}</td>
                                                     <td class="py-2 px-4">
@@ -125,187 +133,190 @@
 <div class="modal fade add-driver-model" tabindex="-1" role="dialog" aria-labelledby="addDriverModel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addDriverModel">Thêm tài xế</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <hr>
-            <div class="modal-body">
-                <form action="javascript:void(0);">
+            <form id="add-driver-form" action="{{ route('admin.users.store') }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addDriverModel">Thêm tài xế</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <hr>
+                <div class="modal-body">
+                    <input hidden type="text" name="add_driver" value="1" class="form-control">
                     <div class="row g-3">
                         <div class="col-xxl-6">
-                            <label for="fullName" class="form-label">Họ và tên</label>
-                            <input type="text" class="form-control" placeholder="Nhập họ và tên">
+                            <label class="form-label">Họ và tên</label>
+                            <input type="text" name="full_name" class="form-control" placeholder="Nhập họ và tên">
+                            <div class="text-danger error" data-field="full_name"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="phone" class="form-label">Số điện thoại</label>
-                            <input type="text" class="form-control" placeholder="Nhập số điện thoại">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="text" name="phone" class="form-control" placeholder="Nhập số điện thoại">
+                            <div class="text-danger error" data-field="phone"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="idNumber" class="form-label">CCCD/CMND</label>
-                            <input type="text" class="form-control" placeholder="Nhập CCCD/CMND">
+                            <label class="form-label">CCCD/CMND</label>
+                            <input type="text" name="id_number" class="form-control" placeholder="Nhập CCCD/CMND">
+                            <div class="text-danger error" data-field="id_number"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" value="" placeholder="Nhập email">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="Nhập email">
+                            <div class="text-danger error" data-field="email"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="date" class="form-label">Ngày sinh</label>
-                            <input type="date" class="form-control" value="" placeholder="Nhập ngày sinh">
+                            <label class="form-label">Ngày sinh</label>
+                            <input type="date" name="birthday" class="form-control">
+                            <div class="text-danger error" data-field="birthday"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="date" class="form-label">Ngày vào làm</label>
-                            <input type="date" class="form-control" value="" placeholder="Nhập ngày vào làm">
+                            <label class="form-label">Ngày vào làm</label>
+                            <input type="date" name="join_date" class="form-control">
+                            <div class="text-danger error" data-field="join_date"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="licenseType" class="form-label">Loại bằng lái</label>
+                            <label class="form-label">Loại bằng lái</label>
                             <select name="license_type" class="form-control">
                                 <option value="">Chọn bằng lái</option>
-                                @foreach ($licenses as $key => $val )
-                                    <option value="{{ $key }}" {{ request('license_type') == $key ? 'selected' : '' }}>{{ $val }}</option>
+                                @foreach ($licenses as $key => $val)
+                                    <option value="{{ $key }}">{{ $val }}</option>
                                 @endforeach
                             </select>
-                        </div>
-                        <!--end col-->
-                        <div class="col-xxl-6">
-                            <label for="date" class="form-label">Hạn bằng lái</label>
-                            <input type="date" class="form-control" value="" placeholder="Nhập hạn bằng lái">
-                        </div>
-                        <!--end col-->
-                        <div class="col-xxl-6">
-                            <label for="salaryBase" class="form-label">Lương cơ bản</label>
-                            <input type="text" class="form-control" name="salary_base" value="" placeholder="Nhập Lương cơ bản">
+                            <div class="text-danger error" data-field="license_type"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label for="status" class="form-label">Trạng thái làm việc</label>
-                            <select class="form-select">
-                                <option value="active">Đang làm việc</option>
-                                <option value="inactive">Đã nghỉ việc</option>
+                            <label class="form-label">Hạn bằng lái</label>
+                            <input type="date" name="license_expire_date" class="form-control">
+                            <div class="text-danger error" data-field="license_expire_date"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Lương cơ bản</label>
+                            <input type="text" name="salary_base" class="form-control" placeholder="Nhập lương cơ bản">
+                            <div class="text-danger error" data-field="salary_base"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Trạng thái làm việc</label>
+                            <select name="status" class="form-select">
+                                @foreach($statuses as $key => $label)
+                                    <option value="{{ $key }}">{{ $label }}</option>
+                                @endforeach
                             </select>
+                            <div class="text-danger error" data-field="status"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-lg-12">
-                            <label for="address" class="form-label">Địa chỉ</label>
-                            <input type="text" class="form-control" placeholder="Nhập địa chỉ">
+                            <label class="form-label">Địa chỉ</label>
+                            <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ">
+                            <div class="text-danger error" data-field="address"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-lg-12">
-                            <label for="address" class="form-label">Ghi chú</label>
-                            <textarea row=3 class="form-control" placeholder="Nhập ghi chú"></textarea>
+                            <label class="form-label">Ghi chú</label>
+                            <textarea name="note" rows="3" class="form-control" placeholder="Nhập ghi chú"></textarea>
+                            <div class="text-danger error" data-field="note"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-lg-12">
-                            <div class="hstack gap-2 justify-content-end">
+                            <div class="hstack gap-2 justify-content-end mt-3">
                                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
                                 <button type="submit" class="btn btn-secondary">Lưu tài xế</button>
                             </div>
                         </div>
-                        <!--end col-->
                     </div>
-                    <!--end row-->
-                </form>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- /.modal -->
 
 <!-- Add User Model -->
-<div class="modal fade add-user-model" tabindex="-1" role="dialog" aria-labelledby="addUserModel" aria-hidden="true">
+<div class="modal fade add-user-model" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addUserModel">Thêm nhân viên</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <hr>
-            <div class="modal-body">
-                <form action="javascript:void(0);">
+            <form id="add-user-form" action="{{ route('admin.users.store') }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm nhân viên</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <hr>
+                <div class="modal-body">
+                    <input hidden type="text" name="add_driver" value="0" class="form-control">
                     <div class="row g-3">
                         <div class="col-xxl-6">
-                            <label for="fullName" class="form-label">Họ và tên</label>
-                            <input type="text" class="form-control" placeholder="Nhập họ và tên">
+                            <label class="form-label">Họ và tên</label>
+                            <input type="text" name="full_name" class="form-control" placeholder="Nhập họ và tên">
+                            <div class="text-danger error" data-field="full_name"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="phone" class="form-label">Số điện thoại</label>
-                            <input type="text" class="form-control" placeholder="Nhập số điện thoại">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="text" name="phone" class="form-control" placeholder="Nhập số điện thoại">
+                            <div class="text-danger error" data-field="phone"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="idNumber" class="form-label">CCCD/CMND</label>
-                            <input type="text" class="form-control" placeholder="Nhập CCCD/CMND">
+                            <label class="form-label">CCCD/CMND</label>
+                            <input type="text" name="id_number" class="form-control" placeholder="Nhập CCCD/CMND">
+                            <div class="text-danger error" data-field="id_number"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" value="" placeholder="Nhập email">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="Nhập email">
+                            <div class="text-danger error" data-field="email"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="date" class="form-label">Ngày sinh</label>
-                            <input type="date" class="form-control" value="" placeholder="Nhập ngày sinh">
+                            <label class="form-label">Ngày sinh</label>
+                            <input type="date" name="birthday" class="form-control">
+                            <div class="text-danger error" data-field="birthday"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="date" class="form-label">Ngày vào làm</label>
-                            <input type="date" class="form-control" value="" placeholder="Nhập ngày vào làm">
+                            <label class="form-label">Ngày vào làm</label>
+                            <input type="date" name="join_date" class="form-control">
+                            <div class="text-danger error" data-field="join_date"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-xxl-6">
-                            <label for="licenseType" class="form-label">Vị trí</label>
-                            <select name="license_type" class="form-control">
+                            <label class="form-label">Vị trí</label>
+                            <select name="position" class="form-control">
                                 <option value="">Chọn vị trí</option>
-                                @foreach ($positions as $key => $val )
+                                @foreach ($positions as $key => $val)
                                     @if ($val !== 'Tài xế')
-                                    <option value="{{ $key }}" {{ request('position_id') == $key ? 'selected' : '' }}>{{ $val }}</option>
+                                        <option value="{{ $key }}">{{ $val }}</option>
                                     @endif
                                 @endforeach
                             </select>
-                        </div>
-                        <!--end col-->
-                        <div class="col-xxl-6">
-                            <label for="salaryBase" class="form-label">Lương cơ bản</label>
-                            <input type="text" class="form-control" name="salary_base" value="" placeholder="Nhập Lương cơ bản">
+                            <div class="text-danger error" data-field="position"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label for="status" class="form-label">Trạng thái làm việc</label>
-                            <select class="form-select">
-                                <option value="active">Đang làm việc</option>
-                                <option value="inactive">Đã nghỉ việc</option>
+                            <label class="form-label">Lương cơ bản</label>
+                            <input type="text" name="salary_base" class="form-control" placeholder="Nhập lương cơ bản">
+                            <div class="text-danger error" data-field="salary_base"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Trạng thái làm việc</label>
+                            <select name="status" class="form-select">
+                                @foreach ($statuses as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                @endforeach
                             </select>
+                            <div class="text-danger error" data-field="status"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-lg-12">
-                            <label for="address" class="form-label">Địa chỉ</label>
-                            <input type="text" class="form-control" placeholder="Nhập địa chỉ">
+                            <label class="form-label">Địa chỉ</label>
+                            <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ">
+                            <div class="text-danger error" data-field="address"></div>
                         </div>
-                        <!--end col-->
                         <div class="col-lg-12">
-                            <label for="address" class="form-label">Ghi chú</label>
-                            <textarea row=3 class="form-control" placeholder="Nhập ghi chú"></textarea>
+                            <label class="form-label">Ghi chú</label>
+                            <textarea name="note" rows="3" class="form-control" placeholder="Nhập ghi chú"></textarea>
+                            <div class="text-danger error" data-field="note"></div>
                         </div>
-                        <!--end col-->
-                        <div class="col-lg-12">
-                            <div class="hstack gap-2 justify-content-end">
-                                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
-                                <button type="submit" class="btn btn-secondary">Lưu nhân viên</button>
-                            </div>
-                        </div>
-                        <!--end col-->
                     </div>
-                    <!--end row-->
-                </form>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-secondary">Lưu nhân viên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- /.modal -->
 @endsection
 
 @push('scripts')
@@ -313,12 +324,12 @@
     $(document).ready(function () {
         $('.delete-user-btn').click(function (e) {
             e.preventDefault();
-    
-            var form = $('.delete-user-form');
-    
+
+            const userId = $(this).data('user-id');
+            const form = $('#delete-form-' + userId);
+
             Swal.fire({
                 title: 'Bạn chắc chắn muốn xóa?',
-                // text: "Hành động này không thể hoàn tác!",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -331,6 +342,69 @@
                 }
             });
         });
+
+        ['#add-driver-form', '#add-user-form'].forEach(function (formSelector) {
+            const $form = $(formSelector);
+            if ($form.length) {
+                $form.on('submit', function (e) {
+                    e.preventDefault();
+
+                    const url = $form.attr('action');
+                    const formData = new FormData(this);
+
+                    // Xóa lỗi cũ
+                    $form.find('.error').text('');
+
+                    $.ajax({
+                        url: url,
+                        method: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                            'Accept': 'application/json',
+                        },
+                        success: function (data) {
+                            // close modal
+                            const modalElement = $form.closest('.modal');
+                            const modal = bootstrap.Modal.getInstance(modalElement[0]);
+                            if (modal) modal.hide();
+
+                            // Reset form
+                            $form[0].reset();
+
+                            // 
+                            Swal.fire({
+                                title: "Tạo thành công!",
+                                icon: "success",
+                                draggable: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Reload table
+                                    if (typeof driverTable !== 'undefined') {
+                                        driverTable.ajax.reload();
+                                    } else {
+                                        location.reload();
+                                    }
+                                }
+                            });
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                const errors = xhr.responseJSON.errors;
+                                $.each(errors, function (field, messages) {
+                                    $form.find(`.error[data-field="${field}"]`).text(messages[0]);
+                                });
+                            } else {
+                                console.error('Có lỗi xảy ra:', xhr);
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
     });
     </script>
 @endpush
