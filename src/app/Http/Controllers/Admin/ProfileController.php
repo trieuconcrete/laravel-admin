@@ -23,9 +23,15 @@ class ProfileController extends Controller
         $request->validate([
             'full_name' => 'required|string|max:255',
             'username' => 'required|string|max:100|unique:users,username,' . $user->id,
-            'phone' => 'nullable|string',
+            'phone' => [
+                'required',
+                'string',
+                'regex:/^(0|\+84|84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/',
+                'unique:users,phone,' . $user->id,
+            ],
             'birthday' => 'nullable|date',
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
+            'email' => 'required|email|unique:users,email,' . $user->id,
         ]);
 
         try {
