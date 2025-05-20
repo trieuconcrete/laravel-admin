@@ -42,8 +42,8 @@ sudo apt install -y nodejs
 
 ```bash
 cd /var/www/webroot
-sudo git clone git@github.com:trieuconcrete/laravel-admin.git vantaihoangphulong
-cd vantaihoangphulong
+sudo git clone git@github.com:trieuconcrete/laravel-admin.git vantai_hoangphulong
+cd vantai_hoangphulong
 composer install
 cp .env.example .env
 php artisan key:generate
@@ -53,9 +53,9 @@ php artisan key:generate
 
 ```bash
 sudo mysql -u root -p
-CREATE DATABASE vantaihoanphulong_db;
+CREATE DATABASE vantai_hoanphulong_db_dev;
 CREATE USER 'laravel_user'@'localhost' IDENTIFIED BY 'password@123';
-GRANT ALL PRIVILEGES ON laravel_db.* TO 'laravel_user'@'localhost';
+GRANT ALL PRIVILEGES ON vantai_hoanphulong_db_dev.* TO 'laravel_user'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 ```
@@ -63,7 +63,7 @@ EXIT;
 Cập nhật file `.env`:
 
 ```
-DB_DATABASE=vantaihoanphulong_db
+DB_DATABASE=vantai_hoanphulong_db
 DB_USERNAME=laravel_user
 DB_PASSWORD=password@123
 ```
@@ -85,7 +85,7 @@ npm run build
 ## ✅ Bước 8: Cấu hình Nginx
 
 ```bash
-sudo nano /etc/nginx/sites-available/vantaihoangphulong.config
+sudo nano /etc/nginx/sites-available/vantai_hoangphulong.config
 ```
 
 Nội dung cấu hình:
@@ -93,9 +93,9 @@ Nội dung cấu hình:
 ```nginx
 server {
     listen 80;
-    server_name your-domain.com;
+    server_name 103.82.132.130;
 
-    root /var/www/webroot/vantaihoangphulong/public;
+    root /var/www/webroot/vantai_hoangphulong/src/public;
     index index.php index.html;
 
     location / {
@@ -118,7 +118,7 @@ server {
 Kích hoạt site:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/my-laravel-app /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/vantai_hoangphulong.config /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -146,7 +146,7 @@ After=network.target
 [Service]
 User=www-data
 Restart=always
-ExecStart=/usr/bin/php /var/www/my-laravel-app/artisan queue:work --sleep=3 --tries=3
+ExecStart=/usr/bin/php /var/www//artisan queue:work --sleep=3 --tries=3
 
 [Install]
 WantedBy=multi-user.target
@@ -161,7 +161,7 @@ sudo systemctl start laravel-worker
 ## ✅ Bước 11: Tạo script `deploy.sh`
 
 ```bash
-nano /var/www/my-laravel-app/deploy.sh
+nano /var/www/vantai_hoangphulong/deploy.sh
 ```
 
 Nội dung:
@@ -169,11 +169,12 @@ Nội dung:
 ```bash
 #!/bin/bash
 
-cd /var/www/my-laravel-app || exit
-git pull origin main
+cd /var/www/webroot/vantai_hoangphulong || exit
+git pull origin project/vantai_hpl
+cd src
 composer install --no-dev
 php artisan migrate --force
-npm install && npm run build
+# npm install && npm run build
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
@@ -183,7 +184,7 @@ chown -R www-data:www-data storage bootstrap/cache
 Phân quyền:
 
 ```bash
-chmod +x /var/www/my-laravel-app/deploy.sh
+chmod +x /var/www/webroot/vantai_hoangphulong/deploy.sh
 ```
 
 ## ✅ Bước 12: Restart services khi cần
