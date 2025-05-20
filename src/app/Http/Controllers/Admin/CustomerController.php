@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use app\Models\Customer;
+use App\Models\Customer;
 
 class CustomerController extends Controller
 {
     public function index(Request $request)
     {
-        return view('admin.customers.index');
+        $customer = Customer::first();
+        return view('admin.customers.index', compact('customer'));
     }
 
     public function create()
@@ -29,12 +30,14 @@ class CustomerController extends Controller
 
     public function show(Customer $customer)
     {
-        return view('admin.customers.show');
+        $customer = Customer::first();
+        return view('admin.customers.show', compact('customer'));
     }
 
     public function edit(Customer $customer)
     {
-        return view('admin.customers.edit', compact('user'));
+        $customer = Customer::first();
+        return view('admin.customers.edit', compact('customer'));
     }
 
     public function update(Request $request, Customer $customer)

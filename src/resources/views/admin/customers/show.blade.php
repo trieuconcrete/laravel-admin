@@ -3,290 +3,223 @@
 @section('content')
 
 <div class="container-fluid">
+    <!-- Customer Info Header -->
     <div class="row mt-5">
-        <div class="col-xxl-3">
-            <div class="card mt-n5">
-                <div class="card-body p-4">
-                    <div class="text-center">
-                        <div class="profile-user position-relative d-inline-block mx-auto  mb-4">
-                            <img src="{{ !$user->avatar ? asset('no-image.jpeg') : asset('storage/' . $user->avatar) }}" class="rounded-circle avatar-xl img-thumbnail user-profile-image" alt="user-profile-image">
-                        </div>
-                        <h5 class="fs-16 mb-1">{{ $user->full_name }}</h5>
-                        <p class="text-muted mb-0">{{ $user->role }}</p>
-                    </div>
-                </div>
-            </div>
-            <!--end card-->
-            <div class="card">
-                <div class="card-body">
-                    <div class="mb-3 d-flex">
-                        <div class="avatar-xs d-block flex-shrink-0 me-3">
-                            <span class="avatar-title rounded-circle fs-16 bg-danger">
-                                <i class="ri-phone-fill"></i>
-                            </span>
-                        </div>
-                        <span style="line-height: 32px">{{ $user->phone }}</span>
-                    </div>
-                    <div class="mb-3 d-flex">
-                        <div class="avatar-xs d-block flex-shrink-0 me-3">
-                            <span class="avatar-title rounded-circle fs-16 bg-primary">
-                                <i class="ri-mail-fill"></i>
-                            </span>
-                        </div>
-                        <span style="line-height: 32px">{{ $user->email }}</span>
-                    </div>
-                </div>
-            </div>
-            <!--end card-->
-        </div>
         <!--end col-->
-        <div class="col-xxl-9">
+        <div class="col-xxl-12">
             <div class="card mt-xxl-n5">
-                <div class="card-header">
-                    <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0" role="tablist">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-bs-toggle="tab" href="#personalDetails" role="tab">
-                                <i class="fas fa-home"></i> Thông tin cá nhân
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#driverLicense" role="tab">
-                                <i class="far fa-user"></i> Bằng lái
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#salary" role="tab">
-                                <i class="far fa-user"></i> Xe đi trong tháng({{ date('m/Y') }})
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#salary" role="tab">
-                                <i class="far fa-user"></i> Bảng lương
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#changePassword" role="tab">
-                                <i class="far fa-user"></i> Cài đặt mật khẩu
-                            </a>
-                        </li>
-                    </ul>
+                <div class="customer-info-header p-3 mb-3">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h4>Công ty TNHH ABC</h4>
+                            <p class="text-muted">Mã khách hàng: KH001</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><i class="fas fa-building me-2 text-primary"></i> Doanh nghiệp</p>
+                                    <p><i class="fas fa-map-marker-alt me-2 text-primary"></i> TP. Hồ Chí Minh</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <span class="badge bg-success mb-2">Đang hoạt động</span>
+                            <p><i class="fas fa-calendar-alt me-2 text-primary"></i> Ngày đăng ký: 01/01/2020</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body p-4">
-                    <div class="tab-content">
-                        <div class="tab-pane active" id="personalDetails" role="tabpanel">
-                            <form action="{{ route('admin.profile.update', $user) }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        <div class="mb-3">
-                                            <label for="fullnameInput" class="form-label">Họ và tên</label>
-                                            <input type="text" class="form-control" name="full_name" id="fullnameInput" placeholder="Enter your Full name" value="{{ $user->full_name }}">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-lg-6">
-                                        <div class="mb-3">
-                                            <label for="emailInput" class="form-label">Email</label>
-                                            <input type="email" class="form-control" name="email" id="emailInput" placeholder="Enter your Email" value="{{ $user->email }}">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-lg-6">
-                                        <div class="mb-3">
-                                            <label for="phonenumberInput" class="form-label">Số điện thoại</label>
-                                            <input type="text" class="form-control" name="phone" id="phonenumberInput" placeholder="Enter your phone number" value="{{ $user->phone }}">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-lg-6">
-                                        <div class="mb-3">
-                                            <label for="birthdayInput" class="form-label">Ngày sinh</label>
-                                            <input type="date" class="form-control" name="birthday" id="birthdayInput" placeholder="Enter your email" value="{{ $user->birthday }}">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-xxl-6">
-                                        <div class="mb-3">
-                                            <label for="idNumber" class="form-label">CCCD/CMND</label>
-                                            <input type="text" class="form-control" name="id_number" placeholder="Nhập CCCD/CMND">
-                                        </div>
-                                    </div>
-                                    <div class="col-xxl-6">
-                                        <div class="mb-3">
-                                            <label for="salaryBase" class="form-label">Lương cơ bản</label>
-                                            <input type="text" class="form-control" name="salary_base" value="" placeholder="Nhập Lương cơ bản">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-lg-12">
-                                        <div class="mb-3">
-                                            <label for="address" class="form-label">Địa chỉ</label>
-                                            <input type="text" class="form-control" placeholder="Nhập địa chỉ">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-lg-12">
-                                        <div class="mb-3">
-                                            <label for="address" class="form-label">Ghi chú</label>
-                                            <textarea row=3 class="form-control" placeholder="Nhập ghi chú"></textarea>
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-lg-6">
-                                        <div class="mb-4">
-                                            <label class="block text-gray-700">Ảnh đại diện</label>
-                                            <input type="file" name="avatar" id="avatarInput" class="form-control mt-1 border p-2 rounded">
-                                            <img id="avatarPreview" src="{{ (isset($user) && $user->avatar) ? asset('storage/' . $user->avatar) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-lg-12">
-                                        <div class="hstack gap-2 justify-content-start">
-                                            <button type="submit" class="btn btn-secondary">Lưu</button>
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                </div>
-                                <!--end row-->
-                            </form>
+
+                <!-- Nav Tabs -->
+                <ul class="nav nav-tabs" id="customerDetailTab">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#generalInfo">Thông tin chung</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#contacts">Hợp đồng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#monthlyReport">Bảng kê theo tháng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#transactions">Lịch sử giao dịch</a>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content p-3 border border-top-0 rounded-bottom">
+                    <!-- General Info Tab -->
+                    <div class="tab-pane fade show active" id="generalInfo">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Tên khách hàng:</strong> Công ty TNHH ABC</p>
+                                <p><strong>Mã khách hàng:</strong> KH001</p>
+                                <p><strong>Loại khách hàng:</strong> Doanh nghiệp</p>
+                                <p><strong>Mã số thuế:</strong> 0123456789</p>
+                                <p><strong>Ngày thành lập:</strong> 15/06/2010</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Địa chỉ:</strong> 123 Đường Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh</p>
+                                <p><strong>Điện thoại:</strong> 0901234567</p>
+                                <p><strong>Email:</strong> contact@abccompany.com</p>
+                                <p><strong>Website:</strong> www.abccompany.com</p>
+                            </div>
                         </div>
-                        <!--end tab-pane-->
-                        <div class="tab-pane" id="driverLicense" role="tabpanel">
-                            <form action="#" method="POST">
-                                @csrf
-                                <div class="row">
-                                    <div class="col-xxl-6">
-                                        <div class="mb-3">
-                                            <label for="" class="form-label">Số bằng lái</label>
-                                            <input type="text" class="form-control" value="" placeholder="Nhập Số bằng lái">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-xxl-6">
-                                        <div class="mb-3">
-                                            <label for="licenseType" class="form-label">Loại bằng lái</label>
-                                            <select name="license_type" class="form-control">
-                                                <option value="">Chọn bằng lái</option>
-                                                @foreach ($licenses as $key => $val )
-                                                    <option value="{{ $key }}" {{ request('license_type') == $key ? 'selected' : '' }}>{{ $val }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-xxl-6">
-                                        <div class="mb-3">
-                                            <label for="date" class="form-label">Ngày cấp</label>
-                                            <input type="date" class="form-control" value="" placeholder="Nhập ngày cấp">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-xxl-6">
-                                        <div class="mb-3">
-                                            <label for="date" class="form-label">Ngày hết hạng</label>
-                                            <input type="date" class="form-control" value="" placeholder="Nhập ngày hết hạn">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-xxl-6">
-                                        <div class="mb-3">
-                                            <label for="date" class="form-label">Nơi cấp</label>
-                                            <input type="text" class="form-control" value="" placeholder="Nhập nơi cấp">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-xxl-6">
-                                        <div class="mb-3">
-                                            <label for="" class="form-label">Trạng thái</label>
-                                            <input type="text" class="form-control" readonly value="">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-lg-6">
-                                        <div class="mb-4">
-                                            <label class="block text-gray-700">Hình ảnh bằng lái</label>
-                                            <input type="file" name="avatar" id="avatarInput" class="form-control mt-1 border p-2 rounded">
-                                            <img id="avatarPreview" src="{{ (isset($user) && $user->avatar) ? asset('storage/' . $user->avatar) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-lg-12">
-                                        <div class="hstack gap-2 justify-content-start">
-                                            <button type="submit" class="btn btn-secondary">Lưu</button>
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                </div>
-                                <!--end row-->
-                            </form>
+                    </div>
+
+                    <!-- Contacts Tab -->
+                    <div class="tab-pane fade" id="contacts">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h6>Danh sách hợp đồng</h6>
+                            <button class="btn btn-sm btn-primary"><i class="fas fa-plus me-1"></i>Thêm hợp đồng</button>
                         </div>
-                        <!--end tab-pane-->
-                        <div class="tab-pane" id="salary" role="tabpanel">
-                            <h2>Salary</h2>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Họ tên</th>
+                                        <th>Chức vụ</th>
+                                        <th>Điện thoại</th>
+                                        <th>Email</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Nguyễn Văn X</td>
+                                        <td>Giám đốc</td>
+                                        <td>0912345678</td>
+                                        <td>nguyenvanx@abccompany.com</td>
+                                        <td><i class="fas fa-check text-success"></i></td>
+                                        <td>
+                                            
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Trần Thị Y</td>
+                                        <td>Kế toán trưởng</td>
+                                        <td>0987654321</td>
+                                        <td>tranthiy@abccompany.com</td>
+                                        <td></td>
+                                        <td>
+                                            
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <!--end tab-pane-->
-                        <div class="tab-pane" id="changePassword" role="tabpanel">
-                            <form action="{{ route('admin.profile.change-password', $user) }}" method="POST">
-                                @csrf
-                                <div class="row g-2">
-                                    <div class="col-lg-4">
-                                        <div>
-                                            <label for="passwordInput" class="form-label">Password*</label>
-                                            <input type="password" class="form-control" name="password" id="passwordInput" placeholder="Enter password">
-                                        </div>
-                                        @error('password')
-                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-lg-4">
-                                        <div>
-                                            <label for="confirmpasswordInput" class="form-label">Confirm Password*</label>
-                                            <input type="password" class="form-control" name="password_confirmation" id="confirmpasswordInput" placeholder="Confirm password">
-                                        </div>
-                                        @error('password_confirmation')
-                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                    <!--end col-->
-                                    <div class="col-lg-12 mt-3">
-                                        <div class="text-start">
-                                            <button type="submit" class="btn btn-secondary">Lưu</button>
-                                        </div>
-                                    </div>
-                                    <!--end col-->
-                                </div>
-                                <!--end row-->
-                            </form>
+                    </div>
+
+                    <!-- monthly report -->
+                    <div class="tab-pane fade" id="monthlyReport">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h6>Bảng kê vận chuyển tháng {{ date('m/Y') }}</h6>
                         </div>
-                        <!--end tab-pane-->
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Mã chuyến hàng</th>
+                                        <th>Ngày</th>
+                                        <th>Điểm đi</th>
+                                        <th>Điểm đến</th>
+                                        <th>Số chuyến</th>
+                                        <th>Số tấn xe</th>
+                                        <th>Đơn giá</th>
+                                        <th>Phụ thu bốc xếp</th>
+                                        <th>Phụ thu kết hợp</th>
+                                        <th>Thành tiền</th>
+                                        <th>Ghi chú</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>CH001</td>
+                                        <td>10/05/2025</td>
+                                        <td>AD - KCN NHƠN TRẠCH2</td>
+                                        <td>EVERTIE - KCN NHƠN TRẠCH VI</td>
+                                        <td>1</td>
+                                        <td>5</td>
+                                        <td>900,000</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>900,000</td>
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>CH002</td>
+                                        <td>12/05/2025</td>
+                                        <td>AD - KCN NHƠN TRẠCH2</td>
+                                        <td>EVERTIE - KCN NHƠN TRẠCH VI</td>
+                                        <td>1</td>
+                                        <td>5</td>
+                                        <td>900,000</td>
+                                        <td></td>
+                                        <td>50,000</td>
+                                        <td>950,000</td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Transactions Tab -->
+                    <div class="tab-pane fade" id="transactions">
+                        <div class="d-flex justify-content-between mb-3">
+                            <h6>Lịch sử giao dịch</h6>
+                            <button class="btn btn-sm btn-primary"><i class="fas fa-plus me-1"></i>Thêm giao dịch</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Ngày</th>
+                                        <th>Loại giao dịch</th>
+                                        <th>Số tiền</th>
+                                        <th>Số tham chiếu</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>15/04/2025</td>
+                                        <td>Hóa đơn</td>
+                                        <td class="text-danger">-25,000,000 VNĐ</td>
+                                        <td>INV-2025-0123</td>
+                                        <td><span class="badge bg-success">Đã thanh toán</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>20/03/2025</td>
+                                        <td>Thanh toán</td>
+                                        <td class="text-success">+30,000,000 VNĐ</td>
+                                        <td>PAY-2025-0098</td>
+                                        <td><span class="badge bg-success">Hoàn thành</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>05/03/2025</td>
+                                        <td>Hóa đơn</td>
+                                        <td class="text-danger">-30,000,000 VNĐ</td>
+                                        <td>INV-2025-0087</td>
+                                        <td><span class="badge bg-success">Đã thanh toán</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!--end col-->
     </div>
-    <!--end row-->
-
 </div>
 <!-- container-fluid -->
 
 @endsection
-
-@push('scripts')
-<script>
-    document.getElementById('avatarInput').addEventListener('change', function(event) {
-        const file = event.target.files[0];
-    
-        if (file) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                document.getElementById('avatarPreview').src = e.target.result;
-            }
-            
-            reader.readAsDataURL(file);
-        }
-    });
-</script>
-@endpush
