@@ -25,7 +25,12 @@ class StoreUserRequest extends FormRequest
     {
         $common = [
             'full_name' => ['required', 'string', 'max:100'],
-            'phone' => ['required', 'regex:/^0[0-9]{9}$/', 'unique:users,phone'],
+            'phone' => [
+                'required',
+                'string',
+                'regex:/^(0|\+84|84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/',
+                'unique:users,phone'
+            ],
             'id_number' => ['required', 'max:20'],
             'email' => ['nullable', 'email', 'unique:users,email'],
             'birthday' => ['nullable', 'date'],

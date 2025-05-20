@@ -32,6 +32,7 @@ return new class extends Migration
             $table->string('profile_image')->nullable();
             $table->decimal('salary_base', 12,2)->nullable();
             $table->tinyInteger('gender')->nullable();
+            $table->text('notes')->nullable();
             $table->softDeletes();
             $table->rememberToken();
             $table->timestamps();
