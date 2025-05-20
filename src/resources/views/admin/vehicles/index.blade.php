@@ -266,6 +266,7 @@
                 <h5 class="modal-title" id="addVehicleModalLabel">Thêm phương tiện mới</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <hr>
             <div class="modal-body">
                 <form>
                     <div class="row mb-3">
@@ -337,6 +338,7 @@
                     </div>
                 </form>
             </div>
+            <hr>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                 <button type="button" class="btn btn-primary">Lưu phương tiện</button>
@@ -353,6 +355,7 @@
                 <h5 class="modal-title">Thông tin chi tiết phương tiện</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <hr>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-4 text-center mb-3">
@@ -519,6 +522,7 @@
                     </div>
                 </div>
             </div>
+            <hr>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editVehicleModal">Chỉnh sửa</button>

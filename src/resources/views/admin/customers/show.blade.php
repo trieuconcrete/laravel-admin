@@ -110,9 +110,19 @@
 
                     <!-- monthly report -->
                     <div class="tab-pane fade" id="monthlyReport">
-                        <div class="d-flex justify-content-between mb-3">
-                            <h6>Bảng kê vận chuyển tháng {{ date('m/Y') }}</h6>
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0 text-start">
+                                <h6 class="mb-1">Tháng</h6>
+                                <select class="form-select">
+                                    @foreach(months_list() as $month)
+                                        <option value="{{ $month }}">{{ $month }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
+                        {{-- <div class="d-flex justify-content-between mb-3">
+                            <h6>Bảng kê vận chuyển tháng {{ date('m/Y') }}</h6>
+                        </div> --}}
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead class="table-light">
@@ -188,7 +198,12 @@
                                         <td>INV-2025-0123</td>
                                         <td><span class="badge bg-success">Đã thanh toán</span></td>
                                         <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+                                            <div class="btn-group">
+                                                <a href="" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    Xóa
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr>
@@ -198,7 +213,12 @@
                                         <td>PAY-2025-0098</td>
                                         <td><span class="badge bg-success">Hoàn thành</span></td>
                                         <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+                                            <div class="btn-group">
+                                                <a href="" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    Xóa
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                     <tr>
@@ -208,7 +228,12 @@
                                         <td>INV-2025-0087</td>
                                         <td><span class="badge bg-success">Đã thanh toán</span></td>
                                         <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
+                                            <div class="btn-group">
+                                                <a href="" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    Xóa
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
