@@ -65,39 +65,51 @@
                                 <div class="row">
                                     <div class="col-lg-6">
                                         <div class="mb-3">
-                                            <label for="fullnameInput" class="form-label">Full Name</label>
-                                            <input type="text" class="form-control" name="full_name" id="fullnameInput" placeholder="Enter your Full name" value="{{ $user->full_name }}">
+                                            <label for="fullnameInput" class="form-label">Full Name <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="full_name" id="fullnameInput" placeholder="Enter your Full name" value="{{ old('full_name', $user->full_name) }}">
+                                            @error('full_name')
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <div class="col-lg-6">
                                         <!-- Username -->
                                         <div class="mb-4">
-                                            <label class="block text-gray-700">Username</label>
+                                            <label class="block text-gray-700">Username <span class="text-danger">*</span></label>
                                             <input type="text" name="username" value="{{ old('username', $user->username ?? '') }}" class="form-control p-2 border rounded @error('username') border-red-500 @enderror">
                                             @error('username')
-                                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                             @enderror
                                         </div>
                                     </div>
                                     <!--end col-->
                                     <div class="col-lg-6">
                                         <div class="mb-3">
-                                            <label for="emailInput" class="form-label">Email</label>
-                                            <input type="email" class="form-control" name="email" id="emailInput" placeholder="Enter your Email" value="{{ $user->email }}">
+                                            <label for="emailInput" class="form-label">Email <span class="text-danger">*</span></label>
+                                            <input type="email" class="form-control" name="email" id="emailInput" placeholder="Enter your Email" value="{{ old('email', $user->email) }}">
+                                            @error('email')
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <!--end col-->
                                     <div class="col-lg-6">
                                         <div class="mb-3">
-                                            <label for="phonenumberInput" class="form-label">Phone Number</label>
-                                            <input type="text" class="form-control" name="phone" id="phonenumberInput" placeholder="Enter your phone number" value="{{ $user->phone }}">
+                                            <label for="phonenumberInput" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" name="phone" id="phonenumberInput" placeholder="Enter your phone number" value="{{ old('phone', $user->phone) }}">
+                                            @error('phone')
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                     <!--end col-->
                                     <div class="col-lg-6">
                                         <div class="mb-3">
                                             <label for="birthdayInput" class="form-label">Birthday</label>
-                                            <input type="date" class="form-control" name="birthday" id="birthdayInput" placeholder="Enter your email" value="{{ $user->birthday }}">
+                                            <input type="date" class="form-control" name="birthday" id="birthdayInput" placeholder="Enter your email" value="{{ old('birthday', $user->birthday) }}">
+                                            @error('birthday')
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
 
@@ -123,11 +135,10 @@
                         <div class="tab-pane" id="changePassword" role="tabpanel">
                             <form action="{{ route('admin.profile.change-password', $user) }}" method="POST">
                                 @csrf
-
                                 <div class="row g-2">
                                     <div class="col-lg-4">
                                         <div>
-                                            <label for="oldpasswordInput" class="form-label">Old Password*</label>
+                                            <label for="oldpasswordInput" class="form-label">Old Password <span class="text-danger">*</span></label>
                                             <input type="password" class="form-control" name="current_password" id="oldpasswordInput" placeholder="Enter current password">
                                         </div>
                                         @error('current_password')
@@ -137,7 +148,7 @@
                                     <!--end col-->
                                     <div class="col-lg-4">
                                         <div>
-                                            <label for="newpasswordInput" class="form-label">New Password*</label>
+                                            <label for="newpasswordInput" class="form-label">New Password <span class="text-danger">*</span></label>
                                             <input type="password" class="form-control" name="new_password" id="newpasswordInput" placeholder="Enter new password">
                                         </div>
                                         @error('new_password')
@@ -147,7 +158,7 @@
                                     <!--end col-->
                                     <div class="col-lg-4">
                                         <div>
-                                            <label for="confirmpasswordInput" class="form-label">Confirm Password*</label>
+                                            <label for="confirmpasswordInput" class="form-label">Confirm Password <span class="text-danger">*</span></label>
                                             <input type="password" class="form-control" name="new_password_confirmation" id="confirmpasswordInput" placeholder="Confirm password">
                                         </div>
                                         @error('new_password_confirmation')

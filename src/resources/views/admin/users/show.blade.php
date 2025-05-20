@@ -57,6 +57,7 @@
                                 <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     @method('PUT')
+                                    <input hidden type="text" name="user_action" value="{{ \App\Constants::USER_ACTION_CHANGE_INFORMATION }}" class="form-control">
                                         <div class="row">
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
@@ -178,7 +179,7 @@
                             <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
-                                <input hidden type="text" name="driver_license" value="1" class="form-control">
+                                <input hidden type="text" name="user_action" value="{{ \App\Constants::USER_ACTION_CHANGE_LICENSE }}" class="form-control">
                                 <div class="row">
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
@@ -428,25 +429,17 @@
                         </div>
                         <!--end tab-pane-->
                         <div class="tab-pane" id="changePassword" role="tabpanel">
-                            <form action="{{ route('admin.profile.change-password', $user) }}" method="POST">
+                            <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
+                                @method('PUT')
+                                <input hidden type="text" name="user_action" value="{{ \App\Constants::USER_ACTION_CHANGE_PASSWORD }}" class="form-control">
                                 <div class="row g-2">
                                     <div class="col-lg-4">
                                         <div>
-                                            <label for="passwordInput" class="form-label">Mật khẩu hiện tại <span class="text-danger">*</span></label>
-                                            <input type="password" class="form-control" name="current_password" id="passwordInput" placeholder="Enter password">
-                                        </div>
-                                        @error('current_password')
-                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-lg-4">
-                                        <div>
                                             <label for="passwordInput" class="form-label">Password <span class="text-danger">*</span></label>
-                                            <input type="password" class="form-control" name="new_password" id="passwordInput" placeholder="Enter password">
+                                            <input type="password" class="form-control" name="password" id="passwordInput" placeholder="Enter password">
                                         </div>
-                                        @error('new_password')
+                                        @error('password')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
@@ -454,9 +447,9 @@
                                     <div class="col-lg-4">
                                         <div>
                                             <label for="confirmpasswordInput" class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                                            <input type="password" class="form-control" name="new_password_confirmation" id="confirmpasswordInput" placeholder="Confirm password">
+                                            <input type="password" class="form-control" name="password_confirmation" id="confirmpasswordInput" placeholder="Confirm password">
                                         </div>
-                                        @error('new_password_confirmation')
+                                        @error('password_confirmation')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>

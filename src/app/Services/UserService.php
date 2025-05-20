@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Throwable;
 use Illuminate\Support\Facades\Storage;
 use App\Models\DriverLicense;
+use App\Constants;
 
 class UserService
 {
@@ -83,7 +84,11 @@ class UserService
     public function update(Request $request, User $user): User
     {
         $data = $request->all();
-        $data['salary_base'] = str_replace(',', '', $request->salary_base);
+
+        // handle salary
+        if ($request->salary_base) {
+            $data['salary_base'] = str_replace(',', '', $request->salary_base);
+        }
 
         // Handle password
         if ($request->filled('password')) {
@@ -103,7 +108,7 @@ class UserService
         $user = $this->userRepository->update($user->id, $data);
 
         // Handle Driver License
-        if ((bool) $request->driver_license) {
+        if ($request->user_action == Constants::USER_ACTION_CHANGE_LICENSE) {
             $this->updateDriverLicense($user, $request);
         }
 
