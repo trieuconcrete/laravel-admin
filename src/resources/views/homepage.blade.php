@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TransCargo - Dịch Vụ Vận Tải Chuyên Nghiệp</title>
+    <title>Vận Tải Hoàng Phú Long - Dịch Vụ Vận Tải Chuyên Nghiệp</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.12.0/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
@@ -94,7 +94,7 @@
             <div class="flex justify-between items-center">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <!-- <img src="/api/placeholder/60/60" alt="TransCargo Logo" class="h-12 w-auto"> -->
+                    <!-- <img src="/api/placeholder/60/60" alt="Vận Tải Hoàng Phú Long Logo" class="h-12 w-auto"> -->
                     <img src="http://vantaihoangphulong.vn/logo/2989/logocuoicung.png" alt="Logo Vận Tải Hoàng Phú Long" class="h-16 w-auto">
                     <div class="ml-3">
                         <h1 class="text-x font-bold text-yellow-300">VẬN TẢI HOÀNG PHÚ LONG</h1>
@@ -265,7 +265,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <!-- Service Card 1 -->
                 <div class="service-card bg-gray-50 rounded-lg shadow-lg overflow-hidden" data-aos="fade-up" data-aos-delay="100">
-                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/van%20chuyen%20hang%20hoa%20(2).jpg" alt="Vận Chuyển Hàng Hóa" class="w-full h-48 object-cover">
+                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/van%20chuyen%20hang%20hoa%20(2).jpg" alt="Vận Chuyển Hàng Hóa" class="w-full object-cover">
                     <div class="p-6">
                         <div class="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mb-4 -mt-14 mx-auto shadow-lg">
                             <i class="fas fa-truck-container text-gray-800 text-2xl"></i>
@@ -293,7 +293,7 @@
 
                 <!-- Service Card 2 -->
                 <div class="service-card bg-gray-50 rounded-lg shadow-lg overflow-hidden" data-aos="fade-up" data-aos-delay="200">
-                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/van%20chuyen%20hang%20sieu%20truong%20(5).jpg" alt="Vận Chuyển Hàng Siêu Trường Siêu Trọng" class="w-full h-48 object-cover">
+                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/van%20chuyen%20hang%20sieu%20truong%20(5).jpg" alt="Vận Chuyển Hàng Siêu Trường Siêu Trọng" class="w-full object-cover">
                     <div class="p-6">
                         <div class="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mb-4 -mt-14 mx-auto shadow-lg">
                             <i class="fas fa-boxes text-gray-800 text-2xl"></i>
@@ -321,7 +321,7 @@
 
                 <!-- Service Card 3 -->
                 <div class="service-card bg-gray-50 rounded-lg shadow-lg overflow-hidden" data-aos="fade-up" data-aos-delay="300">
-                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/van%20chuyen%20hang%20sieu%20truong%20(9).jpg" alt="Vận Chuyển Cống, Cọc Bê Tông" class="w-full h-48 object-cover">
+                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/van%20chuyen%20hang%20sieu%20truong%20(9).jpg" alt="Vận Chuyển Cống, Cọc Bê Tông" class="w-full object-cover">
                     <div class="p-6">
                         <div class="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mb-4 -mt-14 mx-auto shadow-lg">
                             <i class="fas fa-warehouse text-gray-800 text-2xl"></i>
@@ -368,7 +368,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <!-- Vehicle Card 1 -->
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:shadow-xl hover:-translate-y-2" data-aos="fade-up" data-aos-delay="100">
-                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/cho%20thue%20xe%20nang%20(5).jpg" alt="Cho Thuê Xe Cẩu" class="w-full h-48 object-cover">
+                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/cho%20thue%20xe%20nang%20(5).jpg" alt="Cho Thuê Xe Cẩu" class="w-full object-cover">
                     <div class="p-6">
                         <h3 class="text-lg font-bold mb-2">Cho Thuê Xe Cẩu</h3>
                         <p class="text-gray-600 mb-4">Xe cẩu vốn là loại xe cần đầu tư nhiều, ngàn sách mới có thể sở hữu, vì vậy nếu quý khách thuê ngoài thì sẽ tiết kiệm chi phí hơn.</p>
@@ -385,7 +385,7 @@
 
                 <!-- Vehicle Card 2 -->
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:shadow-xl hover:-translate-y-2" data-aos="fade-up" data-aos-delay="200">
-                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/cho%20thue%20xe%20nang%20(3).jpg" alt="Cho Thuê Cần Cẩu" class="w-full h-48 object-cover">
+                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/cho%20thue%20xe%20nang%20(3).jpg" alt="Cho Thuê Cần Cẩu" class="w-full object-cover">
                     <div class="p-6">
                         <h3 class="text-lg font-bold mb-2">Cho Thuê Cần Cẩu</h3>
                         <p class="text-gray-600 mb-4">Ngoài dịch vụ vận chuyển hàng hóa, cẩu hàng và nâng hạ, chúng tôi còn cho thuê cần cẩu có mức với chi phí cạnh tranh nhất.</p>
@@ -402,7 +402,7 @@
 
                 <!-- Vehicle Card 3 -->
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:shadow-xl hover:-translate-y-2" data-aos="fade-up" data-aos-delay="300">
-                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/9065933da6a272fc2bb3.jpg" alt="Cho Thuê Xe Nâng" class="w-full h-48 object-cover">
+                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/9065933da6a272fc2bb3.jpg" alt="Cho Thuê Xe Nâng" class="w-full object-cover">
                     <div class="p-6">
                         <h3 class="text-lg font-bold mb-2">Cho Thuê Xe Nâng</h3>
                         <p class="text-gray-600 mb-4">Quý khách nếu có bất cứ vấn đề gì cần giải đáp, hãy gọi trực tiếp cho chúng tôi, Hoàng Phú Long sẽ tư vấn tận tình và nhiệt tình.</p>
@@ -418,7 +418,7 @@
                 </div>
                 <!-- Vehicle Card 4 -->
                 <div class="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:shadow-xl hover:-translate-y-2" data-aos="fade-up" data-aos-delay="400">
-                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/hoang%20phu%20long%20(15).jpg" alt="Cho Thuê Xe Du Lịch" class="w-full h-48 object-cover">
+                    <img src="http://vantaihoangphulong.vn/dichvu_images/2989/hoang%20phu%20long%20(15).jpg" alt="Cho Thuê Xe Du Lịch" class="w-full object-cover">
                     <div class="p-6">
                         <h3 class="text-lg font-bold mb-2">Cho Thuê Xe Du Lịch</h3>
                         <p class="text-gray-600 mb-4">Hoàng Phú Long là một trong những thương hiệu cho thuê xe du lịch 4, 7, 16, 29, 45 chỗ uy tín, chất lượng và có quy mô lớn tại Đồng Nai.</p>
