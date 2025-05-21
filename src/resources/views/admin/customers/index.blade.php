@@ -171,17 +171,20 @@
                 <h5 class="modal-title">Thêm khách hàng mới</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+            <hr>
             <div class="modal-body">
                 <form>
-                    <div class="mb-3">
-                        <label class="form-label">Loại khách hàng <span class="text-danger">*</span></label>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="customerType" id="individualType" value="individual">
-                            <label class="form-check-label" for="individualType">Cá nhân</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="customerType" id="businessType" value="business" checked>
-                            <label class="form-check-label" for="businessType">Doanh nghiệp</label>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Loại khách hàng <span class="text-danger">*</span></label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="customerType" id="individualType" value="individual">
+                                <label class="form-check-label" for="individualType">Cá nhân</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="customerType" id="businessType" value="business" checked>
+                                <label class="form-check-label" for="businessType">Doanh nghiệp</label>
+                            </div>
                         </div>
                     </div>
 
@@ -191,24 +194,29 @@
                             <input type="text" class="form-control" placeholder="Nhập tên khách hàng">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Mã khách hàng</label>
-                            <input type="text" class="form-control" placeholder="Để trống để tạo tự động" disabled>
-                            <small class="text-muted">Hệ thống sẽ tự động tạo mã</small>
+                            <label class="form-label">Mã số thuế</label>
+                            <input type="text" class="form-control" placeholder="Nhập mã số thuế">
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Mã số thuế</label>
-                            <input type="text" class="form-control" placeholder="Nhập mã số thuế">
+                            <label class="form-label">Website</label>
+                            <input type="text" class="form-control" placeholder="Nhập website">
                         </div>
                         <div class="col-md-6" id="businessDateField">
                             <label class="form-label">Ngày thành lập</label>
                             <input type="date" class="form-control">
                         </div>
-                        <div class="col-md-6" id="individualDateField" style="display: none;">
-                            <label class="form-label">Ngày sinh</label>
-                            <input type="date" class="form-control">
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái</label>
+                            <select name="status" class="form-select">
+                            <option value="1" selected>Đang hoạt động</option>
+                            <option value="0">Không hoạt động</option>
+                            </select>
                         </div>
                     </div>
 
@@ -225,13 +233,6 @@
                         <div class="col-md-6">
                             <label class="form-label">Email</label>
                             <input type="email" class="form-control" placeholder="Nhập email">
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6" id="websiteField">
-                            <label class="form-label">Website</label>
-                            <input type="text" class="form-control" placeholder="Nhập website">
                         </div>
                     </div>
 
@@ -266,6 +267,7 @@
                     </div>
                 </form>
             </div>
+            <hr>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn btn-primary">Lưu khách hàng</button>

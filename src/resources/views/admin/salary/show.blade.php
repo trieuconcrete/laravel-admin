@@ -183,7 +183,7 @@
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="date" class="form-label">Ngày hết hạng</label>
+                                            <label for="date" class="form-label">Ngày hết hạn</label>
                                             <input type="date" class="form-control" value="" placeholder="Nhập ngày hết hạn">
                                         </div>
                                     </div>

@@ -226,7 +226,7 @@
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="date" class="form-label">Ngày hết hạng <span class="text-danger">*</span></label>
+                                            <label for="date" class="form-label">Ngày hết hạn <span class="text-danger">*</span></label>
                                             <input 
                                                 type="date"
                                                 class="form-control"
