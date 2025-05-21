@@ -273,7 +273,7 @@
                         </div>
                         <div class="col-xxl-6">
                             <label class="form-label">Vị trí <span class="text-danger">*</span></label>
-                            <select name="position" class="form-control">
+                            <select name="position_id" class="form-control">
                                 <option value="">Chọn vị trí</option>
                                 @foreach ($positions as $key => $val)
                                     @if ($val !== 'Tài xế')

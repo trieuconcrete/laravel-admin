@@ -14,6 +14,9 @@ use Throwable;
 use Illuminate\Support\Facades\Storage;
 use App\Models\DriverLicense;
 use App\Constants;
+use App\Models\Position;
+use App\Repositories\Interface\PositionRepositoryInterface as PositionRepository;
+use Illuminate\Support\Facades\Log;
 
 class UserService
 {
@@ -21,56 +24,70 @@ class UserService
      * Summary of __construct
      * @param \App\Repositories\Interface\UserRepositoryInterface $userRepository
      * @param \App\Repositories\Interface\DriverLicenseRepositoryInterface $driverLicenseRepository
+     * @param \App\Repositories\Interface\PositionRepositoryInterface $positionRepository
      */
     public function __construct(
         protected UserRepository $userRepository,
-        protected DriverLicenseRepository $driverLicenseRepository
+        protected DriverLicenseRepository $driverLicenseRepository,
+        protected PositionRepository $positionRepository
     ) {}
 
     /**
-     * Summary of store
+     * Store a newly created user.
+     *
      * @param \Illuminate\Http\Request $request
+     * @return \App\Models\User
+     * @throws \Exception
      */
     public function store(Request $request)
     {
         try {
-            $data = $request->all();
-            $data['salary_base'] = str_replace(',', '', $request->salary_base);
-            // general password
-            $data['password'] = $request->password ? Hash::make($request->password) : Hash::make('password');
+            $isDriver = (bool) $request->add_driver;
 
-            // case have avatar
+            $data = $request->all();
+
+            // Format salary
+            $data['salary_base'] = str_replace(',', '', $request->salary_base);
+
+            // Generate password
+            $data['password'] = Hash::make($data['password'] ?? 'password');
+
+            // Handle avatar upload
             if ($request->hasFile('avatar')) {
                 $data['avatar'] = ImageHelper::upload($request->file('avatar'));
             }
 
-            // set role
-            $data['role'] = (bool) $request->add_driver ? User::ROLE_DRIVER : User::ROLE_STAFF;
-
-            // create user
-            if (!$user = $this->userRepository->create($data)) {
-                throw new \Exception('Create user have error!');
+            // Set role and position
+            $data['role'] = $isDriver ? User::ROLE_DRIVER : User::ROLE_STAFF;
+            if ($isDriver) {
+                $position = $this->positionRepository->findBy(['code' => Position::POSITION_TX]);
+                $data['position_id'] = $position->id ?? null;
             }
 
-            // case create driver
-            if ((bool) $request->add_driver) {
+            // Create user
+            $user = $this->userRepository->create($data);
+            if (!$user) {
+                throw new \Exception('Create user failed');
+            }
+
+            // If is driver, create driver license
+            if ($isDriver) {
                 $this->driverLicenseRepository->create([
                     'user_id' => $user->id,
                     'license_type' => $request->license_type,
                     'expiry_date' => $request->license_expire_date,
                     'license_number' => '',
                     'issue_date' => Carbon::today(),
-                    'issued_by' => ''
+                    'issued_by' => '',
                 ]);
             }
 
-            // case have position
-            if ($request->position) {
-                $user->assignPosition((int) $request->position);
-            }
+            // Assign position
+            $user->assignPosition((int) $user->position_id);
 
             return $user;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('User creation failed', ['error' => $e->getMessage()]);
             throw $e;
         }
     }

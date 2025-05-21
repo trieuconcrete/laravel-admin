@@ -11,6 +11,20 @@ class Position extends Model
     use HasFactory;
 
     /**
+     * Position constants
+     */
+    const POSITION_GD = 'GD';
+    const POSITION_TP = 'TP';
+    const POSITION_KT = 'KT';
+    const POSITION_TX = 'TX';
+    const POSITION_NV = 'NV';
+    const POSITION_DP = 'DP';
+    const POSITION_NK = 'NK';
+    const POSITION_KTV = 'KTV';
+    const POSITION_CSKH = 'CSKH';
+    const POSITION_PX = 'PX';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>

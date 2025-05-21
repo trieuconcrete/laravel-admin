@@ -64,4 +64,13 @@ abstract class BaseRepository
         // Nếu cần clear hết cache liên quan Model này
         Cache::flush();
     }
+
+    /**
+     * Summary of findBy
+     * @param array $params
+     * @return TModel|null
+     */
+    public function findBy(array $params = []) {
+        return $this->model->where($params)->first();
+    }
 }

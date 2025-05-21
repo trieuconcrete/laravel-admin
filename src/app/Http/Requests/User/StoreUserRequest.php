@@ -17,6 +17,19 @@ class StoreUserRequest extends FormRequest
     }
 
     /**
+     * Summary of prepareForValidation
+     * @return void
+     */
+    public function prepareForValidation()
+    {
+        if ($this->salary_base) {
+            $this->merge([
+                'salary_base' => str_replace(',', '', $this->salary_base),
+            ]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
@@ -51,7 +64,7 @@ class StoreUserRequest extends FormRequest
 
         // case employee
         return array_merge($common, [
-            'position' => ['required', 'string'],
+            'position_id' => ['required', 'string'],
         ]);
     }
 

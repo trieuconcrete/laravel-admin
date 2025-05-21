@@ -5,9 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Vehicle;
+use App\Http\Requests\Vehicle\StoreVehicleRequest;
+use App\Services\VehicleService;
 
 class VehicleController extends Controller
 {
+    /**
+     * Summary of __construct
+     * @param \App\Services\VehicleService $vehicleService
+     */
+    public function __construct(protected VehicleService $vehicleService) {}
+
     public function index(Request $request)
     {
         $vehicles = Vehicle::with('driver', 'vehicleType', 'documents')->latest()->paginate(10);

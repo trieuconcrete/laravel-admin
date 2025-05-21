@@ -28,6 +28,10 @@ class UserController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Summary of __construct
+     * @param \App\Services\UserService $userService
+     */
     public function __construct(protected UserService $userService) {}
 
     public function index(Request $request)
