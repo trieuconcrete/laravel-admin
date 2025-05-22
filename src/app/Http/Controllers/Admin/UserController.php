@@ -116,7 +116,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateUserRequest $request, User $user)
-    {
+    {        
         DB::beginTransaction();
         try {
             $this->authorize('update', $user);
@@ -130,8 +130,7 @@ class UserController extends Controller
             DB::rollBack();
 
             Log::error('User creation failed', ['error' => $e->getMessage()]);
-
-            return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('active_tab', $request->input('tab'));
         }
     }
 

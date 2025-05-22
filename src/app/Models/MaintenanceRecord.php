@@ -104,6 +104,14 @@ class MaintenanceRecord extends Model
     }
 
     /**
+     * Summary of getCurrentMaintenanceTypes
+     */
+    public function getCurrentMaintenanceTypeLabel()
+    {
+        return self::getMaintenanceTypes()[$this->maintenance_type] ?? '';
+    }
+
+    /**
      * Get the vehicle that owns the maintenance record.
      */
     public function vehicle(): BelongsTo

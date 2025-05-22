@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ImageHelper
 {
@@ -13,9 +14,21 @@ class ImageHelper
      * @param string $directory
      * @return bool|string|null
      */
-    public static function upload(?UploadedFile $file, string $directory = 'avatars'): ?string
+    public static function upload(?UploadedFile $file, string $directory = 'uploads'): ?string
     {
-        return $file ? $file->store($directory, 'public') : null;
+        if (!$file) {
+            return null;
+        }
+
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
+        $slug = Str::slug($originalName) . '_' . Str::random(10);
+
+        $newFileName = $slug . '_' . time() . '.' . $extension;
+
+        $path = $file->storeAs($directory, $newFileName, 'public');
+
+        return $path;
     }
 
     /**

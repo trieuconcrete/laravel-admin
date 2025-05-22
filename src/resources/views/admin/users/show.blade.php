@@ -57,6 +57,7 @@
                                 <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
                                     @csrf
                                     @method('PUT')
+                                    <input type="hidden" name="tab" id="activeTabInput" value="personalDetails">
                                     <input hidden type="text" name="user_action" value="{{ \App\Constants::USER_ACTION_CHANGE_INFORMATION }}" class="form-control">
                                         <div class="row">
                                             <div class="col-lg-6">
@@ -179,6 +180,7 @@
                             <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
+                                <input type="hidden" name="tab" id="activeTabInput" value="driverLicense">
                                 <input hidden type="text" name="user_action" value="{{ \App\Constants::USER_ACTION_CHANGE_LICENSE }}" class="form-control">
                                 <div class="row">
                                     <div class="col-xxl-6">
@@ -432,6 +434,7 @@
                             <form action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
+                                <input type="hidden" name="tab" id="activeTabInput" value="changePassword">
                                 <input hidden type="text" name="user_action" value="{{ \App\Constants::USER_ACTION_CHANGE_PASSWORD }}" class="form-control">
                                 <div class="row g-2">
                                     <div class="col-lg-4">
@@ -529,6 +532,20 @@
             formatted += '.' + parts[1].slice(0, 2);
         }
         salaryInput.val(formatted);
+    }
+
+    $('.nav-tabs-custom .nav-link').on('shown.bs.tab', function (e) {
+        let target = $(e.target).attr("href").replace('#', '');
+        $('#activeTabInput').val(target);
+    });
+
+    let activeTab = @json(session('active_tab'));
+    if (activeTab) {
+        $('.nav-tabs-custom .nav-link').removeClass('active');
+        $('.tab-pane').removeClass('show active');
+
+        $('.nav-tabs-custom .nav-link[href="#' + activeTab + '"]').addClass('active');
+        $('#' + activeTab).addClass('show active');
     }
 </script>
 @endpush

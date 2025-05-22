@@ -281,7 +281,7 @@
                                     @endif
                                 @endforeach
                             </select>
-                            <div class="text-danger error" data-field="position"></div>
+                            <div class="text-danger error" data-field="position_id"></div>
                         </div>
                         <div class="col-xxl-6">
                             <label class="form-label">Lương cơ bản <span class="text-danger">*</span></label>
@@ -405,7 +405,6 @@
                 });
             }
         });
-
     });
 
     $('input[name="salary_base"]').on('input', function () {
@@ -433,31 +432,39 @@
 
     $('#export-user-btn').click(function () {
         Swal.fire({
-            title: 'Đang xử lý...',
-            text: 'Vui lòng chờ trong giây lát',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
+            title: 'Xác nhận xuất dữ liệu?',
+            text: 'Bạn có chắc chắn muốn xuất dữ liệu người dùng không?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Có, xuất ngay',
+            cancelButtonText: 'Hủy bỏ',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    text: 'Vui lòng chờ trong giây lát',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
 
-                const link = document.createElement('a');
-                link.href = "{{ route('admin.users.export') }}";
-                link.download = '';
-                document.body.appendChild(link);
+                        const link = document.createElement('a');
+                        link.href = "{{ route('admin.users.export') }}";
+                        link.download = '';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
 
-                // when click wil call route download
-                link.click();
-
-                document.body.removeChild(link);
-
-                setTimeout(() => {
-                    Swal.close();
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Xuất dữ liệu thành công',
-                        showConfirmButton: false,
-                        timer: 2000
-                    });
-                }, 3000); // timeout
+                        setTimeout(() => {
+                            Swal.close();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Xuất dữ liệu thành công',
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        }, 2000);
+                    }
+                });
             }
         });
     });

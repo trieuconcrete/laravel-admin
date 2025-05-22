@@ -9,19 +9,12 @@ use Illuminate\Http\Request;
 class VehicleService
 {
     /**
-     * Summary of vehicleRepository
-     * @var 
-     */
-    protected $vehicleRepository;
-
-    /**
      * Summary of __construct
-     * @param \App\Repositories\Interface\VehicleRepositoryInterface $vehicleRepository
+     * @param \App\Repositories\Interface\VehicleRepositoryInterface $VehicleRepository
      */
-    public function __construct(VehicleRepository $vehicleRepository)
-    {
-        $this->vehicleRepository = $vehicleRepository;
-    }
+    public function __construct(
+        protected VehicleRepository $vehicleRepository,
+    ) {}
 
     /**
      * Summary of store
@@ -29,14 +22,32 @@ class VehicleService
      */
     public function store(Request $request)
     {
+        $data = $request->all();
         $documents = [];
 
-        foreach ($request->documents ?? [] as $doc) {
-            $data['document_file'] = ImageHelper::upload($request->file('document_file'));
-
+        foreach ($request->documents as $doc) {
+            $doc['document_file'] = ImageHelper::upload($doc['document_file']);
             $documents[] = $doc;
         }
 
-        return $this->vehicleRepository->create($data, $documents);
+        $vehicleData = $data;
+        unset($vehicleData['documents']);
+
+        $vehicle = $this->vehicleRepository->create($vehicleData);
+
+        foreach ($documents as $doc) {
+            $vehicle->documents()->create($doc);
+        }
+
+        return $vehicle;
+    }
+
+    /**
+     * Summary of getFilteredVehicles
+     * @param array $filters
+     */
+    public function getFilteredVehicles(array $filters)
+    {
+        return $this->vehicleRepository->getVehiclesWithFilters($filters);
     }
 }
