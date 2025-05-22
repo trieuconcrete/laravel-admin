@@ -6,6 +6,8 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Enum\UserStatus as EnumUserStatus;
 use Illuminate\Validation\Rules\Enum;
 use App\Constants;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -56,6 +58,7 @@ class UpdateUserRequest extends FormRequest
                     'id_number' => 'required|max:20',
                     'salary_base' => ['required', 'numeric', 'min:0'],
                     'address' => 'nullable|max:100',
+                    'tab' => 'nullable|string',
                 ];
                 break;
             case Constants::USER_ACTION_CHANGE_LICENSE:
@@ -67,11 +70,13 @@ class UpdateUserRequest extends FormRequest
                     'issued_by'      => 'required|string|max:100',
                     'license_file'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
                     'license_status' => 'nullable',
+                    'tab' => 'nullable|string',
                 ];
                 break;
             case Constants::USER_ACTION_CHANGE_PASSWORD:
                 $rules = [
                     'password' => 'required|string|min:8|confirmed',
+                    'tab' => 'nullable|string',
                 ];
                 break;
             default:
@@ -82,6 +87,10 @@ class UpdateUserRequest extends FormRequest
         return $rules;
     }
 
+    /**
+     * Summary of messages
+     * @return array{email.email: string, email.unique: string, full_name.required: string, license_type.required: string, name.required: string, phone.regex: string, phone.required: string, phone.unique: string, position.required: string, status.required: string}
+     */
     public function messages(): array
     {
         return [
@@ -96,5 +105,22 @@ class UpdateUserRequest extends FormRequest
             'license_type.required' => 'Vui lòng chọn loại bằng lái',
             'status.required' => 'Vui lòng chọn trạng thái',
         ];
+    }
+
+    /**
+     * Summary of failedValidation
+     * @param \Illuminate\Contracts\Validation\Validator $validator
+     * @throws \Illuminate\Http\Exceptions\HttpResponseException
+     * @return never
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('active_tab', $this->input('tab'))
+        );
     }
 }

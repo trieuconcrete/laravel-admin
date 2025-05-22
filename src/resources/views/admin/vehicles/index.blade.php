@@ -93,34 +93,36 @@
             <!-- Filter Section -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <select class="form-select" id="vehicleTypeFilter">
-                                <option value="">Tất cả loại xe</option>
-                                <option value="1">Xe tải</option>
-                                <option value="2">Container</option>
-                                <option value="3">Xe thùng</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select" id="statusFilter">
-                                <option value="">Tất cả trạng thái</option>
-                                <option value="active">Đang hoạt động</option>
-                                <option value="maintenance">Đang bảo trì</option>
-                                <option value="inactive">Không hoạt động</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                    <form method="GET" action="{{ route('admin.vehicles.index') }}">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <select class="form-select" name="vehicle_type_id" id="vehicle_type_id">
+                                    <option value="">Tất cả loại xe</option>
+                                    @foreach ($vehicleTypes as $key => $val)
+                                        <option value="{{ $key }}" {{ request('vehicle_type_id') == $key ? 'selected' : '' }}>{{ $val }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="statusFilter" name="status">
+                                    <option value="">Tất cả trạng thái</option>
+                                    @foreach ($vehicleStatuses as $val => $label)
+                                        <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input name="keyword" type="text" class="form-control" placeholder="Tìm kiếm..." value="{{ request('keyword') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-filter me-2"></i>Tìm kiếm
+                                </button>
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <button class="btn btn-outline-primary w-100">
-                                <i class="fas fa-filter me-2"></i>Tìm kiếm
-                            </button>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -158,103 +160,76 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#vehicleDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>51C-123.45</td>
-                                    <td>Xe tải</td>
-                                    <td>Nguyen Van A</td>
-                                    <td>5 tấn</td>
-                                    <td><span class="status-indicator status-active"></span> Hoạt động</td>
-                                    <td>Còn hạn (05/12/2025)</td>
-                                    <td>Còn hạn (15/08/2025)</td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#vehicleDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>51D-456.78</td>
-                                    <td>Container</td>
-                                    <td>Nguyen Van B</td>
-                                    <td>20 tấn</td>
-                                    <td><span class="status-indicator status-maintenance"></span> Bảo trì</td>
-                                    <td>Còn hạn (18/09/2025)</td>
-                                    <td>Còn hạn (30/11/2025)</td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#vehicleDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>51H-789.01</td>
-                                    <td>Xe thùng</td>
-                                    <td>Nguyen Van C</td>
-                                    <td>0.1 tấn</td>
-                                    <td><span class="status-indicator status-active"></span> Hoạt động</td>
-                                    <td>Sắp hết hạn (30/06/2025)</td>
-                                    <td>Còn hạn (22/07/2025)</td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#vehicleDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>51A-345.67</td>
-                                    <td>Xe tải</td>
-                                    <td>Nguyen Van D</td>
-                                    <td>8 tấn</td>
-                                    <td><span class="status-indicator status-expired"></span> Hết hạn đăng kiểm</td>
-                                    <td><span class="text-danger">Hết hạn (15/04/2025)</span></td>
-                                    <td>Còn hạn (10/09/2025)</td>
-                                </tr>
+                                @foreach ($vehicles as $vehicle)
+                                    <tr>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button 
+                                                    class="btn btn-sm btn-outline-primary btn-show-vehicle" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#vehicleDetailModal"
+                                                    data-id="{{ $vehicle->vehicle_id }}"
+                                                >
+                                                    Chi tiết
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger">
+                                                    Xóa
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>{{ $vehicle->plate_number }}</td>
+                                        <td>{{ optional($vehicle->vehicleType)->name }}</td>
+                                        <td>{{ optional($vehicle->driver)->full_name }}</td>
+                                        <td>{{ $vehicle->capacity }}</td>
+                                        <td class="py-2 px-4">
+                                            <span 
+                                                class="
+                                                    status-indicator 
+                                                    status-active 
+                                                    text-{{ $vehicle->getStatusBadgeClassAttribute() }}
+                                                "
+                                            >
+                                                {{ $vehicle->getStatusLabelAttribute() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @php
+                                                $vehicleInspection = $vehicle->getLatestDocument(\App\Models\VehicleDocument::TYPE_INSPECTION);
+                                            @endphp
+                                            @if ($vehicleInspection)
+                                                @if ($vehicle->isDocumentExpired(\App\Models\VehicleDocument::TYPE_INSPECTION)) 
+                                                    <span class="badge bg-danger-subtle text-danger">
+                                                        Hết hạn ({{ $vehicleInspection->expiry_date->format('Y-m-d') }})
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-success-subtle text-success ">Còn hạn({{ $vehicleInspection->expiry_date->format('Y-m-d') }})</span>
+                                                @endif
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @php
+                                                $vehicleInsurance = $vehicle->getLatestDocument(\App\Models\VehicleDocument::TYPE_INSURANCE);
+                                            @endphp
+                                            @if ($vehicleInsurance)
+                                                @if ($vehicle->isDocumentExpired(\App\Models\VehicleDocument::TYPE_INSURANCE)) 
+                                                    <span class="badge bg-danger-subtle text-danger">
+                                                        Hết hạn ({{ $vehicleInsurance->expiry_date->format('Y-m-d') }})
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-success-subtle text-success ">Còn hạn({{ $vehicleInsurance->expiry_date->format('Y-m-d') }})</span>
+                                                @endif
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
-                    <nav>
-                        <ul class="pagination justify-content-end">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Sau</a>
-                            </li>
-                        </ul>
-                    </nav>
                 </div>
             </div>
+            {{ $vehicles->links('vendor.pagination.bootstrap-5') }}
         </div> <!-- end col -->
     </div>
-
 </div>
 <!-- container-fluid -->
 
@@ -267,269 +242,105 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <hr>
+            <form id="add-vehicle-form" enctype="multipart/form-data" action="{{ route('admin.vehicles.store') }}" method="POST">
             <div class="modal-body">
-                <form>
+                    @csrf
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Biển số xe</label>
-                            <input type="text" class="form-control" placeholder="Nhập biển số xe">
+                            <label class="form-label">Biển số xe <span class="text-danger">*</span></label>
+                            <input type="text" name="plate_number" id="plate_number" class="form-control" placeholder="Nhập biển số xe">
+                            <div class="text-danger error" data-field="plate_number"></div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Loại phương tiện</label>
-                            <select class="form-select">
+                            <label class="form-label">Loại phương tiện <span class="text-danger">*</span></label>
+                            <select class="form-select" name="vehicle_type_id" id="vehicle_type_id">
                                 <option value="">Chọn loại phương tiện</option>
-                                <option value="1">Xe tải</option>
-                                <option value="2">Container</option>
-                                <option value="3">Xe thùng</option>
+                                @foreach ($vehicleTypes as $key => $val)
+                                    <option value="{{ $key }}">{{ $val }}</option>
+                                @endforeach
                             </select>
+                            <div class="text-danger error" data-field="vehicle_type_id"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Tải trọng (tấn)</label>
-                            <input type="number" step="0.1" class="form-control">
+                            <input type="number" step="0.1" class="form-control" name="capacity" id="capacity">
+                            <div class="text-danger error" data-field="capacity"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Năm sản xuất</label>
-                            <input type="number" class="form-control">
+                            <input type="number" class="form-control" name="manufactured_year" id="manufactured_year">
+                            <div class="text-danger error" data-field="manufactured_year"></div>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Trạng thái</label>
-                            <select class="form-select">
-                                <option value="active">Đang hoạt động</option>
-                                <option value="maintenance">Đang bảo trì</option>
-                                <option value="inactive">Không hoạt động</option>
+                            <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                            <select class="form-select" name="status">
+                                @foreach ($vehicleStatuses as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                @endforeach
                             </select>
+                            <div class="text-danger error" data-field="status"></div>
                         </div>
                     </div>
                     <hr>
                     <h6>Thông tin đăng kiểm</h6>
+                    <input type="text" class="form-control" name="documents[0][document_type]" value="{{ \App\Models\VehicleDocument::TYPE_INSPECTION }}" hidden>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Số giấy đăng kiểm</label>
-                            <input type="text" class="form-control">
+                            <label class="form-label">Số giấy đăng kiểm <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="documents[0][document_number]">
+                            <div class="text-danger error" data-field="documents.0.document_number"></div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Ngày hết hạn</label>
-                            <input type="date" class="form-control">
+                            <label class="form-label">Ngày hết hạn <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="documents[0][expiry_date]">
+                            <div class="text-danger error" data-field="documents.0.expiry_date"></div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Tệp đính kèm</label>
-                        <input type="file" class="form-control">
+                        <label class="form-label">Tệp đính kèm <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" name="documents[0][document_file]" >
+                        <div class="text-danger error" data-field="documents.0.document_file"></div>
                     </div>
                     <hr>
                     <h6>Thông tin bảo hiểm</h6>
                     <div class="row mb-3">
+                        <input type="text" class="form-control" name="documents[1][document_type]" value="{{ \App\Models\VehicleDocument::TYPE_INSURANCE }}" hidden>
                         <div class="col-md-6">
-                            <label class="form-label">Số hợp đồng bảo hiểm</label>
-                            <input type="text" class="form-control">
+                            <label class="form-label">Số hợp đồng bảo hiểm <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="documents[1][document_number]">
+                            <div class="text-danger error" data-field="documents.1.document_number"></div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Ngày hết hạn</label>
-                            <input type="date" class="form-control">
+                            <label class="form-label">Ngày hết hạn <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="documents[1][expiry_date]">
+                            <div class="text-danger error" data-field="documents.1.expiry_date"></div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Tệp đính kèm</label>
-                        <input type="file" class="form-control">
+                        <label class="form-label">Tệp đính kèm <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" name="documents[1][document_file]" >
+                        <div class="text-danger error" data-field="documents.1.document_file"></div>
                     </div>
-                </form>
-            </div>
-            <hr>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary">Lưu phương tiện</button>
-            </div>
+                </div>
+                <hr>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu phương tiện</button>
+                </div>
+
+            </form>
         </div>
     </div>
 </div>
 
 <!-- Vehicle Detail Modal -->
-<div class="modal fade" id="vehicleDetailModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Thông tin chi tiết phương tiện</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <hr>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-4 text-center mb-3">
-                        <div class="border rounded p-3">
-                            <i class="fas fa-truck fa-5x text-primary mb-3"></i>
-                            <h5>Xe tải - 51C-123.45</h5>
-                            <span class="badge bg-success">Đang hoạt động</span>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <p class="text-muted mb-1">Biển số</p>
-                                <p class="fw-bold">51C-123.45</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p class="text-muted mb-1">Loại phương tiện</p>
-                                <p class="fw-bold">Xe tải</p>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <p class="text-muted mb-1">Tải trọng</p>
-                                <p class="fw-bold">5 tấn</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p class="text-muted mb-1">Năm sản xuất</p>
-                                <p class="fw-bold">2020</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <hr>
-                <ul class="nav nav-tabs" id="vehicleDetailTab">
-                    <li class="nav-item">
-                        <a class="nav-link active" data-bs-toggle="tab" href="#documents">Giấy tờ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#maintenance">Lịch sử bảo trì</a>
-                    </li>
-                </ul>
-                <div class="tab-content p-3 border border-top-0 rounded-bottom">
-                    <div class="tab-pane fade show active" id="documents">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Đăng kiểm</h6>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm">
-                                                <tbody>
-                                                    <tr>
-                                                        <td>Số đăng kiểm:</td>
-                                                        <td>DK123456789</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Ngày cấp:</td>
-                                                        <td>05/12/2024</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Ngày hết hạn:</td>
-                                                        <td>05/12/2025</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Trạng thái:</td>
-                                                        <td><span class="badge bg-success">Còn hạn</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Tài liệu:</td>
-                                                        <td><a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i>Tải xuống</a></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Bảo hiểm</h6>
-                                        <div class="table-responsive">
-                                            <table class="table table-sm">
-                                                <tbody>
-                                                    <tr>
-                                                        <td>Số hợp đồng:</td>
-                                                        <td>BH987654321</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Ngày cấp:</td>
-                                                        <td>15/08/2024</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Ngày hết hạn:</td>
-                                                        <td>15/08/2025</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Trạng thái:</td>
-                                                        <td><span class="badge bg-success">Còn hạn</span></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td>Tài liệu:</td>
-                                                        <td><a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i>Tải xuống</a></td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="maintenance">
-                        <div class="d-flex justify-content-between mb-3">
-                            <h6>Lịch sử bảo trì</h6>
-                            <button class="btn btn-sm btn-primary"><i class="fas fa-plus me-1"></i>Thêm lịch bảo trì</button>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
-                                    <tr>
-                                        <th>Ngày</th>
-                                        <th>Loại bảo trì</th>
-                                        <th>Đơn vị thực hiện</th>
-                                        <th>Chi phí</th>
-                                        <th>Trạng thái</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>15/03/2025</td>
-                                        <td>Bảo dưỡng định kỳ</td>
-                                        <td>Garage Minh Phát</td>
-                                        <td>2,500,000 VNĐ</td>
-                                        <td><span class="badge bg-success">Hoàn thành</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>10/01/2025</td>
-                                        <td>Thay lốp xe</td>
-                                        <td>Garage Minh Phát</td>
-                                        <td>4,800,000 VNĐ</td>
-                                        <td><span class="badge bg-success">Hoàn thành</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>20/05/2025</td>
-                                        <td>Thay dầu máy</td>
-                                        <td>Garage Thành Đạt</td>
-                                        <td>850,000 VNĐ</td>
-                                        <td><span class="badge bg-warning text-dark">Đã lên lịch</span></td>
-                                        <td>
-                                            <button class="btn btn-sm btn-outline-primary"><i class="fas fa-eye"></i></button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <hr>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editVehicleModal">Chỉnh sửa</button>
-            </div>
-        </div>
-    </div>
-</div>
+{{--  <div id="modalContainer"></div>  --}}
+
+@include('admin.modals.loading_modal')
 
 @endsection
 
@@ -556,6 +367,86 @@
                 }
             });
         });
+
+        ['#add-vehicle-form'].forEach(function (formSelector) {
+            const $form = $(formSelector);
+            if ($form.length) {
+                $form.on('submit', function (e) {
+                    e.preventDefault();
+
+                    const url = $form.attr('action');
+                    const formData = new FormData(this);
+
+                    // Xóa lỗi cũ
+                    $form.find('.error').text('');
+
+                    $.ajax({
+                        url: url,
+                        method: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                            'Accept': 'application/json',
+                        },
+                        success: function (data) {
+                            // close modal
+                            const modalElement = $form.closest('.modal');
+                            const modal = bootstrap.Modal.getInstance(modalElement[0]);
+                            if (modal) modal.hide();
+
+                            // Reset form
+                            $form[0].reset();
+
+                            // 
+                            Swal.fire({
+                                title: "Tạo thành công!",
+                                icon: "success",
+                                draggable: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Reload table
+                                    location.reload();
+                                }
+                            });
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                const errors = xhr.responseJSON.errors;
+                                $.each(errors, function (field, messages) {
+                                    $form.find(`.error[data-field="${field}"]`).text(messages[0]);
+                                });
+                            } else {
+                                console.error('Có lỗi xảy ra:', xhr);
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
+        $('.btn-show-vehicle').on('click', function () {
+            let id = $(this).data('id');
+            let modal = $('#vehicleDetailModal');
+            
+            $('#vehicleDetailContent').html('<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></div>');
+            
+            // show modal
+            modal.modal('show');
+            
+            $.ajax({
+                url: `/admin/vehicles/${id}`,
+                type: 'GET',
+                success: function(response) {
+                    $('#vehicleDetailContent').html(response);
+                },
+                error: function(xhr) {
+                    $('#vehicleDetailContent').html('<div class="alert alert-danger">Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</div>');
+                    console.error(xhr);
+                }
+            });
+        });
     });
-    </script>
+</script>
 @endpush

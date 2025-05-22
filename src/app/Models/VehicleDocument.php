@@ -188,7 +188,7 @@ class VehicleDocument extends Model
     public function getDocumentFileUrlAttribute()
     {
         if ($this->document_file) {
-            return Storage::url('vehicle_documents/' . $this->document_file);
+            return Storage::url('/' . $this->document_file);
         }
         return null;
     }

@@ -23,14 +23,14 @@ class StoreVehicleRequest extends FormRequest
     {
         return [
             'plate_number' => 'required|string|unique:vehicles,plate_number',
-            'vehicle_type_id' => 'required|exists:vehicle_types,id',
+            'vehicle_type_id' => 'required|exists:vehicle_types,vehicle_type_id',
             'driver_id' => 'nullable|exists:users,id',
             'capacity' => 'nullable|numeric|min:0',
             'manufactured_year' => 'nullable|integer|min:1990|max:' . date('Y'),
             'status' => 'required|in:active,maintenance,inactive',
             'documents' => 'array',
             'documents.*.document_type' => 'required|string|in:' . implode(',', array_keys(\App\Models\VehicleDocument::getDocumentTypes())),
-            'documents.*.issue_date' => 'required|date',
+            'documents.*.issue_date' => 'nullable|date',
             'documents.*.expiry_date' => 'required|date|after_or_equal:documents.*.issue_date',
             'documents.*.document_number' => 'required|string',
             'documents.*.document_file' => 'required|file|mimes:pdf,jpg,png|max:2048'
