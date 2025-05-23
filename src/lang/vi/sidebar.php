@@ -7,6 +7,7 @@ return [
     'driver_management' => 'Quản lý tài xế và nhân viên',
     'vehicles_management' => 'Quản lý phương tiện',
     'contract_management' => 'Quản lý hợp đồng',
+    'quote_management' => 'Quản lý báo giá',
     'shipment_management' => 'Quản lý chuyến hàng',
     'salary_management' => 'Quản lý lương',
     'settings' => 'Cài đặt',

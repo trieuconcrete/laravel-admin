@@ -80,3 +80,42 @@ if (!function_exists('months_list')) {
     }
 }
 
+// Helper để format tiền tệ
+if (!function_exists('format_currency')) {
+    function format_currency($amount, $currency = 'VND'): string
+    {
+        return number_format($amount, 0, ',', '.') . ' ' . $currency;
+    }
+}
+
+// Helper để format trạng thái
+if (!function_exists('quote_status_badge')) {
+    function quote_status_badge($status): string
+    {
+        $badges = [
+            'draft' => '<span class="badge bg-secondary">Bản nháp</span>',
+            'sent' => '<span class="badge bg-primary">Đã gửi</span>',
+            'approved' => '<span class="badge bg-success">Đã duyệt</span>',
+            'rejected' => '<span class="badge bg-danger">Từ chối</span>',
+            'expired' => '<span class="badge bg-warning">Hết hạn</span>',
+            'converted' => '<span class="badge bg-info">Đã chuyển đổi</span>',
+        ];
+
+        return $badges[$status] ?? '<span class="badge bg-secondary">Không xác định</span>';
+    }
+}
+
+// Helper để format loại xe
+if (!function_exists('vehicle_type_text')) {
+    function vehicle_type_text($type): string
+    {
+        $types = [
+            'truck' => 'Xe tải',
+            'container' => 'Container',
+            'motorcycle' => 'Xe máy',
+            'van' => 'Xe tải nhỏ',
+        ];
+
+        return $types[$type] ?? $type;
+    }
+}
