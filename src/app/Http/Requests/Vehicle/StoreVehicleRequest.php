@@ -29,11 +29,11 @@ class StoreVehicleRequest extends FormRequest
             'manufactured_year' => 'nullable|integer|min:1990|max:' . date('Y'),
             'status' => 'required|in:active,maintenance,inactive',
             'documents' => 'array',
-            'documents.*.document_type' => 'required|string|in:' . implode(',', array_keys(\App\Models\VehicleDocument::getDocumentTypes())),
+            'documents.*.document_type' => 'nullable|string|in:' . implode(',', array_keys(\App\Models\VehicleDocument::getDocumentTypes())),
             'documents.*.issue_date' => 'nullable|date',
-            'documents.*.expiry_date' => 'required|date|after_or_equal:documents.*.issue_date',
-            'documents.*.document_number' => 'required|string',
-            'documents.*.document_file' => 'required|file|mimes:pdf,jpg,png|max:2048'
+            'documents.*.expiry_date' => 'nullable|date|after_or_equal:documents.*.issue_date',
+            'documents.*.document_number' => 'nullable|string',
+            'documents.*.document_file' => 'nullable|file|mimes:pdf,jpg,png|max:2048'
         ];
     }
 

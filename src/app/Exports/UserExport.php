@@ -14,7 +14,7 @@ class UserExport extends BaseExport
      */
     public function headings(): array
     {
-        return ['ID', 'Full Name', 'Email', 'Phone', 'Role', 'Status', 'Created at'];
+        return ['ID', 'Họ và tên', 'Email', 'Số điện thoại', 'Chức vụ', 'Trạng thái', 'Ngày tạo'];
     }
 
     /**
@@ -29,7 +29,7 @@ class UserExport extends BaseExport
             $user->full_name,
             $user->email,
             $user->phone,
-            $user->role,
+            $user->role ? User::getRoles()[$user->role] : '',
             UserStatus::from($user->status)->label(),
             $user->created_at,
         ];

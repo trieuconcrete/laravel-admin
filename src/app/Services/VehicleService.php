@@ -26,8 +26,10 @@ class VehicleService
         $documents = [];
 
         foreach ($request->documents as $doc) {
-            $doc['document_file'] = ImageHelper::upload($doc['document_file']);
-            $documents[] = $doc;
+            if (isset($doc['document_file'])) {
+                $doc['document_file'] = ImageHelper::upload($doc['document_file']);
+                $documents[] = $doc;
+            }
         }
 
         $vehicleData = $data;
