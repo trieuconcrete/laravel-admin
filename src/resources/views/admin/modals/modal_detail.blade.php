@@ -169,7 +169,7 @@
             <hr>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editVehicleModal">Chỉnh sửa</button>
+                <a href="{{ route('admin.vehicles.edit', $vehicle) }}" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editVehicleModal">Chỉnh sửa</a>
             </div>
         </div>
     </div>

@@ -243,7 +243,7 @@
             </div>
             <hr>
             <form id="add-vehicle-form" enctype="multipart/form-data" action="{{ route('admin.vehicles.store') }}" method="POST">
-            <div class="modal-body">
+                <div class="modal-body">
                     @csrf
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -331,7 +331,6 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                     <button type="submit" class="btn btn-primary">Lưu phương tiện</button>
                 </div>
-
             </form>
         </div>
     </div>
