@@ -31,19 +31,19 @@
             <div class="card mb-4">
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-3">
-                            <select class="form-select" id="statusFilter">
-                                <option value="">Tất cả trạng thái</option>
-                                <option value="active">Đang hoạt động</option>
-                                <option value="completed">Hoàn thành</option>
-                                <option value="pending">Chờ phê duyệt</option>
-                                <option value="cancelled">Hủy</option>
-                            </select>
-                        </div>
                         <div class="col-md-4">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                                <input type="text" class="form-control" placeholder="Nhập tên KH, Mã báo giá,...">
                             </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select">
+                                <option value="">Chọn trang thái </option>
+                                <option value="1">Chờ phê duyệt</option>
+                                <option value="2">Đã phê duyệt</option>
+                                <option value="3">Đã gửi KH</option>
+                                <option value="4">Từ chối</option>
+                            </select>
                         </div>
                         <div class="col-md-2">
                             <button class="btn btn-outline-primary w-100">
@@ -61,14 +61,12 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Thao tác</th>
-                                    <th>Mã HD</th>
-                                    <th>Tên khách hàng</th>
-                                    <th>Ngày ký</th>
-                                    <th>Điện thoại</th>
+                                    <th>Mã báo giá</th>
+                                    <th>Khách hàng</th>
                                     <th>Trạng thái</th>
-                                    <th>Tổng giá trị</th>
-                                    <th>Đã thanh toán</th>
-                                    <th>Còn lại</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Hết hạn</th>
+                                    <th>File báo giá</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -83,34 +81,12 @@
                                             </button>
                                         </div>
                                     </td>
-                                    <td>HD001</td>
+                                    <td>G001</td>
                                     <td>Công ty TNHH ABC</td>
-                                    <td>10/10/2025</td>
-                                    <td>0901234567</td>
-                                    <td><span class="badge bg-primary">Đang hoạt động</span></td>
-                                    <td>{{ number_format(123456789) }}</td>
-                                    <td>{{ number_format(12345678) }}</td>
-                                    <td>{{ number_format(123456789-12345678) }}</td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>HD002</td>
-                                    <td>Công ty TNHH XYZ</td>
-                                    <td>10/11/2025</td>
-                                    <td>0901234567</td>
                                     <td><span class="badge bg-warning">Chờ phê duyệt</span></td>
-                                    <td>{{ number_format(3456789324) }}</td>
-                                    <td>{{ number_format(675363653) }}</td>
-                                    <td>{{ number_format(3456789324-675363653) }}</td>
+                                    <td>10/10/2025</td>
+                                    <td>10/12/2025</td>
+                                    <td><a href="#" class="">File báo giá excel</a></td>
                                 </tr>
                                 <tr>
                                     <td>
@@ -123,14 +99,48 @@
                                             </button>
                                         </div>
                                     </td>
-                                    <td>HD003</td>
+                                    <td>G001</td>
+                                    <td>Công ty TNHH XYZ</td>
+                                    <td><span class="badge bg-primary">Đã phê duyệt</span></td>
+                                    <td>10/10/2025</td>
+                                    <td>10/12/2025</td>
+                                    <td><a href="#" class="">File báo giá excel</a></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
+                                                Chi tiết
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>G001</td>
+                                    <td>Công ty TNHH XYZ</td>
+                                    <td><span class="badge bg-success">Đã gửi KH</span></td>
+                                    <td>10/10/2025</td>
+                                    <td>10/12/2025</td>
+                                    <td><a href="#" class="">File báo giá excel</a></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
+                                                Chi tiết
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger">
+                                                Xóa
+                                            </button>
+                                        </div>
+                                    </td>
+                                    <td>G001</td>
                                     <td>Công ty TNHH 123</td>
-                                    <td>10/06/2025</td>
-                                    <td>0901234567</td>
-                                    <td><span class="badge bg-success">Hoàn thành</span></td>
-                                    <td>{{ number_format(345678543) }}</td>
-                                    <td>{{ number_format(345678543) }}</td>
-                                    <td></td>
+                                    <td><span class="badge bg-danger">Từ chối</span></td>
+                                    <td>10/10/2025</td>
+                                    <td>10/12/2025</td>
+                                    <td><a href="#" class="">File báo giá excel</a></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -177,19 +187,14 @@
                                 <option value="3">Công ty TNHH 123</option>
                             </select>
                         </div>
-                    </div>
-
-                    <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Giá trị <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" placeholder="Nhập giá trị">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Loại báo giá </label>
+                            <label class="form-label">Trạng thái </label>
                             <select class="form-select">
                                 <option value="">Chọn loại báo giá </option>
-                                <option value="1">Dài hạn</option>
-                                <option value="2">Chuyến đơn</option>
+                                <option value="1">Chờ phê duyệt</option>
+                                <option value="2">Đã phê duyệt</option>
+                                <option value="3">Đã gửi KH</option>
+                                <option value="4">Từ chối</option>
                             </select>
                         </div>
                     </div>
@@ -200,7 +205,7 @@
                             <input type="text" class="form-control" placeholder="Nhập ngày bắt đầu">
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Ngày kết thúc</label>
+                            <label class="form-label">Ngày hết hạn</label>
                             <input type="text" class="form-control" placeholder="Nhập kết thúc">
                         </div>
                     </div>

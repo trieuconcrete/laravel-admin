@@ -130,9 +130,7 @@
                             <h6 class="mb-0">Biểu đồ chi phí lương theo tháng</h6>
                         </div>
                         <div class="card-body">
-                            <div class="salary-chart">
-                                <img src="/api/placeholder/800/300" alt="Biểu đồ chi phí lương" class="img-fluid">
-                            </div>
+                            <div id="column_chart_datalabel" data-colors='["--vz-primary"]' class="apex-charts" dir="ltr"></div>
                         </div>
                     </div>
                 </div>
@@ -343,5 +341,110 @@
             });
         });
     });
-    </script>
+
+    function getChartColorsArray(t) {
+        if (null !== document.getElementById(t)) {
+            var e = document.getElementById(t).getAttribute("data-colors");
+            if (e) return (e = JSON.parse(e)).map(function(t) {
+                var e = t.replace(" ", "");
+                return -1 === e.indexOf(",") ? getComputedStyle(document.documentElement).getPropertyValue(e) || e : 2 == (t = t.split(",")).length ? "rgba(" + getComputedStyle(document.documentElement).getPropertyValue(t[0]) + "," + t[1] + ")" : e
+            });
+            console.warn("data-colors Attribute not found on:", t)
+        }
+    }
+    var options, chart, chartColumnDatatalabelColors = getChartColorsArray("column_chart_datalabel"),
+        chartPieGradientColors = (chartColumnDatatalabelColors && (options = {
+            chart: {
+                height: 275,
+                type: "bar",
+                toolbar: {
+                    show: !1
+                }
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        position: "top"
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: !0,
+                formatter: function(t) {
+                    return t + "%"
+                },
+                offsetY: -20,
+                style: {
+                    fontSize: "12px",
+                    colors: ["#adb5bd"]
+                }
+            },
+            series: [{
+                name: "Tổng",
+                data: [2.5, 3.2, 5, 10.1, 4.2, 3.8, 3, 2.4, 4, 1.2, 3.5, .8]
+            }],
+            colors: chartColumnDatatalabelColors,
+            grid: {
+                borderStyle: "dashed"
+            },
+            xaxis: {
+                categories: ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"],
+                crosshairs: {
+                    fill: {
+                        type: "gradient",
+                        gradient: {
+                            colorFrom: "#D8E3F0",
+                            colorTo: "#BED1E6",
+                            stops: [0, 100],
+                            opacityFrom: .4,
+                            opacityTo: .5
+                        }
+                    }
+                }
+            },
+            fill: {
+                gradient: {
+                    shade: "light",
+                    type: "horizontal",
+                    shadeIntensity: .25,
+                    gradientToColors: void 0,
+                    inverseColors: !0,
+                    opacityFrom: 1,
+                    opacityTo: 1,
+                    stops: [50, 0, 100, 100]
+                }
+            },
+            yaxis: {
+                labels: {
+                    formatter: function(t) {
+                        return t + "%"
+                    }
+                }
+            }
+        }, (chart = new ApexCharts(document.querySelector("#column_chart_datalabel"), options)).render()), getChartColorsArray("gradient_chart"));
+    chartPieGradientColors && (options = {
+        series: [44, 55, 24],
+        chart: {
+            height: 210,
+            type: "donut"
+        },
+        plotOptions: {
+            pie: {
+                startAngle: -90,
+                endAngle: 270
+            }
+        },
+        labels: ["Desktop", "Mobile", "Laptop"],
+        dataLabels: {
+            enabled: !1
+        },
+        fill: {
+            type: "gradient"
+        },
+        legend: {
+            position: "bottom"
+        },
+        colors: chartPieGradientColors
+    }, (chart = new ApexCharts(document.querySelector("#gradient_chart"), options)).render());
+</script>
 @endpush
