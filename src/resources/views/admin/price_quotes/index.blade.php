@@ -224,30 +224,6 @@
                         <input type="file" class="form-control" name="documents[0][document_file]" >
                         <div class="text-danger error" data-field="documents.0.document_file"></div>
                     </div>
-                    <div id="businessContactSection">
-                        <hr>
-                        <h6 class="mb-3">Thông tin người liên hệ chính</h6>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Họ tên</label>
-                                <input type="text" class="form-control" placeholder="Nhập họ tên">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Chức vụ</label>
-                                <input type="text" class="form-control" placeholder="Nhập chức vụ">
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Điện thoại</label>
-                                <input type="tel" class="form-control" placeholder="Nhập số điện thoại">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" placeholder="Nhập email">
-                            </div>
-                        </div>
-                    </div>
                 </form>
             </div>
             <div class="modal-footer">

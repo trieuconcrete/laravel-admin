@@ -13,11 +13,8 @@ class Quote extends Model
     use HasFactory;
 
     protected $fillable = [
-        'quote_number',
-        'customer_name',
-        'customer_phone',
-        'customer_email',
-        'customer_address',
+        'quote_code',
+        'customer_id',
         'pickup_address',
         'delivery_address',
         'distance',
@@ -68,6 +65,14 @@ class Quote extends Model
         'vat_amount' => 'decimal:2',
         'final_price' => 'decimal:2',
     ];
+
+    /**
+     * Quan hệ với khách hàng
+     */
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class);
+    }
 
     // Relationships
     public function items(): HasMany

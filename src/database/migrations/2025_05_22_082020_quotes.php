@@ -13,46 +13,44 @@ return new class extends Migration
     {
         Schema::create('quotes', function (Blueprint $table) {
             $table->id();
-            $table->string('quote_number')->unique();
-            $table->string('customer_name');
-            $table->string('customer_phone');
-            $table->string('customer_email')->nullable();
-            $table->text('customer_address');
+            $table->string('quote_code')->unique();
+            $table->unsignedBigInteger('customer_id')->comment('ID khách hàng');
+            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');           
             
             // Thông tin vận chuyển
-            $table->text('pickup_address');
-            $table->text('delivery_address');
+            $table->text('pickup_address')->nullable();
+            $table->text('delivery_address')->nullable();
             $table->decimal('distance', 8, 2)->nullable(); // km
-            $table->decimal('cargo_weight', 8, 2); // tấn
+            $table->decimal('cargo_weight', 8, 2)->nullable(); // tấn
             $table->decimal('cargo_volume', 8, 2)->nullable(); // m3
-            $table->string('cargo_type'); // loại hàng hóa
+            $table->string('cargo_type')->nullable(); // loại hàng hóa
             $table->text('cargo_description')->nullable();
             
             // Thông tin phương tiện
-            $table->string('vehicle_type'); // loại xe
+            $table->string('vehicle_type')->nullable(); // loại xe
             $table->integer('vehicle_quantity')->default(1);
             
             // Thông tin thời gian
-            $table->datetime('pickup_datetime');
+            $table->datetime('pickup_datetime')->nullable();
             $table->datetime('delivery_datetime')->nullable();
             $table->boolean('is_round_trip')->default(false);
             
             // Thông tin giá cả
-            $table->decimal('base_price', 12, 2);
+            $table->decimal('base_price', 12, 2)->nullable();
             $table->decimal('fuel_surcharge', 12, 2)->default(0);
             $table->decimal('loading_fee', 12, 2)->default(0);
             $table->decimal('insurance_fee', 12, 2)->default(0);
             $table->decimal('additional_fee', 12, 2)->default(0);
             $table->text('additional_fee_description')->nullable();
             $table->decimal('discount', 12, 2)->default(0);
-            $table->decimal('total_price', 12, 2);
+            $table->decimal('total_price', 12, 2)->nullable();
             $table->decimal('vat_rate', 5, 2)->default(10.00); // %
             $table->decimal('vat_amount', 12, 2)->default(0);
-            $table->decimal('final_price', 12, 2);
+            $table->decimal('final_price', 12, 2)->nullable();
             
             // Trạng thái và thông tin xử lý
             $table->enum('status', ['draft', 'sent', 'approved', 'rejected', 'expired', 'converted'])->default('draft');
-            $table->datetime('valid_until');
+            $table->datetime('valid_until')->nullable();
             $table->text('notes')->nullable();
             $table->text('terms_conditions')->nullable();
             
@@ -61,13 +59,6 @@ return new class extends Migration
             $table->unsignedBigInteger('assigned_to')->nullable();
             
             $table->timestamps();
-            
-            // Indexes
-            $table->index(['status', 'created_at']);
-            $table->index(['customer_phone']);
-            $table->index(['valid_until']);
-            $table->index(['created_by']);
-            $table->index(['assigned_to']);
         });
     }
 

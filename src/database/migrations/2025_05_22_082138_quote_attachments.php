@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId('quote_id')->constrained()->onDelete('cascade');
             $table->string('file_name');
             $table->string('file_path');
-            $table->string('file_type');
-            $table->integer('file_size'); // bytes
+            $table->string('file_type')->nullable();
+            $table->integer('file_size')->nullable(); // bytes
             $table->string('uploaded_by')->nullable();
             $table->timestamps();
             
