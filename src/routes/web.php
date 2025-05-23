@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\ShipmentController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\PriceQuoteController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
 
@@ -41,6 +42,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('vehicles', VehicleController::class);
     Route::resource('customers', CustomerController::class);
     Route::resource('contracts', ContractController::class);
+    Route::resource('quotes', PriceQuoteController::class);
     Route::resource('shipments', ShipmentController::class);
     Route::resource('salary', SalaryController::class);
 });

@@ -51,8 +51,8 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link menu-link" href="{{ route('admin.contracts.index') }}">
-                        <i class="ri-suitcase-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.contract_management') }}</span>
+                    <a class="nav-link menu-link" href="{{ route('admin.quotes.index') }}">
+                        <i class="ri-suitcase-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.quote_management') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">

@@ -9,7 +9,7 @@
                 <div class="col-12">
                     <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                         <div class="flex-grow-1">
-                            <h4><i class="ri-route-fill fs-1"></i> Quản lý hành trình</h4>
+                            <h4><i class="ri-route-fill fs-1"></i> Quản lý chuyến hàng</h4>
                         </div>
                         <div class="mt-3 mt-lg-0">
                             <div class="row g-3 mb-0 align-items-center">
@@ -34,7 +34,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <div class="text-muted">Tổng hành trình</div>
+                                    <div class="text-muted">Tổng chuyến hàng</div>
                                     <h4 class="mt-2">287</h4>
                                 </div>
                                 <div>
@@ -259,59 +259,10 @@
             <hr>
             <div class="modal-body">
                 <form>
-                    <h5 class="mb-3">Thông tin cơ bản</h5>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Hợp đồng</label>
-                            <select class="form-select">
-                                <option value="">Chọn hợp đồng</option>
-                                <option value="51C-123.45">HD001 - Cty TNHH ABC</option>
-                                <option value="51D-456.78">HD002 - Cty TNHH XYZ</option>
-                                <option value="51H-789.01">HD003 - Cty TNHH 123</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Trạng thái</label>
-                            <select class="form-select">
-                                <option value="pending">Chờ xác nhận</option>
-                                <option value="in_transit">Đang vận chuyển</option>
-                                <option value="delivered">Đã giao hàng</option>
-                                <option value="cancelled">Đã hủy</option>
-                                <option value="delayed">Bị trễ</option>
-                                <option value="completed">Hoàn thành</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Điểm khởi hành</label>
-                            <input type="text" class="form-control" placeholder="Nhập điểm khởi hành">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Điểm đến</label>
-                            <input type="text" class="form-control" placeholder="Nhập điểm đến">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Thời gian khởi hành</label>
-                            <input type="datetime-local" class="form-control">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Thời gian dự kiến đến</label>
-                            <input type="datetime-local" class="form-control">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Ghi chú</label>
-                        <textarea class="form-control" rows="2" placeholder="Nhập ghi chú"></textarea>
-                    </div>
-
-                    <hr>
                     <h5 class="mb-3">Chọn tài xế và phương tiện</h5>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Phương tiện</label>
+                            <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
                             <select class="form-select">
                                 <option value="">Chọn phương tiện</option>
                                 <option value="51C-123.45">51C-123.45 (Xe tải - 5 tấn)</option>
@@ -349,8 +300,56 @@
                             </select>
                         </div>
                     </div>
-
                     <hr>
+                    <h5 class="mb-3">Thông tin cơ bản</h5>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
+                            <select class="form-select">
+                                <option value="">Chọn khách hàng</option>
+                                <option value="51C-123.45">Cty TNHH ABC</option>
+                                <option value="51D-456.78">Cty TNHH XYZ</option>
+                                <option value="51H-789.01">Cty TNHH 123</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái</label>
+                            <select class="form-select">
+                                <option value="pending">Chờ xác nhận</option>
+                                <option value="in_transit">Đang vận chuyển</option>
+                                <option value="delivered">Đã giao hàng</option>
+                                <option value="cancelled">Đã hủy</option>
+                                <option value="delayed">Bị trễ</option>
+                                <option value="completed">Hoàn thành</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Thời gian khởi hành<span class="text-danger">*</span></label>
+                            <input type="datetime-local" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Thời gian dự kiến đến</label>
+                            <input type="datetime-local" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Điểm khởi hành</label>
+                            <input type="text" class="form-control" placeholder="Nhập điểm khởi hành">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Điểm đến</label>
+                            <input type="text" class="form-control" placeholder="Nhập điểm đến">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ghi chú</label>
+                        <textarea class="form-control" rows="2" placeholder="Nhập ghi chú"></textarea>
+                    </div>
+                    <hr>
+                    
                     <h5 class="mb-3">Thông tin hàng hóa</h5>
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">

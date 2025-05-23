@@ -129,9 +129,6 @@
     <div class="tab-pane fade" id="maintenance">
         <div class="d-flex justify-content-between mb-3">
             <h6>Lịch sử bảo trì</h6>
-            <button class="btn btn-sm btn-primary" id="addMaintenanceBtn" data-vehicle-id="{{ $vehicle->vehicle_id }}">
-                <i class="fas fa-plus me-1"></i>Thêm lịch bảo trì
-            </button>
         </div>
         <div class="table-responsive">
             <table class="table table-striped">

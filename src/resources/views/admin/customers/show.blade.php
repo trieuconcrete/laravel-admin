@@ -33,9 +33,6 @@
                         <a class="nav-link active" data-bs-toggle="tab" href="#generalInfo">Thông tin chung</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#contacts">Hợp đồng</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" data-bs-toggle="tab" href="#monthlyReport">Bảng kê theo tháng</a>
                     </li>
                     <li class="nav-item">
@@ -61,50 +58,6 @@
                                 <p><strong>Email:</strong> contact@abccompany.com</p>
                                 <p><strong>Website:</strong> www.abccompany.com</p>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Contacts Tab -->
-                    <div class="tab-pane fade" id="contacts">
-                        <div class="d-flex justify-content-between mb-3">
-                            <h6>Danh sách hợp đồng</h6>
-                            <button class="btn btn-sm btn-primary"><i class="fas fa-plus me-1"></i>Thêm hợp đồng</button>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Họ tên</th>
-                                        <th>Chức vụ</th>
-                                        <th>Điện thoại</th>
-                                        <th>Email</th>
-                                        <th>Trạng thái</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Nguyễn Văn X</td>
-                                        <td>Giám đốc</td>
-                                        <td>0912345678</td>
-                                        <td>nguyenvanx@abccompany.com</td>
-                                        <td><i class="fas fa-check text-success"></i></td>
-                                        <td>
-                                            
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>Trần Thị Y</td>
-                                        <td>Kế toán trưởng</td>
-                                        <td>0987654321</td>
-                                        <td>tranthiy@abccompany.com</td>
-                                        <td></td>
-                                        <td>
-                                            
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
                         </div>
                     </div>
 
