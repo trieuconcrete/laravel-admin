@@ -56,9 +56,13 @@ class CustomerController extends Controller
         }
     }
 
+    /**
+     * Summary of show
+     * @param \App\Models\Customer $customer
+     * @return \Illuminate\Contracts\View\View
+     */
     public function show(Customer $customer)
     {
-        $customer = Customer::first();
         return view('admin.customers.show', compact('customer'));
     }
 
@@ -68,11 +72,22 @@ class CustomerController extends Controller
         return view('admin.customers.edit', compact('customer'));
     }
 
+    /**
+     * Summary of update
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Customer $customer
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(Request $request, Customer $customer)
     {
+        DB::beginTransaction();
         try {
-            return redirect()->route('admin.customers.index')->with('success', 'User updated successfully.');
+            $this->customerService->update($request, $customer);
+
+            DB::commit();
+            return redirect()->route('admin.customers.index')->with('success', 'Customer updated successfully.');
         } catch (\Exception $e) {
+            DB::rollBack();
             return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }

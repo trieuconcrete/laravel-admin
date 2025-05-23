@@ -11,18 +11,18 @@
                 <div class="customer-info-header p-3 mb-3">
                     <div class="row">
                         <div class="col-md-8">
-                            <h4>Công ty TNHH ABC</h4>
-                            <p class="text-muted">Mã khách hàng: KH001</p>
+                            <h4>{{ $customer->name }}</h4>
+                            <p class="text-muted">Mã khách hàng: {{ $customer->customer_code }}</p>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <p><i class="fas fa-building me-2 text-primary"></i> Doanh nghiệp</p>
-                                    <p><i class="fas fa-map-marker-alt me-2 text-primary"></i> TP. Hồ Chí Minh</p>
+                                    <p><i class="fas fa-building me-2 text-primary"></i> {{ $customer->getTypeLabelAttribute() }}</p>
+                                    <p><i class="fas fa-map-marker-alt me-2 text-{{ $customer->getStatusBadgeClassAttribute() }}"></i>{{ $customer->address }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-4 text-md-end">
-                            <span class="badge bg-success mb-2">Đang hoạt động</span>
-                            <p><i class="fas fa-calendar-alt me-2 text-primary"></i> Ngày đăng ký: 01/01/2020</p>
+                            <span class="badge bg-{{ $customer->getStatusBadgeClassAttribute() }} mb-2">{{ $customer->getStatusLabelAttribute() }}</span>
+                            <p><i class="fas fa-calendar-alt me-2 text-primary"></i> Ngày đăng ký: {{ $customer->establishment_date ? $customer->establishment_date->format('d/m/y') : null }}</p>
                         </div>
                     </div>
                 </div>
@@ -44,21 +44,86 @@
                 <div class="tab-content p-3 border border-top-0 rounded-bottom">
                     <!-- General Info Tab -->
                     <div class="tab-pane fade show active" id="generalInfo">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Tên khách hàng:</strong> Công ty TNHH ABC</p>
-                                <p><strong>Mã khách hàng:</strong> KH001</p>
-                                <p><strong>Loại khách hàng:</strong> Doanh nghiệp</p>
-                                <p><strong>Mã số thuế:</strong> 0123456789</p>
-                                <p><strong>Ngày thành lập:</strong> 15/06/2010</p>
+                        <form action="{{ route('admin.customers.update', $customer) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            @method('PUT')
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="fullnameInput" class="form-label">Tên khách hàng <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="name" id="fullnameInput" placeholder="Enter your Full name" value="{{ old('name', $customer->name) }}">
+                                        @error('name')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fullnameInput" class="form-label">Mã khách hàng</label>
+                                        <input disabled type="text" class="form-control" name="name" id="fullnameInput" placeholder="Enter your customer code" value="{{ old('customer_code', $customer->customer_code) }}">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fullnameInput" class="form-label">Mã số thuế <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="tax_code" id="fullnameInput" placeholder="Enter your tax_code" value="{{ old('tax_code', $customer->tax_code) }}">
+                                        @error('tax_code')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fullnameInput" class="form-label">Ngày thành lập</label>
+                                        <input type="date" class="form-control" name="establishment_date" value="{{ old('establishment_date', optional($customer->establishment_date)->format('Y-m-d')) }}">
+                                        @error('establishment_date')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Loại khách hàng: <span class="text-danger">*</span></label>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="type" id="individualType" value="individual">
+                                            <label class="form-check-label" for="individualType">Cá nhân</label>
+                                        </div>
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="type" id="businessType" value="business" checked>
+                                            <label class="form-check-label" for="businessType">Doanh nghiệp</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="fullnameInput" class="form-label">Địa chỉ </label>
+                                        <input type="text" class="form-control" name="address" id="fullnameInput" placeholder="Enter your address" value="{{ old('address', $customer->address) }}">
+                                        @error('address')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fullnameInput" class="form-label">Điện thoại <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" name="phone" id="fullnameInput" placeholder="Enter your address" value="{{ old('phone', $customer->phone) }}">
+                                        @error('phone')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fullnameInput" class="form-label">Email <span class="text-danger">*</span></label>
+                                        <input type="email" class="form-control" name="email" id="fullnameInput" placeholder="Enter your email" value="{{ old('email', $customer->email) }}">
+                                        @error('email')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="fullnameInput" class="form-label">Website </label>
+                                        <input type="text" class="form-control" name="website" id="fullnameInput" placeholder="Enter your website" value="{{ old('website', $customer->website) }}">
+                                        @error('website')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="hstack gap-2 justify-content-start">
+                                        <button type="submit" class="btn btn-secondary">Lưu</button>
+                                    </div>
+                                </div>
+                                <!--end col-->
                             </div>
-                            <div class="col-md-6">
-                                <p><strong>Địa chỉ:</strong> 123 Đường Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh</p>
-                                <p><strong>Điện thoại:</strong> 0901234567</p>
-                                <p><strong>Email:</strong> contact@abccompany.com</p>
-                                <p><strong>Website:</strong> www.abccompany.com</p>
-                            </div>
-                        </div>
+                        </form>
                     </div>
 
                     <!-- monthly report -->

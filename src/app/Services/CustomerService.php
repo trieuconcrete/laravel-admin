@@ -48,4 +48,17 @@ class CustomerService
 
         return $this->customerRepository->create($data);
     }
+
+    /**
+     * Summary of update
+     * @param \Illuminate\Http\Request $request
+     * @param \App\Models\Customer $user
+     * @return void
+     */
+    public function update(Request $request, Customer $customer)
+    {
+        $data = $request->all();
+
+        return $this->customerRepository->update($customer->id, $data);
+    }
 }
