@@ -128,22 +128,6 @@
 
             <!-- Vehicles Table -->
             <div class="card">
-                <div class="card-header bg-white">
-                    <ul class="nav nav-tabs card-header-tabs">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#">Tất cả phương tiện</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Đăng kiểm sắp hết hạn</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Bảo hiểm sắp hết hạn</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Lịch bảo trì</a>
-                        </li>
-                    </ul>
-                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -172,9 +156,19 @@
                                                 >
                                                     Chi tiết
                                                 </button>
-                                                <button class="btn btn-sm btn-outline-danger">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-danger delete-vehicle-btn"
+                                                        data-vehicle-id="{{ $vehicle->id }}">
                                                     Xóa
                                                 </button>
+                                                
+                                                <form action="{{ route('admin.vehicles.destroy', $vehicle) }}"
+                                                    method="POST"
+                                                    class="delete-vehicle-form"
+                                                    id="delete-form-{{ $vehicle->id }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
                                             </div>
                                         </td>
                                         <td>{{ $vehicle->plate_number }}</td>
@@ -290,18 +284,18 @@
                     <input type="text" class="form-control" name="documents[0][document_type]" value="{{ \App\Models\VehicleDocument::TYPE_INSPECTION }}" hidden>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Số giấy đăng kiểm <span class="text-danger">*</span></label>
+                            <label class="form-label">Số giấy đăng kiểm </label>
                             <input type="text" class="form-control" name="documents[0][document_number]">
                             <div class="text-danger error" data-field="documents.0.document_number"></div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Ngày hết hạn <span class="text-danger">*</span></label>
+                            <label class="form-label">Ngày hết hạn</label>
                             <input type="date" class="form-control" name="documents[0][expiry_date]">
                             <div class="text-danger error" data-field="documents.0.expiry_date"></div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Tệp đính kèm <span class="text-danger">*</span></label>
+                        <label class="form-label">Tệp đính kèm</label>
                         <input type="file" class="form-control" name="documents[0][document_file]" >
                         <div class="text-danger error" data-field="documents.0.document_file"></div>
                     </div>
@@ -310,18 +304,18 @@
                     <div class="row mb-3">
                         <input type="text" class="form-control" name="documents[1][document_type]" value="{{ \App\Models\VehicleDocument::TYPE_INSURANCE }}" hidden>
                         <div class="col-md-6">
-                            <label class="form-label">Số hợp đồng bảo hiểm <span class="text-danger">*</span></label>
+                            <label class="form-label">Số hợp đồng bảo hiểm </label>
                             <input type="text" class="form-control" name="documents[1][document_number]">
                             <div class="text-danger error" data-field="documents.1.document_number"></div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Ngày hết hạn <span class="text-danger">*</span></label>
+                            <label class="form-label">Ngày hết hạn </label>
                             <input type="date" class="form-control" name="documents[1][expiry_date]">
                             <div class="text-danger error" data-field="documents.1.expiry_date"></div>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Tệp đính kèm <span class="text-danger">*</span></label>
+                        <label class="form-label">Tệp đính kèm </label>
                         <input type="file" class="form-control" name="documents[1][document_file]" >
                         <div class="text-danger error" data-field="documents.1.document_file"></div>
                     </div>
@@ -347,10 +341,11 @@
 @push('scripts')
 <script>
     $(document).ready(function () {
-        $('.delete-user-btn').click(function (e) {
+        $('.delete-vehicle-btn').click(function (e) {
             e.preventDefault();
     
-            var form = $(this).closest('.delete-user-form');
+            const vehicleId = $(this).data('vehicle-id');
+            const form = $('#delete-form-' + vehicleId);
     
             Swal.fire({
                 title: 'Bạn chắc chắn muốn xóa?',

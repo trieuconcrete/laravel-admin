@@ -92,8 +92,18 @@ class VehicleController extends Controller
         }
     }
 
+    /**
+     * Summary of destroy
+     * @param \App\Models\Vehicle $vehicle
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Vehicle $vehicle)
     {
-        return back()->with('success', 'User deleted successfully.');
+        try {
+            $vehicle->delete();
+            return back()->with('success', 'Vehicle deleted successfully.');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
+        }
     }
 }

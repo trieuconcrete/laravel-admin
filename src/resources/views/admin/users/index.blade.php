@@ -438,6 +438,11 @@
             showCancelButton: true,
             confirmButtonText: 'Có, xuất ngay',
             cancelButtonText: 'Hủy bỏ',
+            customClass: {
+                confirmButton: 'btn btn-secondary',
+                cancelButton: 'btn btn-light'
+            },
+            {{--  buttonsStyling: false  --}}
         }).then((result) => {
             if (result.isConfirmed) {
                 Swal.fire({

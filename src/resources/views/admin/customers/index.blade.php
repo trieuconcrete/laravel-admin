@@ -30,32 +30,36 @@
             <!-- Filter Section -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <select class="form-select" id="customerTypeFilter">
-                                <option value="">Tất cả loại khách hàng</option>
-                                <option value="individual">Cá nhân</option>
-                                <option value="business">Doanh nghiệp</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <select class="form-select" id="statusFilter">
-                                <option value="">Tất cả trạng thái</option>
-                                <option value="active">Đang hoạt động</option>
-                                <option value="inactive">Không hoạt động</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                    <form method="GET" action="{{ route('admin.customers.index') }}">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <select class="form-select" id="customerTypeFilter" name="type">
+                                    <option value="">Tất cả loại khách hàng</option>
+                                    @foreach ($customerTypes as $key => $val)
+                                        <option value="{{ $key }}" {{ request('type') == $key ? 'selected' : '' }}>{{ $val }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="statusFilter" name="is_active">
+                                    <option value="">Tất cả trạng thái</option>
+                                    @foreach ($customerStatusActives as $key => $val)
+                                        <option value="{{ $key }}" {{ request('is_active') == $key ? 'selected' : '' }}>{{ $val }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input name="keyword" type="text" class="form-control" placeholder="Tìm kiếm...">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-primary w-100">
+                                    Tìm kiếm
+                                </button>
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <button class="btn btn-outline-primary w-100">
-                                Tìm kiếm
-                            </button>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -75,86 +79,37 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a href="{{ route('admin.customers.show', $customer) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>KH001</td>
-                                    <td>Công ty TNHH ABC</td>
-                                    <td><span class="badge bg-primary">Doanh nghiệp</span></td>
-                                    <td>0901234567</td>
-                                    <td>contact@abccompany.com</td>
-                                    <td><span class="badge bg-success">Đang hoạt động</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a href="{{ route('admin.customers.show', $customer) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>KH002</td>
-                                    <td>Nguyễn Văn A</td>
-                                    <td><span class="badge bg-info">Cá nhân</span></td>
-                                    <td>0912345678</td>
-                                    <td>nguyenvana@gmail.com</td>
-                                    <td><span class="badge bg-success">Đang hoạt động</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a href="{{ route('admin.customers.show', $customer) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>KH003</td>
-                                    <td>Cơ sở sản xuất XYZ</td>
-                                    <td><span class="badge bg-primary">Doanh nghiệp</span></td>
-                                    <td>0978123456</td>
-                                    <td>xyz@example.com</td>
-                                    <td><span class="badge bg-success">Đang hoạt động</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a href="{{ route('admin.customers.show', $customer) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>KH004</td>
-                                    <td>Trần Thị B</td>
-                                    <td><span class="badge bg-info">Cá nhân</span></td>
-                                    <td>0987654321</td>
-                                    <td>tranthib@gmail.com</td>
-                                    <td><span class="badge bg-danger">Không hoạt động</span></td>
-                                </tr>
+                                @foreach ($customers as $customer)
+                                    <tr>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ route('admin.customers.show', $customer) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
+                                                <button class="btn btn-sm btn-outline-danger delete-customer-btn" data-customer-id="{{ $customer->id }}">
+                                                    Xóa
+                                                </button>
+
+                                                <form action="{{ route('admin.customers.destroy', $customer->id) }}"
+                                                    method="POST"
+                                                    class="delete-customer-form"
+                                                    id="delete-form-{{ $customer->id }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+                                            </div>
+                                        </td>
+                                        <td>{{ $customer->customer_code }}</td>
+                                        <td>{{ $customer->name }}</td>
+                                        <td><span class="badge bg-{{ $customer->type_badge_class }}">{{ $customer->type_label }}</span></td>
+                                        <td>{{ $customer->phone }}</td>
+                                        <td>{{ $customer->email }}</td>
+                                        <td><span class="badge bg-{{ $customer->status_badge_class }}">{{ $customer->status_label }}</span></td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
-                    <nav>
-                        <ul class="pagination justify-content-end">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Sau</a>
-                            </li>
-                        </ul>
-                    </nav>
+
+                    {{ $customers->links('vendor.pagination.bootstrap-5') }}
                 </div>
             </div>
         </div> <!-- end col -->
@@ -172,106 +127,120 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <hr>
-            <div class="modal-body">
-                <form>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Loại khách hàng <span class="text-danger">*</span></label>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="customerType" id="individualType" value="individual">
-                                <label class="form-check-label" for="individualType">Cá nhân</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="customerType" id="businessType" value="business" checked>
-                                <label class="form-check-label" for="businessType">Doanh nghiệp</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Tên khách hàng <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" placeholder="Nhập tên khách hàng">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Mã số thuế</label>
-                            <input type="text" class="form-control" placeholder="Nhập mã số thuế">
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Website</label>
-                            <input type="text" class="form-control" placeholder="Nhập website">
-                        </div>
-                        <div class="col-md-6" id="businessDateField">
-                            <label class="form-label">Ngày thành lập</label>
-                            <input type="date" class="form-control">
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Trạng thái</label>
-                            <select name="status" class="form-select">
-                            <option value="1" selected>Đang hoạt động</option>
-                            <option value="0">Không hoạt động</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Địa chỉ</label>
-                        <textarea class="form-control" rows="2" placeholder="Nhập địa chỉ"></textarea>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Điện thoại <span class="text-danger">*</span></label>
-                            <input type="tel" class="form-control" placeholder="Nhập số điện thoại">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control" placeholder="Nhập email">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Ghi chú</label>
-                        <textarea class="form-control" rows="3" placeholder="Nhập ghi chú"></textarea>
-                    </div>
-
-                    <div id="businessContactSection">
-                        <hr>
-                        <h6 class="mb-3">Thông tin người liên hệ chính</h6>
+            <form id="add-customer-form" action="{{ route('admin.customers.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label class="form-label">Họ tên</label>
-                                <input type="text" class="form-control" placeholder="Nhập họ tên">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Chức vụ</label>
-                                <input type="text" class="form-control" placeholder="Nhập chức vụ">
+                                <label class="form-label">Loại khách hàng <span class="text-danger">*</span></label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="type" id="individualType" value="individual">
+                                    <label class="form-check-label" for="individualType">Cá nhân</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="type" id="businessType" value="business" checked>
+                                    <label class="form-check-label" for="businessType">Doanh nghiệp</label>
+                                </div>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label class="form-label">Điện thoại</label>
-                                <input type="tel" class="form-control" placeholder="Nhập số điện thoại">
+                                <label class="form-label">Tên khách hàng <span class="text-danger">*</span></label>
+                                <input type="text" name="name" class="form-control" placeholder="Nhập tên khách hàng">
+                                <div class="text-danger error" data-field="name"></div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" placeholder="Nhập email">
+                                <label class="form-label">Mã số thuế  <span class="text-danger">*</span></label>
+                                <input name="tax_code" type="text" class="form-control" placeholder="Nhập mã số thuế">
+                                <div class="text-danger error" data-field="tax_code"></div>
                             </div>
                         </div>
-                    </div>
-                </form>
-            </div>
-            <hr>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary">Lưu khách hàng</button>
-            </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Website</label>
+                                <input type="text" name="website" class="form-control" placeholder="Nhập website">
+                                <div class="text-danger error" data-field="website"></div>
+                            </div>
+                            <div class="col-md-6" id="businessDateField">
+                                <label class="form-label">Ngày thành lập</label>
+                                <input name="establishment_date" type="date" class="form-control">
+                                <div class="text-danger error" data-field="establishment_date"></div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Trạng thái</label>
+                                <select name="is_active" class="form-select">
+                                    @foreach ($customerStatusActives as $key => $val)
+                                        <option value="{{ $key }}" {{ request('is_active') == $key ? 'selected' : '' }}>{{ $val }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="text-danger error" data-field="is_active"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Địa chỉ</label>
+                            <textarea name="address" class="form-control" rows="2" placeholder="Nhập địa chỉ"></textarea>
+                            <div class="text-danger error" data-field="address"></div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Điện thoại <span class="text-danger">*</span></label>
+                                <input name="phone" type="tel" class="form-control" placeholder="Nhập số điện thoại">
+                                <div class="text-danger error" data-field="phone"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control" placeholder="Nhập email">
+                                <div class="text-danger error" data-field="email"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ghi chú</label>
+                            <textarea class="form-control" name="notes" rows="3" placeholder="Nhập ghi chú"></textarea>
+                            <div class="text-danger error" data-field="notes"></div>
+                        </div>
+
+                        <div id="businessContactSection">
+                            <hr>
+                            <h6 class="mb-3">Thông tin người liên hệ chính</h6>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Họ tên</label>
+                                    <input name="primary_contact_name" type="text" class="form-control" placeholder="Nhập họ tên">
+                                    <div class="text-danger error" data-field="primary_contact_name"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Chức vụ</label>
+                                    <input name="primary_contact_position" type="text" class="form-control" placeholder="Nhập chức vụ">
+                                    <div class="text-danger error" data-field="primary_contact_position"></div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Điện thoại</label>
+                                    <input name="primary_contact_phone" type="tel" class="form-control" placeholder="Nhập số điện thoại">
+                                    <div class="text-danger error" data-field="primary_contact_phone"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input name="primary_contact_email" type="email" class="form-control" placeholder="Nhập email">
+                                    <div class="text-danger error" data-field="primary_contact_email"></div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                <hr>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu khách hàng</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -281,6 +250,89 @@
 @push('scripts')
 <script>
     $(document).ready(function () {
+        $('.delete-customer-btn').click(function (e) {
+            e.preventDefault();
+
+            const customerId = $(this).data('customer-id');
+            const form = $('#delete-form-' + customerId);
+
+            Swal.fire({
+                title: 'Bạn chắc chắn muốn xóa?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+
+        ['#add-customer-form'].forEach(function (formSelector) {
+            const $form = $(formSelector);
+            if ($form.length) {
+                $form.on('submit', function (e) {
+                    e.preventDefault();
+
+                    const url = $form.attr('action');
+                    const formData = new FormData(this);
+
+                    // Xóa lỗi cũ
+                    $form.find('.error').text('');
+
+                    $.ajax({
+                        url: url,
+                        method: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                            'Accept': 'application/json',
+                        },
+                        success: function (data) {
+                            // close modal
+                            const modalElement = $form.closest('.modal');
+                            const modal = bootstrap.Modal.getInstance(modalElement[0]);
+                            if (modal) modal.hide();
+
+                            // Reset form
+                            $form[0].reset();
+
+                            // 
+                            Swal.fire({
+                                title: "Tạo thành công!",
+                                icon: "success",
+                                draggable: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Reload table
+                                    if (typeof driverTable !== 'undefined') {
+                                        driverTable.ajax.reload();
+                                    } else {
+                                        location.reload();
+                                    }
+                                }
+                            });
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                const errors = xhr.responseJSON.errors;
+                                $.each(errors, function (field, messages) {
+                                    $form.find(`.error[data-field="${field}"]`).text(messages[0]);
+                                });
+                            } else {
+                                console.error('Có lỗi xảy ra:', xhr);
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
         $('.delete-user-btn').click(function (e) {
             e.preventDefault();
     

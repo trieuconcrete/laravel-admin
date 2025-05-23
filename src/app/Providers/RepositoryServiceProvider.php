@@ -11,6 +11,9 @@ use App\Repositories\Interface\VehicleRepositoryInterface;
 use App\Repositories\Eloquent\VehicleRepository;
 use App\Repositories\Interface\PositionRepositoryInterface;
 use App\Repositories\Eloquent\PositionRepository;
+use App\Repositories\Interface\CustomerRepositoryInterface;
+use App\Repositories\Eloquent\CustomerRepository;
+
 
 /**
  * Summary of RepositoryServiceProvider
@@ -27,6 +30,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(DriverLicenseRepositoryInterface::class, DriverLicenseRepository::class);
         $this->app->bind(VehicleRepositoryInterface::class, VehicleRepository::class);
         $this->app->bind(PositionRepositoryInterface::class, PositionRepository::class);
+        $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
     }
 
     /**
