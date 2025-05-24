@@ -9,7 +9,7 @@
                 <div class="col-12">
                     <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                         <div class="flex-grow-1">
-                            <h4 class="fs-16 mb-1">Create User</h4>
+                            <h4 class="fs-16 mb-1">Tạo chuyến hàng</h4>
                         </div>
                     </div><!-- end card header -->
                 </div>
@@ -18,91 +18,183 @@
             <div class="row mb-3 pb-1">
                 <div class="col-12">
                     <div class="card">
+                        <div class="card-header">
+                            <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#shipmentDetail" role="tab">
+                                        <i class="fas fa-home"></i> Phương tiện & tài xế
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#productInfo" role="tab">
+                                        <i class="far fa-user"></i> Thông tin hàng hóa
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#driverAllowance" role="tab">
+                                        <i class="far fa-user"></i> Thông tin vận chuyển 
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                         <div class="card-body">
-                            <form action="{{ route('admin.vehicles.store') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                        
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Name</label>
-                                    <input name="full_name" type="text" placeholder="Name" value="{{ old('full_name') }}" required class="form-control p-2 border rounded">
-                                    @error('full_name')
-                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="shipmentDetail" role="tabpanel">
+                                    <form>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
+                                                <select class="form-select">
+                                                    <option value="">Chọn phương tiện</option>
+                                                    <option value="51C-123.45">51C-123.45 (Xe tải - 5 tấn)</option>
+                                                    <option value="51D-456.78">51D-456.78 (Container - 20 tấn)</option>
+                                                    <option value="51H-789.01">51H-789.01 (Xe máy - 0.1 tấn)</option>
+                                                    <option value="51A-345.67">51A-345.67 (Xe tải - 8 tấn)</option>
+                                                    <option value="51B-789.01">51B-789.01 (Container - 15 tấn)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <button type="button" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-plus me-1"></i>Thêm tài xế hoặc lơ xe
+                                                </button>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Chọn tài xế</th>
+                                                            <th>Tiền ứng trước</th>
+                                                            <th>Phụ cấp<br> cơm trưa</th>
+                                                            <th>Phụ cấp<br> cơm tối</th>
+                                                            <th>Phụ cấp<br> chủ nhật</th>
+                                                            <th>Phụ cấp<br> đi sớm</th>
+                                                            <th>Phụ cấp<br> đi khuya</th>
+                                                            <th>Phụ cấp lễ</th>
+                                                            <th>Phụ cấp khác</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>
+                                                                <select class="form-select">
+                                                                    <option value="">Chọn tài xế</option>
+                                                                    <option value="TX001">Nguyễn Văn A (Xe tải - C)</option>
+                                                                    <option value="TX002">Trần Thị B (Xe tải - B2)</option>
+                                                                    <option value="TX003">Lê Văn C (Container - E)</option>
+                                                                    <option value="TX004">Phạm Thị D (Xe tải - C)</option>
+                                                                    <option value="TX005">Vũ Văn E (Xe tải - B2)</option>
+                                                                </select>
+                                                            </td>
+                                                            <td><input type="text" class="form-control form-control" placeholder="Số tiền"></td>
+                                                            <td><input type="text" class="form-control form-control" placeholder="Số tiền"></td>
+                                                            <td><input type="number" class="form-control form-control" placeholder="Số tiền"></td>
+                                                            <td><input type="number" class="form-control form-control" placeholder="Số tiền"></td>
+                                                            <td><input type="number" class="form-control form-control" placeholder="Số tiền"></td>
+                                                            <td><input type="number" class="form-control form-control" placeholder="Số tiền"></td>
+                                                            <td><input type="number" class="form-control form-control" placeholder="Số tiền"></td>
+                                                            <td><input type="number" class="form-control form-control" placeholder="Số tiền"></td>
+                                                            <td>
+                                                                <button type="button" class="btn btn-outline-danger">
+                                                                    <i class="ri-delete-bin-fill"></i>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
-                        
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Email</label>
-                                    <input name="email" type="email" placeholder="Email" value="{{ old('email') }}" required class="form-control p-2 border rounded">
-                                    @error('email')
-                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                <div class="tab-pane" id="productInfo" role="tabpanel">
+                                    <div class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h5 class="mb-3">Danh sách hàng hóa</h5>
+                                            <button type="button" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-plus me-1"></i>Thêm hàng hóa
+                                            </button>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Tên hàng</th>
+                                                        <th>Mô tả</th>
+                                                        <th>Số lượng</th>
+                                                        <th>Trọng lượng (kg)</th>
+                                                        <th>Giá trị (VNĐ)</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><input type="text" class="form-control form-control-sm" placeholder="Mã hàng"></td>
+                                                        <td><input type="text" class="form-control form-control-sm" placeholder="Mô tả"></td>
+                                                        <td><input type="text" class="form-control form-control-sm" placeholder="Số lượng"></td>
+                                                        <td><input type="number" class="form-control form-control-sm" placeholder="Trọng lượng"></td>
+                                                        <td><input type="number" class="form-control form-control-sm" placeholder="Giá trị"></td>
+                                                        <td>
+                                                            <button type="button" class="btn btn-sm btn-outline-danger">
+                                                                <i class="ri-delete-bin-fill"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
-
-                                <!-- Username -->
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Username</label>
-                                    <input type="text" name="username" value="{{ old('username', $user->username ?? '') }}" class="form-control p-2 border rounded @error('username') border-red-500 @enderror">
-                                    @error('username')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                <div class="tab-pane" id="driverAllowance" role="tabpanel">
+                                    <h5 class="mb-3">Thông tin vận chuyển</h5>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
+                                            <select class="form-select">
+                                                <option value="">Chọn khách hàng</option>
+                                                <option value="51C-123.45">Cty TNHH ABC</option>
+                                                <option value="51D-456.78">Cty TNHH XYZ</option>
+                                                <option value="51H-789.01">Cty TNHH 123</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Trạng thái</label>
+                                            <select class="form-select">
+                                                <option value="pending">Chờ xác nhận</option>
+                                                <option value="in_transit">Đang vận chuyển</option>
+                                                <option value="delivered">Đã giao hàng</option>
+                                                <option value="cancelled">Đã hủy</option>
+                                                <option value="delayed">Bị trễ</option>
+                                                <option value="completed">Hoàn thành</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Thời gian khởi hành<span class="text-danger">*</span></label>
+                                            <input type="datetime-local" class="form-control">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Thời gian dự kiến đến</label>
+                                            <input type="datetime-local" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Điểm khởi hành</label>
+                                            <input type="text" class="form-control" placeholder="Nhập điểm khởi hành">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Điểm đến</label>
+                                            <input type="text" class="form-control" placeholder="Nhập điểm đến">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Ghi chú</label>
+                                        <textarea class="form-control" rows="2" placeholder="Nhập ghi chú"></textarea>
+                                    </div>
                                 </div>
-
-                                <!-- Birthday -->
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Birthday</label>
-                                    <input type="date" name="birthday" value="{{ old('birthday', $user->birthday ?? '') }}" class="form-control p-2 border rounded @error('birthday') border-red-500 @enderror">
-                                    @error('birthday')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Phone</label>
-                                    <input name="phone" type="text" placeholder="Phone" value="{{ old('phone') }}" class="form-control p-2 border rounded">
-                                    @error('phone')
-                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                        
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Password</label>
-                                    <input name="password" type="password" placeholder="Password" required class="form-control p-2 border rounded">
-                                    @error('password')
-                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <!-- Confirm Password -->
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Confirm Password</label>
-                                    <input type="password" name="password_confirmation" class="form-control mt-1 border p-2 rounded w-full" required>
-                                </div>
-                        
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Role</label>
-                                    <select name="role" required class="form-control p-2 border rounded">
-                                        <option value="admin">Admin</option>
-                                        <option value="manager">Manager</option>
-                                        <option value="user">User</option>
-                                    </select>
-                                </div>
-                                <div class="form-check form-switch form-switch-lg mb-4">
-                                    <label class="block text-gray-700">Status</label>
-                                    <input type="checkbox" name="status" class="form-check-input" id="customSwitchsizelg" {{ old('status', '1') == '1' ? 'checked' : '' }} value="1">
-
-                                    @error('status')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Avatar</label>
-                                    <input type="file" name="avatar" id="avatarInput" class="form-control mt-1 border p-2 rounded">
-                                    <img id="avatarPreview" src="{{ asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
-                                </div>
-                                <div>
-                                    <button type="submit" class="btn rounded-pill btn-secondary waves-effect">Save</button>
-                                </div>
-                            </form>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -14,9 +14,9 @@
                         <div class="mt-3 mt-lg-0">
                             <div class="row g-3 mb-0 align-items-center">
                                 <div class="col-auto">
-                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createShipmentModal">
+                                    <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary">
                                         <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến hàng 
-                                    </button>
+                                    </a>
                                 </div>
                                 <!--end col-->
                             </div>
@@ -244,7 +244,6 @@
             </div>
         </div> <!-- end col -->
     </div>
-
 </div>
 <!-- container-fluid -->
 
