@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
 
 Route::get('/', [HomepageController::class, 'index'])->name('homepage');
+Route::get('/trangchu', [HomepageController::class, 'index1'])->name('homepage1');
 
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');

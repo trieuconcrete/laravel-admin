@@ -11,4 +11,9 @@ class HomepageController extends Controller
     {
         return view('homepage');
     }
+
+    public function index1(Request $request)
+    {
+        return view('homepage1');
+    }
 }
