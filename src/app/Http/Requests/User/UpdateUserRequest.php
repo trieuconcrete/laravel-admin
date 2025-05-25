@@ -67,7 +67,7 @@ class UpdateUserRequest extends FormRequest
                     'license_type'   => 'required|string|max:50',
                     'issue_date'     => 'required|date',
                     'expiry_date'    => 'required|date|after_or_equal:issue_date',
-                    'issued_by'      => 'required|string|max:100',
+                    'issued_by'      => 'nullable|string|max:100',
                     'license_file'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
                     'license_status' => 'nullable',
                     'tab' => 'nullable|string',

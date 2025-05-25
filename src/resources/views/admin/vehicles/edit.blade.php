@@ -19,81 +19,164 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <form action="{{ route('admin.vehicles.update', $user) }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('admin.vehicles.update', $vehicle) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
-                        
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Name</label>
-                                    <input name="full_name" type="text" placeholder="Name" value="{{ old('full_name', $user->full_name) }}" required class="form-control p-2 border rounded">
-                                    @error('full_name')
+                                @php
+                                    $inspectionDoc = $vehicle->getLatestDocument(\App\Models\VehicleDocument::TYPE_INSPECTION);
+                                    $insuranceDoc = $vehicle->getLatestDocument(\App\Models\VehicleDocument::TYPE_INSURANCE);
+                                @endphp
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Biển số xe <span class="text-danger">*</span></label>
+                                        <input type="text" name="plate_number" id="plate_number" class="form-control" placeholder="Nhập biển số xe" value="{{ old('address', $vehicle->plate_number) }}">
+                                        @error('plate_number')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Loại phương tiện <span class="text-danger">*</span></label>
+                                        <select class="form-select" name="vehicle_type_id" id="vehicle_type_id">
+                                            <option value="">Chọn loại phương tiện</option>
+                                            @foreach ($vehicleTypes as $key => $val)
+                                                <option value="{{ $key }}"
+                                                    {{ old('vehicle_type_id', $vehicle->vehicle_type_id) === $key ? 'selected' : '' }}>
+                                                    {{ $val }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('vehicle_type_id')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Tải trọng (tấn)</label>
+                                        <input type="number" step="0.1" class="form-control" name="capacity" id="capacity" value="{{ old('address', $vehicle->capacity) }}">
+                                        @error('capacity')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Năm sản xuất</label>
+                                        <input type="number" class="form-control" name="manufactured_year" id="manufactured_year" value="{{ old('address', $vehicle->manufactured_year) }}">
+                                        @error('manufactured_year')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                        <select class="form-select" name="status">
+                                            @foreach ($vehicleStatuses as $val => $label)
+                                                <option value="{{ $val }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('status')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Tài xế </label>
+                                        <select class="form-select" name="driver_id">
+                                            @foreach ($drivers as $key => $driver)
+                                                <option value="{{ $key }}">{{ $driver }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('driver_id')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <hr>
+                                <h6>Thông tin đăng kiểm</h6>
+                                <input type="text" class="form-control" name="documents[0][document_type]" value="{{ \App\Models\VehicleDocument::TYPE_INSPECTION }}" hidden>
+                                <input type="text" class="form-control" name="documents[0][document_id]" value="{{ $inspectionDoc->document_id ?? null }}" hidden>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Số giấy đăng kiểm </label>
+                                        <input type="text" class="form-control" name="documents[0][document_number]" value="{{ old('documents[0][document_number]', $inspectionDoc->document_number ?? null) }}">
+                                        @error('documents[0][document_number]')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Ngày hết hạn</label>
+                                        <input
+                                            type="date" 
+                                            class="form-control" 
+                                            name="documents[0][expiry_date]" 
+                                            value="{{ old('documents.0.expiry_date', optional($inspectionDoc->expiry_date)->format('Y-m-d')) }}"
+                                        >
+                                        @error('documents[0][expiry_date]')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Tệp đính kèm</label>
+                                    <input type="file" class="form-control" name="documents[0][document_file]">
+                                    @if (isset($inspectionDoc) && $inspectionDoc->document_file)
+                                        <div class="mt-2">
+                                            <a href="{{ asset('storage/' . $inspectionDoc->document_file) }}" target="_blank">
+                                                📎 Xem tệp đã tải lên
+                                            </a>
+                                        </div>
+                                    @endif
+                                    @error('documents[0][document_file]')
                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
-                        
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Email</label>
-                                    <input name="email" type="email" placeholder="Email" value="{{ old('email', $user->email) }}" required class="form-control p-2 border rounded">
-                                    @error('email')
-                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                <hr>
+                                <h6>Thông tin bảo hiểm</h6>
+                                <div class="row mb-3">
+                                <input type="text" class="form-control" name="documents[1][document_type]" value="{{ \App\Models\VehicleDocument::TYPE_INSURANCE }}" hidden>
+                                <input type="text" class="form-control" name="documents[0][document_id]" value="{{ $insuranceDoc->document_id ?? null }}" hidden>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Số hợp đồng bảo hiểm </label>
+                                        <input type="text" class="form-control" name="documents[1][document_number]" value="{{ old('documents[1][document_number]', $insuranceDoc->document_number ?? null) }}">
+                                        @error('documents[1][document_number]')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Ngày hết hạn </label>
+                                        <input 
+                                            type="date" 
+                                            class="form-control" 
+                                            name="documents[1][expiry_date]" 
+                                            value="{{ old('documents.1.expiry_date', optional($insuranceDoc->expiry_date)->format('Y-m-d')) }}"
+                                        >
+                                        @error('documents[1][expiry_date]')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                 </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Tệp đính kèm </label>
+                                    <input 
+                                        type="file" 
+                                        class="form-control" 
+                                        name="documents[1][document_file]"
+                                    >
+                                    @if (isset($insuranceDoc) && $insuranceDoc->document_file)
+                                        <div class="mt-2">
+                                            <a href="{{ asset('storage/' . $insuranceDoc->document_file) }}" target="_blank">
+                                                📎 Xem tệp đã tải lên
+                                            </a>
+                                        </div>
+                                    @endif
 
-                                <!-- Birthday -->
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Birthday</label>
-                                    <input type="date" name="birthday" value="{{ old('birthday', $user->birthday ?? '') }}" class="form-control p-2 border rounded @error('birthday') border-red-500 @enderror">
-                                    @error('birthday')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Phone</label>
-                                    <input name="phone" type="text" placeholder="Phone" value="{{ old('phone', $user->phone ?? '') }}" class="form-control p-2 border rounded">
-                                    @error('phone')
+                                    @error('documents[1][document_file]')
                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
-                        
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Password</label>
-                                    <input name="password" type="password" placeholder="Password" class="form-control p-2 border rounded">
-                                    @error('password')
-                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <!-- Confirm Password -->
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Confirm Password</label>
-                                    <input type="password" name="password_confirmation" class="form-control mt-1 border p-2 rounded w-full">
-                                </div>
-                        
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Role</label>
-                                    <select name="role" required class="form-control p-2 border rounded">
-                                        <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
-                                        <option value="manager" {{ old('role', $user->role) == 'manager' ? 'selected' : '' }}>Manager</option>
-                                        <option value="user" {{ old('role', $user->role) == 'user' ? 'selected' : '' }}>User</option>
-                                    </select>
-                                </div>
-                                <div class="form-check form-switch form-switch-lg mb-4">
-                                    <label class="flex items-center gap-2">
-                                        <span class="text-gray-700">Status</span>
-                                        <input type="checkbox" name="status" class="form-check-input" id="customSwitchsizelg" {{ old('status', default: $user->status) == 1 ? 'checked' : '' }} value="1">
-                                    </label>
-                                    @error('status')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">Avatar</label>
-                                    <input type="file" name="avatar" id="avatarInput" class="form-control mt-1 border p-2 rounded">
-                                    <img id="avatarPreview" src="{{ (isset($user) && $user->avatar) ? asset('storage/' . $user->avatar) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
-                                </div>
-                                <div>
-                                    <button type="submit" class="btn rounded-pill btn-secondary waves-effect">Save</button>
+                                <div class="col-lg-12">
+                                    <div class="hstack gap-2 justify-content-start">
+                                        <button type="submit" class="btn btn-secondary">Lưu</button>
+                                    </div>
                                 </div>
                             </form>
                         </div>

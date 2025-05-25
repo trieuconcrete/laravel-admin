@@ -16,4 +16,12 @@ interface BaseRepositoryInterface
      * @return TModel|null
      */
     public function findBy(array $params = []);
+
+    /**
+     * Summary of updateOrCreate
+     * @param array $conditions
+     * @param array $data
+     * @return TModel
+     */
+    public function updateOrCreate(array $conditions = [], array $data = []);
 }

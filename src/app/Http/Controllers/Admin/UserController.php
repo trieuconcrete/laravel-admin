@@ -34,6 +34,11 @@ class UserController extends Controller
      */
     public function __construct(protected UserService $userService) {}
 
+    /**
+     * Summary of index
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Contracts\View\View
+     */
     public function index(Request $request)
     {
         $query = User::query();
@@ -52,7 +57,10 @@ class UserController extends Controller
             $query->where('status', $request->status);
         }
 
-        $users = $query->whereNull('deleted_at')->latest()->paginate(10);
+        $users = $query->where('id', '!=', auth()->user()->id)
+            ->whereNull('deleted_at')
+            ->latest()
+            ->paginate(10);
         $positions = Position::pluck('name', 'id');
         $licenses = DriverLicense::getCarLicenseTypes();
         $statuses = EnumUserStatus::options();
@@ -65,6 +73,10 @@ class UserController extends Controller
         ]));
     }
 
+    /**
+     * Summary of create
+     * @return \Illuminate\Contracts\View\View
+     */
     public function create()
     {
         return view('admin.users.create');
@@ -91,6 +103,11 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Summary of show
+     * @param \App\Models\User $user
+     * @return \Illuminate\Contracts\View\View
+     */
     public function show(User $user)
     {
         $this->authorize('view', $user);
@@ -102,6 +119,11 @@ class UserController extends Controller
         return view('admin.users.show', compact('user', 'positions', 'licenses', 'statuses', 'licenseStatuses'));
     }
 
+    /**
+     * Summary of edit
+     * @param \App\Models\User $user
+     * @return \Illuminate\Contracts\View\View
+     */
     public function edit(User $user)
     {
         $this->authorize('update', $user);
@@ -116,7 +138,7 @@ class UserController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      */
     public function update(UpdateUserRequest $request, User $user)
-    {        
+    {
         DB::beginTransaction();
         try {
             $this->authorize('update', $user);

@@ -38,4 +38,14 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         return $this->model->whereDate('created_at', today())->get();
     }
+
+    /**
+     * Summary of getUserByConditions
+     * @param array $conditions
+     * @return \Illuminate\Database\Eloquent\Collection<int, TModel>
+     */
+    public function getUserByConditions(array $conditions = [])
+    {
+        return $this->model->where($conditions)->get();
+    }
 }
