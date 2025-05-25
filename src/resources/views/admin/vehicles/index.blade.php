@@ -278,6 +278,15 @@
                             </select>
                             <div class="text-danger error" data-field="status"></div>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tài xế </label>
+                            <select class="form-select" name="driver_id">
+                                @foreach ($drivers as $key => $driver)
+                                    <option value="{{ $key }}">{{ $driver }}</option>
+                                @endforeach
+                            </select>
+                            <div class="text-danger error" data-field="driver_id"></div>
+                        </div>
                     </div>
                     <hr>
                     <h6>Thông tin đăng kiểm</h6>
@@ -426,6 +435,8 @@
             
             $('#vehicleDetailContent').html('<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></div>');
             
+            $('#editVehicleBtn').data('id', id);
+
             // show modal
             modal.modal('show');
             
@@ -441,6 +452,14 @@
                 }
             });
         });
+
+        $('#editVehicleBtn').on('click', function () {
+            let id = $(this).data('id');
+            if (id) {
+                window.location.href = `/admin/vehicles/${id}/edit`;
+            }
+        });
+
     });
 </script>
 @endpush

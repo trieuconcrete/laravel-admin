@@ -24,6 +24,7 @@ class VehicleDocument extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'document_id',
         'vehicle_id',
         'document_type',
         'issue_date',

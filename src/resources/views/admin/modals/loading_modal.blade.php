@@ -16,7 +16,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" id="editVehicleBtn">Chỉnh sửa</button>
+                <button type="button" class="btn btn-primary" data-id="" id="editVehicleBtn">Chỉnh sửa</button>
             </div>
         </div>
     </div>

@@ -243,7 +243,7 @@
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="date" class="form-label">Nơi cấp <span class="text-danger">*</span></label>
+                                            <label for="date" class="form-label">Nơi cấp</label>
                                             <input type="text" class="form-control" value="{{ old('issued_by', optional($user->license)->issued_by) }}" name="issued_by" placeholder="Nhập nơi cấp">
                                             @error('issued_by')
                                                 <p class="text-danger text-sm mt-1">{{ $message }}</p>

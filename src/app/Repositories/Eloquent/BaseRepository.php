@@ -73,4 +73,15 @@ abstract class BaseRepository
     public function findBy(array $params = []) {
         return $this->model->where($params)->first();
     }
+
+    /**
+     * Summary of updateOrCreate
+     * @param array $conditions
+     * @param array $data
+     * @return TModel
+     */
+    public function updateOrCreate(array $conditions = [], array $data = [])
+    {
+        return $this->model->updateOrCreate($conditions, $data);
+    }
 }
