@@ -43,7 +43,7 @@ class StoreCustomerRequest extends FormRequest
                 Rule::unique('customers', 'phone')->whereNull('deleted_at')
             ],
             'email' => [
-                'nullable',
+                'required',
                 'email',
                 'max:255',
                 Rule::unique('customers', 'email')->whereNull('deleted_at')
@@ -97,7 +97,6 @@ class StoreCustomerRequest extends FormRequest
             // Thông tin người liên hệ chính (cho doanh nghiệp)
             'primary_contact_name' => [
                 'nullable',
-                'required_if:type,' . Customer::TYPE_BUSINESS,
                 'string',
                 'max:255'
             ],

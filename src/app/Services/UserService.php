@@ -47,7 +47,7 @@ class UserService
             $data = $request->all();
 
             // Format salary
-            $data['salary_base'] = str_replace(',', '', $request->salary_base);
+            $data['salary_base'] = $request->salary_base ? str_replace(',', '', $request->salary_base) : 0;
 
             // Generate password
             $data['password'] = Hash::make($data['password'] ?? 'password');
@@ -103,9 +103,7 @@ class UserService
         $data = $request->all();
 
         // handle salary
-        if ($request->salary_base) {
-            $data['salary_base'] = str_replace(',', '', $request->salary_base);
-        }
+        $data['salary_base'] = $request->salary_base ? str_replace(',', '', $request->salary_base) : 0;
 
         // Handle password
         if ($request->filled('password')) {

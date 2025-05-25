@@ -165,12 +165,12 @@
                             <div class="text-danger error" data-field="email"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Ngày sinh <span class="text-danger">*</span></label>
+                            <label class="form-label">Ngày sinh </label>
                             <input type="date" name="birthday" class="form-control">
                             <div class="text-danger error" data-field="birthday"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Ngày vào làm <span class="text-danger">*</span></label>
+                            <label class="form-label">Ngày vào làm </label>
                             <input type="date" name="join_date" class="form-control">
                             <div class="text-danger error" data-field="join_date"></div>
                         </div>
@@ -190,7 +190,7 @@
                             <div class="text-danger error" data-field="license_expire_date"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Lương cơ bản <span class="text-danger">*</span></label>
+                            <label class="form-label">Lương cơ bản </label>
                             <input type="text" name="salary_base" class="form-control" placeholder="Nhập lương cơ bản">
                             <div class="text-danger error" data-field="salary_base"></div>
                         </div>
@@ -267,7 +267,7 @@
                             <div class="text-danger error" data-field="birthday"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Ngày vào làm <span class="text-danger">*</span></label>
+                            <label class="form-label">Ngày vào làm </label>
                             <input type="date" name="join_date" class="form-control">
                             <div class="text-danger error" data-field="join_date"></div>
                         </div>
@@ -284,7 +284,7 @@
                             <div class="text-danger error" data-field="position_id"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Lương cơ bản <span class="text-danger">*</span></label>
+                            <label class="form-label">Lương cơ bản </label>
                             <input type="text" name="salary_base" class="form-control" placeholder="Nhập lương cơ bản">
                             <div class="text-danger error" data-field="salary_base"></div>
                         </div>
