@@ -161,7 +161,7 @@ sudo systemctl start laravel-worker
 ## ✅ Bước 11: Tạo script `deploy.sh`
 
 ```bash
-nano /var/www/vantai_hoangphulong/deploy.sh
+nano /var/www/webroot/vantai_hoangphulong/deploy.sh
 ```
 
 Nội dung:
