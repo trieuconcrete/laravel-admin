@@ -111,7 +111,7 @@
                                             </div>
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
-                                                    <label for="salaryBase" class="form-label">Lương cơ bản <span class="text-danger">*</span></label>
+                                                    <label for="salaryBase" class="form-label">Lương cơ bản </label>
                                                     <input type="text" class="form-control" name="salary_base" placeholder="Nhập Lương cơ bản" value="{{ old('salary_base', $user->salary_base) }}">
                                                     @error('salary_base')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -121,7 +121,7 @@
                                             <!--end col-->
                                             <div class="col-lg-12">
                                                 <div class="mb-3">
-                                                    <label for="address" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                                                    <label for="address" class="form-label">Địa chỉ </label>
                                                     <input type="text" class="form-control" placeholder="Nhập địa chỉ" name="address" value="{{ old('address', $user->address) }}">
                                                     @error('address')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -213,7 +213,7 @@
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="date" class="form-label">Ngày cấp <span class="text-danger">*</span></label>
+                                            <label for="date" class="form-label">Ngày cấp </label>
                                             <input 
                                                 type="date"
                                                 class="form-control"
@@ -228,7 +228,7 @@
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
-                                            <label for="date" class="form-label">Ngày hết hạn <span class="text-danger">*</span></label>
+                                            <label for="date" class="form-label">Ngày hết hạn </label>
                                             <input 
                                                 type="date"
                                                 class="form-control"

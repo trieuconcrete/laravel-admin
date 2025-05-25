@@ -76,9 +76,9 @@ class UserService
                     'user_id' => $user->id,
                     'license_type' => $request->license_type,
                     'expiry_date' => $request->license_expire_date,
-                    'license_number' => '',
+                    'license_number' => null,
                     'issue_date' => Carbon::today(),
-                    'issued_by' => '',
+                    'issued_by' => null
                 ]);
             }
 

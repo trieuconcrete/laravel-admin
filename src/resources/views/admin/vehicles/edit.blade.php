@@ -108,7 +108,7 @@
                                             type="date" 
                                             class="form-control" 
                                             name="documents[0][expiry_date]" 
-                                            value="{{ old('documents.0.expiry_date', optional($inspectionDoc->expiry_date)->format('Y-m-d')) }}"
+                                            value="{{ old('documents.0.expiry_date', optional($inspectionDoc)->expiry_date ? optional($inspectionDoc)->expiry_date->format('Y-m-d') : null) }}"
                                         >
                                         @error('documents[0][expiry_date]')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -133,7 +133,7 @@
                                 <h6>Thông tin bảo hiểm</h6>
                                 <div class="row mb-3">
                                 <input type="text" class="form-control" name="documents[1][document_type]" value="{{ \App\Models\VehicleDocument::TYPE_INSURANCE }}" hidden>
-                                <input type="text" class="form-control" name="documents[0][document_id]" value="{{ $insuranceDoc->document_id ?? null }}" hidden>
+                                <input type="text" class="form-control" name="documents[1][document_id]" value="{{ $insuranceDoc->document_id ?? null }}" hidden>
                                     <div class="col-md-6">
                                         <label class="form-label">Số hợp đồng bảo hiểm </label>
                                         <input type="text" class="form-control" name="documents[1][document_number]" value="{{ old('documents[1][document_number]', $insuranceDoc->document_number ?? null) }}">
@@ -147,7 +147,7 @@
                                             type="date" 
                                             class="form-control" 
                                             name="documents[1][expiry_date]" 
-                                            value="{{ old('documents.1.expiry_date', optional($insuranceDoc->expiry_date)->format('Y-m-d')) }}"
+                                            value="{{ old('documents.1.expiry_date', optional($insuranceDoc)->expiry_date ? optional($insuranceDoc->expiry_date)->format('Y-m-d') : null) }}"
                                         >
                                         @error('documents[1][expiry_date]')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>

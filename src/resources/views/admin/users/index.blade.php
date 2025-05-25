@@ -185,7 +185,7 @@
                             <div class="text-danger error" data-field="license_type"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Hạn bằng lái <span class="text-danger">*</span></label>
+                            <label class="form-label">Hạn bằng lái </label>
                             <input type="date" name="license_expire_date" class="form-control">
                             <div class="text-danger error" data-field="license_expire_date"></div>
                         </div>
@@ -204,7 +204,7 @@
                             <div class="text-danger error" data-field="status"></div>
                         </div>
                         <div class="col-lg-12">
-                            <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                            <label class="form-label">Địa chỉ </label>
                             <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ">
                             <div class="text-danger error" data-field="address"></div>
                         </div>
@@ -298,7 +298,7 @@
                             <div class="text-danger error" data-field="status"></div>
                         </div>
                         <div class="col-lg-12">
-                            <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                            <label class="form-label">Địa chỉ </label>
                             <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ">
                             <div class="text-danger error" data-field="address"></div>
                         </div>
