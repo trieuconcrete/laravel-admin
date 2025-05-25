@@ -114,6 +114,7 @@
                                                         <th>Cầu đường</th>
                                                         <th>Tiền tự cầu</th>
                                                         <th>Khác</th>
+                                                        <th>Ghi chú</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
