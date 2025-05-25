@@ -15,7 +15,7 @@
                             <div class="row g-3 mb-0 align-items-center">
                                 <div class="col-auto">
                                     <button class="btn btn-success">
-                                        <i class="ri-add-circle-line align-middle me-1"></i>Lưu 
+                                        <i class="ri-save-3-line align-middle me-1"></i>Lưu 
                                     </button>
                                 </div>
                                 <!--end col-->
