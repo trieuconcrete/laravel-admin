@@ -125,6 +125,7 @@
                                                         <td><input type="number" class="form-control form-control" placeholder="Số tiền"></td>
                                                         <td><input type="number" class="form-control form-control" placeholder="Số tiền"></td>
                                                         <td><input type="number" class="form-control form-control" placeholder="Số tiền"></td>
+                                                        <td><input type="number" class="form-control form-control" placeholder="Ghi chú khác"></td>
                                                     </tr>
                                                 </tbody>
                                             </table>

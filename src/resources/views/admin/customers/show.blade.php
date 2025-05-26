@@ -128,7 +128,7 @@
 
                     <!-- monthly report -->
                     <div class="tab-pane fade" id="monthlyReport">
-                        <div class="d-flex mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
                             <div class="flex-shrink-0 text-start">
                                 <h6 class="mb-1">Tháng</h6>
                                 <select class="form-select">
@@ -137,6 +137,9 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <button type="button" class="btn btn-outline-secondary">
+                                <i class="las la-file-export align-middle me-1"></i> Xuất bảng kê
+                            </button>
                         </div>
                         {{-- <div class="d-flex justify-content-between mb-3">
                             <h6>Bảng kê vận chuyển tháng {{ date('m/Y') }}</h6>
