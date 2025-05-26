@@ -56,7 +56,7 @@ class UpdateUserRequest extends FormRequest
                     'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
                     'notes' => ['nullable', 'string'],
                     'id_number' => 'required|max:20',
-                    'salary_base' => ['required', 'numeric', 'min:0'],
+                    'salary_base' => ['nullable', 'numeric', 'min:0'],
                     'address' => 'nullable|max:100',
                     'tab' => 'nullable|string',
                 ];
@@ -65,12 +65,13 @@ class UpdateUserRequest extends FormRequest
                 $rules = [
                     'license_number' => 'required|string|max:100',
                     'license_type'   => 'required|string|max:50',
-                    'issue_date'     => 'required|date',
-                    'expiry_date'    => 'required|date|after_or_equal:issue_date',
+                    'issue_date'     => 'nullable|date',
+                    'expiry_date'    => 'nullable|date|after_or_equal:issue_date',
                     'issued_by'      => 'nullable|string|max:100',
                     'license_file'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
                     'license_status' => 'nullable',
                     'tab' => 'nullable|string',
+                    'address' => 'nullable|max:100',
                 ];
                 break;
             case Constants::USER_ACTION_CHANGE_PASSWORD:
