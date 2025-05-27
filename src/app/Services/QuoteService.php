@@ -6,9 +6,27 @@ use App\Models\Quote;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use App\Repositories\Interface\QuoteAttachmentRepositoryInterface as QuoteAttachmentRepository;
+use App\Repositories\Interface\QuoteRepositoryInterface as QuoteRepository;
+use App\Repositories\Interface\QuoteHistoryRepositoryInterface as QuoteHistoryRepository;
+use App\Helpers\ImageHelper;
+use Illuminate\Http\Request;
 
 class QuoteService
 {
+    /**
+     * Summary of __construct
+     * @param \App\Repositories\Interface\QuoteAttachmentRepositoryInterface $quoteAttachmentRepository
+     * @param \App\Repositories\Interface\QuoteRepositoryInterface $quoteRepository
+     * @param \App\Repositories\Interface\QuoteHistoryRepositoryInterface $quoteHistoryRepository
+     */
+    public function __construct(
+        protected QuoteAttachmentRepository $quoteAttachmentRepository,
+        protected QuoteRepository $quoteRepository,
+        protected QuoteHistoryRepository $quoteHistoryRepository,
+    ) {}
+
     /**
      * Tạo số báo giá mới
      */
@@ -219,5 +237,84 @@ class QuoteService
                 ? round(($quotes->approved_quotes / $quotes->total_quotes) * 100, 2) 
                 : 0,
         ];
+    }
+
+    /**
+     * Summary of getFilteredVehicles
+     * @param array $filters
+     */
+    public function getFilteredQuotes(array $filters)
+    {
+        return $this->quoteRepository->getQuotesWithFilters($filters);
+    }
+
+    /**
+     * Summary of store
+     * @param \Illuminate\Http\Request $request
+     */
+    public function store(Request $request)
+    {
+        try {
+            $data = $request->all();
+
+            $quote = $this->quoteRepository->create($data);
+
+            $file = $request->file('document_file');
+
+            $dataQuoteAttachment = [
+                'quote_id'   => $quote->id,
+                'file_name'  => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                'file_type'  => $file->getClientOriginalExtension(),
+                'file_size'  => $file->getSize(),
+                'file_path'  => ImageHelper::upload($file, 'quotes'),
+                'uploaded_by'=> auth()->id(),
+            ];
+            
+            $this->quoteAttachmentRepository->create($dataQuoteAttachment);
+
+            return $quote;
+        } catch (\Throwable $e) {
+            Log::error('Quote creation failed', ['error' => $e->getMessage()]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Summary of update
+     * @param \Illuminate\Http\Request $request
+     * @param mixed $quote
+     */
+    public function update(Request $request, $quote)
+    {
+        try {
+            $data = $request->all();
+
+            $quote = $this->quoteRepository->update($quote->id, $data);
+
+            if ($request->hasFile('document_file')) {
+                $file = $request->file('document_file');
+                $dataQuoteAttachment = [
+                    'quote_id'   => $quote->id,
+                    'file_name'  => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                    'file_type'  => $file->getClientOriginalExtension(),
+                    'file_size'  => $file->getSize(),
+                    'file_path'  => ImageHelper::upload($file, 'quotes'),
+                    'uploaded_by'=> auth()->id(),
+                ];
+
+                // case update
+                if ($request->document_id) {
+                    $this->quoteAttachmentRepository->update($request->document_id, $dataQuoteAttachment);
+                } else {
+                    // case create
+                    $this->quoteAttachmentRepository->create($dataQuoteAttachment);
+                }
+            }
+
+            return $quote;
+        } catch (\Throwable $e) {
+            Log::error('Quote update failed', ['error' => $e->getMessage()]);
+            throw $e;
+        }
     }
 }

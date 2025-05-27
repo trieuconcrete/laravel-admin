@@ -129,20 +129,39 @@ class Quote extends Model
                     ->whereIn('status', ['sent', 'approved']);
     }
 
-    // Accessors & Mutators
-    public function getStatusLabelAttribute(): string
-    {
-        $labels = [
-            'draft' => 'Bản nháp',
-            'sent' => 'Đã gửi',
-            'approved' => 'Đã duyệt',
-            'rejected' => 'Từ chối',
-            'expired' => 'Hết hạn',
-            'converted' => 'Đã chuyển đổi',
-        ];
+    const STATUS_DRAFT = 'draft';
+    const STATUS_SENT = 'sent';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
+    const STATUS_EXPIRED = 'expired';
+    const STATUS_CONVERTED = 'converted';
 
-        return $labels[$this->status] ?? 'Không xác định';
+    /**
+     * Summary of getStatus
+     * @return string[]
+     */
+    public static function getStatuses()
+    {
+        return [
+            self::STATUS_DRAFT => 'Bản nháp',
+            self::STATUS_SENT => 'Đã gửi',
+            self::STATUS_APPROVED => 'Đã duyệt',
+            self::STATUS_REJECTED => 'Từ chối',
+            self::STATUS_EXPIRED => 'Hết hạn',
+            self::STATUS_CONVERTED => 'Đã chuyển đổi',
+        ];
     }
+    
+    /**
+     * Summary of getStatusLabelAttribute
+     * @return string
+     */
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatuses()[$this->status] ?? 'Không xác định';
+    }
+
+    // Accessors & Mutators
 
     public function getStatusColorAttribute(): string
     {
@@ -186,12 +205,12 @@ class Quote extends Model
         $prefix = 'BG';
         $date = now()->format('Ymd');
         $lastQuote = static::whereDate('created_at', today())
-                          ->where('quote_number', 'like', $prefix . $date . '%')
-                          ->orderBy('quote_number', 'desc')
+                          ->where('quote_code', 'like', $prefix . $date . '%')
+                          ->orderBy('quote_code', 'desc')
                           ->first();
 
         if ($lastQuote) {
-            $lastNumber = intval(substr($lastQuote->quote_number, -4));
+            $lastNumber = intval(substr($lastQuote->quote_code, -4));
             $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
             $newNumber = '0001';
@@ -239,8 +258,8 @@ class Quote extends Model
         parent::boot();
 
         static::creating(function ($quote) {
-            if (empty($quote->quote_number)) {
-                $quote->quote_number = $quote->generateQuoteNumber();
+            if (empty($quote->quote_code)) {
+                $quote->quote_code = $quote->generateQuoteNumber();
             }
         });
 

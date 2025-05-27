@@ -27,68 +27,6 @@
                 <!--end col-->
             </div>
             <!-- Dashboard Cards -->
-            <div class="row mb-4">
-                <div class="col-md-6 col-lg-3 mb-3">
-                    <div class="card card-dashboard h-100" style="border-left-color: #4e73df;">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <div class="text-muted">Tổng phương tiện</div>
-                                    <h4 class="mt-2">152</h4>
-                                </div>
-                                <div>
-                                    <i class="ri-truck-fill fs-1 text-muted"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3 mb-3">
-                    <div class="card card-dashboard h-100" style="border-left-color: #1cc88a;">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <div class="text-muted">Đang hoạt động</div>
-                                    <h4 class="mt-2">125</h4>
-                                </div>
-                                <div>
-                                    <i class="ri-check-fill fs-1 text-success"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3 mb-3">
-                    <div class="card card-dashboard h-100" style="border-left-color: #f6c23e;">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <div class="text-muted">Đang bảo trì</div>
-                                    <h4 class="mt-2">15</h4>
-                                </div>
-                                <div>
-                                    <i class="ri-tools-fill fs-1 text-warning"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3 mb-3">
-                    <div class="card card-dashboard h-100" style="border-left-color: #e74a3b;">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <div class="text-muted">Sắp hết hạn đăng kiểm</div>
-                                    <h4 class="mt-2">12</h4>
-                                </div>
-                                <div>
-                                    <i class="ri-alert-fill fs-1 text-danger"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Filter Section -->
             <div class="card mb-4">
@@ -151,7 +89,7 @@
                                                 <button 
                                                     class="btn btn-sm btn-outline-primary btn-show-vehicle" 
                                                     data-bs-toggle="modal" 
-                                                    data-bs-target="#vehicleDetailModal"
+                                                    data-bs-target="#detailModal"
                                                     data-id="{{ $vehicle->vehicle_id }}"
                                                 >
                                                     Chi tiết
@@ -431,11 +369,11 @@
 
         $('.btn-show-vehicle').on('click', function () {
             let id = $(this).data('id');
-            let modal = $('#vehicleDetailModal');
+            let modal = $('#detailModal');
             
-            $('#vehicleDetailContent').html('<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></div>');
+            $('#detailContentModal').html('<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></div>');
             
-            $('#editVehicleBtn').data('id', id);
+            $('#editDetailBtn').data('id', id);
 
             // show modal
             modal.modal('show');
@@ -444,16 +382,16 @@
                 url: `/admin/vehicles/${id}`,
                 type: 'GET',
                 success: function(response) {
-                    $('#vehicleDetailContent').html(response);
+                    $('#detailContentModal').html(response);
                 },
                 error: function(xhr) {
-                    $('#vehicleDetailContent').html('<div class="alert alert-danger">Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</div>');
+                    $('#detailContentModal').html('<div class="alert alert-danger">Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</div>');
                     console.error(xhr);
                 }
             });
         });
 
-        $('#editVehicleBtn').on('click', function () {
+        $('#editDetailBtn').on('click', function () {
             let id = $(this).data('id');
             if (id) {
                 window.location.href = `/admin/vehicles/${id}/edit`;

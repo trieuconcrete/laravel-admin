@@ -1,4 +1,4 @@
-<div class="modal fade" id="vehicleDetailModal" tabindex="-1">
+<div class="modal fade" id="detailModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -6,7 +6,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div id="vehicleDetailContent">
+                <div id="detailContentModal">
                     <div class="d-flex justify-content-center">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Đang tải...</span>
@@ -16,7 +16,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                <button type="button" class="btn btn-primary" data-id="" id="editVehicleBtn">Chỉnh sửa</button>
+                <button type="button" class="btn btn-primary" data-id="" id="editDetailBtn">Chỉnh sửa</button>
             </div>
         </div>
     </div>
