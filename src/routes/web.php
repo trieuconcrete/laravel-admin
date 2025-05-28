@@ -1,13 +1,15 @@
 <?php
 
+use App\Http\Controllers\HomepageController;
 use App\Http\Controllers\AdminAuthController;
-use App\Http\Controllers\Admin\UserController;
 
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
 
+Route::get('/', [HomepageController::class, 'index'])->name('frontend.home');
 
 Route::prefix('admin')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
