@@ -170,7 +170,7 @@ Nội dung:
 #!/bin/bash
 
 cd /var/www/webroot/webfolio || exit
-git pull origin project/vantai_hpl
+git pull origin webfolio.vn
 cd src
 composer install --no-dev
 php artisan migrate --force
