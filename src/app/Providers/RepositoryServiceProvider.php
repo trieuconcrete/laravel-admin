@@ -15,6 +15,12 @@ use App\Repositories\Interface\CustomerRepositoryInterface;
 use App\Repositories\Eloquent\CustomerRepository;
 use App\Repositories\Interface\VehicleDocumentRepositoryInterface;
 use App\Repositories\Eloquent\VehicleDocumentRepository;
+use App\Repositories\Interface\QuoteRepositoryInterface;
+use App\Repositories\Eloquent\QuoteRepository;
+use App\Repositories\Interface\QuoteAttachmentRepositoryInterface;
+use App\Repositories\Eloquent\QuoteAttachmentRepository;
+use App\Repositories\Interface\QuoteHistoryRepositoryInterface;
+use App\Repositories\Eloquent\QuoteHistoryRepository;
 
 
 /**
@@ -26,7 +32,7 @@ class RepositoryServiceProvider extends ServiceProvider
      * Summary of register
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
         $this->app->bind(DriverLicenseRepositoryInterface::class, DriverLicenseRepository::class);
@@ -34,13 +40,16 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(PositionRepositoryInterface::class, PositionRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(VehicleDocumentRepositoryInterface::class, VehicleDocumentRepository::class);
+        $this->app->bind(QuoteRepositoryInterface::class, QuoteRepository::class);
+        $this->app->bind(QuoteAttachmentRepositoryInterface::class, QuoteAttachmentRepository::class);
+        $this->app->bind(QuoteHistoryRepositoryInterface::class, QuoteHistoryRepository::class);
     }
 
     /**
      * Summary of boot
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         //
     }

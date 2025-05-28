@@ -30,27 +30,28 @@
             <!-- Filter Section -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Nhập tên KH, Mã báo giá,...">
+                    <form method="GET" action="{{ route('admin.quotes.index') }}">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input name="keyword" value="{{ request('keyword') }}" type="text" class="form-control" placeholder="Nhập tên KH, Mã báo giá,...">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="statusFilter" name="status">
+                                    <option value="">Tất cả trạng thái</option>
+                                    @foreach ($quoteStatuses as $val => $label)
+                                        <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-primary w-100">
+                                    Tìm kiếm
+                                </button>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <select class="form-select">
-                                <option value="">Chọn trang thái </option>
-                                <option value="1">Chờ phê duyệt</option>
-                                <option value="2">Đã phê duyệt</option>
-                                <option value="3">Đã gửi KH</option>
-                                <option value="4">Từ chối</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button class="btn btn-outline-primary w-100">
-                                Tìm kiếm
-                            </button>
-                        </div>
-                    </div>
+                    </form>
                 </div>
             </div>
 
@@ -70,96 +71,48 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>G001</td>
-                                    <td>Công ty TNHH ABC</td>
-                                    <td><span class="badge bg-warning">Chờ phê duyệt</span></td>
-                                    <td>10/10/2025</td>
-                                    <td>10/12/2025</td>
-                                    <td><a href="#" class="">File báo giá excel</a></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>G001</td>
-                                    <td>Công ty TNHH XYZ</td>
-                                    <td><span class="badge bg-primary">Đã phê duyệt</span></td>
-                                    <td>10/10/2025</td>
-                                    <td>10/12/2025</td>
-                                    <td><a href="#" class="">File báo giá excel</a></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>G001</td>
-                                    <td>Công ty TNHH XYZ</td>
-                                    <td><span class="badge bg-success">Đã gửi KH</span></td>
-                                    <td>10/10/2025</td>
-                                    <td>10/12/2025</td>
-                                    <td><a href="#" class="">File báo giá excel</a></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#customerDetailModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>G001</td>
-                                    <td>Công ty TNHH 123</td>
-                                    <td><span class="badge bg-danger">Từ chối</span></td>
-                                    <td>10/10/2025</td>
-                                    <td>10/12/2025</td>
-                                    <td><a href="#" class="">File báo giá excel</a></td>
-                                </tr>
+                                @foreach ($quotes as $quote)
+                                    <tr>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button 
+                                                    class="btn btn-sm btn-outline-primary btn-show-quote" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#detailModal"
+                                                    data-id="{{ $quote->id }}"
+                                                >
+                                                    Chi tiết
+                                                </button>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-outline-danger delete-quote-btn"
+                                                        data-quote-id="{{ $quote->id }}">
+                                                    Xóa
+                                                </button>
+                                                
+                                                <form action="{{ route('admin.quotes.destroy', $quote) }}"
+                                                    method="POST"
+                                                    class="delete-quote-form"
+                                                    id="delete-form-{{ $quote->id }}">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+                                            </div>
+                                        </td>
+                                        <td>{{ $quote->quote_code }}</td>
+                                        <td>{{ optional($quote->customer)->name }}</td>
+                                        <td><span class="badge bg-{{ $quote->getStatusColorAttribute() }}">{{ $quote->getStatusLabelAttribute() }}</span></td>
+                                        <td>{{ $quote->pickup_datetime ? $quote->pickup_datetime->format('d/m/y') : null }}</td>
+                                        <td>{{ $quote->valid_until ? $quote->valid_until->format('d/m/y') : null }}</td>
+                                        <td><a href="{{ optional(optional($quote->attachments)->first())->document_file_url }}" class="" target="_blank">File báo giá excel</a></td>
+                                    </tr>
+
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
-                    <nav>
-                        <ul class="pagination justify-content-end">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Sau</a>
-                            </li>
-                        </ul>
-                    </nav>
                 </div>
             </div>
+            {{ $quotes->links('vendor.pagination.bootstrap-5') }}
         </div> <!-- end col -->
     </div>
 
@@ -175,74 +128,83 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <hr>
-            <div class="modal-body">
-                <form>
+            <form id="add-quote-form" enctype="multipart/form-data" action="{{ route('admin.quotes.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Khách hàng <span class="text-danger">*</span></label>
-                            <select class="form-select">
+                            <select class="form-select" name="customer_id">
                                 <option value="">Chọn khách hàng</option>
-                                <option value="1">Công ty TNHH ABC</option>
-                                <option value="2">Công ty TNHH XYZ	</option>
-                                <option value="3">Công ty TNHH 123</option>
+                                @foreach ($customers as $key => $customer)
+                                    <option value="{{ $key }}">{{ $customer }}</option>
+                                @endforeach
                             </select>
+                            <div class="text-danger error" data-field="customer_id"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Trạng thái </label>
-                            <select class="form-select">
+                            <select class="form-select" name="status">
                                 <option value="">Chọn loại báo giá </option>
-                                <option value="1">Chờ phê duyệt</option>
-                                <option value="2">Đã phê duyệt</option>
-                                <option value="3">Đã gửi KH</option>
-                                <option value="4">Từ chối</option>
+                                @foreach ($quoteStatuses as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                @endforeach
                             </select>
+                            <div class="text-danger error" data-field="status"></div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" placeholder="Nhập ngày bắt đầu">
+                            <input type="date" class="form-control" name="pickup_datetime">
+                            <div class="text-danger error" data-field="pickup_datetime"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Ngày hết hạn</label>
-                            <input type="text" class="form-control" placeholder="Nhập kết thúc">
+                            <input type="date" class="form-control" name="valid_until">
+                            <div class="text-danger error" data-field="valid_until"></div>
                         </div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Mô tả dịch vụ</label>
-                        <textarea class="form-control" rows="3" placeholder="Nhập Mô tả dịch vụ"></textarea>
+                        <textarea class="form-control" rows="3" placeholder="Nhập Mô tả dịch vụ" name="cargo_description"></textarea>
+                            <div class="text-danger error" data-field="cargo_description"></div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Ghi chú</label>
-                        <textarea class="form-control" rows="3" placeholder="Nhập ghi chú"></textarea>
+                        <textarea class="form-control" rows="3" placeholder="Nhập ghi chú" name="notes"></textarea>
+                        <div class="text-danger error" data-field="notes"></div>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">File báo giá <span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" name="documents[0][document_file]" >
-                        <div class="text-danger error" data-field="documents.0.document_file"></div>
+                        <input type="file" class="form-control" name="document_file" >
+                        <div class="text-danger error" data-field="document_file"></div>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary">Lưu báo giá </button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu báo giá </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+@include('admin.modals.loading_modal')
 
 @endsection
 
 @push('scripts')
 <script>
     $(document).ready(function () {
-        $('.delete-user-btn').click(function (e) {
+        $('.delete-quote-btn').click(function (e) {
             e.preventDefault();
     
-            var form = $(this).closest('.delete-user-form');
+            const quoteId = $(this).data('quote-id');
+            const form = $('#delete-form-' + quoteId);
     
             Swal.fire({
                 title: 'Bạn chắc chắn muốn xóa?',
@@ -256,6 +218,138 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     form.submit();
+                }
+            });
+        });
+
+        ['#add-quote-form'].forEach(function (formSelector) {
+            const $form = $(formSelector);
+            if ($form.length) {
+                $form.on('submit', function (e) {
+                    e.preventDefault();
+
+                    const url = $form.attr('action');
+                    const formData = new FormData(this);
+
+                    // Xóa lỗi cũ
+                    $form.find('.error').text('');
+
+                    $.ajax({
+                        url: url,
+                        method: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                            'Accept': 'application/json',
+                        },
+                        success: function (data) {
+                            // close modal
+                            const modalElement = $form.closest('.modal');
+                            const modal = bootstrap.Modal.getInstance(modalElement[0]);
+                            if (modal) modal.hide();
+
+                            // Reset form
+                            $form[0].reset();
+
+                            // 
+                            Swal.fire({
+                                title: "Tạo thành công!",
+                                icon: "success",
+                                draggable: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Reload table
+                                    location.reload();
+                                }
+                            });
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 422) {
+                                const errors = xhr.responseJSON.errors;
+                                $.each(errors, function (field, messages) {
+                                    $form.find(`.error[data-field="${field}"]`).text(messages[0]);
+                                });
+                            } else {
+                                console.error('Có lỗi xảy ra:', xhr);
+                            }
+                        }
+                    });
+                });
+            }
+        });
+
+        $('.btn-show-quote').on('click', function () {
+            let id = $(this).data('id');
+            let modal = $('#detailModal');
+
+            modal.find('.modal-title').text('Thông tin chi tiết báo giá');
+            
+            $('#detailContentModal').html('<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></div>');
+            
+
+            $('#editDetailBtn').data('id', id);
+
+            // show modal
+            modal.modal('show');
+            
+            $.ajax({
+                url: `/admin/quotes/${id}`,
+                type: 'GET',
+                success: function(response) {
+                    $('#detailContentModal').html(response);
+                },
+                error: function(xhr) {
+                    $('#detailContentModal').html('<div class="alert alert-danger">Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</div>');
+                    console.error(xhr);
+                }
+            });
+        });
+
+        $('#editDetailBtn').on('click', function () {
+            var quoteId = $(this).data('id');
+            var $form = $('#editQuoteForm');
+            var formData = $form.serialize();
+
+            $.ajax({
+                url: '/admin/quotes/' + quoteId,
+                method: 'PUT',
+                data: formData,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'Accept': 'application/json',
+                },
+                success: function (data) {
+                    // close modal
+                    const modalElement = $form.closest('.modal');
+                    const modal = bootstrap.Modal.getInstance(modalElement[0]);
+                    if (modal) modal.hide();
+
+                    // Reset form
+                    $form[0].reset();
+
+                    // 
+                    Swal.fire({
+                        title: "Cập nhật thành công!",
+                        icon: "success",
+                        draggable: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Reload table
+                            location.reload();
+                        }
+                    });
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        const errors = xhr.responseJSON.errors;
+                        $.each(errors, function (field, messages) {
+                            $form.find(`.error[data-field="${field}"]`).text(messages[0]);
+                        });
+                    } else {
+                        console.error('Có lỗi xảy ra:', xhr);
+                    }
                 }
             });
         });

@@ -79,4 +79,16 @@ class QuoteAttachment extends Model
 
         return parent::delete();
     }
+
+    /**
+     * Summary of getDocumentFileUrlAttribute
+     * @return string|null
+     */
+    public function getDocumentFileUrlAttribute()
+    {
+        if ($this->file_path) {
+            return Storage::url('/' . $this->file_path);
+        }
+        return null;
+    }
 }
