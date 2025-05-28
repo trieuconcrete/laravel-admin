@@ -9,6 +9,13 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
 
+Route::get('locale/{locale}', function ($locale) {
+    if (in_array($locale, array_keys(config('languages.supported')))) {
+        session(['locale' => $locale]);
+    }
+    return redirect()->back();
+})->name('locale.switch');
+
 Route::get('/', [HomepageController::class, 'index'])->name('frontend.home');
 
 Route::prefix('admin')->group(function () {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="{{ $lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -650,20 +650,20 @@
                     
                     <!-- Language Switcher -->
                     <div class="lang-switcher">
-                        <button id="lang-toggle" class="flex items-center space-x-2 text-white hover:text-amber-300 transition-colors duration-300">
+                        <a id="lang-toggle" class="flex items-center space-x-2 text-white hover:text-amber-300 transition-colors duration-300">
                             <span class="flag-icon flag-vi" id="current-flag"></span>
                             <span id="current-lang">VI</span>
                             <i class="fas fa-chevron-down text-xs"></i>
-                        </button>
+                        </a>
                         <div id="lang-dropdown" class="lang-dropdown hidden">
-                            <div class="lang-option" data-lang="vi">
+                            <a href="{{ route('locale.switch', ['locale' => 'vi']) }}" class="lang-option" data-lang="vi">
                                 <span class="flag-icon flag-vi"></span>
                                 <span>Tiếng Việt</span>
-                            </div>
-                            <div class="lang-option" data-lang="en">
+                            </a>
+                            <a href="{{ route('locale.switch', ['locale' => 'en']) }}" class="lang-option" data-lang="en">
                                 <span class="flag-icon flag-en"></span>
                                 <span>English</span>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>
