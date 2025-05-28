@@ -31,6 +31,12 @@
         <!-- custom Css-->
         <link href="{{ asset('assets/css/custom.min.css') }}" rel="stylesheet" type="text/css" />
         <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet" type="text/css" />
+
+        <!-- Flatpickr CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+        <!-- Optional: Flatpickr Material Blue theme -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
         
         <!-- Page-specific CSS -->
         @stack('styles')
@@ -126,6 +132,9 @@
         <!-- App js -->
         <script src="{{ asset('assets/js/app.js') }}"></script>
 
+        <!-- Flatpickr JS -->
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
         <script>
             // Tự động ẩn alert sau 3 giây
             document.addEventListener('DOMContentLoaded', function() {
@@ -161,6 +170,18 @@
                             $collapse.prev('a.menu-link').addClass('active').attr('aria-expanded', 'true'); // active menu parent
                         }
                     }
+                });
+            });
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('input[type="date"]').forEach(function (input) {
+                    input.type = 'text';
+                    input.placeholder = 'dd/mm/yyyy'; // gợi ý format
+                    flatpickr(input, {
+                        dateFormat: "m/d/Y",
+                        allowInput: true,
+                        defaultDate: input.value || null
+                    });
                 });
             });
         </script>

@@ -299,6 +299,15 @@
                 type: 'GET',
                 success: function(response) {
                     $('#detailContentModal').html(response);
+                    $('#detailContentModal').find('input[type="date"]').each(function () {
+                        this.type = 'text';
+                        this.placeholder = 'dd/mm/yyyy';
+                        flatpickr(this, {
+                            dateFormat: "d/m/Y",
+                            allowInput: true,
+                            defaultDate: this.value || null
+                        });
+                    });
                 },
                 error: function(xhr) {
                     $('#detailContentModal').html('<div class="alert alert-danger">Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</div>');
