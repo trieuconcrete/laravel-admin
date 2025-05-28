@@ -105,6 +105,108 @@
         .flag-en {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3CclipPath id='s'%3E%3Cpath d='M0,0 v30 h60 v-30 z'/%3E%3C/clipPath%3E%3CclipPath id='t'%3E%3Cpath d='M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z'/%3E%3C/clipPath%3E%3Cg clip-path='url(%23s)'%3E%3Cpath d='M0,0 v30 h60 v-30 z' fill='%23012169'/%3E%3Cpath d='M0,0 L60,30 M60,0 L0,30' stroke='%23fff' stroke-width='6'/%3E%3Cpath d='M0,0 L60,30 M60,0 L0,30' clip-path='url(%23t)' stroke='%23C8102E' stroke-width='4'/%3E%3Cpath d='M30,0 v30 M0,15 h60' stroke='%23fff' stroke-width='10'/%3E%3Cpath d='M30,0 v30 M0,15 h60' stroke='%23C8102E' stroke-width='6'/%3E%3C/g%3E%3C/svg%3E");
         }
+        
+        /* Chatbox Styles */
+        #chat-window {
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        #chat-window.show {
+            transform: scale(1);
+            opacity: 1;
+        }
+        
+        #chat-messages {
+            background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+        }
+        
+        #chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        #chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        
+        #chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        .chat-message {
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .typing-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background-color: #9ca3af;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        @media (max-width: 640px) {
+            #chat-window {
+                width: calc(100vw - 2rem);
+                bottom: 5rem;
+                right: 1rem;
+                left: 1rem;
+            }
+            
+            #chat-toggle {
+                bottom: 1rem;
+                right: 1rem;
+            }
+            
+            #back-to-top {
+                bottom: 5rem;
+                right: 1rem;
+            }
+        }
     </style>
 </head>
 <body class="smooth-scroll bg-gray-50">
@@ -520,6 +622,7 @@
                 : 'WebFolio.vn - Professional Website Design';
         }
     </script>
+
     <!-- Header -->
     <header class="fixed w-full top-0 z-50 glass-effect shadow-lg">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -620,15 +723,15 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="text-white fade-in">
                     <div class="mb-4">
-                        <span class="bg-amber-600 bg-opacity-20 text-amber-200 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm border border-amber-400 border-opacity-30">
-                            ⭐ #1 Website Design Company in Vietnam
+                        <span class="bg-amber-600 bg-opacity-20 text-amber-200 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm border border-amber-400 border-opacity-30" data-i18n="hero.badge">
+                            ⭐ #1 Công ty thiết kế website tại Việt Nam
                         </span>
                     </div>
                     <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                        Thiết Kế Website
-                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-300">Chuyên Nghiệp</span>
+                        <span data-i18n="hero.title">Thiết Kế Website</span>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-300" data-i18n="hero.highlight">Chuyên Nghiệp</span>
                     </h1>
-                    <p class="text-xl mb-8 text-gray-200 leading-relaxed">
+                    <p class="text-xl mb-8 text-gray-200 leading-relaxed" data-i18n="hero.description">
                         Chúng tôi tạo ra những website hiện đại, responsive và tối ưu SEO để giúp doanh nghiệp của bạn thành công trong thời đại số.
                     </p>
                     
@@ -638,36 +741,36 @@
                             <div class="w-8 h-8 bg-emerald-600 rounded-full flex items-center justify-center">
                                 <i class="fas fa-check text-white text-sm"></i>
                             </div>
-                            <span class="text-gray-200">Responsive Design</span>
+                            <span class="text-gray-200" data-i18n="hero.feature1">Responsive Design</span>
                         </div>
                         <div class="flex items-center space-x-3">
                             <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                                 <i class="fas fa-rocket text-white text-sm"></i>
                             </div>
-                            <span class="text-gray-200">Tốc Độ Cao</span>
+                            <span class="text-gray-200" data-i18n="hero.feature2">Tốc Độ Cao</span>
                         </div>
                         <div class="flex items-center space-x-3">
                             <div class="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
                                 <i class="fas fa-search text-white text-sm"></i>
                             </div>
-                            <span class="text-gray-200">SEO Tối Ưu</span>
+                            <span class="text-gray-200" data-i18n="hero.feature3">SEO Tối Ưu</span>
                         </div>
                         <div class="flex items-center space-x-3">
                             <div class="w-8 h-8 bg-slate-600 rounded-full flex items-center justify-center">
                                 <i class="fas fa-shield-alt text-white text-sm"></i>
                             </div>
-                            <span class="text-gray-200">Bảo Mật 24/7</span>
+                            <span class="text-gray-200" data-i18n="hero.feature4">Bảo Mật 24/7</span>
                         </div>
                     </div>
                     
                     <div class="flex flex-col sm:flex-row gap-4">
                         <button class="trust-gradient hover:shadow-lg hover:shadow-blue-900/25 text-white px-8 py-4 rounded-lg font-semibold transition-all duration-300 hover-scale">
                             <i class="fas fa-rocket mr-2"></i>
-                            Bắt Đầu Ngay
+                            <span data-i18n="hero.cta1">Bắt Đầu Ngay</span>
                         </button>
                         <button class="border-2 border-white text-white hover:bg-white hover:text-slate-800 px-8 py-4 rounded-lg font-semibold transition-all duration-300 backdrop-blur-sm">
                             <i class="fas fa-play mr-2"></i>
-                            Xem Portfolio
+                            <span data-i18n="hero.cta2">Xem Portfolio</span>
                         </button>
                     </div>
                 </div>
@@ -726,19 +829,19 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-white">
                     <div>
                         <div class="text-2xl font-bold">100+</div>
-                        <div class="text-sm text-gray-300">Dự Án</div>
+                        <div class="text-sm text-gray-300" data-i18n="hero.stats.projects">Dự Án</div>
                     </div>
                     <div>
                         <div class="text-2xl font-bold">50+</div>
-                        <div class="text-sm text-gray-300">Khách Hàng</div>
+                        <div class="text-sm text-gray-300" data-i18n="hero.stats.clients">Khách Hàng</div>
                     </div>
                     <div>
                         <div class="text-2xl font-bold">5+</div>
-                        <div class="text-sm text-gray-300">Năm Kinh Nghiệm</div>
+                        <div class="text-sm text-gray-300" data-i18n="hero.stats.experience">Năm Kinh Nghiệm</div>
                     </div>
                     <div>
                         <div class="text-2xl font-bold">24/7</div>
-                        <div class="text-sm text-gray-300">Hỗ Trợ</div>
+                        <div class="text-sm text-gray-300" data-i18n="hero.stats.support">Hỗ Trợ</div>
                     </div>
                 </div>
             </div>
@@ -749,8 +852,8 @@
     <section id="services" class="py-20 bg-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 fade-in">
-                <h2 class="text-4xl font-bold text-gray-800 mb-4">Dịch Vụ Của Chúng Tôi</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4" data-i18n="services.title">Dịch Vụ Của Chúng Tôi</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="services.subtitle">
                     Chúng tôi cung cấp giải pháp toàn diện cho nhu cầu thiết kế và phát triển website của bạn
                 </p>
             </div>
@@ -760,8 +863,8 @@
                     <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                         <i class="fas fa-mobile-alt text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Responsive Design</h3>
-                    <p class="text-gray-600 leading-relaxed">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.responsive.title">Responsive Design</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.responsive.desc">
                         Website tự động thích ứng với mọi thiết bị từ mobile, tablet đến desktop, đảm bảo trải nghiệm tốt nhất cho người dùng.
                     </p>
                 </div>
@@ -770,8 +873,8 @@
                     <div class="bg-emerald-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                         <i class="fas fa-search text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">SEO Tối Ưu</h3>
-                    <p class="text-gray-600 leading-relaxed">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.seo.title">SEO Tối Ưu</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.seo.desc">
                         Tối ưu hóa website để đạt thứ hạng cao trên Google, tăng khả năng tiếp cận khách hàng tiềm năng.
                     </p>
                 </div>
@@ -780,8 +883,8 @@
                     <div class="bg-amber-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                         <i class="fas fa-bolt text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Tốc Độ Cao</h3>
-                    <p class="text-gray-600 leading-relaxed">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.speed.title">Tốc Độ Cao</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.speed.desc">
                         Website được tối ưu hóa để tải nhanh, cải thiện trải nghiệm người dùng và thứ hạng SEO.
                     </p>
                 </div>
@@ -790,8 +893,8 @@
                     <div class="bg-slate-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                         <i class="fas fa-shield-alt text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Bảo Mật Cao</h3>
-                    <p class="text-gray-600 leading-relaxed">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.security.title">Bảo Mật Cao</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.security.desc">
                         Áp dụng các biện pháp bảo mật tiên tiến để bảo vệ website và dữ liệu khách hàng.
                     </p>
                 </div>
@@ -800,8 +903,8 @@
                     <div class="bg-orange-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                         <i class="fas fa-cogs text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Quản Lý Dễ Dàng</h3>
-                    <p class="text-gray-600 leading-relaxed">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.management.title">Quản Lý Dễ Dàng</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.management.desc">
                         Giao diện quản trị thân thiện, dễ sử dụng, giúp bạn cập nhật nội dung một cách nhanh chóng.
                     </p>
                 </div>
@@ -810,8 +913,8 @@
                     <div class="bg-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
                         <i class="fas fa-headset text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Hỗ Trợ 24/7</h3>
-                    <p class="text-gray-600 leading-relaxed">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.support.title">Hỗ Trợ 24/7</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.support.desc">
                         Đội ngũ hỗ trợ kỹ thuật luôn sẵn sàng giúp đỡ bạn mọi lúc, mọi nơi.
                     </p>
                 </div>
@@ -823,8 +926,8 @@
     <section id="portfolio" class="py-20 bg-gray-100">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 fade-in">
-                <h2 class="text-4xl font-bold text-gray-800 mb-4">Portfolio</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4" data-i18n="portfolio.title">Portfolio</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="portfolio.subtitle">
                     Khám phá những dự án website chúng tôi đã thực hiện thành công
                 </p>
             </div>
@@ -852,8 +955,8 @@
                             <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">MySQL</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">Hoàn thành: 03/2024</span>
-                            <button class="text-blue-500 hover:text-blue-700 font-semibold">Xem Chi Tiết</button>
+                            <span class="text-sm text-gray-500"><span data-i18n="portfolio.completed">Hoàn thành</span>: 03/2024</span>
+                            <button class="text-blue-500 hover:text-blue-700 font-semibold" data-i18n="portfolio.viewDetails">Xem Chi Tiết</button>
                         </div>
                     </div>
                 </div>
@@ -880,8 +983,8 @@
                             <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">MySQL</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">Hoàn thành: 01/2024</span>
-                            <button class="text-blue-500 hover:text-blue-700 font-semibold">Xem Chi Tiết</button>
+                            <span class="text-sm text-gray-500"><span data-i18n="portfolio.completed">Hoàn thành</span>: 01/2024</span>
+                            <button class="text-blue-500 hover:text-blue-700 font-semibold" data-i18n="portfolio.viewDetails">Xem Chi Tiết</button>
                         </div>
                     </div>
                 </div>
@@ -908,8 +1011,8 @@
                             <span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs">PostgreSQL</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">Hoàn thành: 12/2023</span>
-                            <button class="text-blue-500 hover:text-blue-700 font-semibold">Xem Chi Tiết</button>
+                            <span class="text-sm text-gray-500"><span data-i18n="portfolio.completed">Hoàn thành</span>: 12/2023</span>
+                            <button class="text-blue-500 hover:text-blue-700 font-semibold" data-i18n="portfolio.viewDetails">Xem Chi Tiết</button>
                         </div>
                     </div>
                 </div>
@@ -936,8 +1039,8 @@
                             <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">Custom PHP</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">Hoàn thành: 11/2023</span>
-                            <button class="text-blue-500 hover:text-blue-700 font-semibold">Xem Chi Tiết</button>
+                            <span class="text-sm text-gray-500"><span data-i18n="portfolio.completed">Hoàn thành</span>: 11/2023</span>
+                            <button class="text-blue-500 hover:text-blue-700 font-semibold" data-i18n="portfolio.viewDetails">Xem Chi Tiết</button>
                         </div>
                     </div>
                 </div>
@@ -964,8 +1067,8 @@
                             <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">MySQL</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">Hoàn thành: 10/2023</span>
-                            <button class="text-blue-500 hover:text-blue-700 font-semibold">Xem Chi Tiết</button>
+                            <span class="text-sm text-gray-500"><span data-i18n="portfolio.completed">Hoàn thành</span>: 10/2023</span>
+                            <button class="text-blue-500 hover:text-blue-700 font-semibold" data-i18n="portfolio.viewDetails">Xem Chi Tiết</button>
                         </div>
                     </div>
                 </div>
@@ -992,8 +1095,8 @@
                             <span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">Redis</span>
                         </div>
                         <div class="flex items-center justify-between">
-                            <span class="text-sm text-gray-500">Hoàn thành: 09/2023</span>
-                            <button class="text-blue-500 hover:text-blue-700 font-semibold">Xem Chi Tiết</button>
+                            <span class="text-sm text-gray-500"><span data-i18n="portfolio.completed">Hoàn thành</span>: 09/2023</span>
+                            <button class="text-blue-500 hover:text-blue-700 font-semibold" data-i18n="portfolio.viewDetails">Xem Chi Tiết</button>
                         </div>
                     </div>
                 </div>
@@ -1001,8 +1104,8 @@
 
             <!-- Portfolio CTA -->
             <div class="text-center mt-12 fade-in">
-                <p class="text-gray-600 mb-6">Bạn muốn xem thêm dự án của chúng tôi?</p>
-                <button class="trust-gradient hover:shadow-lg hover:shadow-slate-900/25 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover-scale">
+                <p class="text-gray-600 mb-6" data-i18n="portfolio.viewMore">Bạn muốn xem thêm dự án của chúng tôi?</p>
+                <button class="trust-gradient hover:shadow-lg hover:shadow-slate-900/25 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover-scale" data-i18n="portfolio.viewAll">
                     Xem Tất Cả Portfolio
                 </button>
             </div>
@@ -1013,30 +1116,30 @@
     <section id="themes" class="py-20 bg-gray-100">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 fade-in">
-                <h2 class="text-4xl font-bold text-slate-800 mb-4">Kho Theme HTML</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <h2 class="text-4xl font-bold text-slate-800 mb-4" data-i18n="themes.title">Kho Theme HTML</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="themes.subtitle">
                     Bộ sưu tập theme HTML chuyên nghiệp, responsive và dễ tùy chỉnh cho mọi loại hình doanh nghiệp
                 </p>
             </div>
 
             <!-- Category Filter -->
             <div class="flex flex-wrap justify-center gap-4 mb-12 fade-in">
-                <button class="theme-filter active bg-slate-600 text-white px-6 py-2 rounded-full font-medium transition-all duration-300" data-filter="all">
+                <button class="theme-filter active bg-slate-600 text-white px-6 py-2 rounded-full font-medium transition-all duration-300" data-filter="all" data-i18n="themes.filter.all">
                     Tất Cả
                 </button>
-                <button class="theme-filter bg-white text-slate-600 hover:bg-slate-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 border border-slate-200" data-filter="business">
+                <button class="theme-filter bg-white text-slate-600 hover:bg-slate-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 border border-slate-200" data-filter="business" data-i18n="themes.filter.business">
                     Doanh Nghiệp
                 </button>
-                <button class="theme-filter bg-white text-slate-600 hover:bg-slate-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 border border-slate-200" data-filter="ecommerce">
+                <button class="theme-filter bg-white text-slate-600 hover:bg-slate-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 border border-slate-200" data-filter="ecommerce" data-i18n="themes.filter.ecommerce">
                     Bán Hàng
                 </button>
-                <button class="theme-filter bg-white text-slate-600 hover:bg-slate-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 border border-slate-200" data-filter="portfolio">
+                <button class="theme-filter bg-white text-slate-600 hover:bg-slate-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 border border-slate-200" data-filter="portfolio" data-i18n="themes.filter.portfolio">
                     Portfolio
                 </button>
-                <button class="theme-filter bg-white text-slate-600 hover:bg-slate-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 border border-slate-200" data-filter="blog">
+                <button class="theme-filter bg-white text-slate-600 hover:bg-slate-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 border border-slate-200" data-filter="blog" data-i18n="themes.filter.blog">
                     Blog
                 </button>
-                <button class="theme-filter bg-white text-slate-600 hover:bg-slate-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 border border-slate-200" data-filter="landing">
+                <button class="theme-filter bg-white text-slate-600 hover:bg-slate-600 hover:text-white px-6 py-2 rounded-full font-medium transition-all duration-300 border border-slate-200" data-filter="landing" data-i18n="themes.filter.landing">
                     Landing Page
                 </button>
             </div>
@@ -1050,19 +1153,19 @@
                              alt="Corporate Pro Theme" 
                              class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <div class="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                        <div class="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-semibold" data-i18n="themes.filter.business">
                             Doanh Nghiệp
                         </div>
-                        <div class="absolute top-4 right-4 bg-amber-500 text-white px-2 py-1 rounded text-xs font-bold">
+                        <div class="absolute top-4 right-4 bg-amber-500 text-white px-2 py-1 rounded text-xs font-bold" data-i18n="themes.hot">
                             HOT
                         </div>
                         <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <div class="flex space-x-2">
                                 <button class="bg-white text-slate-800 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors duration-300 flex-1">
-                                    <i class="fas fa-eye mr-1"></i> Xem Demo
+                                    <i class="fas fa-eye mr-1"></i> <span data-i18n="themes.viewDemo">Xem Demo</span>
                                 </button>
                                 <button class="trust-gradient text-white px-4 py-2 rounded-lg font-medium text-sm hover:shadow-lg transition-all duration-300 flex-1">
-                                    <i class="fas fa-download mr-1"></i> Tải Về
+                                    <i class="fas fa-download mr-1"></i> <span data-i18n="themes.download">Tải Về</span>
                                 </button>
                             </div>
                         </div>
@@ -1100,10 +1203,10 @@
                         <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <div class="flex space-x-2">
                                 <button class="bg-white text-slate-800 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors duration-300 flex-1">
-                                    <i class="fas fa-eye mr-1"></i> Xem Demo
+                                    <i class="fas fa-eye mr-1"></i> <span data-i18n="themes.viewDemo">Xem Demo</span>
                                 </button>
                                 <button class="trust-gradient text-white px-4 py-2 rounded-lg font-medium text-sm hover:shadow-lg transition-all duration-300 flex-1">
-                                    <i class="fas fa-download mr-1"></i> Tải Về
+                                    <i class="fas fa-download mr-1"></i> <span data-i18n="themes.download">Tải Về</span>
                                 </button>
                             </div>
                         </div>
@@ -1140,10 +1243,10 @@
                         <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <div class="flex space-x-2">
                                 <button class="bg-white text-slate-800 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors duration-300 flex-1">
-                                    <i class="fas fa-eye mr-1"></i> Xem Demo
+                                    <i class="fas fa-eye mr-1"></i> <span data-i18n="themes.viewDemo">Xem Demo</span>
                                 </button>
                                 <button class="trust-gradient text-white px-4 py-2 rounded-lg font-medium text-sm hover:shadow-lg transition-all duration-300 flex-1">
-                                    <i class="fas fa-download mr-1"></i> Tải Về
+                                    <i class="fas fa-download mr-1"></i> <span data-i18n="themes.download">Tải Về</span>
                                 </button>
                             </div>
                         </div>
@@ -1180,10 +1283,10 @@
                         <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <div class="flex space-x-2">
                                 <button class="bg-white text-slate-800 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors duration-300 flex-1">
-                                    <i class="fas fa-eye mr-1"></i> Xem Demo
+                                    <i class="fas fa-eye mr-1"></i> <span data-i18n="themes.viewDemo">Xem Demo</span>
                                 </button>
                                 <button class="trust-gradient text-white px-4 py-2 rounded-lg font-medium text-sm hover:shadow-lg transition-all duration-300 flex-1">
-                                    <i class="fas fa-download mr-1"></i> Tải Về
+                                    <i class="fas fa-download mr-1"></i> <span data-i18n="themes.download">Tải Về</span>
                                 </button>
                             </div>
                         </div>
@@ -1217,16 +1320,16 @@
                         <div class="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                             Landing Page
                         </div>
-                        <div class="absolute top-4 right-4 bg-green-500 text-white px-2 py-1 rounded text-xs font-bold">
+                        <div class="absolute top-4 right-4 bg-green-500 text-white px-2 py-1 rounded text-xs font-bold" data-i18n="themes.new">
                             MỚI
                         </div>
                         <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <div class="flex space-x-2">
                                 <button class="bg-white text-slate-800 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors duration-300 flex-1">
-                                    <i class="fas fa-eye mr-1"></i> Xem Demo
+                                    <i class="fas fa-eye mr-1"></i> <span data-i18n="themes.viewDemo">Xem Demo</span>
                                 </button>
                                 <button class="trust-gradient text-white px-4 py-2 rounded-lg font-medium text-sm hover:shadow-lg transition-all duration-300 flex-1">
-                                    <i class="fas fa-download mr-1"></i> Tải Về
+                                    <i class="fas fa-download mr-1"></i> <span data-i18n="themes.download">Tải Về</span>
                                 </button>
                             </div>
                         </div>
@@ -1263,10 +1366,10 @@
                         <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <div class="flex space-x-2">
                                 <button class="bg-white text-slate-800 px-4 py-2 rounded-lg font-medium text-sm hover:bg-gray-100 transition-colors duration-300 flex-1">
-                                    <i class="fas fa-eye mr-1"></i> Xem Demo
+                                    <i class="fas fa-eye mr-1"></i> <span data-i18n="themes.viewDemo">Xem Demo</span>
                                 </button>
                                 <button class="trust-gradient text-white px-4 py-2 rounded-lg font-medium text-sm hover:shadow-lg transition-all duration-300 flex-1">
-                                    <i class="fas fa-download mr-1"></i> Tải Về
+                                    <i class="fas fa-download mr-1"></i> <span data-i18n="themes.download">Tải Về</span>
                                 </button>
                             </div>
                         </div>
@@ -1295,46 +1398,48 @@
             <div class="text-center mt-12 fade-in">
                 <button class="trust-gradient hover:shadow-lg hover:shadow-slate-900/25 text-white px-8 py-3 rounded-lg font-semibold transition-all duration-300 hover-scale">
                     <i class="fas fa-plus mr-2"></i>
-                    Xem Thêm Theme
+                    <span data-i18n="themes.loadMore">Xem Thêm Theme</span>
                 </button>
             </div>
 
             <!-- Theme Features -->
             <div class="mt-20 fade-in">
                 <div class="bg-gradient-to-r from-slate-50 to-blue-50 rounded-2xl p-8">
-                    <h3 class="text-3xl font-bold text-slate-800 text-center mb-8">Tại Sao Chọn Theme Của Chúng Tôi?</h3>
+                    <h3 class="text-3xl font-bold text-slate-800 text-center mb-8" data-i18n="themes.whyChoose">Tại Sao Chọn Theme Của Chúng Tôi?</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div class="text-center">
                             <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <i class="fas fa-mobile-alt text-2xl text-white"></i>
                             </div>
-                            <h4 class="text-xl font-bold text-slate-800 mb-3">100% Responsive</h4>
-                            <p class="text-gray-600">Tất cả theme đều tối ưu hoàn hảo trên mọi thiết bị từ mobile đến desktop.</p>
+                            <h4 class="text-xl font-bold text-slate-800 mb-3" data-i18n="themes.feature1.title">100% Responsive</h4>
+                            <p class="text-gray-600" data-i18n="themes.feature1.desc">Tất cả theme đều tối ưu hoàn hảo trên mọi thiết bị từ mobile đến desktop.</p>
                         </div>
                         <div class="text-center">
                             <div class="bg-emerald-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <i class="fas fa-code text-2xl text-white"></i>
                             </div>
-                            <h4 class="text-xl font-bold text-slate-800 mb-3">Code Sạch & Tối Ưu</h4>
-                            <p class="text-gray-600">Mã nguồn được viết theo chuẩn W3C, tải nhanh và dễ tùy chỉnh.</p>
+                            <h4 class="text-xl font-bold text-slate-800 mb-3" data-i18n="themes.feature2.title">Code Sạch & Tối Ưu</h4>
+                            <p class="text-gray-600" data-i18n="themes.feature2.desc">Mã nguồn được viết theo chuẩn W3C, tải nhanh và dễ tùy chỉnh.</p>
                         </div>
                         <div class="text-center">
                             <div class="bg-amber-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <i class="fas fa-headset text-2xl text-white"></i>
                             </div>
-                            <h4 class="text-xl font-bold text-slate-800 mb-3">Hỗ Trợ Trọn Đời</h4>
-                            <p class="text-gray-600">Nhận hỗ trợ kỹ thuật và cập nhật miễn phí trọn đời cho tất cả theme.</p>
+                            <h4 class="text-xl font-bold text-slate-800 mb-3" data-i18n="themes.feature3.title">Hỗ Trợ Trọn Đời</h4>
+                            <p class="text-gray-600" data-i18n="themes.feature3.desc">Nhận hỗ trợ kỹ thuật và cập nhật miễn phí trọn đời cho tất cả theme.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Pricing Section -->
     <section id="pricing" class="py-20 bg-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 fade-in">
-                <h2 class="text-4xl font-bold text-slate-800 mb-4">Bảng Giá Dịch Vụ</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <h2 class="text-4xl font-bold text-slate-800 mb-4" data-i18n="pricing.title">Bảng Giá Dịch Vụ</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="pricing.subtitle">
                     Chọn gói dịch vụ phù hợp với nhu cầu và ngân sách của bạn
                 </p>
             </div>
@@ -1343,8 +1448,8 @@
                 <!-- Basic Plan -->
                 <div class="bg-gray-50 rounded-2xl p-8 hover-scale fade-in border border-gray-200 relative">
                     <div class="text-center">
-                        <h3 class="text-2xl font-bold text-slate-800 mb-2">Gói Cơ Bản</h3>
-                        <p class="text-gray-600 mb-6">Phù hợp cho cá nhân và doanh nghiệp nhỏ</p>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-2" data-i18n="pricing.basic.title">Gói Cơ Bản</h3>
+                        <p class="text-gray-600 mb-6" data-i18n="pricing.basic.desc">Phù hợp cho cá nhân và doanh nghiệp nhỏ</p>
                         <div class="mb-8">
                             <span class="text-4xl font-bold text-slate-800">5.990.000₫</span>
                         </div>
@@ -1353,31 +1458,31 @@
                     <div class="space-y-4 mb-8">
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Thiết kế responsive trên mọi thiết bị</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.responsive">Thiết kế responsive trên mọi thiết bị</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Tối đa 5 trang nội dung</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.pages5">Tối đa 5 trang nội dung</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Tối ưu SEO cơ bản</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.seoBasic">Tối ưu SEO cơ bản</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Form liên hệ đơn giản</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.contactForm">Form liên hệ đơn giản</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Bảo hành 12 tháng</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.warranty12">Bảo hành 12 tháng</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Hỗ trợ kỹ thuật cơ bản</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.supportBasic">Hỗ trợ kỹ thuật cơ bản</span>
                         </div>
                     </div>
                     
-                    <button class="w-full border-2 border-slate-600 text-slate-600 hover:bg-slate-600 hover:text-white py-3 px-6 rounded-lg font-semibold transition-all duration-300">
+                    <button class="w-full border-2 border-slate-600 text-slate-600 hover:bg-slate-600 hover:text-white py-3 px-6 rounded-lg font-semibold transition-all duration-300" data-i18n="pricing.choose">
                         Chọn Gói Này
                     </button>
                 </div>
@@ -1385,12 +1490,12 @@
                 <!-- Professional Plan -->
                 <div class="trust-gradient rounded-2xl p-8 hover-scale fade-in relative transform scale-105 shadow-xl">
                     <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                        <span class="bg-amber-500 text-white px-4 py-2 rounded-full text-sm font-bold">PHỔ BIẾN NHẤT</span>
+                        <span class="bg-amber-500 text-white px-4 py-2 rounded-full text-sm font-bold" data-i18n="pricing.pro.badge">PHỔ BIẾN NHẤT</span>
                     </div>
                     
                     <div class="text-center text-white">
-                        <h3 class="text-2xl font-bold mb-2">Gói Chuyên Nghiệp</h3>
-                        <p class="text-gray-200 mb-6">Lựa chọn tốt nhất cho doanh nghiệp</p>
+                        <h3 class="text-2xl font-bold mb-2" data-i18n="pricing.pro.title">Gói Chuyên Nghiệp</h3>
+                        <p class="text-gray-200 mb-6" data-i18n="pricing.pro.desc">Lựa chọn tốt nhất cho doanh nghiệp</p>
                         <div class="mb-8">
                             <span class="text-4xl font-bold">12.990.000₫</span>
                         </div>
@@ -1399,39 +1504,39 @@
                     <div class="space-y-4 mb-8 text-white">
                         <div class="flex items-start">
                             <i class="fas fa-check text-amber-300 mr-3 mt-1"></i>
-                            <span>Thiết kế responsive cao cấp</span>
+                            <span data-i18n="pricing.feature.responsivePremium">Thiết kế responsive cao cấp</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-amber-300 mr-3 mt-1"></i>
-                            <span>Tối đa 15 trang nội dung</span>
+                            <span data-i18n="pricing.feature.pages15">Tối đa 15 trang nội dung</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-amber-300 mr-3 mt-1"></i>
-                            <span>Tối ưu SEO chuyên sâu</span>
+                            <span data-i18n="pricing.feature.seoAdvanced">Tối ưu SEO chuyên sâu</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-amber-300 mr-3 mt-1"></i>
-                            <span>Tích hợp Google Analytics</span>
+                            <span data-i18n="pricing.feature.analytics">Tích hợp Google Analytics</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-amber-300 mr-3 mt-1"></i>
-                            <span>Hệ thống quản trị nội dung</span>
+                            <span data-i18n="pricing.feature.cms">Hệ thống quản trị nội dung</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-amber-300 mr-3 mt-1"></i>
-                            <span>Tích hợp mạng xã hội</span>
+                            <span data-i18n="pricing.feature.social">Tích hợp mạng xã hội</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-amber-300 mr-3 mt-1"></i>
-                            <span>Bảo hành 24 tháng</span>
+                            <span data-i18n="pricing.feature.warranty24">Bảo hành 24 tháng</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-amber-300 mr-3 mt-1"></i>
-                            <span>Hỗ trợ ưu tiên</span>
+                            <span data-i18n="pricing.feature.supportPriority">Hỗ trợ ưu tiên</span>
                         </div>
                     </div>
                     
-                    <button class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-300 shadow-lg">
+                    <button class="w-full bg-amber-500 hover:bg-amber-600 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-300 shadow-lg" data-i18n="pricing.choose">
                         Chọn Gói Này
                     </button>
                 </div>
@@ -1439,50 +1544,50 @@
                 <!-- Enterprise Plan -->
                 <div class="bg-gray-50 rounded-2xl p-8 hover-scale fade-in border border-gray-200 relative">
                     <div class="text-center">
-                        <h3 class="text-2xl font-bold text-slate-800 mb-2">Gói Doanh Nghiệp</h3>
-                        <p class="text-gray-600 mb-6">Giải pháp toàn diện cho tập đoán lớn</p>
+                        <h3 class="text-2xl font-bold text-slate-800 mb-2" data-i18n="pricing.enterprise.title">Gói Doanh Nghiệp</h3>
+                        <p class="text-gray-600 mb-6" data-i18n="pricing.enterprise.desc">Giải pháp toàn diện cho tập đoán lớn</p>
                         <div class="mb-8">
-                            <span class="text-4xl font-bold text-slate-800">Liên Hệ</span>
-                            <span class="text-gray-500 block mt-1">Báo giá theo yêu cầu</span>
+                            <span class="text-4xl font-bold text-slate-800" data-i18n="pricing.enterprise.price">Liên Hệ</span>
+                            <span class="text-gray-500 block mt-1" data-i18n="pricing.enterprise.quote">Báo giá theo yêu cầu</span>
                         </div>
                     </div>
                     
                     <div class="space-y-4 mb-8">
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Thiết kế tùy theo yêu cầu</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.custom">Thiết kế tùy theo yêu cầu</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Không giới hạn số trang</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.pagesUnlimited">Không giới hạn số trang</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Tối ưu SEO chuyên gia</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.seoExpert">Tối ưu SEO chuyên gia</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Tích hợp hệ thống ERP/CRM</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.erp">Tích hợp hệ thống ERP/CRM</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Đa ngôn ngữ & đa tiền tệ</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.multilingual">Đa ngôn ngữ & đa tiền tệ</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Bảo mật cao</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.security">Bảo mật cao</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Bảo hành trọn đời</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.warrantyLifetime">Bảo hành trọn đời</span>
                         </div>
                         <div class="flex items-start">
                             <i class="fas fa-check text-emerald-500 mr-3 mt-1"></i>
-                            <span class="text-gray-700">Dedicated support team</span>
+                            <span class="text-gray-700" data-i18n="pricing.feature.supportDedicated">Dedicated support team</span>
                         </div>
                     </div>
                     
-                    <button class="w-full trust-gradient hover:shadow-lg hover:shadow-slate-900/25 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-300">
+                    <button class="w-full trust-gradient hover:shadow-lg hover:shadow-slate-900/25 text-white py-3 px-6 rounded-lg font-semibold transition-all duration-300" data-i18n="pricing.contact">
                         Liên Hệ Ngay
                     </button>
                 </div>
@@ -1491,22 +1596,22 @@
             <!-- Additional Info -->
             <div class="mt-16 text-center fade-in">
                 <div class="bg-gradient-to-r from-blue-50 to-amber-50 rounded-2xl p-8 max-w-4xl mx-auto">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Cam Kết Của Chúng Tôi</h3>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="pricing.commitment">Cam Kết Của Chúng Tôi</h3>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
                         <div>
                             <i class="fas fa-clock text-3xl text-amber-600 mb-3"></i>
-                            <h4 class="font-semibold text-slate-800 mb-2">Giao Hàng Đúng Hẹn</h4>
-                            <p class="text-gray-600 text-sm">Cam kết hoàn thành dự án đúng timeline đã thỏa thuận</p>
+                            <h4 class="font-semibold text-slate-800 mb-2" data-i18n="pricing.commitment1.title">Giao Hàng Đúng Hẹn</h4>
+                            <p class="text-gray-600 text-sm" data-i18n="pricing.commitment1.desc">Cam kết hoàn thành dự án đúng timeline đã thỏa thuận</p>
                         </div>
                         <div>
                             <i class="fas fa-redo text-3xl text-emerald-600 mb-3"></i>
-                            <h4 class="font-semibold text-slate-800 mb-2">Sửa Đổi Không Giới Hạn</h4>
-                            <p class="text-gray-600 text-sm">Điều chỉnh thiết kế cho đến khi bạn hoàn toàn hài lòng</p>
+                            <h4 class="font-semibold text-slate-800 mb-2" data-i18n="pricing.commitment2.title">Sửa Đổi Không Giới Hạn</h4>
+                            <p class="text-gray-600 text-sm" data-i18n="pricing.commitment2.desc">Điều chỉnh thiết kế cho đến khi bạn hoàn toàn hài lòng</p>
                         </div>
                         <div>
                             <i class="fas fa-medal text-3xl text-blue-600 mb-3"></i>
-                            <h4 class="font-semibold text-slate-800 mb-2">Chất Lượng Đảm Bảo</h4>
-                            <p class="text-gray-600 text-sm">Hoàn tiền 100% nếu không hài lòng với chất lượng</p>
+                            <h4 class="font-semibold text-slate-800 mb-2" data-i18n="pricing.commitment3.title">Chất Lượng Đảm Bảo</h4>
+                            <p class="text-gray-600 text-sm" data-i18n="pricing.commitment3.desc">Hoàn tiền 100% nếu không hài lòng với chất lượng</p>
                         </div>
                     </div>
                 </div>
@@ -1514,79 +1619,81 @@
 
             <!-- FAQ Section -->
             <div class="mt-16 max-w-4xl mx-auto fade-in">
-                <h3 class="text-3xl font-bold text-slate-800 text-center mb-8">Câu Hỏi Thường Gặp</h3>
+                <h3 class="text-3xl font-bold text-slate-800 text-center mb-8" data-i18n="faq.title">Câu Hỏi Thường Gặp</h3>
                 <div class="space-y-4">
                     <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
-                        <h4 class="font-semibold text-slate-800 mb-2">Thời gian hoàn thành dự án là bao lâu?</h4>
-                        <p class="text-gray-600">Gói Cơ Bản: 2-3 tuần, Gói Chuyên Nghiệp: 4-6 tuần, Gói Doanh Nghiệp: 8-12 tuần tùy thuộc vào độ phức tạp.</p>
+                        <h4 class="font-semibold text-slate-800 mb-2" data-i18n="faq.q1">Thời gian hoàn thành dự án là bao lâu?</h4>
+                        <p class="text-gray-600" data-i18n="faq.a1">Gói Cơ Bản: 2-3 tuần, Gói Chuyên Nghiệp: 4-6 tuần, Gói Doanh Nghiệp: 8-12 tuần tùy thuộc vào độ phức tạp.</p>
                     </div>
                     <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
-                        <h4 class="font-semibold text-slate-800 mb-2">Có được xem trước thiết kế trước khi thanh toán?</h4>
-                        <p class="text-gray-600">Có, chúng tôi sẽ cung cấp mockup và wireframe để bạn xem trước và góp ý trước khi bắt đầu phát triển.</p>
+                        <h4 class="font-semibold text-slate-800 mb-2" data-i18n="faq.q2">Có được xem trước thiết kế trước khi thanh toán?</h4>
+                        <p class="text-gray-600" data-i18n="faq.a2">Có, chúng tôi sẽ cung cấp mockup và wireframe để bạn xem trước và góp ý trước khi bắt đầu phát triển.</p>
                     </div>
                     <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
-                        <h4 class="font-semibold text-slate-800 mb-2">Có hỗ trợ hosting và tên miền không?</h4>
-                        <p class="text-gray-600">Chúng tôi hỗ trợ tư vấn và thiết lập hosting, tên miền. Chi phí hosting/domain sẽ được tính riêng theo nhà cung cấp.</p>
+                        <h4 class="font-semibold text-slate-800 mb-2" data-i18n="faq.q3">Có hỗ trợ hosting và tên miền không?</h4>
+                        <p class="text-gray-600" data-i18n="faq.a3">Chúng tôi hỗ trợ tư vấn và thiết lập hosting, tên miền. Chi phí hosting/domain sẽ được tính riêng theo nhà cung cấp.</p>
                     </div>
                     <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow duration-300">
-                        <h4 class="font-semibold text-slate-800 mb-2">Sau khi hoàn thành có được chỉnh sửa không?</h4>
-                        <p class="text-gray-600">Trong thời gian bảo hành, chúng tôi hỗ trợ sửa lỗi miễn phí. Các thay đổi về thiết kế/tính năng sẽ có chi phí riêng.</p>
+                        <h4 class="font-semibold text-slate-800 mb-2" data-i18n="faq.q4">Sau khi hoàn thành có được chỉnh sửa không?</h4>
+                        <p class="text-gray-600" data-i18n="faq.a4">Trong thời gian bảo hành, chúng tôi hỗ trợ sửa lỗi miễn phí. Các thay đổi về thiết kế/tính năng sẽ có chi phí riêng.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- About Section -->
     <section id="about" class="py-20 bg-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="fade-in">
-                    <h2 class="text-4xl font-bold text-gray-800 mb-6">Về WebFolio.vn</h2>
-                    <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                    <h2 class="text-4xl font-bold text-gray-800 mb-6" data-i18n="about.title">Về WebFolio.vn</h2>
+                    <p class="text-lg text-gray-600 mb-6 leading-relaxed" data-i18n="about.desc1">
                         Với hơn 5 năm kinh nghiệm trong lĩnh vực thiết kế và phát triển website, WebFolio.vn đã trở thành đối tác tin cậy của hàng trăm doanh nghiệp tại Việt Nam.
                     </p>
-                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                    <p class="text-lg text-gray-600 mb-8 leading-relaxed" data-i18n="about.desc2">
                         Chúng tôi chuyên tạo ra những website không chỉ đẹp mắt mà còn hiệu quả, giúp khách hàng đạt được mục tiêu kinh doanh trong thời đại số.
                     </p>
                     
                     <div class="grid grid-cols-2 gap-6">
                         <div class="text-center">
                             <div class="text-3xl font-bold text-blue-500 mb-2">100+</div>
-                            <div class="text-gray-600">Dự Án Hoàn Thành</div>
+                            <div class="text-gray-600" data-i18n="about.stats1">Dự Án Hoàn Thành</div>
                         </div>
                         <div class="text-center">
                             <div class="text-3xl font-bold text-green-500 mb-2">50+</div>
-                            <div class="text-gray-600">Khách Hàng Hài Lòng</div>
+                            <div class="text-gray-600" data-i18n="about.stats2">Khách Hàng Hài Lòng</div>
                         </div>
                         <div class="text-center">
                             <div class="text-3xl font-bold text-purple-500 mb-2">5+</div>
-                            <div class="text-gray-600">Năm Kinh Nghiệm</div>
+                            <div class="text-gray-600" data-i18n="about.stats3">Năm Kinh Nghiệm</div>
                         </div>
                         <div class="text-center">
                             <div class="text-3xl font-bold text-red-500 mb-2">24/7</div>
-                            <div class="text-gray-600">Hỗ Trợ Khách Hàng</div>
+                            <div class="text-gray-600" data-i18n="about.stats4">Hỗ Trợ Khách Hàng</div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="fade-in">
                     <div class="trust-gradient p-8 rounded-2xl text-white">
-                        <h3 class="text-2xl font-bold mb-6">Tại Sao Chọn Chúng Tôi?</h3>
+                        <h3 class="text-2xl font-bold mb-6" data-i18n="about.whyChoose">Tại Sao Chọn Chúng Tôi?</h3>
                         <ul class="space-y-4">
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-emerald-400 mr-3 mt-1"></i>
-                                <span>Thiết kế responsive trên mọi thiết bị</span>
+                                <span data-i18n="about.reason1">Thiết kế responsive trên mọi thiết bị</span>
                             </li>
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-emerald-400 mr-3 mt-1"></i>
-                                <span>Tối ưu SEO và tốc độ tải trang</span>
+                                <span data-i18n="about.reason2">Tối ưu SEO và tốc độ tải trang</span>
                             </li>
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-emerald-400 mr-3 mt-1"></i>
-                                <span>Bảo hành và hỗ trợ dài hạn</span>
+                                <span data-i18n="about.reason3">Bảo hành và hỗ trợ dài hạn</span>
                             </li>
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-emerald-400 mr-3 mt-1"></i>
-                                <span>Giá cả cạnh tranh, minh bạch</span>
+                                <span data-i18n="about.reason4">Giá cả cạnh tranh, minh bạch</span>
                             </li>
                         </ul>
                     </div>
@@ -1599,8 +1706,8 @@
     <section id="contact" class="py-20 bg-gray-100">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16 fade-in">
-                <h2 class="text-4xl font-bold text-gray-800 mb-4">Liên Hệ Với Chúng Tôi</h2>
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                <h2 class="text-4xl font-bold text-gray-800 mb-4" data-i18n="contact.title">Liên Hệ Với Chúng Tôi</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-i18n="contact.subtitle">
                     Sẵn sàng bắt đầu dự án website của bạn? Hãy liên hệ ngay để được tư vấn miễn phí
                 </p>
             </div>
@@ -1608,43 +1715,45 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div class="fade-in">
                     <div class="bg-white p-8 rounded-2xl shadow-lg">
-                        <h3 class="text-2xl font-bold text-gray-800 mb-6">Gửi Tin Nhắn</h3>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-6" data-i18n="contact.form.title">Gửi Tin Nhắn</h3>
                         <form id="contact-form" class="space-y-6">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Họ và Tên *</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="contact.form.name">Họ và Tên *</label>
                                 <input type="text" name="name" required 
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="contact.form.email">Email *</label>
                                 <input type="email" name="email" required 
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Số Điện Thoại</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="contact.form.phone">Số Điện Thoại</label>
                                 <input type="tel" name="phone" 
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Dịch Vụ Quan Tâm</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="contact.form.service">Dịch Vụ Quan Tâm</label>
                                 <select name="service" 
                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                    <option value="">Chọn dịch vụ</option>
-                                    <option value="website-design">Thiết Kế Website</option>
-                                    <option value="ecommerce">Website Bán Hàng</option>
-                                    <option value="corporate">Website Doanh Nghiệp</option>
-                                    <option value="system">Website hệ thống ERP/CRM</option>
-                                    <option value="maintenance">Bảo Trì Website</option>
+                                    <option value="" data-i18n="contact.form.service.choose">Chọn dịch vụ</option>
+                                    <option value="website-design" data-i18n="contact.form.service.design">Thiết Kế Website</option>
+                                    <option value="ecommerce" data-i18n="contact.form.service.ecommerce">Website Bán Hàng</option>
+                                    <option value="corporate" data-i18n="contact.form.service.corporate">Website Doanh Nghiệp</option>
+                                    <option value="system" data-i18n="contact.form.service.system">Website hệ thống ERP/CRM</option>
+                                    <option value="maintenance" data-i18n="contact.form.service.maintenance">Bảo Trì Website</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Tin Nhắn *</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2" data-i18n="contact.form.message">Tin Nhắn *</label>
                                 <textarea name="message" rows="4" required 
                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                          data-i18n-placeholder="contact.form.placeholder"
                                           placeholder="Mô tả chi tiết về dự án của bạn..."></textarea>
                             </div>
                             <button type="submit" 
-                                    class="w-full trust-gradient hover:shadow-lg hover:shadow-slate-900/25 text-white py-3 px-6 rounded-lg font-semibold transition-colors duration-300">
+                                    class="w-full trust-gradient hover:shadow-lg hover:shadow-slate-900/25 text-white py-3 px-6 rounded-lg font-semibold transition-colors duration-300"
+                                    data-i18n="contact.form.submit">
                                 Gửi Tin Nhắn
                             </button>
                         </form>
@@ -1653,21 +1762,21 @@
 
                 <div class="fade-in">
                     <div class="trust-gradient p-8 rounded-2xl text-white h-full">
-                        <h3 class="text-2xl font-bold mb-8">Thông Tin Liên Hệ</h3>
+                        <h3 class="text-2xl font-bold mb-8" data-i18n="contact.info.title">Thông Tin Liên Hệ</h3>
                         
                         <div class="space-y-6">
                             <div class="flex items-start">
                                 <i class="fas fa-map-marker-alt text-2xl mr-4 mt-1 text-amber-300"></i>
                                 <div>
-                                    <h4 class="font-semibold mb-1">Địa Chỉ</h4>
-                                    <p class="text-gray-200">123 Đường ABC, Quận 1, TP. Hồ Chí Minh</p>
+                                    <h4 class="font-semibold mb-1" data-i18n="contact.info.address">Địa Chỉ</h4>
+                                    <p class="text-gray-200" data-i18n="contact.info.addressValue">123 Đường ABC, Quận 1, TP. Hồ Chí Minh</p>
                                 </div>
                             </div>
                             
                             <div class="flex items-start">
                                 <i class="fas fa-phone text-2xl mr-4 mt-1 text-amber-300"></i>
                                 <div>
-                                    <h4 class="font-semibold mb-1">Điện Thoại</h4>
+                                    <h4 class="font-semibold mb-1" data-i18n="contact.info.phone">Điện Thoại</h4>
                                     <p class="text-gray-200">+84 123 456 789</p>
                                 </div>
                             </div>
@@ -1675,7 +1784,7 @@
                             <div class="flex items-start">
                                 <i class="fas fa-envelope text-2xl mr-4 mt-1 text-amber-300"></i>
                                 <div>
-                                    <h4 class="font-semibold mb-1">Email</h4>
+                                    <h4 class="font-semibold mb-1" data-i18n="contact.info.email">Email</h4>
                                     <p class="text-gray-200">info@WebFolio.vn</p>
                                 </div>
                             </div>
@@ -1683,14 +1792,17 @@
                             <div class="flex items-start">
                                 <i class="fas fa-clock text-2xl mr-4 mt-1 text-amber-300"></i>
                                 <div>
-                                    <h4 class="font-semibold mb-1">Giờ Làm Việc</h4>
-                                    <p class="text-gray-200">Thứ 2 - Thứ 6: 8:00 - 18:00<br>Thứ 7: 8:00 - 12:00</p>
+                                    <h4 class="font-semibold mb-1" data-i18n="contact.info.hours">Giờ Làm Việc</h4>
+                                    <p class="text-gray-200">
+                                        <span data-i18n="contact.info.hoursValue1">Thứ 2 - Thứ 6: 8:00 - 18:00</span><br>
+                                        <span data-i18n="contact.info.hoursValue2">Thứ 7: 8:00 - 12:00</span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="mt-8 pt-8 border-t border-gray-500">
-                            <h4 class="font-semibold mb-4">Theo Dõi Chúng Tôi</h4>
+                            <h4 class="font-semibold mb-4" data-i18n="contact.social">Theo Dõi Chúng Tôi</h4>
                             <div class="flex space-x-4">
                                 <a href="#" class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 transition-all duration-300">
                                     <i class="fab fa-facebook-f"></i>
@@ -1721,7 +1833,7 @@
                         <i class="fas fa-code mr-2 text-amber-400"></i>
                         <span class="text-2xl font-bold">WebFolio.vn</span>
                     </div>
-                    <p class="text-gray-400 mb-4 leading-relaxed">
+                    <p class="text-gray-400 mb-4 leading-relaxed" data-i18n="footer.desc">
                         Chuyên thiết kế và phát triển website chuyên nghiệp, hiện đại và tối ưu SEO. 
                         Đồng hành cùng doanh nghiệp trong chuyển đổi số.
                     </p>
@@ -1742,18 +1854,18 @@
                 </div>
                 
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Dịch Vụ</h4>
+                    <h4 class="text-lg font-semibold mb-4" data-i18n="footer.services">Dịch Vụ</h4>
                     <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Thiết Kế Website</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Website Bán Hàng</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Website Doanh Nghiệp</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Tối Ưu SEO</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Bảo Trì Website</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300" data-i18n="footer.services.design">Thiết Kế Website</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300" data-i18n="footer.services.ecommerce">Website Bán Hàng</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300" data-i18n="footer.services.corporate">Website Doanh Nghiệp</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300" data-i18n="footer.services.seo">Tối Ưu SEO</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300" data-i18n="footer.services.maintenance">Bảo Trì Website</a></li>
                     </ul>
                 </div>
                 
                 <div>
-                    <h4 class="text-lg font-semibold mb-4">Liên Hệ</h4>
+                    <h4 class="text-lg font-semibold mb-4" data-i18n="footer.contact">Liên Hệ</h4>
                     <ul class="space-y-2 text-gray-400">
                         <li class="flex items-center">
                             <i class="fas fa-map-marker-alt mr-2"></i>
@@ -1772,7 +1884,7 @@
             </div>
             
             <div class="border-t border-gray-700 mt-8 pt-8 text-center">
-                <p class="text-gray-400">
+                <p class="text-gray-400" data-i18n="footer.copyright">
                     &copy; 2025 WebFolio.vn. Tất cả quyền được bảo lưu.
                 </p>
             </div>
@@ -1783,6 +1895,82 @@
     <button id="back-to-top" class="fixed bottom-8 right-8 trust-gradient hover:shadow-lg hover:shadow-slate-900/25 text-white w-12 h-12 rounded-full shadow-lg hidden transition-all duration-300 z-40">
         <i class="fas fa-arrow-up"></i>
     </button>
+
+    <!-- AI Chatbox -->
+    <div id="ai-chatbox-container" class="fixed bottom-8 right-8 z-50">
+        <!-- Chat Button -->
+        <button id="chat-toggle" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110">
+            <i class="fas fa-comments text-xl"></i>
+            <span class="absolute top-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white animate-pulse"></span>
+        </button>
+        
+        <!-- Chat Window -->
+        <div id="chat-window" class="hidden absolute bottom-20 right-0 w-96 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 transform scale-95 opacity-0">
+            <!-- Chat Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="relative">
+                        <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                            <i class="fas fa-robot text-blue-600 text-lg"></i>
+                        </div>
+                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></span>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold" data-i18n="chat.title">AI Assistant</h3>
+                        <p class="text-xs opacity-90" data-i18n="chat.subtitle">Chúng tôi sẵn sàng hỗ trợ bạn</p>
+                    </div>
+                </div>
+                <button id="chat-close" class="text-white hover:bg-white hover:bg-opacity-20 rounded-lg p-2 transition-colors duration-200">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- Chat Messages -->
+            <div id="chat-messages" class="h-96 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                <!-- Welcome Message -->
+                <div class="flex items-start space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg shadow-sm max-w-[80%]">
+                        <p class="text-gray-800 text-sm" data-i18n="chat.welcome">Xin chào! Tôi là AI Assistant của WebFolio. Tôi có thể giúp bạn tìm hiểu về dịch vụ thiết kế website, báo giá, hoặc trả lời bất kỳ câu hỏi nào của bạn. Bạn cần hỗ trợ gì?</p>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <button class="quick-action bg-white hover:bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm border border-gray-200 transition-colors duration-200" data-action="pricing">
+                        <i class="fas fa-tag mr-1"></i> <span data-i18n="chat.quick.pricing">Xem bảng giá</span>
+                    </button>
+                    <button class="quick-action bg-white hover:bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm border border-gray-200 transition-colors duration-200" data-action="services">
+                        <i class="fas fa-briefcase mr-1"></i> <span data-i18n="chat.quick.services">Dịch vụ</span>
+                    </button>
+                    <button class="quick-action bg-white hover:bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm border border-gray-200 transition-colors duration-200" data-action="contact">
+                        <i class="fas fa-phone mr-1"></i> <span data-i18n="chat.quick.contact">Liên hệ tư vấn</span>
+                    </button>
+                    <button class="quick-action bg-white hover:bg-gray-100 text-gray-700 px-3 py-1.5 rounded-full text-sm border border-gray-200 transition-colors duration-200" data-action="portfolio">
+                        <i class="fas fa-images mr-1"></i> <span data-i18n="chat.quick.portfolio">Xem portfolio</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Chat Input -->
+            <div class="border-t border-gray-200 p-4 bg-white">
+                <form id="chat-form" class="flex items-center space-x-2">
+                    <input type="text" 
+                           id="chat-input" 
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                           placeholder="Nhập tin nhắn..."
+                           data-i18n-placeholder="chat.input.placeholder">
+                    <button type="submit" 
+                            class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white p-2 rounded-full transition-colors duration-200 w-10 h-10 flex items-center justify-center">
+                        <i class="fas fa-paper-plane text-sm"></i>
+                    </button>
+                </form>
+                <p class="text-xs text-gray-500 mt-2 text-center" data-i18n="chat.powered">Powered by AI</p>
+            </div>
+        </div>
+    </div>
 
     <script>
         $(document).ready(function() {
@@ -2016,6 +2204,197 @@
                         hasAnimated = true;
                     }
                 }
+            });
+            
+            // Chatbox functionality
+            var chatOpen = false;
+            var chatMessages = $('#chat-messages');
+            
+            // Toggle chat window
+            $('#chat-toggle').click(function() {
+                if (!chatOpen) {
+                    $('#chat-window').removeClass('hidden');
+                    setTimeout(function() {
+                        $('#chat-window').addClass('show');
+                    }, 10);
+                    chatOpen = true;
+                    $('#chat-input').focus();
+                } else {
+                    $('#chat-window').removeClass('show');
+                    setTimeout(function() {
+                        $('#chat-window').addClass('hidden');
+                    }, 300);
+                    chatOpen = false;
+                }
+            });
+            
+            // Close chat window
+            $('#chat-close').click(function() {
+                $('#chat-window').removeClass('show');
+                setTimeout(function() {
+                    $('#chat-window').addClass('hidden');
+                }, 300);
+                chatOpen = false;
+            });
+            
+            // Quick action buttons
+            $('.quick-action').click(function() {
+                var action = $(this).data('action');
+                var userMessage = $(this).text().trim();
+                addUserMessage(userMessage);
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                // Simulate AI response
+                setTimeout(function() {
+                    removeTypingIndicator();
+                    var response = '';
+                    switch(action) {
+                        case 'pricing':
+                            response = t('chat.responses.pricing');
+                            break;
+                        case 'services':
+                            response = t('chat.responses.services');
+                            break;
+                        case 'contact':
+                            response = t('chat.responses.contact');
+                            break;
+                        case 'portfolio':
+                            response = t('chat.responses.portfolio');
+                            break;
+                        default:
+                            response = t('chat.responses.default');
+                    }
+                    addBotMessage(response);
+                }, 1000);
+            });
+            
+            // Chat form submission
+            $('#chat-form').submit(function(e) {
+                e.preventDefault();
+                var message = $('#chat-input').val().trim();
+                if (!message) return;
+                
+                addUserMessage(message);
+                $('#chat-input').val('');
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                // Simulate AI response
+                setTimeout(function() {
+                    removeTypingIndicator();
+                    
+                    // Simple keyword matching for demo
+                    var response = '';
+                    var lowerMessage = message.toLowerCase();
+                    
+                    if (lowerMessage.includes('giá') || lowerMessage.includes('price') || lowerMessage.includes('cost')) {
+                        response = t('chat.responses.pricing');
+                    } else if (lowerMessage.includes('dịch vụ') || lowerMessage.includes('service')) {
+                        response = t('chat.responses.services');
+                    } else if (lowerMessage.includes('liên hệ') || lowerMessage.includes('contact') || lowerMessage.includes('phone')) {
+                        response = t('chat.responses.contact');
+                    } else if (lowerMessage.includes('portfolio') || lowerMessage.includes('dự án') || lowerMessage.includes('project')) {
+                        response = t('chat.responses.portfolio');
+                    } else {
+                        response = t('chat.responses.default');
+                    }
+                    
+                    addBotMessage(response);
+                }, 1500);
+            });
+            
+            // Helper functions for chat
+            function addUserMessage(message) {
+                var messageHtml = `
+                    <div class="flex items-start space-x-2 justify-end chat-message">
+                        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-3 rounded-lg shadow-sm max-w-[80%]">
+                            <p class="text-sm">${escapeHtml(message)}</p>
+                        </div>
+                        <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-user text-gray-600 text-sm"></i>
+                        </div>
+                    </div>
+                `;
+                chatMessages.append(messageHtml);
+                scrollToBottom();
+            }
+            
+            function addBotMessage(message) {
+                var formattedMessage = message.replace(/\n/g, '<br>');
+                var messageHtml = `
+                    <div class="flex items-start space-x-2 chat-message">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg shadow-sm max-w-[80%]">
+                            <p class="text-gray-800 text-sm">${formattedMessage}</p>
+                        </div>
+                    </div>
+                `;
+                chatMessages.append(messageHtml);
+                scrollToBottom();
+            }
+            
+            function showTypingIndicator() {
+                var typingHtml = `
+                    <div class="flex items-start space-x-2 typing-message">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                `;
+                chatMessages.append(typingHtml);
+                scrollToBottom();
+            }
+            
+            function removeTypingIndicator() {
+                $('.typing-message').remove();
+            }
+            
+            function scrollToBottom() {
+                chatMessages.scrollTop(chatMessages[0].scrollHeight);
+            }
+            
+            function escapeHtml(text) {
+                var map = {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                };
+                return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+            }
+            
+            // Update chatbox texts when language changes
+            $('.lang-option').click(function() {
+                currentLang = $(this).data('lang');
+                localStorage.setItem('selectedLanguage', currentLang);
+                updateTexts();
+                updateLanguageUI();
+                $('#lang-dropdown, #mobile-lang-dropdown').addClass('hidden');
+                
+                // Clear chat messages and show welcome message again
+                chatMessages.empty();
+                var welcomeHtml = `
+                    <div class="flex items-start space-x-2">
+                        <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg shadow-sm max-w-[80%]">
+                            <p class="text-gray-800 text-sm">${t('chat.welcome')}</p>
+                        </div>
+                    </div>
+                `;
+                chatMessages.append(welcomeHtml);
             });
         });
     </script>
