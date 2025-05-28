@@ -43,7 +43,7 @@ sudo apt install -y nodejs
 ```bash
 cd /var/www/webroot
 sudo git clone git@github.com:trieuconcrete/laravel-admin.git webfolio
-cd webfolio
+cd webfolio/src
 composer install
 cp .env.example .env
 php artisan key:generate
