@@ -62,9 +62,464 @@
         .bg-accent-gold {
             background-color: #d97706;
         }
+        /* Language Switcher Styles */
+        .lang-switcher {
+            position: relative;
+        }
+        .lang-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-top: 8px;
+            min-width: 150px;
+        }
+        .lang-option {
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .lang-option:hover {
+            background-color: #f3f4f6;
+        }
+        .lang-option.active {
+            background-color: #e5e7eb;
+        }
+        .flag-icon {
+            width: 20px;
+            height: 15px;
+            display: inline-block;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+        .flag-vi {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 20'%3E%3Crect width='30' height='20' fill='%23da251d'/%3E%3Cpolygon points='15,4 16.5,9 21.5,9 17.5,12 19,17 15,14 11,17 12.5,12 8.5,9 13.5,9' fill='%23ffff00'/%3E%3C/svg%3E");
+        }
+        .flag-en {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 30'%3E%3CclipPath id='s'%3E%3Cpath d='M0,0 v30 h60 v-30 z'/%3E%3C/clipPath%3E%3CclipPath id='t'%3E%3Cpath d='M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z'/%3E%3C/clipPath%3E%3Cg clip-path='url(%23s)'%3E%3Cpath d='M0,0 v30 h60 v-30 z' fill='%23012169'/%3E%3Cpath d='M0,0 L60,30 M60,0 L0,30' stroke='%23fff' stroke-width='6'/%3E%3Cpath d='M0,0 L60,30 M60,0 L0,30' clip-path='url(%23t)' stroke='%23C8102E' stroke-width='4'/%3E%3Cpath d='M30,0 v30 M0,15 h60' stroke='%23fff' stroke-width='10'/%3E%3Cpath d='M30,0 v30 M0,15 h60' stroke='%23C8102E' stroke-width='6'/%3E%3C/g%3E%3C/svg%3E");
+        }
     </style>
 </head>
 <body class="smooth-scroll bg-gray-50">
+    <!-- Language Data -->
+    <script>
+        const translations = {
+            vi: {
+                // Navigation
+                'nav.home': 'Trang Chủ',
+                'nav.services': 'Dịch Vụ',
+                'nav.portfolio': 'Portfolio',
+                'nav.themes': 'Kho Theme',
+                'nav.pricing': 'Bảng Giá',
+                'nav.about': 'Về Chúng Tôi',
+                'nav.contact': 'Liên Hệ',
+                
+                // Hero Section
+                'hero.badge': '⭐ #1 Công ty thiết kế website tại Việt Nam',
+                'hero.title': 'Thiết Kế Website',
+                'hero.highlight': 'Chuyên Nghiệp',
+                'hero.description': 'Chúng tôi tạo ra những website hiện đại, responsive và tối ưu SEO để giúp doanh nghiệp của bạn thành công trong thời đại số.',
+                'hero.feature1': 'Responsive Design',
+                'hero.feature2': 'Tốc Độ Cao',
+                'hero.feature3': 'SEO Tối Ưu',
+                'hero.feature4': 'Bảo Mật 24/7',
+                'hero.cta1': 'Bắt Đầu Ngay',
+                'hero.cta2': 'Xem Portfolio',
+                'hero.stats.projects': 'Dự Án',
+                'hero.stats.clients': 'Khách Hàng',
+                'hero.stats.experience': 'Năm Kinh Nghiệm',
+                'hero.stats.support': 'Hỗ Trợ',
+                
+                // Services Section
+                'services.title': 'Dịch Vụ Của Chúng Tôi',
+                'services.subtitle': 'Chúng tôi cung cấp giải pháp toàn diện cho nhu cầu thiết kế và phát triển website của bạn',
+                'services.responsive.title': 'Responsive Design',
+                'services.responsive.desc': 'Website tự động thích ứng với mọi thiết bị từ mobile, tablet đến desktop, đảm bảo trải nghiệm tốt nhất cho người dùng.',
+                'services.seo.title': 'SEO Tối Ưu',
+                'services.seo.desc': 'Tối ưu hóa website để đạt thứ hạng cao trên Google, tăng khả năng tiếp cận khách hàng tiềm năng.',
+                'services.speed.title': 'Tốc Độ Cao',
+                'services.speed.desc': 'Website được tối ưu hóa để tải nhanh, cải thiện trải nghiệm người dùng và thứ hạng SEO.',
+                'services.security.title': 'Bảo Mật Cao',
+                'services.security.desc': 'Áp dụng các biện pháp bảo mật tiên tiến để bảo vệ website và dữ liệu khách hàng.',
+                'services.management.title': 'Quản Lý Dễ Dàng',
+                'services.management.desc': 'Giao diện quản trị thân thiện, dễ sử dụng, giúp bạn cập nhật nội dung một cách nhanh chóng.',
+                'services.support.title': 'Hỗ Trợ 24/7',
+                'services.support.desc': 'Đội ngũ hỗ trợ kỹ thuật luôn sẵn sàng giúp đỡ bạn mọi lúc, mọi nơi.',
+                
+                // Portfolio Section
+                'portfolio.title': 'Portfolio',
+                'portfolio.subtitle': 'Khám phá những dự án website chúng tôi đã thực hiện thành công',
+                'portfolio.viewDetails': 'Xem Chi Tiết',
+                'portfolio.completed': 'Hoàn thành',
+                'portfolio.viewAll': 'Xem Tất Cả Portfolio',
+                'portfolio.viewMore': 'Bạn muốn xem thêm dự án của chúng tôi?',
+                
+                // Themes Section
+                'themes.title': 'Kho Theme HTML',
+                'themes.subtitle': 'Bộ sưu tập theme HTML chuyên nghiệp, responsive và dễ tùy chỉnh cho mọi loại hình doanh nghiệp',
+                'themes.filter.all': 'Tất Cả',
+                'themes.filter.business': 'Doanh Nghiệp',
+                'themes.filter.ecommerce': 'Bán Hàng',
+                'themes.filter.portfolio': 'Portfolio',
+                'themes.filter.blog': 'Blog',
+                'themes.filter.landing': 'Landing Page',
+                'themes.viewDemo': 'Xem Demo',
+                'themes.download': 'Tải Về',
+                'themes.loadMore': 'Xem Thêm Theme',
+                'themes.whyChoose': 'Tại Sao Chọn Theme Của Chúng Tôi?',
+                'themes.feature1.title': '100% Responsive',
+                'themes.feature1.desc': 'Tất cả theme đều tối ưu hoàn hảo trên mọi thiết bị từ mobile đến desktop.',
+                'themes.feature2.title': 'Code Sạch & Tối Ưu',
+                'themes.feature2.desc': 'Mã nguồn được viết theo chuẩn W3C, tải nhanh và dễ tùy chỉnh.',
+                'themes.feature3.title': 'Hỗ Trợ Trọn Đời',
+                'themes.feature3.desc': 'Nhận hỗ trợ kỹ thuật và cập nhật miễn phí trọn đời cho tất cả theme.',
+                'themes.new': 'MỚI',
+                'themes.hot': 'HOT',
+                
+                // Pricing Section
+                'pricing.title': 'Bảng Giá Dịch Vụ',
+                'pricing.subtitle': 'Chọn gói dịch vụ phù hợp với nhu cầu và ngân sách của bạn',
+                'pricing.basic.title': 'Gói Cơ Bản',
+                'pricing.basic.desc': 'Phù hợp cho cá nhân và doanh nghiệp nhỏ',
+                'pricing.pro.title': 'Gói Chuyên Nghiệp',
+                'pricing.pro.desc': 'Lựa chọn tốt nhất cho doanh nghiệp',
+                'pricing.pro.badge': 'PHỔ BIẾN NHẤT',
+                'pricing.enterprise.title': 'Gói Doanh Nghiệp',
+                'pricing.enterprise.desc': 'Giải pháp toàn diện cho tập đoán lớn',
+                'pricing.enterprise.price': 'Liên Hệ',
+                'pricing.enterprise.quote': 'Báo giá theo yêu cầu',
+                'pricing.choose': 'Chọn Gói Này',
+                'pricing.contact': 'Liên Hệ Ngay',
+                'pricing.commitment': 'Cam Kết Của Chúng Tôi',
+                'pricing.commitment1.title': 'Giao Hàng Đúng Hẹn',
+                'pricing.commitment1.desc': 'Cam kết hoàn thành dự án đúng timeline đã thỏa thuận',
+                'pricing.commitment2.title': 'Sửa Đổi Không Giới Hạn',
+                'pricing.commitment2.desc': 'Điều chỉnh thiết kế cho đến khi bạn hoàn toàn hài lòng',
+                'pricing.commitment3.title': 'Chất Lượng Đảm Bảo',
+                'pricing.commitment3.desc': 'Hoàn tiền 100% nếu không hài lòng với chất lượng',
+                
+                // FAQ Section
+                'faq.title': 'Câu Hỏi Thường Gặp',
+                'faq.q1': 'Thời gian hoàn thành dự án là bao lâu?',
+                'faq.a1': 'Gói Cơ Bản: 2-3 tuần, Gói Chuyên Nghiệp: 4-6 tuần, Gói Doanh Nghiệp: 8-12 tuần tùy thuộc vào độ phức tạp.',
+                'faq.q2': 'Có được xem trước thiết kế trước khi thanh toán?',
+                'faq.a2': 'Có, chúng tôi sẽ cung cấp mockup và wireframe để bạn xem trước và góp ý trước khi bắt đầu phát triển.',
+                'faq.q3': 'Có hỗ trợ hosting và tên miền không?',
+                'faq.a3': 'Chúng tôi hỗ trợ tư vấn và thiết lập hosting, tên miền. Chi phí hosting/domain sẽ được tính riêng theo nhà cung cấp.',
+                'faq.q4': 'Sau khi hoàn thành có được chỉnh sửa không?',
+                'faq.a4': 'Trong thời gian bảo hành, chúng tôi hỗ trợ sửa lỗi miễn phí. Các thay đổi về thiết kế/tính năng sẽ có chi phí riêng.',
+                
+                // About Section
+                'about.title': 'Về WebFolio.vn',
+                'about.desc1': 'Với hơn 5 năm kinh nghiệm trong lĩnh vực thiết kế và phát triển website, WebFolio.vn đã trở thành đối tác tin cậy của hàng trăm doanh nghiệp tại Việt Nam.',
+                'about.desc2': 'Chúng tôi chuyên tạo ra những website không chỉ đẹp mắt mà còn hiệu quả, giúp khách hàng đạt được mục tiêu kinh doanh trong thời đại số.',
+                'about.stats1': 'Dự Án Hoàn Thành',
+                'about.stats2': 'Khách Hàng Hài Lòng',
+                'about.stats3': 'Năm Kinh Nghiệm',
+                'about.stats4': 'Hỗ Trợ Khách Hàng',
+                'about.whyChoose': 'Tại Sao Chọn Chúng Tôi?',
+                'about.reason1': 'Thiết kế responsive trên mọi thiết bị',
+                'about.reason2': 'Tối ưu SEO và tốc độ tải trang',
+                'about.reason3': 'Bảo hành và hỗ trợ dài hạn',
+                'about.reason4': 'Giá cả cạnh tranh, minh bạch',
+                
+                // Contact Section
+                'contact.title': 'Liên Hệ Với Chúng Tôi',
+                'contact.subtitle': 'Sẵn sàng bắt đầu dự án website của bạn? Hãy liên hệ ngay để được tư vấn miễn phí',
+                'contact.form.title': 'Gửi Tin Nhắn',
+                'contact.form.name': 'Họ và Tên *',
+                'contact.form.email': 'Email *',
+                'contact.form.phone': 'Số Điện Thoại',
+                'contact.form.service': 'Dịch Vụ Quan Tâm',
+                'contact.form.service.choose': 'Chọn dịch vụ',
+                'contact.form.service.design': 'Thiết Kế Website',
+                'contact.form.service.ecommerce': 'Website Bán Hàng',
+                'contact.form.service.corporate': 'Website Doanh Nghiệp',
+                'contact.form.service.system': 'Website hệ thống ERP/CRM',
+                'contact.form.service.maintenance': 'Bảo Trì Website',
+                'contact.form.message': 'Tin Nhắn *',
+                'contact.form.placeholder': 'Mô tả chi tiết về dự án của bạn...',
+                'contact.form.submit': 'Gửi Tin Nhắn',
+                'contact.info.title': 'Thông Tin Liên Hệ',
+                'contact.info.address': 'Địa Chỉ',
+                'contact.info.addressValue': '123 Đường ABC, Quận 1, TP. Hồ Chí Minh',
+                'contact.info.phone': 'Điện Thoại',
+                'contact.info.email': 'Email',
+                'contact.info.hours': 'Giờ Làm Việc',
+                'contact.info.hoursValue1': 'Thứ 2 - Thứ 6: 8:00 - 18:00',
+                'contact.info.hoursValue2': 'Thứ 7: 8:00 - 12:00',
+                'contact.social': 'Theo Dõi Chúng Tôi',
+                
+                // Footer
+                'footer.desc': 'Chuyên thiết kế và phát triển website chuyên nghiệp, hiện đại và tối ưu SEO. Đồng hành cùng doanh nghiệp trong chuyển đổi số.',
+                'footer.services': 'Dịch Vụ',
+                'footer.services.design': 'Thiết Kế Website',
+                'footer.services.ecommerce': 'Website Bán Hàng',
+                'footer.services.corporate': 'Website Doanh Nghiệp',
+                'footer.services.seo': 'Tối Ưu SEO',
+                'footer.services.maintenance': 'Bảo Trì Website',
+                'footer.contact': 'Liên Hệ',
+                'footer.copyright': '© 2025 WebFolio.vn. Tất cả quyền được bảo lưu.',
+                
+                // Form Messages
+                'form.error.name': 'Vui lòng nhập họ và tên',
+                'form.error.email': 'Vui lòng nhập địa chỉ email',
+                'form.error.emailInvalid': 'Vui lòng nhập địa chỉ email hợp lệ',
+                'form.error.message': 'Vui lòng nhập tin nhắn',
+                'form.success': 'Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.',
+                'form.sending': 'Đang gửi...',
+                
+                // Pricing Features
+                'pricing.feature.responsive': 'Thiết kế responsive trên mọi thiết bị',
+                'pricing.feature.pages5': 'Tối đa 5 trang nội dung',
+                'pricing.feature.pages15': 'Tối đa 15 trang nội dung',
+                'pricing.feature.pagesUnlimited': 'Không giới hạn số trang',
+                'pricing.feature.seoBasic': 'Tối ưu SEO cơ bản',
+                'pricing.feature.seoAdvanced': 'Tối ưu SEO chuyên sâu',
+                'pricing.feature.seoExpert': 'Tối ưu SEO chuyên gia',
+                'pricing.feature.contactForm': 'Form liên hệ đơn giản',
+                'pricing.feature.warranty12': 'Bảo hành 12 tháng',
+                'pricing.feature.warranty24': 'Bảo hành 24 tháng',
+                'pricing.feature.warrantyLifetime': 'Bảo hành trọn đời',
+                'pricing.feature.supportBasic': 'Hỗ trợ kỹ thuật cơ bản',
+                'pricing.feature.supportPriority': 'Hỗ trợ ưu tiên',
+                'pricing.feature.supportDedicated': 'Dedicated support team',
+                'pricing.feature.analytics': 'Tích hợp Google Analytics',
+                'pricing.feature.cms': 'Hệ thống quản trị nội dung',
+                'pricing.feature.social': 'Tích hợp mạng xã hội',
+                'pricing.feature.erp': 'Tích hợp hệ thống ERP/CRM',
+                'pricing.feature.multilingual': 'Đa ngôn ngữ & đa tiền tệ',
+                'pricing.feature.security': 'Bảo mật cao',
+                'pricing.feature.custom': 'Thiết kế tùy theo yêu cầu',
+                'pricing.feature.responsivePremium': 'Thiết kế responsive cao cấp'
+            },
+            en: {
+                // Navigation
+                'nav.home': 'Home',
+                'nav.services': 'Services',
+                'nav.portfolio': 'Portfolio',
+                'nav.themes': 'Theme Store',
+                'nav.pricing': 'Pricing',
+                'nav.about': 'About Us',
+                'nav.contact': 'Contact',
+                
+                // Hero Section
+                'hero.badge': '⭐ #1 Website Design Company in Vietnam',
+                'hero.title': 'Professional Website',
+                'hero.highlight': 'Design',
+                'hero.description': 'We create modern, responsive and SEO-optimized websites to help your business succeed in the digital age.',
+                'hero.feature1': 'Responsive Design',
+                'hero.feature2': 'High Speed',
+                'hero.feature3': 'SEO Optimized',
+                'hero.feature4': '24/7 Security',
+                'hero.cta1': 'Get Started',
+                'hero.cta2': 'View Portfolio',
+                'hero.stats.projects': 'Projects',
+                'hero.stats.clients': 'Clients',
+                'hero.stats.experience': 'Years Experience',
+                'hero.stats.support': 'Support',
+                
+                // Services Section
+                'services.title': 'Our Services',
+                'services.subtitle': 'We provide comprehensive solutions for your website design and development needs',
+                'services.responsive.title': 'Responsive Design',
+                'services.responsive.desc': 'Websites automatically adapt to all devices from mobile, tablet to desktop, ensuring the best user experience.',
+                'services.seo.title': 'SEO Optimization',
+                'services.seo.desc': 'Optimize your website to achieve high rankings on Google, increasing reach to potential customers.',
+                'services.speed.title': 'High Speed',
+                'services.speed.desc': 'Websites are optimized for fast loading, improving user experience and SEO rankings.',
+                'services.security.title': 'High Security',
+                'services.security.desc': 'Apply advanced security measures to protect websites and customer data.',
+                'services.management.title': 'Easy Management',
+                'services.management.desc': 'User-friendly admin interface, easy to use, helping you update content quickly.',
+                'services.support.title': '24/7 Support',
+                'services.support.desc': 'Our technical support team is always ready to help you anytime, anywhere.',
+                
+                // Portfolio Section
+                'portfolio.title': 'Portfolio',
+                'portfolio.subtitle': 'Explore the website projects we have successfully completed',
+                'portfolio.viewDetails': 'View Details',
+                'portfolio.completed': 'Completed',
+                'portfolio.viewAll': 'View All Portfolio',
+                'portfolio.viewMore': 'Want to see more of our projects?',
+                
+                // Themes Section
+                'themes.title': 'HTML Theme Store',
+                'themes.subtitle': 'Collection of professional, responsive and easily customizable HTML themes for all types of businesses',
+                'themes.filter.all': 'All',
+                'themes.filter.business': 'Business',
+                'themes.filter.ecommerce': 'E-Commerce',
+                'themes.filter.portfolio': 'Portfolio',
+                'themes.filter.blog': 'Blog',
+                'themes.filter.landing': 'Landing Page',
+                'themes.viewDemo': 'View Demo',
+                'themes.download': 'Download',
+                'themes.loadMore': 'Load More Themes',
+                'themes.whyChoose': 'Why Choose Our Themes?',
+                'themes.feature1.title': '100% Responsive',
+                'themes.feature1.desc': 'All themes are perfectly optimized on all devices from mobile to desktop.',
+                'themes.feature2.title': 'Clean & Optimized Code',
+                'themes.feature2.desc': 'Source code written according to W3C standards, fast loading and easy to customize.',
+                'themes.feature3.title': 'Lifetime Support',
+                'themes.feature3.desc': 'Get lifetime technical support and free updates for all themes.',
+                'themes.new': 'NEW',
+                'themes.hot': 'HOT',
+                
+                // Pricing Section
+                'pricing.title': 'Service Pricing',
+                'pricing.subtitle': 'Choose the service package that suits your needs and budget',
+                'pricing.basic.title': 'Basic Plan',
+                'pricing.basic.desc': 'Suitable for individuals and small businesses',
+                'pricing.pro.title': 'Professional Plan',
+                'pricing.pro.desc': 'Best choice for businesses',
+                'pricing.pro.badge': 'MOST POPULAR',
+                'pricing.enterprise.title': 'Enterprise Plan',
+                'pricing.enterprise.desc': 'Comprehensive solution for large corporations',
+                'pricing.enterprise.price': 'Contact',
+                'pricing.enterprise.quote': 'Quote on request',
+                'pricing.choose': 'Choose This Plan',
+                'pricing.contact': 'Contact Now',
+                'pricing.commitment': 'Our Commitment',
+                'pricing.commitment1.title': 'On-Time Delivery',
+                'pricing.commitment1.desc': 'Committed to completing projects on the agreed timeline',
+                'pricing.commitment2.title': 'Unlimited Revisions',
+                'pricing.commitment2.desc': 'Adjust the design until you are completely satisfied',
+                'pricing.commitment3.title': 'Quality Guarantee',
+                'pricing.commitment3.desc': '100% refund if not satisfied with quality',
+                
+                // FAQ Section
+                'faq.title': 'Frequently Asked Questions',
+                'faq.q1': 'How long does it take to complete a project?',
+                'faq.a1': 'Basic Plan: 2-3 weeks, Professional Plan: 4-6 weeks, Enterprise Plan: 8-12 weeks depending on complexity.',
+                'faq.q2': 'Can I preview the design before payment?',
+                'faq.a2': 'Yes, we will provide mockups and wireframes for you to preview and provide feedback before starting development.',
+                'faq.q3': 'Do you support hosting and domain?',
+                'faq.a3': 'We provide consultation and setup for hosting and domain. Hosting/domain costs will be charged separately according to the provider.',
+                'faq.q4': 'Can I make changes after completion?',
+                'faq.a4': 'During the warranty period, we support bug fixes for free. Design/feature changes will have separate costs.',
+                
+                // About Section
+                'about.title': 'About WebFolio.vn',
+                'about.desc1': 'With over 5 years of experience in website design and development, WebFolio.vn has become a trusted partner of hundreds of businesses in Vietnam.',
+                'about.desc2': 'We specialize in creating websites that are not only beautiful but also effective, helping customers achieve their business goals in the digital age.',
+                'about.stats1': 'Projects Completed',
+                'about.stats2': 'Happy Clients',
+                'about.stats3': 'Years Experience',
+                'about.stats4': 'Customer Support',
+                'about.whyChoose': 'Why Choose Us?',
+                'about.reason1': 'Responsive design on all devices',
+                'about.reason2': 'SEO optimization and page loading speed',
+                'about.reason3': 'Long-term warranty and support',
+                'about.reason4': 'Competitive, transparent pricing',
+                
+                // Contact Section
+                'contact.title': 'Contact Us',
+                'contact.subtitle': 'Ready to start your website project? Contact us now for a free consultation',
+                'contact.form.title': 'Send Message',
+                'contact.form.name': 'Full Name *',
+                'contact.form.email': 'Email *',
+                'contact.form.phone': 'Phone Number',
+                'contact.form.service': 'Service of Interest',
+                'contact.form.service.choose': 'Choose service',
+                'contact.form.service.design': 'Website Design',
+                'contact.form.service.ecommerce': 'E-Commerce Website',
+                'contact.form.service.corporate': 'Corporate Website',
+                'contact.form.service.system': 'ERP/CRM System Website',
+                'contact.form.service.maintenance': 'Website Maintenance',
+                'contact.form.message': 'Message *',
+                'contact.form.placeholder': 'Describe your project in detail...',
+                'contact.form.submit': 'Send Message',
+                'contact.info.title': 'Contact Information',
+                'contact.info.address': 'Address',
+                'contact.info.addressValue': '123 ABC Street, District 1, Ho Chi Minh City',
+                'contact.info.phone': 'Phone',
+                'contact.info.email': 'Email',
+                'contact.info.hours': 'Working Hours',
+                'contact.info.hoursValue1': 'Monday - Friday: 8:00 AM - 6:00 PM',
+                'contact.info.hoursValue2': 'Saturday: 8:00 AM - 12:00 PM',
+                'contact.social': 'Follow Us',
+                
+                // Footer
+                'footer.desc': 'Specializing in professional, modern and SEO-optimized website design and development. Accompanying businesses in digital transformation.',
+                'footer.services': 'Services',
+                'footer.services.design': 'Website Design',
+                'footer.services.ecommerce': 'E-Commerce Website',
+                'footer.services.corporate': 'Corporate Website',
+                'footer.services.seo': 'SEO Optimization',
+                'footer.services.maintenance': 'Website Maintenance',
+                'footer.contact': 'Contact',
+                'footer.copyright': '© 2025 WebFolio.vn. All rights reserved.',
+                
+                // Form Messages
+                'form.error.name': 'Please enter your name',
+                'form.error.email': 'Please enter your email',
+                'form.error.emailInvalid': 'Please enter a valid email address',
+                'form.error.message': 'Please enter a message',
+                'form.success': 'Thank you for contacting us! We will respond as soon as possible.',
+                'form.sending': 'Sending...',
+                
+                // Pricing Features
+                'pricing.feature.responsive': 'Responsive design on all devices',
+                'pricing.feature.pages5': 'Up to 5 content pages',
+                'pricing.feature.pages15': 'Up to 15 content pages',
+                'pricing.feature.pagesUnlimited': 'Unlimited pages',
+                'pricing.feature.seoBasic': 'Basic SEO optimization',
+                'pricing.feature.seoAdvanced': 'Advanced SEO optimization',
+                'pricing.feature.seoExpert': 'Expert SEO optimization',
+                'pricing.feature.contactForm': 'Simple contact form',
+                'pricing.feature.warranty12': '12-month warranty',
+                'pricing.feature.warranty24': '24-month warranty',
+                'pricing.feature.warrantyLifetime': 'Lifetime warranty',
+                'pricing.feature.supportBasic': 'Basic technical support',
+                'pricing.feature.supportPriority': 'Priority support',
+                'pricing.feature.supportDedicated': 'Dedicated support team',
+                'pricing.feature.analytics': 'Google Analytics integration',
+                'pricing.feature.cms': 'Content management system',
+                'pricing.feature.social': 'Social media integration',
+                'pricing.feature.erp': 'ERP/CRM system integration',
+                'pricing.feature.multilingual': 'Multi-language & multi-currency',
+                'pricing.feature.security': 'High security',
+                'pricing.feature.custom': 'Custom design on request',
+                'pricing.feature.responsivePremium': 'Premium responsive design'
+            }
+        };
+        
+        // Current language
+        let currentLang = localStorage.getItem('selectedLanguage') || 'vi';
+        
+        // Translation function
+        function t(key) {
+            return translations[currentLang][key] || translations['vi'][key] || key;
+        }
+        
+        // Update text function
+        function updateTexts() {
+            $('[data-i18n]').each(function() {
+                const key = $(this).data('i18n');
+                $(this).text(t(key));
+            });
+            
+            $('[data-i18n-placeholder]').each(function() {
+                const key = $(this).data('i18n-placeholder');
+                $(this).attr('placeholder', t(key));
+            });
+            
+            // Update HTML lang attribute
+            $('html').attr('lang', currentLang);
+            
+            // Update page title
+            document.title = currentLang === 'vi' 
+                ? 'WebFolio.vn - Thiết Kế Website Chuyên Nghiệp' 
+                : 'WebFolio.vn - Professional Website Design';
+        }
+    </script>
     <!-- Header -->
     <header class="fixed w-full top-0 z-50 glass-effect shadow-lg">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -77,18 +532,54 @@
                 </div>
                 
                 <!-- Desktop Menu -->
-                <div class="hidden md:flex space-x-8">
-                    <a href="#home" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium">Trang Chủ</a>
-                    <a href="#services" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium">Dịch Vụ</a>
-                    <a href="#portfolio" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium">Portfolio</a>
-                    <a href="#themes" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium">Kho Theme</a>
-                    <a href="#pricing" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium">Bảng Giá</a>
-                    <a href="#about" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium">Về Chúng Tôi</a>
-                    <a href="#contact" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium">Liên Hệ</a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium" data-i18n="nav.home">Trang Chủ</a>
+                    <a href="#services" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium" data-i18n="nav.services">Dịch Vụ</a>
+                    <a href="#portfolio" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium" data-i18n="nav.portfolio">Portfolio</a>
+                    <a href="#themes" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium" data-i18n="nav.themes">Kho Theme</a>
+                    <a href="#pricing" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium" data-i18n="nav.pricing">Bảng Giá</a>
+                    <a href="#about" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium" data-i18n="nav.about">Về Chúng Tôi</a>
+                    <a href="#contact" class="text-white hover:text-amber-300 transition-colors duration-300 font-medium" data-i18n="nav.contact">Liên Hệ</a>
+                    
+                    <!-- Language Switcher -->
+                    <div class="lang-switcher">
+                        <button id="lang-toggle" class="flex items-center space-x-2 text-white hover:text-amber-300 transition-colors duration-300">
+                            <span class="flag-icon flag-vi" id="current-flag"></span>
+                            <span id="current-lang">VI</span>
+                            <i class="fas fa-chevron-down text-xs"></i>
+                        </button>
+                        <div id="lang-dropdown" class="lang-dropdown hidden">
+                            <div class="lang-option" data-lang="vi">
+                                <span class="flag-icon flag-vi"></span>
+                                <span>Tiếng Việt</span>
+                            </div>
+                            <div class="lang-option" data-lang="en">
+                                <span class="flag-icon flag-en"></span>
+                                <span>English</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Mobile Menu Button -->
-                <div class="md:hidden">
+                <div class="md:hidden flex items-center space-x-4">
+                    <!-- Mobile Language Switcher -->
+                    <div class="lang-switcher">
+                        <button id="mobile-lang-toggle" class="text-white hover:text-amber-300">
+                            <span class="flag-icon flag-vi" id="mobile-current-flag"></span>
+                        </button>
+                        <div id="mobile-lang-dropdown" class="lang-dropdown hidden">
+                            <div class="lang-option" data-lang="vi">
+                                <span class="flag-icon flag-vi"></span>
+                                <span>VI</span>
+                            </div>
+                            <div class="lang-option" data-lang="en">
+                                <span class="flag-icon flag-en"></span>
+                                <span>EN</span>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <button id="mobile-menu-btn" class="text-white hover:text-amber-300 focus:outline-none">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
@@ -98,13 +589,13 @@
             <!-- Mobile Menu -->
             <div id="mobile-menu" class="md:hidden hidden pb-4">
                 <div class="flex flex-col space-y-3">
-                    <a href="#home" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium">Trang Chủ</a>
-                    <a href="#services" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium">Dịch Vụ</a>
-                    <a href="#portfolio" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium">Portfolio</a>
-                    <a href="#themes" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium">Kho Theme</a>
-                    <a href="#pricing" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium">Bảng Giá</a>
-                    <a href="#about" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium">Về Chúng Tôi</a>
-                    <a href="#contact" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium">Liên Hệ</a>
+                    <a href="#home" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium" data-i18n="nav.home">Trang Chủ</a>
+                    <a href="#services" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium" data-i18n="nav.services">Dịch Vụ</a>
+                    <a href="#portfolio" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium" data-i18n="nav.portfolio">Portfolio</a>
+                    <a href="#themes" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium" data-i18n="nav.themes">Kho Theme</a>
+                    <a href="#pricing" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium" data-i18n="nav.pricing">Bảng Giá</a>
+                    <a href="#about" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium" data-i18n="nav.about">Về Chúng Tôi</a>
+                    <a href="#contact" class="text-white hover:text-amber-300 transition-colors duration-300 mobile-link font-medium" data-i18n="nav.contact">Liên Hệ</a>
                 </div>
             </div>
         </nav>
@@ -1295,6 +1786,50 @@
 
     <script>
         $(document).ready(function() {
+            // Initialize language
+            updateTexts();
+            updateLanguageUI();
+            
+            // Language switcher functionality
+            function updateLanguageUI() {
+                if (currentLang === 'vi') {
+                    $('#current-flag, #mobile-current-flag').removeClass('flag-en').addClass('flag-vi');
+                    $('#current-lang').text('VI');
+                } else {
+                    $('#current-flag, #mobile-current-flag').removeClass('flag-vi').addClass('flag-en');
+                    $('#current-lang').text('EN');
+                }
+                
+                $('.lang-option').removeClass('active');
+                $(`.lang-option[data-lang="${currentLang}"]`).addClass('active');
+            }
+            
+            // Desktop language toggle
+            $('#lang-toggle').click(function(e) {
+                e.stopPropagation();
+                $('#lang-dropdown').toggleClass('hidden');
+            });
+            
+            // Mobile language toggle
+            $('#mobile-lang-toggle').click(function(e) {
+                e.stopPropagation();
+                $('#mobile-lang-dropdown').toggleClass('hidden');
+            });
+            
+            // Language selection
+            $('.lang-option').click(function() {
+                currentLang = $(this).data('lang');
+                localStorage.setItem('selectedLanguage', currentLang);
+                updateTexts();
+                updateLanguageUI();
+                $('#lang-dropdown, #mobile-lang-dropdown').addClass('hidden');
+            });
+            
+            // Close language dropdown when clicking outside
+            $(document).click(function() {
+                $('#lang-dropdown, #mobile-lang-dropdown').addClass('hidden');
+            });
+            
             // Mobile menu toggle
             $('#mobile-menu-btn').click(function() {
                 $('#mobile-menu').toggleClass('hidden');
@@ -1361,25 +1896,25 @@
                 
                 // Simple validation
                 if (!name) {
-                    alert('Vui lòng nhập họ và tên');
+                    alert(t('form.error.name'));
                     $('input[name="name"]').focus();
                     return false;
                 }
                 
                 if (!email) {
-                    alert('Vui lòng nhập địa chỉ email');
+                    alert(t('form.error.email'));
                     $('input[name="email"]').focus();
                     return false;
                 }
                 
                 if (!isValidEmail(email)) {
-                    alert('Vui lòng nhập địa chỉ email hợp lệ');
+                    alert(t('form.error.emailInvalid'));
                     $('input[name="email"]').focus();
                     return false;
                 }
                 
                 if (!message) {
-                    alert('Vui lòng nhập tin nhắn');
+                    alert(t('form.error.message'));
                     $('textarea[name="message"]').focus();
                     return false;
                 }
@@ -1388,10 +1923,10 @@
                 var submitBtn = $(this).find('button[type="submit"]');
                 var originalText = submitBtn.text();
                 
-                submitBtn.text('Đang gửi...').prop('disabled', true);
+                submitBtn.text(t('form.sending')).prop('disabled', true);
                 
                 setTimeout(function() {
-                    alert('Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.');
+                    alert(t('form.success'));
                     $('#contact-form')[0].reset();
                     submitBtn.text(originalText).prop('disabled', false);
                 }, 2000);
@@ -1411,21 +1946,6 @@
                     $('header').removeClass('backdrop-blur-md bg-opacity-90');
                 }
             });
-
-            // Typing effect for hero title (optional enhancement)
-            function typeWriter(element, text, speed = 100) {
-                let i = 0;
-                element.html('');
-                
-                function type() {
-                    if (i < text.length) {
-                        element.html(element.html() + text.charAt(i));
-                        i++;
-                        setTimeout(type, speed);
-                    }
-                }
-                type();
-            }
 
             // Add some interactive hover effects
             $('.hover-scale').hover(
