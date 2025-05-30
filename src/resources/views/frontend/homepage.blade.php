@@ -242,18 +242,18 @@
                 // Services Section
                 'services.title': 'Dịch Vụ Của Chúng Tôi',
                 'services.subtitle': 'Chúng tôi cung cấp giải pháp toàn diện cho nhu cầu thiết kế và phát triển website của bạn',
-                'services.responsive.title': 'Responsive Design',
+                'services.responsive.title': 'Thiết kế Website Chuẩn UX/UI',
                 'services.responsive.desc': 'Website tự động thích ứng với mọi thiết bị từ mobile, tablet đến desktop, đảm bảo trải nghiệm tốt nhất cho người dùng.',
-                'services.seo.title': 'SEO Tối Ưu',
-                'services.seo.desc': 'Tối ưu hóa website để đạt thứ hạng cao trên Google, tăng khả năng tiếp cận khách hàng tiềm năng.',
-                'services.speed.title': 'Tốc Độ Cao',
-                'services.speed.desc': 'Website được tối ưu hóa để tải nhanh, cải thiện trải nghiệm người dùng và thứ hạng SEO.',
-                'services.security.title': 'Bảo Mật Cao',
-                'services.security.desc': 'Áp dụng các biện pháp bảo mật tiên tiến để bảo vệ website và dữ liệu khách hàng.',
-                'services.management.title': 'Quản Lý Dễ Dàng',
-                'services.management.desc': 'Giao diện quản trị thân thiện, dễ sử dụng, giúp bạn cập nhật nội dung một cách nhanh chóng.',
-                'services.support.title': 'Hỗ Trợ 24/7',
-                'services.support.desc': 'Đội ngũ hỗ trợ kỹ thuật luôn sẵn sàng giúp đỡ bạn mọi lúc, mọi nơi.',
+                'services.seo.title': 'Digital Marketing',
+                'services.seo.desc': 'Dịch vụ marketing số toàn diện: SEO, Google Ads, Facebook Ads, Content Marketing. Giúp doanh nghiệp tiếp cận đúng khách hàng mục tiêu.',
+                'services.speed.title': 'Tư vấn Giải pháp CNTT',
+                'services.speed.desc': 'Tư vấn chiến lược số hóa, kiến trúc hệ thống, lựa chọn công nghệ phù hợp. Giúp doanh nghiệp tối ưu hóa quy trình và nâng cao hiệu quả hoạt động.',
+                'services.security.title': 'Cho Thuê Nhân Sự IT (Freelancer)',
+                'services.security.desc': 'Cung cấp đội ngũ lập trình viên Backend, Frontend, DevOps, QA, BrSE chất lượng cao làm việc từ xa. Linh hoạt theo giờ, theo tháng, theo dự án – tiết kiệm chi phí tuyển dụng.',
+                'services.management.title': 'Quản trị Hệ thống',
+                'services.management.desc': 'Dịch vụ aws, vps, domain, SSL, backup dữ liệu. Quản trị server, tối ưu hóa hiệu năng, bảo mật hệ thống 24/7.',
+                'services.support.title': 'Phần mềm Quản lý',
+                'services.support.desc': 'Xây dựng phần mềm quản lý theo yêu cầu: ERP, CRM, HRM. Tích hợp đầy đủ tính năng, giao diện trực quan, phù hợp với quy trình doanh nghiệp.',
                 
                 // Portfolio Section
                 'portfolio.title': 'Portfolio',
@@ -864,62 +864,62 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
-                    <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-mobile-alt text-2xl text-white"></i>
+                    <div class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-desktop text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.responsive.title">Responsive Design</h3>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.responsive.title">Thiết kế Website Chuẩn UX/UI</h3>
                     <p class="text-gray-600 leading-relaxed" data-i18n="services.responsive.desc">
-                        Website tự động thích ứng với mọi thiết bị từ mobile, tablet đến desktop, đảm bảo trải nghiệm tốt nhất cho người dùng.
-                    </p>
-                </div>
-
-                <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
-                    <div class="bg-emerald-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-search text-2xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.seo.title">SEO Tối Ưu</h3>
-                    <p class="text-gray-600 leading-relaxed" data-i18n="services.seo.desc">
-                        Tối ưu hóa website để đạt thứ hạng cao trên Google, tăng khả năng tiếp cận khách hàng tiềm năng.
+                        Thiết kế giao diện hiện đại, tối ưu trải nghiệm người dùng trên mọi thiết bị. Đáp ứng đa dạng nhu cầu từ website doanh nghiệp, bán hàng đến landing page quảng cáo.
                     </p>
                 </div>
 
                 <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
                     <div class="bg-amber-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-bolt text-2xl text-white"></i>
+                        <i class="fas fa-project-diagram text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.speed.title">Tốc Độ Cao</h3>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.speed.title">Tư vấn Giải pháp CNTT</h3>
                     <p class="text-gray-600 leading-relaxed" data-i18n="services.speed.desc">
-                        Website được tối ưu hóa để tải nhanh, cải thiện trải nghiệm người dùng và thứ hạng SEO.
+                        Tư vấn chiến lược số hóa, kiến trúc hệ thống, lựa chọn công nghệ phù hợp. Giúp doanh nghiệp tối ưu hóa quy trình và nâng cao hiệu quả hoạt động.
                     </p>
                 </div>
 
                 <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
-                    <div class="bg-slate-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-shield-alt text-2xl text-white"></i>
+                    <div class="bg-emerald-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-bullhorn text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.security.title">Bảo Mật Cao</h3>
-                    <p class="text-gray-600 leading-relaxed" data-i18n="services.security.desc">
-                        Áp dụng các biện pháp bảo mật tiên tiến để bảo vệ website và dữ liệu khách hàng.
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.seo.title">Digital Marketing</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.seo.desc">
+                        Dịch vụ marketing số toàn diện: SEO, Google Ads, Facebook Ads, Content Marketing. Giúp doanh nghiệp tiếp cận đúng khách hàng mục tiêu.
                     </p>
                 </div>
 
                 <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
                     <div class="bg-orange-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-cogs text-2xl text-white"></i>
+                        <i class="fas fa-laptop-code text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.management.title">Quản Lý Dễ Dàng</h3>
-                    <p class="text-gray-600 leading-relaxed" data-i18n="services.management.desc">
-                        Giao diện quản trị thân thiện, dễ sử dụng, giúp bạn cập nhật nội dung một cách nhanh chóng.
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.security.title">Cho Thuê Nhân Sự IT (Freelancer)</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.security.desc">
+                        Cung cấp đội ngũ lập trình viên Backend, Frontend, DevOps, QA, BrSE chất lượng cao làm việc từ xa. Linh hoạt theo giờ, theo tháng, theo dự án – tiết kiệm chi phí tuyển dụng.
                     </p>
                 </div>
 
                 <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
                     <div class="bg-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-headset text-2xl text-white"></i>
+                        <i class="fas fa-server text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.support.title">Hỗ Trợ 24/7</h3>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.management.title">Quản trị Hệ thống</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.management.desc">
+                        Dịch vụ vps, aws, domain, SSL, backup dữ liệu. Quản trị server, tối ưu hóa hiệu năng, bảo mật hệ thống 24/7.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
+                    <div class="bg-slate-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-cogs text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.support.title">Phần mềm Quản lý</h3>
                     <p class="text-gray-600 leading-relaxed" data-i18n="services.support.desc">
-                        Đội ngũ hỗ trợ kỹ thuật luôn sẵn sàng giúp đỡ bạn mọi lúc, mọi nơi.
+                        Xây dựng phần mềm quản lý theo yêu cầu: ERP, CRM, HRM. Tích hợp đầy đủ tính năng, giao diện trực quan, phù hợp với quy trình doanh nghiệp.
                     </p>
                 </div>
             </div>
