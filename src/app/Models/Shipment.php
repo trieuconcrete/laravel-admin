@@ -8,6 +8,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Shipment extends Model
 {
+    // ...
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
     use HasFactory, SoftDeletes;
 
     /**
@@ -18,16 +24,17 @@ class Shipment extends Model
     protected $fillable = [
         'shipment_code',
         'contract_id',
-        'origin',
-        'destination',
-        'departure_time',
-        'estimated_arrival_time',
+        'customer_id', // khách hàng
+        'origin', // điểm xuất phát
+        'destination', // điểm đến
+        'departure_time', // thời gian khởi hành
+        'estimated_arrival_time', // thời gian đến
         'cargo_weight',
         'cargo_description',
         'driver_id',
         'co_driver_id',
         'vehicle_id',
-        'distance',
+        'distance', // số km
         'unit_price',
         'crane_price',
         'has_crane_service',
@@ -68,6 +75,44 @@ class Shipment extends Model
         'completed' => 'Hoàn thành'
     ];
 
+    const STATUS_PENDING = 'pending';
+    const STATUS_CONFIRMED = 'confirmed';
+    const STATUS_IN_TRANSIT = 'in_transit';
+    const STATUS_DELIVERED = 'delivered';
+    const STATUS_CANCELLED = 'cancelled';
+    const STATUS_DELAYED = 'delayed';
+    const STATUS_COMPLETED = 'completed';
+
+    public static function getStatuses()
+    {
+        return [
+            self::STATUS_PENDING => 'Chờ xác nhận',
+            self::STATUS_CONFIRMED => 'Đã xác nhận',
+            self::STATUS_IN_TRANSIT => 'Đang vận chuyển',
+            self::STATUS_DELIVERED => 'Đã giao hàng',
+            self::STATUS_CANCELLED => 'Đã hủy',
+            self::STATUS_DELAYED => 'Bị trễ',
+            self::STATUS_COMPLETED => 'Hoàn thành'
+        ];
+    }
+    public function getStatusLabelAttribute()
+    {
+        return self::getStatuses()[$this->status] ?? '';
+    }
+
+    public function getStatusBadgeClassAttribute()
+    {
+        return match($this->status) {
+            self::STATUS_PENDING => 'bg-warning',
+            self::STATUS_CONFIRMED => 'bg-info',
+            self::STATUS_IN_TRANSIT => 'bg-primary',
+            self::STATUS_DELIVERED => 'bg-success',
+            self::STATUS_CANCELLED => 'bg-danger',
+            self::STATUS_DELAYED => 'bg-danger',
+            self::STATUS_COMPLETED => 'bg-success',
+        };
+    }
+
     /**
      * Quan hệ với hợp đồng
      */
@@ -97,7 +142,7 @@ class Shipment extends Model
      */
     public function vehicle()
     {
-        return $this->belongsTo(Vehicle::class);
+        return $this->belongsTo(Vehicle::class, 'vehicle_id');  
     }
 
     /**
@@ -114,6 +159,21 @@ class Shipment extends Model
     public function updater()
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function goods()
+    {
+        return $this->hasMany(ShipmentGood::class);
+    }
+
+    public function shipmentDeductions()
+    {
+        return $this->hasMany(ShipmentDeduction::class);
+    }
+
+    public function shipmentDeductionTypes()
+    {
+        return $this->hasMany(ShipmentDeductionType::class);
     }
 
     /**
@@ -175,10 +235,10 @@ class Shipment extends Model
                   ->orWhere('destination', 'LIKE', "%{$term}%")
                   ->orWhere('cargo_description', 'LIKE', "%{$term}%") // Thêm tìm kiếm theo mô tả hàng hóa
                   ->orWhereHas('driver', function($subQuery) use ($term) {
-                      $subQuery->where('name', 'LIKE', "%{$term}%");
+                      $subQuery->where('full_name', 'LIKE', "%{$term}%");
                   })
                   ->orWhereHas('vehicle', function($subQuery) use ($term) {
-                      $subQuery->where('license_plate', 'LIKE', "%{$term}%");
+                      $subQuery->where('plate_number', 'LIKE', "%{$term}%");
                   });
             });
         }
@@ -265,5 +325,15 @@ class Shipment extends Model
         $random = strtoupper(substr(md5(microtime()), 0, 4));
         
         return $prefix . $date . $random;
+    }
+
+    /**
+     * Summary of getDriverFromShipmentDeductions
+     */
+    public function getDriverFromShipmentDeductions()
+    {
+        return $this->shipmentDeductions()->whereHas('shipmentDeductionType', function($query) {
+            $query->where('type', 'driver_and_busboy');
+        })->whereNotNull('user_id')->first()->user ?? null;
     }
 }
