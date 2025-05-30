@@ -21,6 +21,8 @@ use App\Repositories\Interface\QuoteAttachmentRepositoryInterface;
 use App\Repositories\Eloquent\QuoteAttachmentRepository;
 use App\Repositories\Interface\QuoteHistoryRepositoryInterface;
 use App\Repositories\Eloquent\QuoteHistoryRepository;
+use App\Repositories\Interface\ShipmentRepositoryInterface;
+use App\Repositories\Eloquent\ShipmentRepository;
 
 
 /**
@@ -43,6 +45,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(QuoteRepositoryInterface::class, QuoteRepository::class);
         $this->app->bind(QuoteAttachmentRepositoryInterface::class, QuoteAttachmentRepository::class);
         $this->app->bind(QuoteHistoryRepositoryInterface::class, QuoteHistoryRepository::class);
+        $this->app->bind(ShipmentRepositoryInterface::class, ShipmentRepository::class);
     }
 
     /**
