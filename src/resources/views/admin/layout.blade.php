@@ -31,6 +31,20 @@
         <!-- custom Css-->
         <link href="{{ asset('assets/css/custom.min.css') }}" rel="stylesheet" type="text/css" />
         <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet" type="text/css" />
+        
+        <style>
+            .highlight-error {
+                border-color: #ff3d60 !important;
+                box-shadow: 0 0 0 0.15rem rgba(255, 61, 96, 0.25) !important;
+                animation: pulse-error 1.5s ease-in-out;
+            }
+            
+            @keyframes pulse-error {
+                0% { box-shadow: 0 0 0 0 rgba(255, 61, 96, 0.4); }
+                70% { box-shadow: 0 0 0 10px rgba(255, 61, 96, 0); }
+                100% { box-shadow: 0 0 0 0 rgba(255, 61, 96, 0); }
+            }
+        </style>
 
         <!-- Flatpickr CSS -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -175,12 +189,25 @@
 
             document.addEventListener('DOMContentLoaded', function () {
                 document.querySelectorAll('input[type="date"]').forEach(function (input) {
+                    // Lưu giá trị ban đầu
+                    const originalValue = input.value;
+                    
+                    // Lấy định dạng từ thuộc tính data nếu có, mặc định là Y-m-d
+                    const dateFormat = input.getAttribute('data-date-format') || "Y-m-d";
+                    
+                    // Chuyển từ input type="date" sang input type="text" để sử dụng flatpickr
                     input.type = 'text';
                     input.placeholder = 'dd/mm/yyyy'; // gợi ý format
+                    
+                    // Khởi tạo flatpickr với định dạng phù hợp
                     flatpickr(input, {
-                        dateFormat: "m/d/Y",
+                        dateFormat: dateFormat,
                         allowInput: true,
-                        defaultDate: input.value || null
+                        defaultDate: originalValue || null,
+                        // Đảm bảo giá trị được parse đúng
+                        parseDate: (datestr, format) => {
+                            return new Date(datestr);
+                        }
                     });
                 });
             });

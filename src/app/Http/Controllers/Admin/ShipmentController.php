@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ShipmentRequest;
+use App\Http\Requests\Shipment\ShipmentRequest;
 use App\Services\ShipmentService;
 use App\Models\Shipment;
 use App\Models\Customer;
@@ -17,10 +17,20 @@ class ShipmentController extends Controller
 {
     protected $shipmentService;
 
+    /**
+     * Summary of __construct
+     * @param \App\Services\ShipmentService $shipmentService
+     */
     public function __construct(ShipmentService $shipmentService)
     {
         $this->shipmentService = $shipmentService;
     }
+
+    /**
+     * Summary of index
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Contracts\View\View
+     */
     public function index(Request $request)
     {
         $filters = [
@@ -32,10 +42,13 @@ class ShipmentController extends Controller
         $shipments = $this->shipmentService->list($filters, 20);
         $shipmentStatus = Shipment::$statuses;
 
-        // dd($shipments);
         return view('admin.shipments.index', compact('shipments','shipmentStatus'));
     }
 
+    /**
+     * Summary of create
+     * @return \Illuminate\Contracts\View\View
+     */
     public function create()
     {
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
@@ -46,6 +59,11 @@ class ShipmentController extends Controller
         return view('admin.shipments.create', compact('customers', 'vehicles', 'users', 'deductionTypes', 'personDeductionTypes'));
     }
 
+    /**
+     * Summary of store
+     * @param \App\Http\Requests\Shipment\ShipmentRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(ShipmentRequest $request)
     {
         try {
@@ -57,6 +75,11 @@ class ShipmentController extends Controller
         }
     }
 
+    /**
+     * Summary of edit
+     * @param \App\Models\Shipment $shipment
+     * @return \Illuminate\Contracts\View\View
+     */
     public function edit(Shipment $shipment)
     {
         $shipment->load(['goods', 'shipmentDeductions']);
@@ -78,6 +101,12 @@ class ShipmentController extends Controller
         ));
     }
 
+    /**
+     * Summary of update
+     * @param \App\Http\Requests\Shipment\ShipmentRequest $request
+     * @param \App\Models\Shipment $shipment
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(ShipmentRequest $request, Shipment $shipment)
     {
         try {
@@ -88,6 +117,11 @@ class ShipmentController extends Controller
         }
     }
 
+    /**
+     * Summary of destroy
+     * @param \App\Models\Shipment $shipment
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Shipment $shipment)
     {
         $this->shipmentService->delete($shipment);

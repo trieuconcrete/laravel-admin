@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Shipment;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -22,17 +22,17 @@ class ShipmentRequest extends FormRequest
             'estimated_arrival_time' => 'required|date|after_or_equal:departure_time',
             'notes' => 'nullable|string',
             'status' => 'required|string',
-            'distance' => 'nullable|integer|min:1',
+            'distance' => 'nullable|numeric|min:0',
             // Chi phí chuyến hàng
             'deductions' => 'array',
             'deductions.*' => 'nullable|numeric|min:0',
             // Hàng hóa
             'goods' => 'array',
             'goods.*.name' => 'required|string|max:255',
-            'goods.*.quantity' => 'required|integer|min:1',
-            'goods.*.unit' => 'required|string|max:50',
+            'goods.*.quantity' => 'nullable|integer|min:0',
+            'goods.*.unit' => 'required|numeric|min:0',
             'goods.*.notes' => 'nullable|string|max:255',
-            'goods.*.weight' => 'nullable|integer|min:1',
+            'goods.*.weight' => 'nullable|numeric|min:0',
             // Tài xế/lơ xe và phụ cấp
             'drivers' => 'array',
             'drivers.*.user_id' => 'required|exists:users,id',

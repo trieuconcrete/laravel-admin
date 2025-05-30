@@ -28,6 +28,24 @@
             </div>
 
             <!-- Dashboard Cards -->
+            @php
+                // Đếm tổng số chuyến hàng
+                $totalShipments = $shipments->total();
+                
+                // Đếm số chuyến hàng đang vận chuyển
+                $inTransitCount = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_IN_TRANSIT)->count();
+                
+                // Đếm số chuyến hàng sắp khởi hành (đã xác nhận nhưng chưa vận chuyển)
+                $confirmedCount = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_CONFIRMED)->count();
+                
+                // Đếm số chuyến hàng hoàn thành trong tháng hiện tại
+                $startOfMonth = now()->startOfMonth();
+                $endOfMonth = now()->endOfMonth();
+                $completedThisMonth = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_COMPLETED)
+                    ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
+                    ->count();
+            @endphp
+            
             <div class="row mb-4">
                 <div class="col-md-6 col-lg-3 mb-3">
                     <div class="card card-dashboard h-100" style="border-left-color: #4e73df;">
@@ -35,7 +53,7 @@
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <div class="text-muted">Tổng chuyến hàng</div>
-                                    <h4 class="mt-2">287</h4>
+                                    <h4 class="mt-2">{{ $totalShipments }}</h4>
                                 </div>
                                 <div>
                                     <i class="ri-route-fill fs-1 text-muted"></i>
@@ -50,7 +68,7 @@
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <div class="text-muted">Đang hoạt động</div>
-                                    <h4 class="mt-2">23</h4>
+                                    <h4 class="mt-2">{{ $inTransitCount }}</h4>
                                 </div>
                                 <div>
                                     <i class="ri-truck-fill fs-1 text-success"></i>
@@ -65,7 +83,7 @@
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <div class="text-muted">Sắp khởi hành</div>
-                                    <h4 class="mt-2">15</h4>
+                                    <h4 class="mt-2">{{ $confirmedCount }}</h4>
                                 </div>
                                 <div>
                                     <i class="ri-time-fill fs-1 text-warning"></i>
@@ -80,7 +98,7 @@
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <div class="text-muted">Hoàn thành (tháng)</div>
-                                    <h4 class="mt-2">249</h4>
+                                    <h4 class="mt-2">{{ $completedThisMonth }}</h4>
                                 </div>
                                 <div>
                                     <i class="ri-checkbox-circle-fill fs-1 text-info"></i>
