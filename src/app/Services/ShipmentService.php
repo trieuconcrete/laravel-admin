@@ -44,6 +44,7 @@ class ShipmentService
                 'estimated_arrival_time' => $data['estimated_arrival_time'] ?? null,
                 'notes' => $data['notes'] ?? null,
                 'status' => $data['status'],
+                'distance' => $data['distance'] ?? null,
             ];
             $shipment = Shipment::create($shipmentData);
 

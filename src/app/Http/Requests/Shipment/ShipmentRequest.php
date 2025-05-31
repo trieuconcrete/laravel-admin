@@ -10,6 +10,29 @@ class ShipmentRequest extends FormRequest
     {
         return true;
     }
+    
+    /**
+     * Prepare the data for validation.
+     * This method will filter drivers array to only include rows that were actually submitted.
+     */
+    protected function prepareForValidation()
+    {
+        if ($this->has('driver_row_indexes')) {
+            $indexes = explode(',', $this->input('driver_row_indexes'));
+            $drivers = $this->input('drivers', []);
+            $filteredDrivers = [];
+            
+            foreach ($indexes as $index) {
+                if (isset($drivers[$index])) {
+                    $filteredDrivers[$index] = $drivers[$index];
+                }
+            }
+            
+            $this->merge([
+                'drivers' => $filteredDrivers
+            ]);
+        }
+    }
 
     public function rules()
     {

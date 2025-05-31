@@ -296,7 +296,8 @@
                                                                         </td>
                                                                     @endforeach
                                                                     <td>
-                                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="ri-delete-bin-fill"></i></button>
+                                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
+                                                                        <input type="hidden" name="driver_rows[]" value="{{ $i }}">
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
@@ -341,265 +342,59 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('js/shipment-form.js') }}"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const goodsTable = document.querySelector('#goodsTable tbody');
-        let goodsCount = {{ count(old('goods', [])) ?: 1 }};
+    // Khai báo các biến cần thiết
+    const goodsTable = document.querySelector('#goodsTable tbody');
+    let goodsCount = {{ count(old('goods', $shipment->goods ?? [])) ?: 1 }};
+    const personTable = document.querySelector('#personTable tbody');
+    
+    // Khai báo các loại khấu trừ cho tài xế
+    const personDeductionTypes = [
+        @foreach($personDeductionTypes as $type)
+            { id: "{{ $type->id }}", name: "{{ $type->name }}" },
+        @endforeach
+    ];
+    
+    // Khai báo danh sách người dùng
+    const users = {
+        @foreach($users as $id => $name)
+            "{{ $id }}": "{{ $name }}",
+        @endforeach
+    };
+    
+    // Khởi tạo các sự kiện khi trang đã tải xong
+    document.addEventListener('DOMContentLoaded', function() {
+        // Khởi tạo form với số lượng driver ban đầu
+        initShipmentForm({{ count(old('drivers', $shipment->drivers ?? [])) }});
+        
+        // Thêm event listener cho nút thêm hàng hóa
+        document.getElementById('addGoodBtn').onclick = function() {
+            goodsCount = addGoodRow(goodsTable, goodsCount);
+        };
+        
+        // Thêm event listener cho nút thêm người
+        document.getElementById('addPersonBtn').onclick = function() {
+            addDriverRow(personTable, personDeductionTypes, users);
+        };
         
         // Định dạng tất cả các trường số khi trang được tải
         formatAllNumericInputs();
         
-        document.getElementById('addGoodBtn').onclick = function() {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>
-                    <input type="hidden" name="goods_index[]" value="${goodsCount}">
-                    <input type="text" name="goods[${goodsCount}][name]" class="form-control form-control-sm" required>
-                    <div class="text-danger goods-error" data-field="goods.${goodsCount}.name"></div>
-                </td>
-                <td>
-                    <input type="text" name="goods[${goodsCount}][notes]" class="form-control form-control-sm">
-                    <div class="text-danger goods-error" data-field="goods.${goodsCount}.notes"></div>
-                </td>
-                <td>
-                    <input type="number" name="goods[${goodsCount}][quantity]" class="form-control form-control-sm" min="1" required>
-                    <div class="text-danger goods-error" data-field="goods.${goodsCount}.quantity"></div>
-                </td>
-                <td>
-                    <input type="number" name="goods[${goodsCount}][weight]" class="form-control form-control-sm numeric-input" min="0" required>
-                    <div class="text-danger goods-error" data-field="goods.${goodsCount}.weight"></div>
-                </td>
-                <td>
-                    <input type="number" name="goods[${goodsCount}][unit]" class="form-control form-control-sm numeric-input" min="0" required>
-                    <div class="text-danger goods-error" data-field="goods.${goodsCount}.unit"></div>
-                </td>
-                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="ri-delete-bin-fill"></i></button></td>
-            `;
-            goodsTable.appendChild(row);
-            
-            // Thêm event listener cho các trường số mới thêm vào
-            const newRow = goodsTable.lastElementChild;
-            addNumericInputListeners(newRow.querySelectorAll('input[type="number"]'));
-            
-            goodsCount++;
-        };
-
-        const personTable = document.querySelector('#personTable tbody');
-        document.getElementById('addPersonBtn').onclick = function() {
-            let deductionInputs = '';
-            @foreach($personDeductionTypes as $type)
-                deductionInputs += `<td>
-                    <input type=\"hidden\" name=\"drivers[][deduction_type_ids][]\" value=\"{{ $type->id }}\">
-                    <input type=\"number\" name=\"drivers[][deductions][{{ $type->id }}]\" class=\"form-control form-control-sm numeric-input\" min=\"0\">
-                </td>`;
-            @endforeach
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>
-                    <select name="drivers[][user_id]" class="form-select form-select-sm" required>
-                        <option value="">Chọn nhân sự</option>
-                        @foreach($users as $id => $name)
-                            <option value="{{ $id }}">{{ $name }}</option>
-                        @endforeach
-                    </select>
-                </td>
-                ${deductionInputs}
-                <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="ri-delete-bin-fill"></i></button></td>
-            `;
-            personTable.appendChild(row);
-            
-            // Thêm event listener cho các trường số mới thêm vào
-            const newRow = personTable.lastElementChild;
-            addNumericInputListeners(newRow.querySelectorAll('input[type="number"]'));
-        };
+        // Kiểm tra và chuyển đến tab có lỗi nếu có
+        handleFormErrors();
         
-        // Sử dụng nút submit để kiểm tra và hiển thị thông báo lỗi
-        document.getElementById('submitBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            // 1. Ưu tiên kiểm tra các trường ở tab thông tin vận chuyển trước
-            const customerId = document.querySelector('select[name="customer_id"]')?.value;
-            const origin = document.querySelector('input[name="origin"]')?.value;
-            const destination = document.querySelector('input[name="destination"]')?.value;
-            const departureTime = document.querySelector('input[name="departure_time"]')?.value;
-            const estimatedArrivalTime = document.querySelector('input[name="estimated_arrival_time"]')?.value;
-            
-            // Kiểm tra xem có ít nhất một hàng hóa hay không
-            const goodsNameInputs = document.querySelectorAll('input[name^="goods["][name$="][name]"]');
-            const hasGoods = goodsNameInputs.length > 0 && Array.from(goodsNameInputs).some(input => input.value.trim() !== '');
-            
-            // Kiểm tra các trường ở tab thông tin vận chuyển
-            if (!customerId || !origin || !destination || !departureTime || !estimatedArrivalTime || !hasGoods) {
-                let errorMessage = '';
-                let errorField = null;
-                let tabId = 'driverAllowance'; // ID của tab thông tin vận chuyển
-                
-                if (!customerId) {
-                    errorMessage = 'Vui lòng chọn khách hàng!';
-                    errorField = 'select[name="customer_id"]';
-                } else if (!origin) {
-                    errorMessage = 'Vui lòng nhập điểm khởi hành!';
-                    errorField = 'input[name="origin"]';
-                } else if (!destination) {
-                    errorMessage = 'Vui lòng nhập điểm đến!';
-                    errorField = 'input[name="destination"]';
-                } else if (!departureTime) {
-                    errorMessage = 'Vui lòng chọn thời gian khởi hành!';
-                    errorField = 'input[name="departure_time"]';
-                } else if (!estimatedArrivalTime) {
-                    errorMessage = 'Vui lòng chọn thời gian dự kiến đến!';
-                    errorField = 'input[name="estimated_arrival_time"]';
-                } else if (!hasGoods) {
-                    errorMessage = 'Vui lòng thêm ít nhất một hàng hóa!';
-                    errorField = 'input[name^="goods["][name$="][name]"]';
-                }
-                
-                // Hiển thị thông báo lỗi
-                Swal.fire({
-                    title: 'Lỗi!',
-                    text: errorMessage,
-                    icon: 'error',
-                    confirmButtonText: 'Đóng',
-                    confirmButtonColor: '#d33'
-                }).then(() => {
-                    // Chuyển đến tab thông tin vận chuyển
-                    const tabLink = document.querySelector(`a[href="#${tabId}"]`);
-                    if (tabLink) {
-                        const tab = new bootstrap.Tab(tabLink);
-                        tab.show();
-                        
-                        // Focus vào trường có lỗi
-                        setTimeout(() => {
-                            const errorElement = document.querySelector(errorField);
-                            if (errorElement) {
-                                errorElement.focus();
-                                errorElement.classList.add('highlight-error');
-                                setTimeout(() => {
-                                    errorElement.classList.remove('highlight-error');
-                                }, 2000);
-                            }
-                        }, 300);
-                    }
-                });
-                
-                return;
-            }
-            
-            // 2. Sau đó mới kiểm tra các trường ở tab phương tiện & tài xế
-            const vehicleId = document.querySelector('select[name="vehicle_id"]')?.value;
-            const userIdField = document.querySelector('select[name="drivers[0][user_id]"]');
-            const userId = userIdField ? userIdField.value : '';
-            
-            // Nếu vehicle_id hoặc user_id trống, hiển thị thông báo lỗi
-            if (!vehicleId || !userId) {
-                let errorMessage = '';
-                let errorField = null;
-                
-                if (!vehicleId && !userId) {
-                    errorMessage = 'Vui lòng chọn phương tiện và nhân sự!';
-                    errorField = 'select[name="vehicle_id"]';
-                } else if (!vehicleId) {
-                    errorMessage = 'Vui lòng chọn phương tiện!';
-                    errorField = 'select[name="vehicle_id"]';
-                } else {
-                    errorMessage = 'Vui lòng chọn nhân sự!';
-                    errorField = 'select[name="drivers[0][user_id]"]';
-                }
-                
-                // Sử dụng SweetAlert2 để hiển thị thông báo
-                Swal.fire({
-                    title: 'Lỗi!',
-                    text: errorMessage,
-                    icon: 'error',
-                    confirmButtonText: 'Đóng',
-                    confirmButtonColor: '#d33'
-                }).then(() => {
-                    // Chuyển đến tab phương tiện & tài xế
-                    const vehicleTab = document.querySelector('a[href="#shipmentDetail"]');
-                    if (vehicleTab) {
-                        const tab = new bootstrap.Tab(vehicleTab);
-                        tab.show();
-                        
-                        // Focus vào trường có lỗi
-                        setTimeout(() => {
-                            const errorElement = document.querySelector(errorField);
-                            if (errorElement) {
-                                errorElement.focus();
-                                errorElement.classList.add('highlight-error');
-                                setTimeout(() => {
-                                    errorElement.classList.remove('highlight-error');
-                                }, 2000);
-                            }
-                        }, 300);
-                    }
-                });
-            } else {
-                // Định dạng tất cả các trường số trước khi submit
-                document.querySelectorAll('input[type="number"]').forEach(input => {
-                    if (input.value !== '') {
-                        const value = parseFloat(input.value);
-                        if (Number.isInteger(value)) {
-                            input.value = parseInt(value);
-                        }
-                    }
-                });
-                
-                // Nếu tất cả đều hợp lệ, submit form
-                document.getElementById('shipmentForm').submit();
-            }
-        });
-        
-        // Xử lý form trước khi submit để định dạng số
+        // Xử lý submit form
         document.getElementById('shipmentForm').addEventListener('submit', function(e) {
-            // Định dạng tất cả các trường số trước khi submit
-            document.querySelectorAll('input[type="number"]').forEach(input => {
-                if (input.value !== '') {
-                    const value = parseFloat(input.value);
-                    if (Number.isInteger(value)) {
-                        input.value = parseInt(value);
-                    }
-                }
-            });
+            e.preventDefault();
+            if (validateShipmentForm()) {
+                prepareFormBeforeSubmit();
+                this.submit();
+            }
         });
     });
-    
-    // Hàm để định dạng tất cả các trường số khi trang được tải
-    function formatAllNumericInputs() {
-        // Thêm listener cho tất cả các trường số
-        const numericInputs = document.querySelectorAll('input[type="number"]');
-        addNumericInputListeners(numericInputs);
-        
-        // Định dạng giá trị ban đầu
-        numericInputs.forEach(input => {
-            if (input.value !== '') {
-                const value = parseFloat(input.value);
-                if (Number.isInteger(value)) {
-                    input.value = parseInt(value);
-                }
-            }
-        });
-    }
-    
-    // Hàm thêm event listener cho các trường số
-    function addNumericInputListeners(inputs) {
-        inputs.forEach(input => {
-            // Thêm class để dễ quản lý
-            input.classList.add('numeric-input');
-            
-            // Xử lý khi blur (rời khỏi trường nhập)
-            input.addEventListener('blur', function() {
-                if (this.value !== '') {
-                    const value = parseFloat(this.value);
-                    if (Number.isInteger(value)) {
-                        this.value = parseInt(value);
-                    }
-                }
-            });
-        });
-    }
 
-    document.getElementById('avatarInput').addEventListener('change', function(event) {
+    document.getElementById('avatarInput')?.addEventListener('change', function(event) {
         const file = event.target.files[0];
     
         if (file) {
