@@ -463,11 +463,11 @@
                     </div>
                     
                     <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
-                        <h4 class="font-semibold text-gray-800 mb-2">Real-time Analytics Dashboard</h4>
-                        <p class="text-sm text-gray-600 mb-3">Dashboard phân tích dữ liệu real-time cho logistics</p>
+                        <h4 class="font-semibold text-gray-800 mb-2">Multichannel Sales Platform</h4>
+                        <p class="text-sm text-gray-600 mb-3">Quản lý Bán hàng Đa kênh Shopee, TikTok, Facebook</p>
                         <div class="flex flex-wrap gap-1 mb-3">
-                            <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">Python</span>
-                            <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">Django</span>
+                            <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">NestJS</span>
+                            <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">NextJS</span>
                             <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">PostgreSQL</span>
                         </div>
                         <a href="#" class="text-sm text-blue-600 hover:underline">Xem chi tiết →</a>
@@ -787,7 +787,7 @@
                     'or_contact': 'Or contact directly:',
                     'view_details': 'View Details →',
                     'ecommerce_desc': 'B2B e-commerce platform with 50k+ products',
-                    'analytics_desc': 'Real-time analytics dashboard for logistics',
+                    'analytics_desc': 'Multichannel Sales Management Platform for Shopee, TikTok, and Facebook',
                     'lead_team': '• Lead team of 10 developers, implementing Agile/Scrum',
                     'optimize_perf': '• Optimized performance, reduced load time by 40%',
                     'build_mvp': '• Built MVP for 3 startup products',
