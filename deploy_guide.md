@@ -189,7 +189,7 @@ Nội dung:
 #!/bin/bash
 
 cd /var/www/webroot/nguyentrieu || exit
-git pull origin nguyentrieu.vn
+git pull origin portfolio
 cd src
 composer install --no-dev
 php artisan migrate --force
