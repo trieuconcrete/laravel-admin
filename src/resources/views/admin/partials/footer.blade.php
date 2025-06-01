@@ -2,11 +2,11 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-6">
-                <script>document.write(new Date().getFullYear())</script> © LaravelAdmin.
+                <script>document.write(new Date().getFullYear())</script> © VMove.
             </div>
             <div class="col-sm-6">
                 <div class="text-sm-end d-none d-sm-block">
-                    Develop by Nguyễn Triều
+                    Develop by VMove
                 </div>
             </div>
         </div>

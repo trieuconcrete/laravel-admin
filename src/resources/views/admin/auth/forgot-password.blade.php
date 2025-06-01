@@ -61,7 +61,7 @@
                             <div class="card-body p-4">
                                 <div class="text-center mt-2">
                                     <h5 class="text-primary">Forgot Password?</h5>
-                                    <p class="text-muted">Reset password with LaravelAdmin</p>
+                                    <p class="text-muted">Reset password with VMove</p>
 
                                     <lord-icon src="https://cdn.lordicon.com/rhvddzym.json" trigger="loop" colors="primary:#0ab39c" class="avatar-xl"></lord-icon>
 
@@ -104,7 +104,7 @@
                     <div class="col-lg-12">
                         <div class="text-center">
                             <p class="mb-0 text-muted">&copy;
-                                <script>document.write(new Date().getFullYear())</script> LaravelAdmin. Crafted with <i class="mdi mdi-heart text-danger"></i> by Nguyễn Triều
+                                <script>document.write(new Date().getFullYear())</script> VMove. Crafted with <i class="mdi mdi-heart text-danger"></i> by VMove
                             </p>
                         </div>
                     </div>
