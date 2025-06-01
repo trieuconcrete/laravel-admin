@@ -96,9 +96,9 @@
         <div class="mb-6">
             <h4 class="text-sm font-semibold text-gray-700 mb-3">Cloud & DevOps</h4>
             <div class="flex flex-wrap gap-2">
-                <a href="https://www.credly.com/badges/20142edc-b77f-4c9d-b1de-6d86e7d22445" target="_blank" class="skill-tag px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                <span class="skill-tag px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
                     <i class="fab fa-aws mr-1"></i>AWS Certified SAA-C03
-                </a>
+                </span>
                 <span class="skill-tag px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
                     <i class="fab fa-aws mr-1"></i>AWS Certified DVA-C02 (Learning)
                 </span>
