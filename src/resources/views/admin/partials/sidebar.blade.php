@@ -71,7 +71,7 @@
                     </a>
                 </li> --}}
                 <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
+                    <a class="nav-link menu-link" href="{{ route('admin.settings.index') }}">
                         <i class="ri-settings-2-line"></i> </i> <span data-key="t-settings">{{ __('sidebar.settings') }}</span>
                     </a>
                 </li>
