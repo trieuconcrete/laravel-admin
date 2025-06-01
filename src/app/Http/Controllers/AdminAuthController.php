@@ -20,7 +20,7 @@ class AdminAuthController extends Controller
         $credentials['status'] = 1;
         $remember = $request->has('remember');
         if (Auth::guard('admin')->attempt($credentials, $remember)) {
-            return redirect()->intended('/admin/dashboard');
+            return redirect()->intended('/admin/contacts');
         }
 
         return back()->withErrors([
