@@ -121,6 +121,16 @@ server {
         index index.html;
         try_files $uri $uri/ =404;
     }
+
+    # Redirect /prompt → /prompt/
+    location = /prompt {
+        return 301 /prompt/;
+    }
+    location /prompt/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
 }
 ```
 
@@ -155,7 +165,7 @@ After=network.target
 [Service]
 User=www-data
 Restart=always
-ExecStart=/usr/bin/php /var/www//artisan queue:work --sleep=3 --tries=3
+ExecStart=/usr/bin/php /var/www/artisan queue:work --sleep=3 --tries=3
 
 [Install]
 WantedBy=multi-user.target
