@@ -10,7 +10,7 @@ if (!function_exists('greeting_message')) {
         $hour = (int) $now->format('H');
         $dayOfWeek = (int) $now->format('N');
 
-        $name = Auth::user()->full_name ?? null; 
+        $name = Auth::user()->name ?? null; 
         if (in_array($dayOfWeek, [6, 7])) {
             $greeting = __('messages.happy_weekend') . ' 🎉';
         }

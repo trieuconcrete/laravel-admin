@@ -25,8 +25,8 @@
                         
                                 <div class="mb-4">
                                     <label class="block text-gray-700">Name</label>
-                                    <input name="full_name" type="text" placeholder="Name" value="{{ old('full_name', $user->full_name) }}" required class="form-control p-2 border rounded">
-                                    @error('full_name')
+                                    <input name="name" type="text" placeholder="Name" value="{{ old('name', $user->name) }}" required class="form-control p-2 border rounded">
+                                    @error('name')
                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>

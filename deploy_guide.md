@@ -42,8 +42,8 @@ sudo apt install -y nodejs
 
 ```bash
 cd /var/www/webroot
-sudo git clone git@github.com:trieuconcrete/laravel-admin.git webfolio
-cd webfolio/src
+sudo git clone git@github.com:trieuconcrete/laravel-admin.git nguyentrieu
+cd nguyentrieu/src
 composer install
 cp .env.example .env
 php artisan key:generate
@@ -53,9 +53,9 @@ php artisan key:generate
 
 ```bash
 sudo mysql -u root -p
-CREATE DATABASE webfolio_db;
+CREATE DATABASE nguyentrieu_db;
 CREATE USER 'laravel_user'@'localhost' IDENTIFIED BY 'password@123';
-GRANT ALL PRIVILEGES ON webfolio_db.* TO 'laravel_user'@'localhost';
+GRANT ALL PRIVILEGES ON nguyentrieu_db.* TO 'laravel_user'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 ```
@@ -63,7 +63,7 @@ EXIT;
 Cập nhật file `.env`:
 
 ```
-DB_DATABASE=webfolio_db
+DB_DATABASE=nguyentrieu_db
 DB_USERNAME=laravel_user
 DB_PASSWORD=password@123
 ```
@@ -85,17 +85,16 @@ npm run build
 ## ✅ Bước 8: Cấu hình Nginx
 
 ```bash
-sudo nano /etc/nginx/sites-available/webfolio.config
+sudo nano /etc/nginx/sites-available/nguyentrieu.config
 ```
 
 Nội dung cấu hình:
 
 ```nginx
 server {
-    listen 8080;
-    server_name 103.82.132.130;
+    server_name nguyentrieu.dev;
 
-    root /var/www/webroot/webfolio/src/public;
+    root /var/www/webroot/nguyentrieu/src/public;
     index index.php index.html;
 
     location / {
@@ -112,13 +111,23 @@ server {
     location ~ /\.ht {
         deny all;
     }
+
+    # Redirect /multichannel-sales-platform → /multichannel-sales-platform/
+    location = /multichannel-sales-platform {
+        return 301 /multichannel-sales-platform/;
+    }
+    location /multichannel-sales-platform/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
 }
 ```
 
 Kích hoạt site:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/webfolio.config /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/nguyentrieu.config /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -161,7 +170,7 @@ sudo systemctl start laravel-worker
 ## ✅ Bước 11: Tạo script `deploy.sh`
 
 ```bash
-nano /var/www/webroot/webfolio/deploy.sh
+nano /var/www/webroot/nguyentrieu/deploy.sh
 ```
 
 Nội dung:
@@ -169,8 +178,8 @@ Nội dung:
 ```bash
 #!/bin/bash
 
-cd /var/www/webroot/webfolio || exit
-git pull origin webfolio.vn
+cd /var/www/webroot/nguyentrieu || exit
+git pull origin nguyentrieu.vn
 cd src
 composer install --no-dev
 php artisan migrate --force
@@ -184,7 +193,7 @@ chown -R www-data:www-data storage bootstrap/cache
 Phân quyền:
 
 ```bash
-chmod +x /var/www/webroot/webfolio/deploy.sh
+chmod +x /var/www/webroot/nguyentrieu/deploy.sh
 ```
 
 ## ✅ Bước 12: Restart services khi cần

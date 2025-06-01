@@ -18,5 +18,5 @@ return [
     'status' => 'ステータス',
     'role' => '役割',
     'username' => 'ユーザー名',
-    'full_name' => 'フルネーム',
+    'name' => 'フルネーム',
 ];

@@ -18,5 +18,5 @@ return [
     'status' => 'Status',
     'role' => 'Role',
     'username' => 'Username',
-    'full_name' => 'Full Name',
+    'name' => 'Full Name',
 ];

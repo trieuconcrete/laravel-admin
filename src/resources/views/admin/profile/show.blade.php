@@ -11,7 +11,7 @@
                         <div class="profile-user position-relative d-inline-block mx-auto  mb-4">
                             <img src="{{ !$user->avatar ? asset('no-image.jpeg') : asset('storage/' . $user->avatar) }}" class="rounded-circle avatar-xl img-thumbnail user-profile-image" alt="user-profile-image">
                         </div>
-                        <h5 class="fs-16 mb-1">{{ $user->full_name }}</h5>
+                        <h5 class="fs-16 mb-1">{{ $user->name }}</h5>
                         <p class="text-muted mb-0">{{ $user->role }}</p>
                     </div>
                 </div>
@@ -66,7 +66,7 @@
                                     <div class="col-lg-6">
                                         <div class="mb-3">
                                             <label for="fullnameInput" class="form-label">Full Name</label>
-                                            <input type="text" class="form-control" name="full_name" id="fullnameInput" placeholder="Enter your Full name" value="{{ $user->full_name }}">
+                                            <input type="text" class="form-control" name="name" id="fullnameInput" placeholder="Enter your Full name" value="{{ $user->name }}">
                                         </div>
                                     </div>
                                     <div class="col-lg-6">

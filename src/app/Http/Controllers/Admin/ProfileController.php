@@ -21,7 +21,7 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'full_name' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'username' => 'required|string|max:100|unique:users,username,' . $user->id,
             'phone' => 'nullable|string',
             'birthday' => 'nullable|date',
@@ -37,7 +37,7 @@ class ProfileController extends Controller
                 $user->avatar = $avatarPath;
             }
 
-            $user->full_name = $request->input('full_name');
+            $user->name = $request->input('name');
             $user->username = $request->input('username');
             $user->phone = $request->input('phone');
             $user->birthday = $request->input('birthday');

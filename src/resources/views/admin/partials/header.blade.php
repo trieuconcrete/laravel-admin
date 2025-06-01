@@ -39,14 +39,14 @@
                         <span class="d-flex align-items-center">
                             <img class="rounded-circle header-profile-user" src="{{ !request()->user()->avatar ? asset('no-image.jpeg') : asset('storage/' . request()->user()->avatar) }}" alt="Header Avatar">
                             <span class="text-start ms-xl-2">
-                                <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ request()->user()->full_name }}</span>
+                                <span class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ request()->user()->name }}</span>
                                 <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">{{ request()->user()->role }}</span>
                             </span>
                         </span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-end">
                         <!-- item-->
-                        <h6 class="dropdown-header">Welcome {{ request()->user()->full_name }}!</h6>
+                        <h6 class="dropdown-header">Welcome {{ request()->user()->name }}!</h6>
                         <a class="dropdown-item" href="{{ route('admin.profile.show') }}"><i class="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i> <span class="align-middle">Profile</span></a>
                         <a class="dropdown-item" href="{{ route('admin.logout') }}"><i class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i> <span class="align-middle" data-key="t-logout">Logout</span></a>
                     </div>

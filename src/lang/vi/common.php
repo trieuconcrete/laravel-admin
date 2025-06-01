@@ -18,5 +18,5 @@ return [
     'status' => 'Trạng thái',
     'role' => 'Vai trò',
     'username' => 'Tên đăng nhập',
-    'full_name' => 'Họ và tên',
+    'name' => 'Họ và tên',
 ];
