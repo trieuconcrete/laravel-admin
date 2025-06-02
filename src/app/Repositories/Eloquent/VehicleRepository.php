@@ -48,6 +48,6 @@ class VehicleRepository extends BaseRepository implements VehicleRepositoryInter
             });
         }
 
-        return $query->paginate(10);
+        return $query->paginate($this->getPaginationLimit());
     }
 }

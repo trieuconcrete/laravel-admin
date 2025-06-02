@@ -60,11 +60,11 @@
                                         </tr>
                                         <tr>
                                             <td>Ngày cấp:</td>
-                                            <td>{{ $inspectionDoc->issue_date ? $inspectionDoc->issue_date->format('d/m/Y') : null }}</td>
+                                            <td>@formatDate($inspectionDoc->issue_date)</td>
                                         </tr>
                                         <tr>
                                             <td>Ngày hết hạn:</td>
-                                            <td>{{ $inspectionDoc->expiry_date ? $inspectionDoc->expiry_date->format('d/m/Y') : null }}</td>
+                                            <td>@formatDate($inspectionDoc->expiry_date)</td>
                                         </tr>
                                         <tr>
                                             <td>Trạng thái:</td>
@@ -99,11 +99,11 @@
                                         </tr>
                                         <tr>
                                             <td>Ngày cấp:</td>
-                                            <td>{{ $insuranceDoc->issue_date ? $insuranceDoc->issue_date->format('d/m/Y') : null }}</td>
+                                            <td>@formatDate($insuranceDoc->issue_date)</td>
                                         </tr>
                                         <tr>
                                             <td>Ngày hết hạn:</td>
-                                            <td>{{ $insuranceDoc->expiry_date ? $insuranceDoc->expiry_date->format('d/m/Y') : null }}</td>
+                                            <td>@formatDate($insuranceDoc->expiry_date)</td>
                                         </tr>
                                         <tr>
                                             <td>Trạng thái:</td>
@@ -145,7 +145,7 @@
                 <tbody>
                     @forelse($vehicle->maintenanceRecords as $record)
                         <tr>
-                            <td>{{ $record->start_date ? $record->start_date->format('d/m/Y') : null }}</td>
+                            <td>@formatDate($record->start_date)</td>
                             <td>{{ $record->getCurrentMaintenanceTypeLabel() ?? null }}</td>
                             <td>{{ $record->service_provider }}</td>
                             <td>{{ number_format($record->cost) ?? 0 }} VNĐ</td>

@@ -82,13 +82,13 @@
                                             </div>
                                             <div class="row mb-3">
                                                 @php
-                                                $departure_time = old('departure_time', optional($shipment->departure_time)->format('Y-m-d'));
-                                                $estimated_arrival_time = old('estimated_arrival_time', optional($shipment->estimated_arrival_time)->format('Y-m-d'));
+                                                $departure_time = old('departure_time', $shipment->departure_time);
+                                                $estimated_arrival_time = old('estimated_arrival_time', $shipment->estimated_arrival_time);
                                                 @endphp
                                                 <div class="col-md-6">
                                                     <label class="form-label">Thời gian khởi hành<span class="text-danger">*</span></label>
                                                     <input type="date" class="form-control" name="departure_time"
-                                                           value="{{ $departure_time }}">
+                                                           value="@formatDateForInput($departure_time)">
                                                     @error('departure_time')
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
@@ -96,7 +96,7 @@
                                                 <div class="col-md-6">
                                                     <label class="form-label">Thời gian dự kiến đến<span class="text-danger">*</span></label>
                                                     <input type="date" class="form-control" name="estimated_arrival_time"
-                                                    value="{{ $estimated_arrival_time }}">
+                                                    value="@formatDateForInput($estimated_arrival_time)">
                                                     @error('estimated_arrival_time')
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror

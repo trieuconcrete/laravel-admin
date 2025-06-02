@@ -47,6 +47,6 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
             });
         }
 
-        return $query->paginate(10);
+        return $query->paginate($this->getPaginationLimit());
     }    
 }

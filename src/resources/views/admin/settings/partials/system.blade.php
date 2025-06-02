@@ -1,18 +1,18 @@
 <div class="col-md-6">
     <div class="mb-3">
-        <label for="site_title" class="form-label">Tiêu đề trang web</label>
+        <label for="site_title" class="form-label">Tiêu đề trang web <span class="text-danger">*</span></label>
         <input type="text" class="form-control" id="site_title" name="system[site_title]" 
             value="{{ old('system.site_title', $settings['system']->where('key', 'site_title')->first()->value ?? '') }}">
     </div>
     
     <div class="mb-3">
-        <label for="pagination_limit" class="form-label">Số lượng bản ghi mỗi trang</label>
+        <label for="pagination_limit" class="form-label">Số lượng bản ghi mỗi trang <span class="text-danger">*</span></label>
         <input type="number" class="form-control" id="pagination_limit" name="system[pagination_limit]" min="5" max="100" 
             value="{{ old('system.pagination_limit', $settings['system']->where('key', 'pagination_limit')->first()->value ?? 15) }}">
     </div>
     
     <div class="mb-3">
-        <label for="date_format" class="form-label">Định dạng ngày tháng</label>
+        <label for="date_format" class="form-label">Định dạng ngày tháng <span class="text-danger">*</span></label>
         <select class="form-select" id="date_format" name="system[date_format]">
             @php
                 $currentDateFormat = old('system.date_format', $settings['system']->where('key', 'date_format')->first()->value ?? 'd/m/Y');
@@ -27,7 +27,7 @@
 
 <div class="col-md-6">
     <div class="mb-3">
-        <label for="time_format" class="form-label">Định dạng thời gian</label>
+        <label for="time_format" class="form-label">Định dạng thời gian <span class="text-danger">*</span></label>
         <select class="form-select" id="time_format" name="system[time_format]">
             @php
                 $currentTimeFormat = old('system.time_format', $settings['system']->where('key', 'time_format')->first()->value ?? 'H:i');
@@ -38,7 +38,7 @@
     </div>
     
     <div class="mb-3">
-        <label for="timezone" class="form-label">Múi giờ</label>
+        <label for="timezone" class="form-label">Múi giờ <span class="text-danger">*</span></label>
         <select class="form-select" id="timezone" name="system[timezone]">
             @php
                 $currentTimezone = old('system.timezone', $settings['system']->where('key', 'timezone')->first()->value ?? 'Asia/Ho_Chi_Minh');

@@ -94,12 +94,12 @@
                                                 @endphp
                                                 <div class="col-md-6">
                                                     <label class="form-label">Thời gian khởi hành<span class="text-danger">*</span></label>
-                                                    <input type="date" class="form-control date-input" name="departure_time" value="{{ $departureDateValue }}" required autocomplete="off" data-date-format="Y-m-d">
+                                                    <input type="date" class="form-control date-input" name="departure_time" value="@formatDateForInput($departureDateValue)" required autocomplete="off">
                                                     @error('departure_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Thời gian dự kiến đến<span class="text-danger">*</span></label>
-                                                    <input type="date" class="form-control date-input" name="estimated_arrival_time" value="{{ $arrivalDateValue }}" required autocomplete="off" data-date-format="Y-m-d">
+                                                    <input type="date" class="form-control date-input" name="estimated_arrival_time" value="@formatDateForInput($arrivalDateValue)" required autocomplete="off">
                                                     @error('estimated_arrival_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
