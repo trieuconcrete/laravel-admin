@@ -18,7 +18,7 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
      * @param mixed $perPage
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function getShipmentsWithFilters($filters = [], $perPage = 20)
+    public function getShipmentsWithFilters($filters = [], $perPage = null)
     {
         $query = Shipment::query();
         if (!empty($filters['status'])) {
@@ -47,11 +47,6 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
         }
         return $query->with(['driver', 'vehicle', 'goods', 'shipmentDeductions.shipmentDeductionType'])
             ->orderByDesc('departure_time')
-            ->paginate($perPage);
+            ->paginate($perPage ?? $this->getPaginationLimit());
     }
-
-    // public function find($id)
-    // {
-    //     return Shipment::with(['driver', 'vehicle', 'goods', 'shipmentDeductions.shipmentDeductionType'])->findOrFail($id);
-    // }
 }

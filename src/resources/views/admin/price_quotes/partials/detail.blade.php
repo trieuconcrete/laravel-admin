@@ -34,7 +34,7 @@
             <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
             <input 
                 type="date" class="form-control" name="pickup_datetime" 
-                value="{{ old('pickup_datetime', $quote->pickup_datetime ? $quote->pickup_datetime->format('Y-m-d') : null) }}"
+                value="@formatDateForInput($quote->pickup_datetime)"
             >
             <div class="text-danger error" data-field="pickup_datetime"></div>
         </div>
@@ -42,7 +42,7 @@
             <label class="form-label">Ngày hết hạn</label>
             <input 
                 type="date" class="form-control" name="valid_until"
-                value="{{ old('valid_until', $quote->valid_until ? $quote->valid_until->format('Y-m-d') : null) }}"
+                value="@formatDateForInput($quote->valid_until)"
             >
             <div class="text-danger error" data-field="valid_until"></div>
         </div>

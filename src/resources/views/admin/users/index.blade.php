@@ -166,7 +166,7 @@
                         </div>
                         <div class="col-xxl-6">
                             <label class="form-label">Ngày sinh </label>
-                            <input type="date" name="birthday" class="form-control">
+                            <input type="date" name="birthday" class="form-control" value="@formatDateForInput(request('birthday'))">
                             <div class="text-danger error" data-field="birthday"></div>
                         </div>
                         <div class="col-xxl-6">

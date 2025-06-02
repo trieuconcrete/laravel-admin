@@ -125,13 +125,13 @@
                             <div class="col-md-3">
                                 <div class="input-group">
                                     <span class="input-group-text">Từ</span>
-                                    <input type="date" class="form-control" id="startDateFilter" name="departure_time" value="{{ request('departure_time') ? \Carbon\Carbon::parse(request('departure_time'))->format('Y-m-d') : '' }}">
+                                    <input type="date" class="form-control" id="startDateFilter" name="departure_time" value="@formatDateForInput(request('departure_time'))">
                                 </div>
                             </div>
                             <div class="col-md-3">
                                 <div class="input-group">
                                     <span class="input-group-text">Đến</span>
-                                    <input type="date" class="form-control" id="endDateFilter" name="estimated_arrival_time" value="{{ request('estimated_arrival_time') ? \Carbon\Carbon::parse(request('estimated_arrival_time'))->format('Y-m-d') : '' }}">
+                                    <input type="date" class="form-control" id="endDateFilter" name="estimated_arrival_time" value="@formatDateForInput(request('estimated_arrival_time'))">
                                 </div>
                             </div>
                             <div class="col-md-3">
@@ -190,8 +190,8 @@
                                     <td>{{ $shipment->getDriverFromShipmentDeductions()->full_name ?? '' }}</td>
                                     <td>{{ $shipment->vehicle ? $shipment->vehicle->plate_number : '' }}</td>
                                     <td>
-                                        <div>KH: {{ $shipment->departure_time ? $shipment->departure_time->format('d/m/Y') : '' }}</div>
-                                        <div>DK: {{ $shipment->estimated_arrival_time ? $shipment->estimated_arrival_time->format('d/m/Y') : '' }}</div>
+                                        <div>KH: @formatDate($shipment->departure_time)</div>
+                                        <div>DK: @formatDate($shipment->estimated_arrival_time)</div>
                                     </td>
                                     <td><span class="badge {{ $shipment->statusBadgeClass }}">{{ $shipment->status_label }}</span></td>
                                 </tr>

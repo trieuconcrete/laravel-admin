@@ -22,7 +22,7 @@
                         </div>
                         <div class="col-md-4 text-md-end">
                             <span class="badge bg-{{ $customer->getStatusBadgeClassAttribute() }} mb-2">{{ $customer->getStatusLabelAttribute() }}</span>
-                            <p><i class="fas fa-calendar-alt me-2 text-primary"></i> Ngày đăng ký: {{ $customer->establishment_date ? $customer->establishment_date->format('d/m/y') : null }}</p>
+                            <p><i class="fas fa-calendar-alt me-2 text-primary"></i> Ngày đăng ký: @formatDate($customer->establishment_date)</p>
                         </div>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
                                     </div>
                                     <div class="mb-3">
                                         <label for="fullnameInput" class="form-label">Ngày thành lập</label>
-                                        <input type="date" class="form-control" name="establishment_date" value="{{ old('establishment_date', optional($customer->establishment_date)->format('Y-m-d')) }}">
+                                        <input type="date" class="form-control" name="establishment_date" value="@formatDateForInput($customer->establishment_date)">
                                         @error('establishment_date')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror

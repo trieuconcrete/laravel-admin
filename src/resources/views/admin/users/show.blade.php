@@ -93,7 +93,7 @@
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
                                                     <label for="birthdayInput" class="form-label">Ngày sinh</label>
-                                                    <input type="date" class="form-control" name="birthday" id="birthdayInput" placeholder="Enter your email" value="{{ old('birthday', $user->birthday) }}">
+                                                    <input type="date" class="form-control" name="birthday" id="birthdayInput" placeholder="Enter your email" value="@formatDateForInput($user->birthday)">
                                                     @error('birthday')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                                     @enderror
@@ -218,7 +218,7 @@
                                                 type="date"
                                                 class="form-control"
                                                 name="issue_date"
-                                                value="{{ old('issue_date', optional($user->license)->issue_date ? optional($user->license)->issue_date->format('Y-m-d') : '') }}"
+                                                value="@formatDateForInput($user->license->issue_date)"
                                             >
                                             @error('issue_date')
                                                 <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -233,7 +233,7 @@
                                                 type="date"
                                                 class="form-control"
                                                 name="expiry_date"
-                                                value="{{ old('expiry_date', optional($user->license)->expiry_date ? optional($user->license)->expiry_date->format('Y-m-d') : '') }}"
+                                                value="@formatDateForInput($user->license->expiry_date)"
                                             >
                                             @error('expiry_date')
                                                 <p class="text-danger text-sm mt-1">{{ $message }}</p>

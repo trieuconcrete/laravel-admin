@@ -177,6 +177,7 @@ return [
         
         // Custom Service Providers
         App\Providers\SettingServiceProvider::class,
+        App\Providers\HelperServiceProvider::class,
     ],
 
     /*

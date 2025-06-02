@@ -56,7 +56,7 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#salary" role="tab">
-                                <i class="far fa-user"></i> Xe đi trong tháng({{ date('m/Y') }})
+                                <i class="far fa-user"></i> Xe đi trong tháng({{ date(\App\Helpers\DateHelper::getMonthYearFormat()) }})
                             </a>
                         </li>
                         <li class="nav-item">
@@ -177,14 +177,14 @@
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
                                             <label for="date" class="form-label">Ngày cấp</label>
-                                            <input type="date" class="form-control" value="" placeholder="Nhập ngày cấp">
+                                            <input type="date" class="form-control" value="@formatDateForInput($vehicle->license->issue_date ?? null)" placeholder="Nhập ngày cấp">
                                         </div>
                                     </div>
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
                                             <label for="date" class="form-label">Ngày hết hạn</label>
-                                            <input type="date" class="form-control" value="" placeholder="Nhập ngày hết hạn">
+                                            <input type="date" class="form-control" value="@formatDateForInput($vehicle->license->expiry_date ?? null)" placeholder="Nhập ngày hết hạn">
                                         </div>
                                     </div>
                                     <!--end col-->

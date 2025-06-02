@@ -6,7 +6,7 @@
     </div>
     
     <div id="email_notification_settings" class="mb-3 {{ old('notifications.email_notifications', $settings['notifications']->where('key', 'email_notifications')->first()->value ?? true) ? '' : 'd-none' }}">
-        <label for="notification_email" class="form-label">Email gửi thông báo</label>
+        <label for="notification_email" class="form-label">Email gửi thông báo <span class="text-danger">*</span></label>
         <input type="email" class="form-control" id="notification_email" name="notifications[notification_email]" 
             value="{{ old('notifications.notification_email', $settings['notifications']->where('key', 'notification_email')->first()->value ?? '') }}">
         <small class="text-muted">Email này sẽ được sử dụng để gửi thông báo tự động</small>
@@ -27,7 +27,7 @@
     </div>
     
     <div class="mb-3">
-        <label class="form-label">Các sự kiện gửi thông báo</label>
+        <label class="form-label">Các sự kiện gửi thông báo <span class="text-danger">*</span></label>
 
         <div class="form-check">
             <input type="hidden" name="notifications[notify_new_shipment]" value="0">

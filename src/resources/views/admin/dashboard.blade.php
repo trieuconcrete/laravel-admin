@@ -181,11 +181,11 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Thời gian khởi hành</label>
-                            <input type="datetime-local" class="form-control">
+                            <input type="datetime-local" class="form-control" value="{{ now()->format('Y-m-d\TH:i') }}">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Thời gian dự kiến đến</label>
-                            <input type="datetime-local" class="form-control">
+                            <input type="datetime-local" class="form-control" value="{{ now()->addHours(2)->format('Y-m-d\TH:i') }}">
                         </div>
                     </div>
                     <div class="mb-3">
