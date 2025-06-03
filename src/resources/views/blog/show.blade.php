@@ -157,7 +157,7 @@
     
     <!-- Article Content -->
     <div class="container mx-auto px-4 py-8">
-        <div class="max-w-4xl mx-auto">
+        <div class="lg:col-span-2">
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <!-- Main Content -->
                 <div class="lg:col-span-3">

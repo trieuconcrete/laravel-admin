@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nguyen Trieu - IT Professional Portfolio</title>
-    
+    <title>@section('title', 'Nguyen Trieu - IT Professional Portfolio')</title>
+    @stack('meta')
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -139,6 +139,7 @@
             cursor: not-allowed;
         }
     </style>
+    @stack('styles')
 </head>
 <body class="bg-gray-50 text-gray-900">
     

@@ -117,7 +117,7 @@
                 <!-- Pagination -->
                 @if($posts->hasPages())
                 <div class="mt-8">
-                    {{ $posts->links() }}
+                    {{ $posts->links('vendor.pagination.tailwind') }}
                 </div>
                 @endif
             </div>

@@ -72,16 +72,16 @@
                 <span class="skill-tag px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium">Tailwind CSS</span>
                 <span class="skill-tag px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">JavaScript</span>
                 <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">jQuery</span>
-                <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                {{-- <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                     <i class="fab fa-vuejs mr-1"></i>NuxtJS
                 </span>
                 <span class="skill-tag px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">
                     <i class="fab fa-react mr-1"></i>NextJS
-                </span>
+                </span> --}}
             </div>
         </div>
 
-        <div class="mb-6">
+        {{-- <div class="mb-6">
             <h4 class="text-sm font-semibold text-gray-700 mb-3">CMS & E-Commerce</h4>
             <div class="flex flex-wrap gap-2">
                 <span class="skill-tag px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
@@ -91,7 +91,7 @@
                     <i class="fas fa-shopping-cart mr-1"></i>EC-CUBE
                 </span>
             </div>
-        </div>
+        </div> --}}
         
         <div class="mb-6">
             <h4 class="text-sm font-semibold text-gray-700 mb-3">Cloud & DevOps</h4>

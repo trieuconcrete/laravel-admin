@@ -131,6 +131,106 @@ server {
         index index.html;
         try_files $uri $uri/ =404;
     }
+
+    # Redirect /spa → /spa/
+    location = /spa {
+        return 301 /spa/;
+    }
+    location /spa/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Redirect /nails → /nails/
+    location = /nails {
+        return 301 /nails/;
+    }
+    location /nails/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Redirect /batdongsan → /batdongsan/
+    location = /batdongsan {
+        return 301 /batdongsan/;
+    }
+    location /batdongsan/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Redirect /farm → /farm/
+    location = /farm {
+        return 301 /farm/;
+    }
+    location /farm/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Redirect /hoachat → /hoachat/
+    location = /hoachat {
+        return 301 /hoachat/;
+    }
+    location /hoachat/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Redirect /shopmypham → /shopmypham/
+    location = /shopmypham {
+        return 301 /shopmypham/;
+    }
+    location /shopmypham/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Redirect /travel → /travel/
+    location = /travel {
+        return 301 /travel/;
+    }
+    location /travel/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Redirect /vantai → /vantai/
+    location = /vantai {
+        return 301 /vantai/;
+    }
+    location /vantai/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Redirect /xemaycu → /xemaycu/
+    location = /xemaycu {
+        return 301 /xemaycu/;
+    }
+    location /xemaycu/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
+
+    # Redirect /greenproduct → /greenproduct/
+    location = /greenproduct {
+        return 301 /greenproduct/;
+    }
+    location /greenproduct/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
 }
 ```
 
