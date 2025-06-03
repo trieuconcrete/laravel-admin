@@ -101,8 +101,8 @@
                                         <td>{{ $quote->quote_code }}</td>
                                         <td>{{ optional($quote->customer)->name }}</td>
                                         <td><span class="badge bg-{{ $quote->getStatusColorAttribute() }}">{{ $quote->getStatusLabelAttribute() }}</span></td>
-                                        <td>{{ $quote->pickup_datetime ? $quote->pickup_datetime->format('d/m/y') : null }}</td>
-                                        <td>{{ $quote->valid_until ? $quote->valid_until->format('d/m/y') : null }}</td>
+                                        <td>@formatDate($quote->pickup_datetime)</td>
+                                        <td>@formatDate($quote->valid_until)</td>
                                         <td><a href="{{ optional(optional($quote->attachments)->first())->document_file_url }}" class="" target="_blank">File báo giá excel</a></td>
                                     </tr>
 
@@ -157,12 +157,12 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" name="pickup_datetime">
+                            <input type="date" class="form-control" name="pickup_datetime" value="@formatDateForInput(request('pickup_datetime'))">
                             <div class="text-danger error" data-field="pickup_datetime"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Ngày hết hạn</label>
-                            <input type="date" class="form-control" name="valid_until">
+                            <input type="date" class="form-control" name="valid_until" value="@formatDateForInput(request('valid_until'))">
                             <div class="text-danger error" data-field="valid_until"></div>
                         </div>
                     </div>

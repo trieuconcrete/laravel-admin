@@ -128,13 +128,13 @@
                                             @php
                                                 $vehicleInspection = $vehicle->getLatestDocument(\App\Models\VehicleDocument::TYPE_INSPECTION);
                                             @endphp
-                                            @if ($vehicleInspection)
+                                            @if ($vehicleInspection && $vehicleInspection->expiry_date)
                                                 @if ($vehicle->isDocumentExpired(\App\Models\VehicleDocument::TYPE_INSPECTION)) 
                                                     <span class="badge bg-danger-subtle text-danger">
-                                                        Hết hạn ({{ $vehicleInspection->expiry_date->format('Y-m-d') }})
+                                                        Hết hạn (@formatDate($vehicleInspection->expiry_date))
                                                     </span>
                                                 @else
-                                                    <span class="badge bg-success-subtle text-success ">Còn hạn({{ $vehicleInspection->expiry_date->format('Y-m-d') }})</span>
+                                                    <span class="badge bg-success-subtle text-success ">Còn hạn(@formatDate($vehicleInspection->expiry_date))</span>
                                                 @endif
                                             @endif
                                         </td>
@@ -142,13 +142,13 @@
                                             @php
                                                 $vehicleInsurance = $vehicle->getLatestDocument(\App\Models\VehicleDocument::TYPE_INSURANCE);
                                             @endphp
-                                            @if ($vehicleInsurance)
+                                            @if ($vehicleInsurance && $vehicleInsurance->expiry_date)
                                                 @if ($vehicle->isDocumentExpired(\App\Models\VehicleDocument::TYPE_INSURANCE)) 
                                                     <span class="badge bg-danger-subtle text-danger">
-                                                        Hết hạn ({{ $vehicleInsurance->expiry_date->format('Y-m-d') }})
+                                                        Hết hạn (@formatDate($vehicleInsurance->expiry_date))
                                                     </span>
                                                 @else
-                                                    <span class="badge bg-success-subtle text-success ">Còn hạn({{ $vehicleInsurance->expiry_date->format('Y-m-d') }})</span>
+                                                    <span class="badge bg-success-subtle text-success ">Còn hạn(@formatDate($vehicleInsurance->expiry_date))</span>
                                                 @endif
                                             @endif
                                         </td>
@@ -237,7 +237,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Ngày hết hạn</label>
-                            <input type="date" class="form-control" name="documents[0][expiry_date]">
+                            <input type="date" class="form-control" name="documents[0][expiry_date]" value="@formatDateForInput(old('documents.0.expiry_date'))">
                             <div class="text-danger error" data-field="documents.0.expiry_date"></div>
                         </div>
                     </div>
@@ -257,7 +257,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Ngày hết hạn </label>
-                            <input type="date" class="form-control" name="documents[1][expiry_date]">
+                            <input type="date" class="form-control" name="documents[1][expiry_date]" value="@formatDateForInput(old('documents.1.expiry_date'))">
                             <div class="text-danger error" data-field="documents.1.expiry_date"></div>
                         </div>
                     </div>

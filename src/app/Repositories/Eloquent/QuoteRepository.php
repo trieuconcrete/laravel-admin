@@ -44,6 +44,6 @@ class QuoteRepository extends BaseRepository implements QuoteRepositoryInterface
             });
         }
 
-        return $query->paginate(10);
+        return $query->paginate($this->getPaginationLimit());
     }
 }

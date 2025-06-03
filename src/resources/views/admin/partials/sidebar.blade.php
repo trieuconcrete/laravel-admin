@@ -1,22 +1,28 @@
 <div class="app-menu navbar-menu">
     <!-- LOGO -->
     <div class="navbar-brand-box">
+        @php
+            $logoPath = app(\App\Services\SettingService::class)->get('company_logo', '');
+            $logoFilePath = storage_path('app/public/' . $logoPath);
+            $logoUrl = ($logoPath && file_exists($logoFilePath)) ? asset('storage/' . $logoPath) : asset('assets/images/logo-light.png');
+            $logoSmUrl = asset('assets/images/logo-sm.png');
+        @endphp
         <!-- Dark Logo-->
         <a href="{{ route('admin.dashboard') }}" class="logo logo-dark">
             <span class="logo-sm">
-                <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
+                <img src="{{ $logoSmUrl }}" alt="" height="22">
             </span>
             <span class="logo-lg">
-                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" height="17">
+                <img src="{{ $logoUrl }}" alt="" height="17">
             </span>
         </a>
         <!-- Light Logo-->
         <a href="{{ route('admin.dashboard') }}" class="logo logo-light">
             <span class="logo-sm">
-                <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
+                <img src="{{ $logoSmUrl }}" alt="" height="22">
             </span>
             <span class="logo-lg">
-                <img src="{{ asset('assets/images/logo-light.png') }}" alt="" height="24">
+                <img src="{{ $logoUrl }}" alt="" height="24">
             </span>
         </a>
         <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover" id="vertical-hover">
@@ -71,7 +77,7 @@
                     </a>
                 </li> --}}
                 <li class="nav-item">
-                    <a class="nav-link menu-link" href="#">
+                    <a class="nav-link menu-link" href="{{ route('admin.settings.index') }}">
                         <i class="ri-settings-2-line"></i> </i> <span data-key="t-settings">{{ __('sidebar.settings') }}</span>
                     </a>
                 </li>

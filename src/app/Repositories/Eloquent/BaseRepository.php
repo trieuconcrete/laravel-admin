@@ -4,15 +4,31 @@ namespace App\Repositories\Eloquent;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\App;
 
 abstract class BaseRepository
 {
     protected $model;
     protected $cacheTTL = 60; // Time cache minutes
+    protected $settingService;
 
     public function __construct(Model $model)
     {
         $this->model = $model;
+    }
+    
+    /**
+     * Get the setting service instance
+     * 
+     * @return \App\Services\SettingService
+     */
+    protected function getSettingService()
+    {
+        if (!$this->settingService) {
+            $this->settingService = App::make('App\\Services\\SettingService');
+        }
+        
+        return $this->settingService;
     }
 
     public function all()
@@ -68,7 +84,7 @@ abstract class BaseRepository
     /**
      * Summary of findBy
      * @param array $params
-     * @return TModel|null
+     * @return Model|null
      */
     public function findBy(array $params = []) {
         return $this->model->where($params)->first();
@@ -78,10 +94,21 @@ abstract class BaseRepository
      * Summary of updateOrCreate
      * @param array $conditions
      * @param array $data
-     * @return TModel
+     * @return Model
      */
     public function updateOrCreate(array $conditions = [], array $data = [])
     {
         return $this->model->updateOrCreate($conditions, $data);
+    }
+    
+    /**
+     * Get pagination limit from settings
+     * 
+     * @param int $default
+     * @return int
+     */
+    protected function getPaginationLimit($default = 10)
+    {
+        return (int) $this->getSettingService()->get('pagination_limit', $default);
     }
 }
