@@ -12,6 +12,7 @@ use App\Models\Vehicle;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\ShipmentDeductionType;
+use App\Enum\UserStatus;
 
 class ShipmentController extends Controller
 {
@@ -53,7 +54,7 @@ class ShipmentController extends Controller
     {
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
         $vehicles = Vehicle::pluck('plate_number', 'vehicle_id');
-        $users = User::whereIn('role', ['driver', 'assistant', 'helper'])->pluck('full_name', 'id');
+        $users = User::whereIn('role', ['driver', 'assistant', 'helper'])->where('status', UserStatus::ACTIVE)->pluck('full_name', 'id');
         $deductionTypes = ShipmentDeductionType::where('type', 'expense')->get();
         $personDeductionTypes =ShipmentDeductionType::where('type','driver_and_busboy')->get();
         return view('admin.shipments.create', compact('customers', 'vehicles', 'users', 'deductionTypes', 'personDeductionTypes'));
@@ -85,7 +86,7 @@ class ShipmentController extends Controller
         $shipment->load(['goods', 'shipmentDeductions']);
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
         $vehicles = Vehicle::pluck('plate_number', 'vehicle_id');
-        $users = User::whereIn('role', ['driver', 'assistant', 'helper'])->pluck('full_name', 'id');
+        $users = User::whereIn('role', ['driver', 'assistant', 'helper'])->where('status', UserStatus::ACTIVE)->pluck('full_name', 'id');
         $deductionTypes = ShipmentDeductionType::where('type', 'expense')->get();
         $personDeductionTypes = ShipmentDeductionType::where('type','driver_and_busboy')->get();
         $shipmentStatus = Shipment::$statuses;

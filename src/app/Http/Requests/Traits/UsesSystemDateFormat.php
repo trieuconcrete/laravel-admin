@@ -27,12 +27,8 @@ trait UsesSystemDateFormat
             'y' => 'yy',    // A two digit representation of a year
         ];
         
-        $validationFormat = str_replace(
-            array_keys($formatMap),
-            array_values($formatMap),
-            $dateFormat
-        );
+        $validationFormat = strtr($dateFormat, $formatMap);
         
-        return 'date|date_format:' . $validationFormat;
+        return 'date_format:' . $dateFormat;
     }
 }

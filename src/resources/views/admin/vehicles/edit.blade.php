@@ -40,7 +40,7 @@
                                             <option value="">Chọn loại phương tiện</option>
                                             @foreach ($vehicleTypes as $key => $val)
                                                 <option value="{{ $key }}"
-                                                    {{ old('vehicle_type_id', $vehicle->vehicle_type_id) === $key ? 'selected' : '' }}>
+                                                    {{ old('vehicle_type_id', $vehicle->vehicle_type_id) == $key ? 'selected' : '' }}>
                                                     {{ $val }}
                                                 </option>
                                             @endforeach
@@ -108,20 +108,27 @@
                                             type="date" 
                                             class="form-control" 
                                             name="documents[0][expiry_date]" 
-                                            value="@formatDateForInput($inspectionDoc?->expiry_date)"
+                                            placeholder="{{ \App\Helpers\DateHelper::getDateFormatPlaceholder() }}"
+                                            value="{{ old('documents.0.expiry_date', $inspectionDoc ? \App\Helpers\DateHelper::formatForInput($inspectionDoc->expiry_date) : '') }}"
                                         >
-                                        @error('documents[0][expiry_date]')
+                                        @error('documents.0.expiry_date ')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Tệp đính kèm</label>
-                                    <input type="file" class="form-control" name="documents[0][document_file]">
+                                    <input type="file" name="documents[0][document_file]" id="documentFile0Input" class="form-control mt-1 border p-2 rounded">
+                                    @if(session()->has('_documentFile0_temp'))
+                                        <img id="documentFile0Preview" src="{{ session('_documentFile0_temp') }}" class="w-24 h-24 rounded-full mt-4" alt="Document Preview">
+                                        <input type="hidden" name="_documentFile0_temp" value="{{ session('_documentFile0_temp') ?? null }}">
+                                    @else
+                                        <img id="documentFile0Preview" src="{{ (isset($inspectionDoc) && $inspectionDoc->document_file) ? asset('storage/' . $inspectionDoc->document_file) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Document Preview">
+                                    @endif
                                     @if (isset($inspectionDoc) && $inspectionDoc->document_file)
                                         <div class="mt-2">
                                             <a href="{{ asset('storage/' . $inspectionDoc->document_file) }}" target="_blank">
-                                                📎 Xem tệp đã tải lên
+                                                📎 Xem tệp đã tải lên (đã được lưu)
                                             </a>
                                         </div>
                                     @endif
@@ -147,9 +154,10 @@
                                             type="date" 
                                             class="form-control" 
                                             name="documents[1][expiry_date]" 
-                                            value="@formatDateForInput($insuranceDoc?->expiry_date)"
+                                            placeholder="{{ \App\Helpers\DateHelper::getDateFormatPlaceholder() }}"
+                                            value="{{ old('documents[1][expiry_date]', $insuranceDoc ? \App\Helpers\DateHelper::formatForInput($insuranceDoc->expiry_date) : '') }}"
                                         >
-                                        @error('documents[1][expiry_date]')
+                                        @error('documents.1.expiry_date ')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
@@ -159,12 +167,19 @@
                                     <input 
                                         type="file" 
                                         class="form-control" 
+                                        id="documentFile1Input" 
                                         name="documents[1][document_file]"
                                     >
+                                    @if(session()->has('_documentFile1_temp'))
+                                        <img id="documentFile1Preview" src="{{ session('_documentFile1_temp') }}" class="w-24 h-24 rounded-full mt-4" alt="Document Preview">
+                                        <input type="hidden" name="_documentFile1_temp" value="{{ session('_documentFile1_temp') ?? null }}">
+                                    @else
+                                        <img id="documentFile1Preview" src="{{ (isset($insuranceDoc) && $insuranceDoc->document_file) ? asset('storage/' . $insuranceDoc->document_file) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Document Preview">
+                                    @endif
                                     @if (isset($insuranceDoc) && $insuranceDoc->document_file)
                                         <div class="mt-2">
                                             <a href="{{ asset('storage/' . $insuranceDoc->document_file) }}" target="_blank">
-                                                📎 Xem tệp đã tải lên
+                                                📎 Xem tệp đã tải lên (đã được lưu)
                                             </a>
                                         </div>
                                     @endif
@@ -191,14 +206,28 @@
 
 @push('scripts')
 <script>
-    document.getElementById('avatarInput').addEventListener('change', function(event) {
+    document.getElementById('documentFile0Input').addEventListener('change', function(event) {
         const file = event.target.files[0];
     
         if (file) {
             const reader = new FileReader();
             
             reader.onload = function(e) {
-                document.getElementById('avatarPreview').src = e.target.result;
+                document.getElementById('documentFile0Preview').src = e.target.result;
+            }
+            
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('documentFile1Input').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+    
+        if (file) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                document.getElementById('documentFile1Preview').src = e.target.result;
             }
             
             reader.readAsDataURL(file);
