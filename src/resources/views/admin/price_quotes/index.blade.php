@@ -143,7 +143,7 @@
                             <div class="text-danger error" data-field="customer_id"></div>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Trạng thái </label>
+                            <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                             <select class="form-select" name="status">
                                 <option value="">Chọn loại báo giá </option>
                                 @foreach ($quoteStatuses as $val => $label)

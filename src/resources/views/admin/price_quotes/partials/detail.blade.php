@@ -34,7 +34,7 @@
             <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
             <input 
                 type="date" class="form-control" name="pickup_datetime" 
-                value="@formatDateForInput($quote->pickup_datetime)"
+                value="@formatDateForInput($quote?->pickup_datetime)"
             >
             <div class="text-danger error" data-field="pickup_datetime"></div>
         </div>
@@ -42,7 +42,7 @@
             <label class="form-label">Ngày hết hạn</label>
             <input 
                 type="date" class="form-control" name="valid_until"
-                value="@formatDateForInput($quote->valid_until)"
+                value="@formatDateForInput($quote?->valid_until)"
             >
             <div class="text-danger error" data-field="valid_until"></div>
         </div>

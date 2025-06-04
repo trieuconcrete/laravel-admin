@@ -82,8 +82,8 @@
                                             </div>
                                             <div class="row mb-3">
                                                 @php
-                                                $departure_time = old('departure_time', $shipment->departure_time);
-                                                $estimated_arrival_time = old('estimated_arrival_time', $shipment->estimated_arrival_time);
+                                                $departure_time = old('departure_time', $shipment?->departure_time);
+                                                $estimated_arrival_time = old('estimated_arrival_time', $shipment?->estimated_arrival_time);
                                                 @endphp
                                                 <div class="col-md-6">
                                                     <label class="form-label">Thời gian khởi hành<span class="text-danger">*</span></label>

@@ -103,7 +103,9 @@ class UserService
         $data = $request->all();
 
         // handle salary
-        $data['salary_base'] = $request->salary_base ? str_replace(',', '', $request->salary_base) : 0;
+        if ($request->user_action == Constants::USER_ACTION_CHANGE_INFORMATION) {
+            $data['salary_base'] = $request->salary_base ? str_replace(',', '', $request->salary_base) : 0;
+        }
 
         // Handle password
         if ($request->filled('password')) {

@@ -93,7 +93,7 @@
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
                                                     <label for="birthdayInput" class="form-label">Ngày sinh</label>
-                                                    <input type="date" class="form-control" name="birthday" id="birthdayInput" placeholder="Enter your email" value="@formatDateForInput($user->birthday)">
+                                                    <input type="date" class="form-control" name="birthday" id="birthdayInput" placeholder="Enter your email" value="@formatDateForInput($user?->birthday)">
                                                     @error('birthday')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                                     @enderror
@@ -112,7 +112,7 @@
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
                                                     <label for="salaryBase" class="form-label">Lương cơ bản </label>
-                                                    <input type="text" class="form-control" name="salary_base" placeholder="Nhập Lương cơ bản" value="{{ old('salary_base', $user->salary_base) }}">
+                                                    <input type="text" class="form-control" name="salary_base" placeholder="Nhập Lương cơ bản" value="{{ old('salary_base', $user->salary_base == '0.00' ? null : $user->salary_base) }}">
                                                     @error('salary_base')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                                     @enderror
@@ -159,7 +159,12 @@
                                                 <div class="mb-4">
                                                     <label class="block text-gray-700">Ảnh đại diện</label>
                                                     <input type="file" name="avatar" id="avatarInput" class="form-control mt-1 border p-2 rounded">
-                                                    <img id="avatarPreview" src="{{ (isset($user) && $user->avatar) ? asset('storage/' . $user->avatar) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
+                                                    @if(!(isset($user->avatar) && $user->avatar) && session()->has('_avatar_temp'))
+                                                        <img id="avatarPreview" src="{{ session('_avatar_temp') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
+                                                        <input type="hidden" name="_avatar_temp" value="{{ session('_avatar_temp') }}">
+                                                    @else
+                                                        <img id="avatarPreview" src="{{ (isset($user) && $user->avatar) ? asset('storage/' . $user->avatar) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
+                                                    @endif
                                                 </div>
                                             </div>
                                             <!--end col-->
@@ -218,7 +223,7 @@
                                                 type="date"
                                                 class="form-control"
                                                 name="issue_date"
-                                                value="@formatDateForInput($user->license->issue_date)"
+                                                value="@formatDateForInput($user?->license?->issue_date)"
                                             >
                                             @error('issue_date')
                                                 <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -233,7 +238,7 @@
                                                 type="date"
                                                 class="form-control"
                                                 name="expiry_date"
-                                                value="@formatDateForInput($user->license->expiry_date)"
+                                                value="@formatDateForInput($user?->license?->expiry_date)"
                                             >
                                             @error('expiry_date')
                                                 <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -272,7 +277,12 @@
                                         <div class="mb-4">
                                             <label class="block text-gray-700">Hình ảnh bằng lái</label>
                                             <input type="file" name="license_file" id="license_file_input" class="form-control mt-1 border p-2 rounded">
-                                            <img id="license_file_preview" src="{{ (isset($user->license) && $user->license->license_file) ? asset('storage/' . $user->license->license_file) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
+                                            @if(!(isset($user->license) && $user->license->license_file) && session()->has('_license_file_temp'))
+                                                <img id="license_file_preview" src="{{ session('_license_file_temp') }}" class="w-24 h-24 rounded-full mt-4" alt="License Preview">
+                                                <input type="hidden" name="_license_file_temp" value="{{ session('_license_file_temp') }}">
+                                            @else
+                                                <img id="license_file_preview" src="{{ (isset($user->license) && $user->license->license_file) ? asset('storage/' . $user->license->license_file) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="License Preview">
+                                            @endif
                                         </div>
                                     </div>
                                     <!--end col-->
@@ -511,28 +521,49 @@
         }
     });
 
-    $('input[name="salary_base"]').on('input', function () {
-        let value = $(this).val();
+    function formatSalaryAsInteger(input) {
+        // Get the value from the input
+        let value = input.val();
+        
+        // First convert the value to a proper number to handle decimal points correctly
+        // Remove all commas first
+        value = value.replace(/,/g, '');
+        
+        // Try to parse as float to handle decimal values
+        let numValue = parseFloat(value);
+        
+        // If it's a valid number, convert to integer and format
+        if (!isNaN(numValue)) {
+            // Convert to integer (remove decimal part)
+            let intValue = Math.floor(numValue);
+            
+            // Format with commas for thousands
+            let formatted = intValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            input.val(formatted);
+        } else if (value) {
+            // If not a valid number but has content, just remove non-digits and format
+            let cleanValue = value.replace(/[^0-9]/g, '');
+            if (cleanValue) {
+                let formatted = cleanValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                input.val(formatted);
+            }
+        }
+    }
 
-        value = value.replace(/[^0-9.]/g, '');
-
-        let parts = value.split('.');
-        let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
-
-        $(this).val(integerPart + decimalPart);
+    // Format on input change
+    $('input[name="salary_base"]').on('input', function() {
+        formatSalaryAsInteger($(this));
     });
 
-    let salaryInput = $('input[name="salary_base"]');
-    let initial = salaryInput.val().replace(/[^0-9.]/g, '');
-    if (initial) {
-        let parts = initial.split('.');
-        let formatted = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        if (parts[1]) {
-            formatted += '.' + parts[1].slice(0, 2);
-        }
-        salaryInput.val(formatted);
-    }
+    // Format on page load
+    $(document).ready(function() {
+        formatSalaryAsInteger($('input[name="salary_base"]'));
+    });
+    
+    // Format on change (for when value is set programmatically)
+    $('input[name="salary_base"]').on('change', function() {
+        formatSalaryAsInteger($(this));
+    });
 
     $('.nav-tabs-custom .nav-link').on('shown.bs.tab', function (e) {
         let target = $(e.target).attr("href").replace('#', '');

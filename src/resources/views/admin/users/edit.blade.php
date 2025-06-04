@@ -42,7 +42,7 @@
                                 <!-- Birthday -->
                                 <div class="mb-4">
                                     <label class="block text-gray-700">Birthday</label>
-                                    <input type="date" name="birthday" value="@formatDateForInput($user->birthday)" class="form-control p-2 border rounded @error('birthday') border-red-500 @enderror">
+                                    <input type="date" name="birthday" value="@formatDateForInput($user?->birthday)" class="form-control p-2 border rounded @error('birthday') border-red-500 @enderror">
                                     @error('birthday')
                                         <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                                     @enderror
@@ -90,7 +90,12 @@
                                 <div class="mb-4">
                                     <label class="block text-gray-700">Avatar</label>
                                     <input type="file" name="avatar" id="avatarInput" class="form-control mt-1 border p-2 rounded">
-                                    <img id="avatarPreview" src="{{ (isset($user) && $user->avatar) ? asset('storage/' . $user->avatar) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
+                                    @if(old('avatar') && session()->hasOldInput('_avatar_temp'))
+                                        <img id="avatarPreview" src="{{ session('_avatar_temp') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
+                                        <input type="hidden" name="_avatar_temp" value="{{ session('_avatar_temp') }}">
+                                    @else
+                                        <img id="avatarPreview" src="{{ (isset($user) && $user->avatar) ? asset('storage/' . $user->avatar) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
+                                    @endif
                                 </div>
                                 <div>
                                     <button type="submit" class="btn rounded-pill btn-secondary waves-effect">Save</button>

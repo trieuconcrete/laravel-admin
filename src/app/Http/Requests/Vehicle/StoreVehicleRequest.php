@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\Vehicle;
 
+use App\Http\Requests\Traits\UsesSystemDateFormat;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreVehicleRequest extends FormRequest
 {
+    use UsesSystemDateFormat;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -30,8 +32,8 @@ class StoreVehicleRequest extends FormRequest
             'status' => 'required|in:active,maintenance,inactive',
             'documents' => 'array',
             'documents.*.document_type' => 'nullable|string|in:' . implode(',', array_keys(\App\Models\VehicleDocument::getDocumentTypes())),
-            'documents.*.issue_date' => 'nullable|date',
-            'documents.*.expiry_date' => 'nullable|date|after_or_equal:documents.*.issue_date',
+            'documents.*.issue_date' => 'nullable|' . $this->getSystemDateFormatRule(),
+            'documents.*.expiry_date' => 'nullable|' . $this->getSystemDateFormatRule() . '|after_or_equal:documents.*.issue_date',
             'documents.*.document_number' => 'nullable|string',
             'documents.*.document_file' => 'nullable|file|mimes:pdf,jpg,png|max:2048'
         ];

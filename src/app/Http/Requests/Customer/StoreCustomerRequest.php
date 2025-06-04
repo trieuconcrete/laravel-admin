@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests\Customer;
 
+use App\Http\Requests\Traits\UsesSystemDateFormat;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use App\Models\Customer;
 
 class StoreCustomerRequest extends FormRequest
 {
+    use UsesSystemDateFormat;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -76,7 +78,7 @@ class StoreCustomerRequest extends FormRequest
             ],
             'establishment_date' => [
                 'nullable',
-                'date',
+                $this->getSystemDateFormatRule(),
                 'before_or_equal:today'
             ],
             'website' => [

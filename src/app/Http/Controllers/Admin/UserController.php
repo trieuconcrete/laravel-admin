@@ -151,7 +151,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('User creation failed', ['error' => $e->getMessage()]);
+            Log::error('User update failed', ['error' => $e->getMessage()]);
             return redirect()->back()->withInput()->with('active_tab', $request->input('tab'));
         }
     }
