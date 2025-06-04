@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\Shipment;
 
+use App\Http\Requests\Traits\UsesSystemDateFormat;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ShipmentRequest extends FormRequest
 {
+    use UsesSystemDateFormat;
     public function authorize()
     {
         return true;
@@ -41,8 +43,8 @@ class ShipmentRequest extends FormRequest
             'vehicle_id' => 'required|exists:vehicles,vehicle_id',
             'origin' => 'required|string|max:255',
             'destination' => 'required|string|max:255',
-            'departure_time' => 'required|date',
-            'estimated_arrival_time' => 'required|date|after_or_equal:departure_time',
+            'departure_time' => 'required|' . $this->getSystemDateFormatRule(),
+            'estimated_arrival_time' => 'required|' . $this->getSystemDateFormatRule() . '|after_or_equal:departure_time',
             'notes' => 'nullable|string',
             'status' => 'required|string',
             'distance' => 'nullable|numeric|min:0',

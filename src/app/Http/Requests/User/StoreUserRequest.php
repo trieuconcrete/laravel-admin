@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests\User;
 
+use App\Http\Requests\Traits\UsesSystemDateFormat;
 use Illuminate\Foundation\Http\FormRequest;
 use App\Enum\UserStatus as EnumUserStatus;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rule;
 
 class StoreUserRequest extends FormRequest
 {
+    use UsesSystemDateFormat;
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -42,12 +45,16 @@ class StoreUserRequest extends FormRequest
                 'required',
                 'string',
                 'regex:/^(0|\+84|84)(3[2-9]|5[6|8|9]|7[0|6-9]|8[1-5]|9[0-9])[0-9]{7}$/',
-                'unique:users,phone'
+                Rule::unique('users', 'phone')->whereNull('deleted_at')
             ],
             'id_number' => ['required', 'max:20'],
-            'email' => ['nullable', 'email', 'unique:users,email'],
-            'birthday' => ['nullable', 'date'],
-            'join_date' => ['nullable', 'date'],
+            'email' => [
+                'nullable', 
+                'email',
+                Rule::unique('users', 'email')->whereNull('deleted_at')
+            ],
+            'birthday' => ['nullable', $this->getSystemDateFormatRule()],
+            'join_date' => ['nullable', $this->getSystemDateFormatRule()],
             'salary_base' => ['nullable', 'numeric'],
             'status' => ['required'],
             'address' => ['nullable', 'string', 'max:255'],
@@ -58,7 +65,7 @@ class StoreUserRequest extends FormRequest
         if ($this->has('license_type')) {
             return array_merge($common, [
                 'license_type' => ['required', 'string'],
-                'license_expire_date' => ['nullable', 'date'],
+                'license_expire_date' => ['nullable', $this->getSystemDateFormatRule()],
             ]);
         }
 

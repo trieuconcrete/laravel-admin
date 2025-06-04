@@ -68,6 +68,7 @@ class Position extends Model
         // Get the last employee with this position code
         $lastEmployee = User::where('employee_code', 'like', $this->code . '%')
                             ->orderBy('employee_code', 'desc')
+                            ->withTrashed()
                             ->first();
 
         if (!$lastEmployee) {

@@ -177,14 +177,14 @@
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
                                             <label for="date" class="form-label">Ngày cấp</label>
-                                            <input type="date" class="form-control" value="@formatDateForInput($vehicle->license->issue_date ?? null)" placeholder="Nhập ngày cấp">
+                                            <input type="date" class="form-control" value="@formatDateForInput($vehicle?->license?->issue_date ?? null)" placeholder="Nhập ngày cấp">
                                         </div>
                                     </div>
                                     <!--end col-->
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
                                             <label for="date" class="form-label">Ngày hết hạn</label>
-                                            <input type="date" class="form-control" value="@formatDateForInput($vehicle->license->expiry_date ?? null)" placeholder="Nhập ngày hết hạn">
+                                            <input type="date" class="form-control" value="@formatDateForInput($vehicle?->license?->expiry_date ?? null)" placeholder="Nhập ngày hết hạn">
                                         </div>
                                     </div>
                                     <!--end col-->

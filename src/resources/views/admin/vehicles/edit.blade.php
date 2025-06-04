@@ -108,7 +108,7 @@
                                             type="date" 
                                             class="form-control" 
                                             name="documents[0][expiry_date]" 
-                                            value="@formatDateForInput($inspectionDoc->expiry_date)"
+                                            value="@formatDateForInput($inspectionDoc?->expiry_date)"
                                         >
                                         @error('documents[0][expiry_date]')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -147,7 +147,7 @@
                                             type="date" 
                                             class="form-control" 
                                             name="documents[1][expiry_date]" 
-                                            value="@formatDateForInput($insuranceDoc->expiry_date)"
+                                            value="@formatDateForInput($insuranceDoc?->expiry_date)"
                                         >
                                         @error('documents[1][expiry_date]')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>

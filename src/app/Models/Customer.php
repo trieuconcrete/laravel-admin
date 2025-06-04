@@ -272,6 +272,7 @@ class Customer extends Model
         $lastCustomer = self::withTrashed()
             ->where('customer_code', 'LIKE', $prefix.'%')
             ->orderBy('customer_code', 'desc')
+            ->withTrashed()
             ->first();
 
 

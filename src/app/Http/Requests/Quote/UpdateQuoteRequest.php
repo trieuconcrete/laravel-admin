@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\Quote;
 
+use App\Http\Requests\Traits\UsesSystemDateFormat;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateQuoteRequest extends FormRequest
 {
+    use UsesSystemDateFormat;
     public function authorize()
     {
         return true;
@@ -19,8 +21,8 @@ class UpdateQuoteRequest extends FormRequest
     {
         return [
             'customer_id' => 'required',
-            'pickup_datetime' => 'required|date',
-            'valid_until' => 'nullable|date',
+            'pickup_datetime' => 'required|' . $this->getSystemDateFormatRule(),
+            'valid_until' => 'nullable|' . $this->getSystemDateFormatRule(),
             'cargo_description' => 'nullable|string',
             'notes' => 'nullable|string',
             'document_file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240'
