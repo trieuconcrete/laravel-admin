@@ -299,11 +299,15 @@
                 type: 'GET',
                 success: function(response) {
                     $('#detailContentModal').html(response);
+
+                    const dateFormatPlaceholder = '{{ \App\Helpers\DateHelper::getDateFormatPlaceholder() }}';
+                    const systemDateFormat = '{{ \App\Helpers\DateHelper::getSystemDateFormat() }}';
+
                     $('#detailContentModal').find('input[type="date"]').each(function () {
                         this.type = 'text';
-                        this.placeholder = 'dd/mm/yyyy';
+                        this.placeholder = dateFormatPlaceholder;
                         flatpickr(this, {
-                            dateFormat: "d/m/Y",
+                            dateFormat: systemDateFormat,
                             allowInput: true,
                             defaultDate: this.value || null
                         });

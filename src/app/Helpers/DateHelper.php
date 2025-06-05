@@ -105,4 +105,16 @@ class DateHelper
             return 'm/Y'; // Default for d/m/Y format
         }
     }
+
+    /**
+     * Summary of getSystemDateFormat
+     * @return string
+     */
+    public static function getSystemDateFormat()
+    {
+        $settingService = App::make('App\Services\SettingService');
+        $dateFormat = $settingService->get('date_format', 'd/m/Y');
+        
+        return $dateFormat;
+    }
 }
