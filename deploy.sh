@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cd /var/www/webroot/webfolio || exit
-git pull origin webfolio.vn
+cd /var/www/webroot/nguyentrieu || exit
+git pull origin portfolio
 cd src
 composer install --no-dev
 php artisan migrate --force
