@@ -56,9 +56,11 @@
         <div class="mb-6">
             <h4 class="text-sm font-semibold text-gray-700 mb-3">Backend Development</h4>
             <div class="flex flex-wrap gap-2">
-                <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">PHP</span>
+                <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-php mr-1"></i>PHP</span>
                 <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Laravel</span>
-                <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Python</span>
+                <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-python mr-1"></i>Python</span>
                 <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Django</span>
             </div>
         </div>
@@ -66,12 +68,18 @@
         <div class="mb-6">
             <h4 class="text-sm font-semibold text-gray-700 mb-3">Frontend Development</h4>
             <div class="flex flex-wrap gap-2">
-                <span class="skill-tag px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">HTML5</span>
-                <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">CSS3</span>
-                <span class="skill-tag px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Bootstrap</span>
-                <span class="skill-tag px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium">Tailwind CSS</span>
-                <span class="skill-tag px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">JavaScript</span>
-                <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">jQuery</span>
+                <span class="skill-tag px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-html5 mr-1"></i>HTML5</span>
+                <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-css3-alt mr-1"></i>CSS3</span>
+                <span class="skill-tag px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-bootstrap mr-1"></i>Bootstrap</span>
+                <span class="skill-tag px-3 py-1 bg-cyan-100 text-cyan-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-tailwind mr-1"></i>Tailwind CSS</span>
+                <span class="skill-tag px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-js mr-1"></i>JavaScript</span>
+                <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-js mr-1"></i>jQuery</span>
                 {{-- <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                     <i class="fab fa-vuejs mr-1"></i>NuxtJS
                 </span>
@@ -81,7 +89,7 @@
             </div>
         </div>
 
-        {{-- <div class="mb-6">
+        <div class="mb-6">
             <h4 class="text-sm font-semibold text-gray-700 mb-3">CMS & E-Commerce</h4>
             <div class="flex flex-wrap gap-2">
                 <span class="skill-tag px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
@@ -91,7 +99,7 @@
                     <i class="fas fa-shopping-cart mr-1"></i>EC-CUBE
                 </span>
             </div>
-        </div> --}}
+        </div>
         
         <div class="mb-6">
             <h4 class="text-sm font-semibold text-gray-700 mb-3">Cloud & DevOps</h4>
@@ -102,8 +110,10 @@
                 <span class="skill-tag px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium">
                     <i class="fab fa-aws mr-1"></i>AWS Certified DVA-C02 (Learning)
                 </span>
-                <span class="skill-tag px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">Server Management</span>
-                <span class="skill-tag px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">DevOps</span>
+                <span class="skill-tag px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                    <i class="fas fa-server mr-1"></i>Server Management</span>
+                <span class="skill-tag px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-medium">
+                    <i class="fas fa-sync-alt mr-1"></i>DevOps</span>
             </div>
         </div>
         
