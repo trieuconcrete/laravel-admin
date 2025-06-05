@@ -178,7 +178,7 @@ class SettingService
             // Cài đặt hệ thống
             $this->set('site_title', 'Hệ thống Quản lý Vận tải HPL', 'system', 'string', 'Tiêu đề trang web');
             $this->set('pagination_limit', 15, 'system', 'integer', 'Số lượng bản ghi mỗi trang');
-            $this->set('date_format', 'd/m/Y', 'system', 'string', 'Định dạng ngày tháng');
+            $this->set('date_format', 'Y-m-d', 'system', 'string', 'Định dạng ngày tháng');
             $this->set('time_format', 'H:i', 'system', 'string', 'Định dạng thời gian');
             $this->set('timezone', 'Asia/Ho_Chi_Minh', 'system', 'string', 'Múi giờ');
             $this->set('maintenance_mode', false, 'system', 'boolean', 'Chế độ bảo trì');

@@ -15,7 +15,7 @@ class DateHelper
     {
         // Get date format from settings
         $settingService = App::make('App\Services\SettingService');
-        $format = $settingService->get('date_format', 'd/m/Y');
+        $format = $settingService->get('date_format', 'Y-m-d');
 
         $placeholderMap = [
             'd' => 'dd',    // Day of the month, 2 digits with leading zeros
@@ -54,7 +54,7 @@ class DateHelper
 
         // Get date format from settings
         $settingService = App::make('App\Services\SettingService');
-        $format = $settingService->get('date_format', $defaultFormat ?: 'd/m/Y');
+        $format = $settingService->get('date_format', $defaultFormat ?: 'Y-m-d');
 
         return $date->format($format);
     }
@@ -93,7 +93,7 @@ class DateHelper
     {
         // Get date format from settings
         $settingService = App::make('App\Services\SettingService');
-        $dateFormat = $settingService->get('date_format', 'd/m/Y');
+        $dateFormat = $settingService->get('date_format', 'Y-m-d');
         
         // Extract month/year format from date format
         // Common formats: d/m/Y, m/d/Y, Y-m-d
@@ -113,7 +113,7 @@ class DateHelper
     public static function getSystemDateFormat()
     {
         $settingService = App::make('App\Services\SettingService');
-        $dateFormat = $settingService->get('date_format', 'd/m/Y');
+        $dateFormat = $settingService->get('date_format', 'Y-m-d');
         
         return $dateFormat;
     }

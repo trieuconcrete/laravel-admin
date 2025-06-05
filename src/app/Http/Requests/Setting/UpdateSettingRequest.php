@@ -42,8 +42,8 @@ class UpdateSettingRequest extends FormRequest
             'system.site_title' => 'required|string|max:255',
             'system.pagination_limit' => 'required|integer|min:5|max:100',
             'system.date_format' => 'required|string',
-            'system.time_format' => 'required|string',
-            'system.timezone' => 'required|string',
+            'system.time_format' => 'nullable|string',
+            'system.timezone' => 'nullable|string',
             
             // Shipment settings
             'shipment' => 'nullable|array',
