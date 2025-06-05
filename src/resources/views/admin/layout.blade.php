@@ -188,6 +188,10 @@
             });
 
             document.addEventListener('DOMContentLoaded', function () {
+                // Lấy định dạng placeholder từ PHP để đảm bảo nhất quán
+                const dateFormatPlaceholder = '{{ \App\Helpers\DateHelper::getDateFormatPlaceholder() }}';
+                const systemDateFormat = '{{ \App\Helpers\DateHelper::getSystemDateFormat() }}';
+                
                 document.querySelectorAll('input[type="date"]').forEach(function (input) {
                     // Lưu giá trị ban đầu
                     const originalValue = input.value;
@@ -197,11 +201,11 @@
                     
                     // Chuyển từ input type="date" sang input type="text" để sử dụng flatpickr
                     input.type = 'text';
-                    input.placeholder = 'dd/mm/yyyy'; // gợi ý format
+                    input.placeholder = dateFormatPlaceholder; // Sử dụng định dạng từ cài đặt hệ thống
                     
                     // Khởi tạo flatpickr với định dạng phù hợp
                     flatpickr(input, {
-                        dateFormat: dateFormat,
+                        dateFormat: systemDateFormat,
                         allowInput: true,
                         defaultDate: originalValue || null,
                         // Đảm bảo giá trị được parse đúng

@@ -7,6 +7,30 @@ use Illuminate\Support\Facades\App;
 class DateHelper
 {
     /**
+     * Get date format placeholder based on system settings
+     *
+     * @return string
+     */
+    public static function getDateFormatPlaceholder()
+    {
+        // Get date format from settings
+        $settingService = App::make('App\Services\SettingService');
+        $format = $settingService->get('date_format', 'd/m/Y');
+
+        $placeholderMap = [
+            'd' => 'dd',    // Day of the month, 2 digits with leading zeros
+            'j' => 'd',     // Day of the month without leading zeros
+            'm' => 'mm',    // Month, 2 digits with leading zeros
+            'n' => 'm',     // Month without leading zeros
+            'Y' => 'yyyy',  // A full numeric representation of a year, 4 digits
+            'y' => 'yy',    // A two digit representation of a year
+        ];
+        
+        // Replace format characters with example values
+        return strtr($format, $placeholderMap);
+    }
+    
+    /**
      * Format a date according to the system settings
      *
      * @param \Carbon\Carbon|string|null $date
@@ -80,5 +104,17 @@ class DateHelper
         } else {
             return 'm/Y'; // Default for d/m/Y format
         }
+    }
+
+    /**
+     * Summary of getSystemDateFormat
+     * @return string
+     */
+    public static function getSystemDateFormat()
+    {
+        $settingService = App::make('App\Services\SettingService');
+        $dateFormat = $settingService->get('date_format', 'd/m/Y');
+        
+        return $dateFormat;
     }
 }

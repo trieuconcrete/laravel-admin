@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Log;
 use App\Repositories\Interface\VehicleRepositoryInterface as VehicleRepository;
 use App\Repositories\Interface\UserRepositoryInterface as UserRepository;
 use App\Models\User;
+use App\Http\Requests\Vehicle\UpdateVehicleRequest;
+use App\Enum\UserStatus;
 
 class VehicleController extends Controller
 {
@@ -42,7 +44,8 @@ class VehicleController extends Controller
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
         $vehicleStatuses = Vehicle::getStatuses();
         $drivers = $this->userRepository->getUserByConditions([
-            'role' => User::ROLE_DRIVER
+            'role' => User::ROLE_DRIVER,
+            'status' => UserStatus::ACTIVE
         ])->pluck('full_name', 'id');
 
         return view('admin.vehicles.index', compact('vehicles', 'vehicleTypes', 'vehicleStatuses', 'drivers'));
@@ -104,7 +107,8 @@ class VehicleController extends Controller
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
         $vehicleStatuses = Vehicle::getStatuses();
         $drivers = $this->userRepository->getUserByConditions([
-            'role' => User::ROLE_DRIVER
+            'role' => User::ROLE_DRIVER,
+            'status' => UserStatus::ACTIVE
         ])->pluck('full_name', 'id');
 
         return view('admin.vehicles.edit', compact('vehicle', 'vehicleTypes', 'vehicleStatuses', 'drivers'));
@@ -116,10 +120,16 @@ class VehicleController extends Controller
      * @param \App\Models\Vehicle $vehicle
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, Vehicle $vehicle)
+    public function update(UpdateVehicleRequest $request, Vehicle $vehicle)
     {
         DB::beginTransaction();
         try {
+            // Log the request data for debugging
+            Log::info('Vehicle update request', [
+                'request_data' => $request->all(),
+                'vehicle_id' => $vehicle->vehicle_id
+            ]);
+            
             $this->vehicleService->update($request, $vehicle);
 
             DB::commit();
@@ -127,6 +137,7 @@ class VehicleController extends Controller
             return redirect()->route('admin.vehicles.index')->with('success', 'Vehicle updated successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Vehicle update failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
