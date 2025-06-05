@@ -190,6 +190,7 @@
             document.addEventListener('DOMContentLoaded', function () {
                 // Lấy định dạng placeholder từ PHP để đảm bảo nhất quán
                 const dateFormatPlaceholder = '{{ \App\Helpers\DateHelper::getDateFormatPlaceholder() }}';
+                const systemDateFormat = '{{ \App\Helpers\DateHelper::getSystemDateFormat() }}';
                 
                 document.querySelectorAll('input[type="date"]').forEach(function (input) {
                     // Lưu giá trị ban đầu
@@ -204,7 +205,7 @@
                     
                     // Khởi tạo flatpickr với định dạng phù hợp
                     flatpickr(input, {
-                        dateFormat: dateFormat,
+                        dateFormat: systemDateFormat,
                         allowInput: true,
                         defaultDate: originalValue || null,
                         // Đảm bảo giá trị được parse đúng
