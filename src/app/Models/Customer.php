@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Customer extends Model
 {
@@ -38,7 +39,8 @@ class Customer extends Model
         'notes',
         'is_active',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'document_file'
     ];
 
     /**
@@ -53,6 +55,14 @@ class Customer extends Model
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
+
+    public function getDocumentFileUrlAttribute()
+    {
+        if ($this->document_file) {
+            return Storage::url('/' . $this->document_file);
+        }
+        return null;
+    }
 
     /**
      * Quan hệ với người tạo

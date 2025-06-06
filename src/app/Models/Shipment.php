@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Enum\UserStatus;
 
 class Shipment extends Model
 {
@@ -334,6 +335,8 @@ class Shipment extends Model
     {
         return $this->shipmentDeductions()->whereHas('shipmentDeductionType', function($query) {
             $query->where('type', 'driver_and_busboy');
+        })->whereHas('user', function($subQuery) {
+            $subQuery->where('status', UserStatus::ACTIVE);
         })->whereNotNull('user_id')->first()->user ?? null;
     }
 }

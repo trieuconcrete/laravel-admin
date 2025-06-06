@@ -6,6 +6,9 @@
 // Biến để theo dõi số lượng hàng driver đã thêm vào
 let driverRowCount = 0;
 
+// Biến toàn cục để lưu trữ danh sách người dùng
+let users = {};
+
 /**
  * Hàm để lấy danh sách user_id đã được chọn
  * @returns {Array} Mảng các user_id đã được chọn
@@ -29,8 +32,18 @@ function removeDriverRow(button, rowIndex) {
     // Xóa hàng từ bảng
     button.closest('tr').remove();
     
-    // Cập nhật lại danh sách dropdown
+    // Cập nhật lại danh sách dropdown và trạng thái nút thêm
     updateUserDropdowns();
+}
+
+/**
+ * Hàm xử lý khi xóa một hàng hàng hóa
+ * @param {HTMLElement} button - Nút xóa được nhấn
+ * @param {number} rowIndex - Chỉ số hàng
+ */
+function removeGoodRow(button, rowIndex) {
+    // Xóa hàng từ bảng
+    button.closest('tr').remove();
 }
 
 /**
@@ -59,6 +72,9 @@ function updateUserDropdowns() {
             }
         });
     });
+    
+    // Cập nhật trạng thái nút thêm nhân sự
+    updateAddPersonButtonState();
 }
 
 /**
@@ -66,8 +82,24 @@ function updateUserDropdowns() {
  * @param {HTMLElement} personTable - Bảng chứa các hàng driver
  * @param {Array} personDeductionTypes - Mảng các loại phụ cấp
  * @param {Object} users - Object chứa danh sách người dùng (id => name)
+ * @returns {boolean} - Trả về true nếu thêm thành công, false nếu không thể thêm
  */
 function addDriverRow(personTable, personDeductionTypes, users) {
+    // Kiểm tra xem còn người dùng khả dụng không
+    const selectedIds = getSelectedUserIds();
+    const totalUsers = Object.keys(users).length;
+    
+    // Nếu đã chọn hết tất cả người dùng, không cho thêm nữa
+    if (selectedIds.length >= totalUsers) {
+        Swal.fire({
+            title: 'Không thể thêm',
+            text: 'Đã sử dụng hết tất cả nhân sự có sẵn',
+            icon: 'warning',
+            confirmButtonText: 'Đóng'
+        });
+        return false;
+    }
+    
     // Tăng số lượng hàng
     driverRowCount++;
     
@@ -83,7 +115,6 @@ function addDriverRow(personTable, personDeductionTypes, users) {
     
     // Tạo HTML cho dropdown với các option đã lọc
     let userOptionsHtml = '<option value="">Chọn nhân sự</option>';
-    const selectedIds = getSelectedUserIds();
     
     for (const id in users) {
         if (users.hasOwnProperty(id)) {
@@ -112,6 +143,14 @@ function addDriverRow(personTable, personDeductionTypes, users) {
     
     // Thêm event listener cho các trường số mới thêm vào
     addNumericInputListeners(row.querySelectorAll('input[type="number"]'));
+    
+    // Kiểm tra nếu đã sử dụng hết tất cả người dùng, vô hiệu hóa nút thêm
+    if (selectedIds.length + 1 >= totalUsers) {
+        document.getElementById('addPersonBtn').disabled = true;
+        document.getElementById('addPersonBtn').classList.replace('btn-outline-primary', 'btn-outline-secondary');
+    }
+    
+    return true;
 }
 
 /**
@@ -125,20 +164,28 @@ function addGoodRow(goodsTable, goodsCount) {
     row.innerHTML = `
         <td>
             <input type="text" name="goods[${goodsCount}][name]" class="form-control form-control-sm" required>
+            <div class="text-danger" id="error-goods-${goodsCount}-name"></div>
         </td>
         <td>
-            <input type="text" name="goods[${goodsCount}][notes]" class="form-control form-control-sm" min="0">
+            <input type="text" name="goods[${goodsCount}][notes]" class="form-control form-control-sm">
+            <div class="text-danger" id="error-goods-${goodsCount}-notes"></div>
         </td>
         <td>
-            <input type="number" name="goods[${goodsCount}][quantity]" class="form-control form-control-sm" min="0">
+            <input type="number" name="goods[${goodsCount}][quantity]" class="form-control form-control-sm" min="1" required>
+            <div class="text-danger" id="error-goods-${goodsCount}-quantity"></div>
         </td>
         <td>
             <input type="number" name="goods[${goodsCount}][weight]" class="form-control form-control-sm" min="0">
+            <div class="text-danger" id="error-goods-${goodsCount}-weight"></div>
         </td>
         <td>
-            <input type="text" name="goods[${goodsCount}][unit]" class="form-control form-control-sm">
+            <input type="number" name="goods[${goodsCount}][unit]" class="form-control form-control-sm" required>
+            <div class="text-danger" id="error-goods-${goodsCount}-unit"></div>
         </td>
-        <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="ri-delete-bin-fill"></i></button></td>
+        <td>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeGoodRow(this, ${goodsCount})"><i class="ri-delete-bin-fill"></i></button>
+            <input type="hidden" name="goods_rows[]" value="${goodsCount}">
+        </td>
     `;
     goodsTable.appendChild(row);
     
@@ -161,6 +208,27 @@ function addNumericInputListeners(inputs) {
 }
 
 /**
+ * Kiểm tra và cập nhật trạng thái nút thêm nhân sự dựa trên số lượng người dùng khả dụng
+ */
+function updateAddPersonButtonState() {
+    const selectedIds = getSelectedUserIds();
+    const totalUsers = Object.keys(users).length;
+    const addPersonBtn = document.getElementById('addPersonBtn');
+    
+    if (selectedIds.length >= totalUsers) {
+        // Nếu đã sử dụng hết tất cả người dùng, vô hiệu hóa nút thêm
+        addPersonBtn.disabled = true;
+        addPersonBtn.classList.replace('btn-outline-primary', 'btn-outline-secondary');
+    } else {
+        // Nếu còn người dùng khả dụng, kích hoạt nút thêm
+        addPersonBtn.disabled = false;
+        if (addPersonBtn.classList.contains('btn-outline-secondary')) {
+            addPersonBtn.classList.replace('btn-outline-secondary', 'btn-outline-primary');
+        }
+    }
+}
+
+/**
  * Chuẩn bị form trước khi submit
  * @param {HTMLFormElement} form - Form cần chuẩn bị
  */
@@ -177,6 +245,19 @@ function prepareFormBeforeSubmit(form) {
     driverRowsInput.name = 'driver_row_indexes';
     driverRowsInput.value = driverRows.join(',');
     form.appendChild(driverRowsInput);
+    
+    // Tạo một mảng để lưu trữ các chỉ số hàng hàng hóa đã được thêm vào
+    const goodsRows = [];
+    document.querySelectorAll('input[name="goods_rows[]"]').forEach(input => {
+        goodsRows.push(input.value);
+    });
+    
+    // Tạo một input hidden để lưu trữ các chỉ số hàng hàng hóa
+    const goodsRowsInput = document.createElement('input');
+    goodsRowsInput.type = 'hidden';
+    goodsRowsInput.name = 'goods_row_indexes';
+    goodsRowsInput.value = goodsRows.join(',');
+    form.appendChild(goodsRowsInput);
     
     // Định dạng tất cả các trường số trước khi submit
     document.querySelectorAll('input[type="number"]').forEach(input => {
@@ -234,7 +315,7 @@ function validateShipmentForm(form) {
     // 1. Kiểm tra các trường ở tab thông tin vận chuyển
     const customerId = form.querySelector('select[name="customer_id"]')?.value;
     const origin = form.querySelector('input[name="origin"]')?.value;
-    const destination = form.querySelector('input[name="destination"]')?.value;
+    // const destination = form.querySelector('input[name="destination"]')?.value;
     const departureTime = form.querySelector('input[name="departure_time"]')?.value;
     const estimatedArrivalTime = form.querySelector('input[name="estimated_arrival_time"]')?.value;
     
@@ -243,7 +324,7 @@ function validateShipmentForm(form) {
     const hasGoods = goodsNameInputs.length > 0 && Array.from(goodsNameInputs).some(input => input.value.trim() !== '');
     
     // Kiểm tra các trường ở tab thông tin vận chuyển
-    if (!customerId || !origin || !destination || !departureTime || !estimatedArrivalTime || !hasGoods) {
+    if (!customerId || !origin || !departureTime || !estimatedArrivalTime || !hasGoods) {
         let errorMessage = '';
         let errorField = null;
         let tabId = 'driverAllowance'; // ID của tab thông tin vận chuyển
@@ -254,9 +335,6 @@ function validateShipmentForm(form) {
         } else if (!origin) {
             errorMessage = 'Vui lòng nhập điểm khởi hành!';
             errorField = 'input[name="origin"]';
-        } else if (!destination) {
-            errorMessage = 'Vui lòng nhập điểm đến!';
-            errorField = 'input[name="destination"]';
         } else if (!departureTime) {
             errorMessage = 'Vui lòng chọn thời gian khởi hành!';
             errorField = 'input[name="departure_time"]';
@@ -272,7 +350,59 @@ function validateShipmentForm(form) {
         return false;
     }
     
-    // 2. Kiểm tra các trường ở tab phương tiện & tài xế
+    // 2. Kiểm tra chi tiết các hàng hóa
+    let goodsValid = true;
+    let goodsErrorMessage = '';
+    let goodsErrorField = null;
+    
+    // Kiểm tra từng hàng hóa
+    goodsNameInputs.forEach(input => {
+        if (!goodsValid) return; // Nếu đã có lỗi, không kiểm tra tiếp
+        
+        const rowIndex = input.name.match(/\[(\d+)\]/)[1];
+        const nameValue = input.value.trim();
+        const quantityInput = form.querySelector(`input[name="goods[${rowIndex}][quantity]"]`);
+        const quantityValue = quantityInput ? quantityInput.value.trim() : '';
+        const unitInput = form.querySelector(`input[name="goods[${rowIndex}][unit]"]`);
+        const unitValue = unitInput ? unitInput.value.trim() : '';
+        
+        // Kiểm tra tên hàng hóa
+        if (nameValue === '') {
+            goodsErrorMessage = 'Tên hàng hóa không được để trống!';
+            goodsErrorField = input;
+            goodsValid = false;
+            // Hiển thị lỗi trực tiếp trong trường
+            document.getElementById(`error-goods-${rowIndex}-name`).textContent = goodsErrorMessage;
+            return;
+        }
+        
+        // Kiểm tra số lượng
+        if (quantityValue === '' || parseInt(quantityValue) < 1) {
+            goodsErrorMessage = 'Số lượng phải lớn hơn 0!';
+            goodsErrorField = quantityInput;
+            goodsValid = false;
+            // Hiển thị lỗi trực tiếp trong trường
+            document.getElementById(`error-goods-${rowIndex}-quantity`).textContent = goodsErrorMessage;
+            return;
+        }
+        
+        // Kiểm tra đơn vị
+        if (unitValue === '') {
+            goodsErrorMessage = 'Giá trị không được để trống!';
+            goodsErrorField = unitInput;
+            goodsValid = false;
+            // Hiển thị lỗi trực tiếp trong trường
+            document.getElementById(`error-goods-${rowIndex}-unit`).textContent = goodsErrorMessage;
+            return;
+        }
+    });
+    
+    if (!goodsValid) {
+        handleFormError(goodsErrorMessage, goodsErrorField, 'driverAllowance');
+        return false;
+    }
+    
+    // 3. Kiểm tra các trường ở tab phương tiện & tài xế
     const vehicleId = form.querySelector('select[name="vehicle_id"]')?.value;
     const userIdField = form.querySelector('select[name="drivers[0][user_id]"]');
     const userId = userIdField ? userIdField.value : '';
@@ -296,6 +426,11 @@ function validateShipmentForm(form) {
         handleFormError(errorMessage, errorField, 'shipmentDetail');
         return false;
     }
+    
+    // Xóa tất cả các thông báo lỗi trước khi submit
+    document.querySelectorAll('.text-danger').forEach(element => {
+        element.textContent = '';
+    });
     
     return true;
 }

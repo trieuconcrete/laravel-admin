@@ -18,9 +18,9 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::guard('admin')->user();
 
-        $request->validate([
+        $validator = validator($request->all(), [
             'full_name' => 'required|string|max:255',
             'username' => 'required|string|max:100|unique:users,username,' . $user->id,
             'phone' => [
@@ -33,6 +33,13 @@ class ProfileController extends Controller
             'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
             'email' => 'required|email|unique:users,email,' . $user->id,
         ]);
+        
+        if ($validator->fails()) {
+            return redirect()->route('admin.profile.show')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('activeTab', 'personalDetails');
+        }
 
         try {
             if ($request->hasFile('avatar')) {
@@ -47,25 +54,35 @@ class ProfileController extends Controller
             $user->username = $request->input('username');
             $user->phone = $request->input('phone');
             $user->birthday = $request->input('birthday');
+            $user->email = $request->input('email');
             $user->save();
 
             return redirect()->route('admin.profile.show')->with('success', 'Profile updated successfully!');
         } catch (\Exception $e) {
-            return back()->with('error', 'Update failed: ' . $e->getMessage());
+            return redirect()->route('admin.profile.show')
+                ->with('error', 'Update failed: ' . $e->getMessage())
+                ->with('activeTab', 'personalDetails');
         }
     }
 
     public function changePassword(Request $request)
     {
-        $user = Auth::user();
+        $user = Auth::guard('admin')->user();
 
-        $request->validate([
-            'current_password' => ['required', 'current_password'],
+        $validator = validator($request->all(), [
+            'current_password' => ['required', function ($attribute, $value, $fail) use ($user) {
+                if (!Hash::check($value, $user->password)) {
+                    $fail('The current password is incorrect.');
+                }
+            }],
             'new_password' => 'required|string|min:8|confirmed',
         ]);
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            return back()->with('error', 'Current password is incorrect.');
+        
+        if ($validator->fails()) {
+            return redirect()->route('admin.profile.show')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('activeTab', 'changePassword');
         }
 
         $user->password = Hash::make($request->new_password);

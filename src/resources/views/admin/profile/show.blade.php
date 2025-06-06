@@ -45,12 +45,12 @@
                 <div class="card-header">
                     <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active" data-bs-toggle="tab" href="#personalDetails" role="tab">
+                            <a class="nav-link {{ session('activeTab') != 'changePassword' ? 'active' : '' }}" data-bs-toggle="tab" href="#personalDetails" role="tab">
                                 <i class="fas fa-home"></i> Personal Details
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#changePassword" role="tab">
+                            <a class="nav-link {{ session('activeTab') == 'changePassword' ? 'active' : '' }}" data-bs-toggle="tab" href="#changePassword" role="tab">
                                 <i class="far fa-user"></i> Change Password
                             </a>
                         </li>
@@ -58,7 +58,7 @@
                 </div>
                 <div class="card-body p-4">
                     <div class="tab-content">
-                        <div class="tab-pane active" id="personalDetails" role="tabpanel">
+                        <div class="tab-pane {{ session('activeTab') != 'changePassword' ? 'active' : '' }}" id="personalDetails" role="tabpanel">
                             <form action="{{ route('admin.profile.update', $user) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
 
@@ -132,7 +132,7 @@
                             </form>
                         </div>
                         <!--end tab-pane-->
-                        <div class="tab-pane" id="changePassword" role="tabpanel">
+                        <div class="tab-pane {{ session('activeTab') == 'changePassword' ? 'active' : '' }}" id="changePassword" role="tabpanel">
                             <form action="{{ route('admin.profile.change-password', $user) }}" method="POST">
                                 @csrf
                                 <div class="row g-2">

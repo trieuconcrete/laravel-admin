@@ -115,6 +115,23 @@
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">File bảng kê</label>
+                                        <input type="file" name="document_file" id="documentFileInput" class="form-control mt-1 border p-2 rounded">
+                                        @if(session()->has('_documentFile_temp'))
+                                            <input type="hidden" name="_documentFile_temp" value="{{ session('_documentFile_temp') ?? null }}">
+                                        @endif
+                                        @if ($customer->document_file)
+                                            <div class="mt-2">
+                                                <a href="{{ asset('storage/' . $customer->document_file) }}" target="_blank">
+                                                    📎 Xem tệp đã tải lên (đã được lưu)
+                                                </a>
+                                            </div>
+                                        @endif
+                                        @error('document_file')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                 </div>
                                 <div class="col-lg-12">
                                     <div class="hstack gap-2 justify-content-start">
