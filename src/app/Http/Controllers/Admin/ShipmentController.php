@@ -114,6 +114,7 @@ class ShipmentController extends Controller
             $this->shipmentService->update($shipment, $request->validated());
             return redirect()->route('admin.shipments.index')->with('success', 'Cập nhật chuyến hàng thành công.');
         } catch (\Exception $e) {
+            Log::error('Cập nhật chuyến hàng thất bại: '. $e->getMessage());
             return back()->withInput()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }

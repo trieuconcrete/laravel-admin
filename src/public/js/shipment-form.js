@@ -107,7 +107,7 @@ function addDriverRow(personTable, personDeductionTypes, users) {
     personDeductionTypes.forEach(type => {
         deductionInputs += `<td>
             <input type="hidden" name="drivers[${driverRowCount}][deduction_type_ids][]" value="${type.id}">
-            <input type="number" name="drivers[${driverRowCount}][deductions][${type.id}]" class="form-control form-control-sm numeric-input" min="0">
+            <input type="text" name="drivers[${driverRowCount}][deductions][${type.id}]" class="form-control form-control-sm deduction-input" min="0">
         </td>`;
     });
     
@@ -144,6 +144,37 @@ function addDriverRow(personTable, personDeductionTypes, users) {
     // Thêm event listener cho các trường số mới thêm vào
     addNumericInputListeners(row.querySelectorAll('input[type="number"]'));
     
+    // Apply VND formatting cho các input deduction mới thêm vào
+    const newDeductionInputs = row.querySelectorAll('.deduction-input');
+    newDeductionInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            let value = this.value;
+            
+            // Remove non-numeric characters and handle decimal part
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // If there's a decimal part, handle it
+            if (value.includes('.')) {
+                // Split into integer and decimal parts
+                let parts = value.split('.');
+                // If decimal part is .00, remove it completely
+                if (parts[1] === '00' || parts[1] === '0') {
+                    value = parts[0];
+                } else {
+                    // Otherwise keep only integer part
+                    value = parts[0];
+                }
+            }
+            
+            // Format with commas
+            if (value) {
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+            
+            this.value = value;
+        });
+    });
+    
     // Kiểm tra nếu đã sử dụng hết tất cả người dùng, vô hiệu hóa nút thêm
     if (selectedIds.length + 1 >= totalUsers) {
         document.getElementById('addPersonBtn').disabled = true;
@@ -179,7 +210,7 @@ function addGoodRow(goodsTable, goodsCount) {
             <div class="text-danger" id="error-goods-${goodsCount}-weight"></div>
         </td>
         <td>
-            <input type="number" name="goods[${goodsCount}][unit]" class="form-control form-control-sm" required>
+            <input type="number" name="goods[${goodsCount}][unit]" class="form-control form-control-sm unit-input" required>
             <div class="text-danger" id="error-goods-${goodsCount}-unit"></div>
         </td>
         <td>
@@ -191,6 +222,48 @@ function addGoodRow(goodsTable, goodsCount) {
     
     // Thêm event listener cho các trường số mới thêm vào
     addNumericInputListeners(row.querySelectorAll('input[type="number"]'));
+    
+    // Apply VND formatting cho các unit input mới thêm vào
+    const unitInputs = row.querySelectorAll('.unit-input');
+    unitInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            // Use the global formatPriceInput function if available
+            if (typeof window.formatPriceInput === 'function') {
+                window.formatPriceInput(this);
+            } else {
+                // Fallback if the global function is not available
+                let value = this.value;
+                
+                // Remove non-numeric characters and handle decimal part
+                value = value.replace(/[^0-9.]/g, '');
+                
+                // If there's a decimal part, handle it
+                if (value.includes('.')) {
+                    // Split into integer and decimal parts
+                    let parts = value.split('.');
+                    // If decimal part is .00, remove it completely
+                    if (parts[1] === '00' || parts[1] === '0') {
+                        value = parts[0];
+                    } else {
+                        // Otherwise keep only integer part
+                        value = parts[0];
+                    }
+                }
+                
+                // Limit to 9 digits
+                if (value.length > 9) {
+                    value = value.substring(0, 9);
+                }
+                
+                // Format with commas
+                if (value) {
+                    value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                }
+                
+                this.value = value;
+            }
+        });
+    });
     
     return goodsCount + 1;
 }

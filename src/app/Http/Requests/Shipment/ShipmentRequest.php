@@ -19,6 +19,7 @@ class ShipmentRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
+        // Filter drivers array based on submitted rows
         if ($this->has('driver_row_indexes')) {
             $indexes = explode(',', $this->input('driver_row_indexes'));
             $drivers = $this->input('drivers', []);
@@ -32,6 +33,49 @@ class ShipmentRequest extends FormRequest
             
             $this->merge([
                 'drivers' => $filteredDrivers
+            ]);
+        }
+        
+        // Remove commas from deduction values
+        if ($this->has('deductions')) {
+            $deductions = $this->input('deductions', []);
+            foreach ($deductions as $key => $value) {
+                if (!empty($value)) {
+                    $deductions[$key] = str_replace(',', '', $value);
+                }
+            }
+            $this->merge([
+                'deductions' => $deductions
+            ]);
+        }
+        
+        // Remove commas from goods unit values
+        if ($this->has('goods')) {
+            $goods = $this->input('goods', []);
+            foreach ($goods as $key => $item) {
+                if (isset($item['unit']) && !empty($item['unit'])) {
+                    $goods[$key]['unit'] = str_replace(',', '', $item['unit']);
+                }
+            }
+            $this->merge([
+                'goods' => $goods
+            ]);
+        }
+        
+        // Remove commas from driver deduction values
+        if ($this->has('drivers')) {
+            $drivers = $this->input('drivers', []);
+            foreach ($drivers as $driverIndex => $driver) {
+                if (isset($driver['deductions']) && is_array($driver['deductions'])) {
+                    foreach ($driver['deductions'] as $deductionKey => $value) {
+                        if (!empty($value)) {
+                            $drivers[$driverIndex]['deductions'][$deductionKey] = str_replace(',', '', $value);
+                        }
+                    }
+                }
+            }
+            $this->merge([
+                'drivers' => $drivers
             ]);
         }
     }

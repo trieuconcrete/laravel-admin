@@ -144,7 +144,7 @@
                                                                 @foreach($deductionTypes as $type)
                                                                     <td>
                                                                         <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
-                                                                        <input type="number" class="form-control form-control-sm" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->amount : '') }}">
+                                                                        <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->amount : '') }}">
                                                                         @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
                                                                     </td>
                                                                 @endforeach
@@ -186,15 +186,15 @@
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-notes">@error('goods.'.$i.'.notes'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="number" name="goods[{{ $i }}][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.'.$i.'.quantity', $good->quantity) }}" required>
+                                                                            <input type="text" name="goods[{{ $i }}][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.'.$i.'.quantity', $good->quantity) }}" required>
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-quantity">@error('goods.'.$i.'.quantity'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="number" name="goods[{{ $i }}][weight]" class="form-control form-control-sm" min="0" value="{{ old('goods.'.$i.'.weight', $good->weight) }}">
+                                                                            <input type="text" name="goods[{{ $i }}][weight]" class="form-control form-control-sm" min="0" value="{{ old('goods.'.$i.'.weight', $good->weight) }}">
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-weight">@error('goods.'.$i.'.weight'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][unit]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.unit', $good->unit) }}" required>
+                                                                            <input type="text" name="goods[{{ $i }}][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.'.$i.'.unit', $good->unit) }}" required>
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-unit">@error('goods.'.$i.'.unit'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
@@ -214,15 +214,15 @@
                                                                         <div class="text-danger" id="error-goods-0-notes">@error('goods.0.notes'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="number" name="goods[0][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.0.quantity') }}" required>
+                                                                        <input type="text" name="goods[0][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.0.quantity') }}" required>
                                                                         <div class="text-danger" id="error-goods-0-quantity">@error('goods.0.quantity'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="number" name="goods[0][weight]" class="form-control form-control-sm" min="0" value="{{ old('goods.0.weight') }}">
+                                                                        <input type="text" name="goods[0][weight]" class="form-control form-control-sm" min="0" value="{{ old('goods.0.weight') }}">
                                                                         <div class="text-danger" id="error-goods-0-weight">@error('goods.0.weight'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][unit]" class="form-control form-control-sm" value="{{ old('goods.0.unit') }}" required>
+                                                                        <input type="text" name="goods[0][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.0.unit') }}" required>
                                                                         <div class="text-danger" id="error-goods-0-unit">@error('goods.0.unit'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
@@ -282,7 +282,7 @@
                                                             @foreach($driversArray as $i => $driver)
                                                                 <tr>
                                                                     <td>
-                                                                        <select name="drivers[{{ $i }}][user_id]" class="form-select form-select-sm" required>
+                                                                        <select name="drivers[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
                                                                             <option value="">Chọn nhân sự</option>
                                                                             @foreach($users as $id => $name)
                                                                                 <option value="{{ $id }}" {{ old('drivers.'.$i.'.user_id', $driver['user_id']) == $id ? 'selected' : '' }}>{{ $name }}</option>
@@ -292,8 +292,7 @@
                                                                     </td>
                                                                     @foreach($personDeductionTypes as $type)
                                                                         <td>
-                                                                            <input type="number" name="drivers[{{ $i }}][deductions][{{ $type->id }}]" class="form-control form-control-sm" min="0" 
-                                                                                value="{{ old('drivers.'.$i.'.deductions.'.$type->id, isset($driver['deductions'][$type->id]) ? $driver['deductions'][$type->id]->amount : '') }}">
+                                                                            <input type="text" name="drivers[{{ $i }}][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0" value="{{ old('drivers.'.$i.'.deductions.'.$type->id, isset($driver['deductions'][$type->id]) ? $driver['deductions'][$type->id]->amount : '') }}">
                                                                             @error('drivers.'.$i.'.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
                                                                     @endforeach
@@ -316,7 +315,7 @@
                                                                 </td>
                                                                 @foreach($personDeductionTypes as $type)
                                                                     <td>
-                                                                        <input type="number" name="drivers[0][deductions][{{ $type->id }}]" class="form-control form-control-sm" min="0">
+                                                                        <input type="text" name="drivers[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
                                                                         @error('drivers.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                 @endforeach
@@ -345,6 +344,61 @@
 
 @push('scripts')
 <script src="{{ asset('js/shipment-form.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        // Function to format price inputs with VND formatting and 9-digit limit
+        function formatPriceInput(input) {
+            let value = input.val();
+            
+            // Remove non-numeric characters except commas
+            value = value.replace(/[^0-9,]/g, '');
+            
+            // Remove existing commas to work with clean number
+            value = value.replace(/,/g, '');
+            
+            // Limit to 9 digits
+            if (value.length > 9) {
+                value = value.substring(0, 9);
+            }
+            
+            // Format with commas
+            if (value) {
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+            
+            input.val(value);
+        }
+        
+        // Format deduction inputs and unit inputs on keyup
+        $('.deduction-input, .unit-input').on('input', function () {
+            formatPriceInput($(this));
+        });
+        
+        // Initial formatting for deduction inputs and unit inputs
+        $('.deduction-input, .unit-input').each(function() {
+            let value = $(this).val();
+            if (value) {
+                // Remove existing formatting
+                value = value.replace(/,/g, '');
+                
+                // Handle decimal part if exists
+                if (value.includes('.')) {
+                    let parts = value.split('.');
+                    value = parts[0]; // Keep only integer part
+                }
+                
+                // Apply formatting
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                $(this).val(value);
+            }
+        });
+        
+        // Make the formatPriceInput function globally available
+        window.formatPriceInput = function(input) {
+            formatPriceInput($(input));
+        };
+    });
+</script>
 <script>
     // Khai báo các biến cần thiết
     const goodsTable = document.querySelector('#goodsTable tbody');

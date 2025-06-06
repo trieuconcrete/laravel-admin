@@ -144,7 +144,7 @@
                                                                 @foreach($deductionTypes as $type)
                                                                     <td>
                                                                         <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
-                                                                        <input type="number" class="form-control form-control-sm" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id) }}">
+                                                                        <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id) }}">
                                                                         @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
                                                                     </td>
                                                                 @endforeach
@@ -198,7 +198,7 @@
                                                                             @error('goods.'.$i.'.weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][unit]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.unit', $good['unit'] ?? '') }}">
+                                                                            <input type="number" name="goods[{{ $i }}][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.'.$i.'.unit', $good['unit'] ?? '') }}" required>
                                                                             @error('goods.'.$i.'.unit')<span class="text-danger">{{ $message }}</span>@enderror
                                                                         </td>
                                                                         <td>
@@ -225,7 +225,7 @@
                                                                         <div class="text-danger" id="error-goods-0-weight">@error('goods.0.weight'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][unit]" class="form-control form-control-sm" value="{{ old('goods.0.unit') }}">
+                                                                        <input type="number" name="goods[0][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.0.unit') }}" required>
                                                                         <div class="text-danger" id="error-goods-0-unit">@error('goods.0.unit'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
@@ -279,7 +279,7 @@
                                                             @foreach($drivers as $i => $driver)
                                                                 <tr>
                                                                     <td>
-                                                                        <select name="drivers[{{ $i }}][user_id]" class="form-select form-select-sm" required>
+                                                                        <select name="drivers[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
                                                                             <option value="">Chọn nhân sự</option>
                                                                             @foreach($users as $id => $name)
                                                                                 <option value="{{ $id }}" {{ old('drivers.'.$i.'.user_id', $driver['user_id'] ?? '') == $id ? 'selected' : '' }}>{{ $name }}</option>
@@ -289,7 +289,7 @@
                                                                     </td>
                                                                     @foreach($personDeductionTypes as $type)
                                                                         <td>
-                                                                            <input type="number" name="drivers[{{ $i }}][deductions][{{ $type->id }}]" class="form-control form-control-sm" min="0" value="{{ old('drivers.'.$i.'.deductions.'.$type->id, $driver['deductions'][$type->id] ?? '') }}">
+                                                                            <input type="text" name="drivers[{{ $i }}][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0" value="{{ old('drivers.'.$i.'.deductions.'.$type->id, $driver['deductions'][$type->id] ?? '') }}">
                                                                             @error('drivers.'.$i.'.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
                                                                     @endforeach
@@ -312,7 +312,7 @@
                                                                 </td>
                                                                 @foreach($personDeductionTypes as $type)
                                                                     <td>
-                                                                        <input type="number" name="drivers[0][deductions][{{ $type->id }}]" class="form-control form-control-sm" min="0">
+                                                                        <input type="text" name="drivers[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
                                                                         @error('drivers.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                 @endforeach
@@ -344,6 +344,82 @@
 
 @push('scripts')
 <script src="{{ asset('js/shipment-form.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        // Function to format price inputs with VND formatting and 9-digit limit
+        function formatPriceInput(input) {
+            let value = input.val();
+            
+            // Remove non-numeric characters and handle decimal part
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // If there's a decimal part, handle it
+            if (value.includes('.')) {
+                // Split into integer and decimal parts
+                let parts = value.split('.');
+                // If decimal part is .00, remove it completely
+                if (parts[1] === '00' || parts[1] === '0') {
+                    value = parts[0];
+                } else {
+                    // Otherwise keep only integer part
+                    value = parts[0];
+                }
+            }
+            
+            // Limit to 9 digits
+            if (value.length > 9) {
+                value = value.substring(0, 9);
+            }
+            
+            // Format with commas
+            if (value) {
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+            
+            input.val(value);
+        }
+        
+        // Format deduction inputs and unit inputs on keyup
+        $('.deduction-input, .unit-input').on('input', function () {
+            formatPriceInput($(this));
+        });
+        
+        // Initial formatting for deduction inputs and unit inputs
+        $('.deduction-input, .unit-input').each(function() {
+            let value = $(this).val();
+            if (value) {
+                // Remove existing formatting
+                value = value.replace(/,/g, '');
+                
+                // Handle decimal part if exists
+                if (value.includes('.')) {
+                    let parts = value.split('.');
+                    // If decimal part is .00, remove it completely
+                    if (parts[1] === '00' || parts[1] === '0') {
+                        value = parts[0];
+                    } else {
+                        // Otherwise keep only integer part
+                        value = parts[0];
+                    }
+                }
+                
+                // Limit to 9 digits
+                if (value.length > 9) {
+                    value = value.substring(0, 9);
+                }
+                
+                // Apply formatting
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                $(this).val(value);
+            }
+        });
+        
+        // Make the formatPriceInput function globally available
+        window.formatPriceInput = function(input) {
+            formatPriceInput($(input));
+        };
+    });
+</script>
 <script>
     // Khai báo các biến cần thiết
     const goodsTable = document.querySelector('#goodsTable tbody');
