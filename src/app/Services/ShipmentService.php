@@ -91,8 +91,8 @@ class ShipmentService
                                     ShipmentDeduction::create([
                                         'user_id' => $user_id,
                                         'shipment_id' => $shipment->id,
-                                        'shipment_deduction_type_id' => (int)$deduction_type_id,
-                                        'amount' => (float)$amount,
+                                        'shipment_deduction_type_id' => (int)$deduction_type_id ?? null,
+                                        'amount' => (float)$amount ?? null,
                                     ]);
                                 }
                             }
@@ -158,13 +158,12 @@ class ShipmentService
                         if (!empty($person['deductions'])) {
                             foreach ($person['deductions'] as $deduction_type_id => $amount) {
                                 // Kiểm tra deduction_type_id và amount có hợp lệ
-                                if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0 && 
-                                    $amount !== null && $amount !== '' && is_numeric($amount)) {
+                                if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0) {
                                     ShipmentDeduction::create([
                                         'user_id' => $user_id,
                                         'shipment_id' => $shipment->id,
-                                        'shipment_deduction_type_id' => (int)$deduction_type_id,
-                                        'amount' => (float)$amount,
+                                        'shipment_deduction_type_id' => (int)$deduction_type_id ?? null,
+                                        'amount' => (float)$amount ?? null,
                                     ]);
                                 }
                             }
