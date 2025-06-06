@@ -110,8 +110,8 @@
                                                     @error('origin')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Điểm đến<span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" placeholder="Nhập điểm đến" name="destination" value="{{ old('destination') }}" required>
+                                                    <label class="form-label">Điểm đến</label>
+                                                    <input type="text" class="form-control" placeholder="Nhập điểm đến" name="destination" value="{{ old('destination') }}">
                                                     @error('destination')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
@@ -209,29 +209,29 @@
                                                             @else
                                                                 <tr>
                                                                     <td>
-                                                                        <input type="hidden" name="goods_index[]" value="0">
                                                                         <input type="text" name="goods[0][name]" class="form-control form-control-sm" value="{{ old('goods.0.name') }}" required>
-                                                                        @error('goods.0.name')<span class="text-danger">{{ $message }}</span>@enderror
+                                                                        <div class="text-danger" id="error-goods-0-name">@error('goods.0.name'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
                                                                         <input type="text" name="goods[0][notes]" class="form-control form-control-sm" value="{{ old('goods.0.notes') }}">
-                                                                        @error('goods.0.notes')<span class="text-danger">{{ $message }}</span>@enderror
+                                                                        <div class="text-danger" id="error-goods-0-notes">@error('goods.0.notes'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
                                                                         <input type="number" name="goods[0][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.0.quantity') }}" required>
-                                                                        @error('goods.0.quantity')<span class="text-danger">{{ $message }}</span>@enderror
+                                                                        <div class="text-danger" id="error-goods-0-quantity">@error('goods.0.quantity'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
                                                                         <input type="number" name="goods[0][weight]" class="form-control form-control-sm" min="0"  value="{{ old('goods.0.weight') }}">
-                                                                        @error('goods.0.weight')<span class="text-danger">{{ $message }}</span>@enderror
+                                                                        <div class="text-danger" id="error-goods-0-weight">@error('goods.0.weight'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="number" name="goods[0][unit]" class="form-control form-control-sm" min="0"  value="{{ old('goods.0.unit') }}">
-                                                                        @error('goods.0.unit')<span class="text-danger">{{ $message }}</span>@enderror
+                                                                        <input type="text" name="goods[0][unit]" class="form-control form-control-sm" value="{{ old('goods.0.unit') }}">
+                                                                        <div class="text-danger" id="error-goods-0-unit">@error('goods.0.unit'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                     <input type="hidden" name="driver_rows[]" value="0">
-                                                                 </td>
+                                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeGoodRow(this, 0)"><i class="ri-delete-bin-fill"></i></button>
+                                                                        <input type="hidden" name="goods_rows[]" value="0">
+                                                                    </td>
                                                                 </tr>
                                                             @endif
                                                         </tbody>
@@ -357,8 +357,8 @@
         @endforeach
     ];
     
-    // Khai báo danh sách người dùng
-    const users = {
+    // Gán danh sách người dùng vào biến toàn cục
+    users = {
         @foreach($users as $id => $name)
             "{{ $id }}": "{{ $name }}",
         @endforeach
@@ -378,6 +378,9 @@
         document.getElementById('addPersonBtn').onclick = function() {
             addDriverRow(personTable, personDeductionTypes, users);
         };
+        
+        // Kiểm tra và cập nhật trạng thái nút thêm nhân sự dựa trên số lượng người dùng khả dụng
+        updateAddPersonButtonState();
         
         // Định dạng tất cả các trường số khi trang được tải
         formatAllNumericInputs();

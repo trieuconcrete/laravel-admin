@@ -19,7 +19,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <form action="{{ route('admin.vehicles.store') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('admin.customers.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                         
                                 <div class="mb-4">
@@ -98,6 +98,21 @@
                                     <label class="block text-gray-700">Avatar</label>
                                     <input type="file" name="avatar" id="avatarInput" class="form-control mt-1 border p-2 rounded">
                                     <img id="avatarPreview" src="{{ asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="Avatar Preview">
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Tệp đính kèm</label>
+                                    <input type="file" name="document_file" id="documentFileInput" class="form-control mt-1 border p-2 rounded">
+                                    @if(session()->has('_documentFile_temp'))
+                                        <input type="hidden" name="_documentFile_temp" value="{{ session('_documentFile_temp') ?? null }}">
+                                        <div class="mt-2">
+                                            <a href="{{ asset('storage/' . session('_documentFile_temp')) }}" target="_blank">
+                                                📎 Xem tệp đã tải lên (chưa được lưu)
+                                            </a>
+                                        </div>
+                                    @endif
+                                    @error('document_file')
+                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <div>
                                     <button type="submit" class="btn rounded-pill btn-secondary waves-effect">Save</button>

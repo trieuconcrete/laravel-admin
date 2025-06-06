@@ -42,7 +42,7 @@ class ShipmentRequest extends FormRequest
             'customer_id' => 'required|exists:customers,id',
             'vehicle_id' => 'required|exists:vehicles,vehicle_id',
             'origin' => 'required|string|max:255',
-            'destination' => 'required|string|max:255',
+            'destination' => 'nullable|string|max:255',
             'departure_time' => 'required|' . $this->getSystemDateFormatRule(),
             'estimated_arrival_time' => 'required|' . $this->getSystemDateFormatRule() . '|after_or_equal:departure_time',
             'notes' => 'nullable|string',

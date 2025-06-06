@@ -119,6 +119,12 @@ class StoreCustomerRequest extends FormRequest
                 'email',
                 'max:255'
             ],
+            'document_file' => [
+                'nullable',
+                'file',
+                'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png',
+                'max:10240' // 10MB max
+            ],
         ];
     }
 
@@ -159,6 +165,10 @@ class StoreCustomerRequest extends FormRequest
             'primary_contact_name.required_if' => 'Tên người liên hệ chính là bắt buộc đối với doanh nghiệp.',
             'primary_contact_phone.regex' => 'Số điện thoại người liên hệ không đúng định dạng.',
             'primary_contact_email.email' => 'Email người liên hệ không đúng định dạng.',
+            
+            'document_file.file' => 'Tệp đính kèm phải là một tệp hợp lệ.',
+            'document_file.mimes' => 'Tệp đính kèm phải có định dạng: pdf, doc, docx, xls, xlsx, jpg, jpeg, png.',
+            'document_file.max' => 'Tệp đính kèm không được vượt quá 10MB.',
         ];
     }
 
@@ -184,6 +194,7 @@ class StoreCustomerRequest extends FormRequest
             'primary_contact_position' => 'chức vụ người liên hệ',
             'primary_contact_phone' => 'số điện thoại người liên hệ',
             'primary_contact_email' => 'email người liên hệ',
+            'document_file' => 'tệp đính kèm',
         ];
     }
 
