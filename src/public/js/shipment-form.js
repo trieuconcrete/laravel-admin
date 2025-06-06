@@ -127,16 +127,16 @@ function addGoodRow(goodsTable, goodsCount) {
             <input type="text" name="goods[${goodsCount}][name]" class="form-control form-control-sm" required>
         </td>
         <td>
+            <input type="text" name="goods[${goodsCount}][notes]" class="form-control form-control-sm" min="0">
+        </td>
+        <td>
             <input type="number" name="goods[${goodsCount}][quantity]" class="form-control form-control-sm" min="0">
         </td>
         <td>
             <input type="number" name="goods[${goodsCount}][weight]" class="form-control form-control-sm" min="0">
         </td>
         <td>
-            <input type="number" name="goods[${goodsCount}][unit]" class="form-control form-control-sm" min="0">
-        </td>
-        <td>
-            <input type="text" name="goods[${goodsCount}][notes]" class="form-control form-control-sm">
+            <input type="text" name="goods[${goodsCount}][unit]" class="form-control form-control-sm">
         </td>
         <td><button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()"><i class="ri-delete-bin-fill"></i></button></td>
     `;

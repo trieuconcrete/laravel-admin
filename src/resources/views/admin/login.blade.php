@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable">
+<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-theme="default">
 
 <head>
 
@@ -21,7 +21,29 @@
     <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- custom Css-->
     <link href="{{ asset('assets/css/custom.min.css') }}" rel="stylesheet" type="text/css" />
-
+    
+    <style>
+        body {
+            margin: 0;
+            font-family: var(--vz-body-font-family);
+            font-size: var(--vz-body-font-size);
+            font-weight: var(--vz-body-font-weight);
+            line-height: var(--vz-body-line-height);
+            color: var(--vz-body-color);
+            text-align: var(--vz-body-text-align);
+            background-color: var(--vz-body-bg);
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+        h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 {
+            font-family: var(--vz-body-font-family);
+            font-size: var(--vz-body-font-size);
+            font-weight: var(--vz-body-font-weight);
+            line-height: var(--vz-body-line-height);
+            color: var(--vz-body-color);
+            text-align: var(--vz-body-text-align);
+        }
+    </style>
 </head>
 
 <body>
