@@ -94,7 +94,7 @@
 
                                         <div class="mb-3">
                                             <label for="email" class="form-label">Email</label>
-                                            <input type="text" name="email" class="form-control" id="email" placeholder="Enter email">
+                                            <input type="text" name="email" class="form-control" id="email" placeholder="Enter email" value="{{ old('email') ?? $lastEmail ?? '' }}">
                                         </div>
 
                                         <div class="mb-3">
