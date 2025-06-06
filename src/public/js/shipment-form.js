@@ -407,7 +407,15 @@ function validateShipmentForm(form) {
     const userIdField = form.querySelector('select[name="drivers[0][user_id]"]');
     const userId = userIdField ? userIdField.value : '';
     
-    // Nếu vehicle_id hoặc user_id trống, hiển thị thông báo lỗi
+    // Kiểm tra xem có ít nhất một khoản chi phí (deduction) được nhập hay không
+    const deductionInputs = form.querySelectorAll('input[name^="deductions["]');
+    const hasDeductions = deductionInputs.length > 0 && Array.from(deductionInputs).some(input => input.value.trim() !== '');
+    
+    // Kiểm tra xem có ít nhất một khoản chi phí cho tài xế (driver deduction) được nhập hay không
+    const driverDeductionInputs = form.querySelectorAll('input[name^="drivers["][name*="[deductions]"]');
+    const hasDriverDeductions = driverDeductionInputs.length > 0 && Array.from(driverDeductionInputs).some(input => input.value.trim() !== '');
+    
+    // Nếu vehicle_id hoặc user_id trống hoặc không có deductions, hiển thị thông báo lỗi
     if (!vehicleId || !userId) {
         let errorMessage = '';
         let errorField = null;
@@ -418,10 +426,14 @@ function validateShipmentForm(form) {
         } else if (!vehicleId) {
             errorMessage = 'Vui lòng chọn phương tiện!';
             errorField = 'select[name="vehicle_id"]';
-        } else {
+        } else if (!userId) {
             errorMessage = 'Vui lòng chọn nhân sự!';
             errorField = 'select[name="drivers[0][user_id]"]';
         }
+        //  else if (!hasDriverDeductions) {
+        //     errorMessage = 'Vui lòng nhập ít nhất một khoản phụ cấp cho tài xế!';
+        //     errorField = 'input[name^="drivers["][name*="[deductions]"]';
+        // }
         
         handleFormError(errorMessage, errorField, 'shipmentDetail');
         return false;

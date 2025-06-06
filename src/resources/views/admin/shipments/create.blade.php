@@ -167,7 +167,7 @@
                                                             <tr>
                                                                 <th>Tên hàng hóa <span class="text-danger">*</span></th>
                                                                 <th>Mô tả</th>
-                                                                <th>Số lượng</th>
+                                                                <th>Số lượng <span class="text-danger">*</span></th>
                                                                 <th>Trọng lượng (kg)</th>
                                                                 <th>Giá trị (VNĐ) <span class="text-danger">*</span></th>
                                                                 <th></th>

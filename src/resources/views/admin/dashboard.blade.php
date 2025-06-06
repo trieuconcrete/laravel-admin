@@ -17,9 +17,9 @@
                             <div class="mt-3 mt-lg-0">
                                 <form action="javascript:void(0);">
                                     <div class="row g-3 mb-0 align-items-center">
-                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createShipmentModal">
+                                        <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary" >
                                             <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến hàng 
-                                        </button>
+                                        </a>
                                         <!--end col-->
                                     </div>
                                     <!--end row-->
