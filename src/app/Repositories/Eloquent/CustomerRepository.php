@@ -3,8 +3,14 @@
 namespace App\Repositories\Eloquent;
 
 use App\Models\Customer;
+use App\Models\Shipment;
+use App\Models\ShipmentDeduction;
 use App\Repositories\Interface\CustomerRepositoryInterface;
+use App\Helpers\DateHelper;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use App\Models\ShipmentDeductionType;
 
 class CustomerRepository extends BaseRepository implements CustomerRepositoryInterface
 {
@@ -49,4 +55,26 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
 
         return $query->paginate($this->getPaginationLimit());
     }    
+    
+    /**
+     * Get monthly shipments for a customer
+     * @param int $customerId
+     * @param string $month Format: 'YYYY-MM'
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getMonthlyShipments(int $customerId, string $month)
+    {
+        // Parse the month string to get start and end dates
+        $startDate = $month . '-01 00:00:00';
+        $endDate = date('Y-m-t 23:59:59', strtotime($startDate));
+        
+        return Shipment::where('customer_id', $customerId)
+            ->whereBetween('departure_time', [$startDate, $endDate])
+            ->with(['shipmentDeductions' => function ($query) {
+                $query->with(['shipmentDeductionType' => function ($query) {
+                    $query->where('type', ShipmentDeductionType::TYPE_EXPENSE);
+                }]);
+            }])
+            ->get();
+    }
 }

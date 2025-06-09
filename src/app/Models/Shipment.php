@@ -30,13 +30,14 @@ class Shipment extends Model
         'destination', // điểm đến
         'departure_time', // thời gian khởi hành
         'estimated_arrival_time', // thời gian đến
-        'cargo_weight',
+        'cargo_weight', // trọng lượng hàng hóa
         'cargo_description',
         'driver_id',
         'co_driver_id',
         'vehicle_id',
         'distance', // số km
-        'unit_price',
+        'unit_price', // giá chuyến hàng
+        'trip_count', // số lượng chuyến hàng
         'crane_price',
         'has_crane_service',
         'notes',

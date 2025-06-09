@@ -78,6 +78,13 @@ class ShipmentRequest extends FormRequest
                 'drivers' => $drivers
             ]);
         }
+
+        // Remove commas from unit price
+        if ($this->unit_price) {
+            $this->merge([
+                'unit_price' => str_replace(',', '', $this->unit_price),
+            ]);
+        }
     }
 
     public function rules()
@@ -92,6 +99,9 @@ class ShipmentRequest extends FormRequest
             'notes' => 'nullable|string',
             'status' => 'required|string',
             'distance' => 'nullable|numeric|min:0',
+            'cargo_weight' => 'nullable|numeric|min:0',
+            'trip_count' => 'nullable|numeric|min:0',
+            'unit_price' => 'required|numeric|min:0',
             // Chi phí chuyến hàng
             'deductions' => 'array',
             'deductions.*' => 'nullable|numeric|min:0',

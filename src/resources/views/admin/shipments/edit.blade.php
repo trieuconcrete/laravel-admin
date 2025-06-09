@@ -121,6 +121,23 @@
                                                     <input type="text" class="form-control" placeholder="Nhập số KM" name="distance" value="{{ old('distance', $shipment->distance) }}">
                                                     @error('distance')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Khối lượng (kg)</label>
+                                                    <input type="text" class="form-control" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $shipment->cargo_weight) }}">
+                                                    @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Số lượng chuyến</label>
+                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count) }}">
+                                                    @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $shipment->unit_price) }}">
+                                                    @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Ghi chú</label>
@@ -169,7 +186,7 @@
                                                                 <th>Mô tả</th>
                                                                 <th>Số lượng</th>
                                                                 <th>Trọng lượng (kg)</th>
-                                                                <th>Giá trị (VNĐ) <span class="text-danger">*</span></th>
+                                                                <th>Giá trị (VNĐ)</th>
                                                                 <th></th>
                                                             </tr>
                                                         </thead>
@@ -186,7 +203,7 @@
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-notes">@error('goods.'.$i.'.notes'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.'.$i.'.quantity', $good->quantity) }}" required>
+                                                                            <input type="text" name="goods[{{ $i }}][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.'.$i.'.quantity', $good->quantity) }}">
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-quantity">@error('goods.'.$i.'.quantity'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
@@ -194,7 +211,7 @@
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-weight">@error('goods.'.$i.'.weight'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.'.$i.'.unit', $good->unit) }}" required>
+                                                                            <input type="text" name="goods[{{ $i }}][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.'.$i.'.unit', $good->unit) }}">
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-unit">@error('goods.'.$i.'.unit'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
@@ -214,7 +231,7 @@
                                                                         <div class="text-danger" id="error-goods-0-notes">@error('goods.0.notes'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.0.quantity') }}" required>
+                                                                        <input type="text" name="goods[0][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.0.quantity') }}">
                                                                         <div class="text-danger" id="error-goods-0-quantity">@error('goods.0.quantity'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
@@ -222,7 +239,7 @@
                                                                         <div class="text-danger" id="error-goods-0-weight">@error('goods.0.weight'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.0.unit') }}" required>
+                                                                        <input type="text" name="goods[0][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.0.unit') }}">
                                                                         <div class="text-danger" id="error-goods-0-unit">@error('goods.0.unit'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>

@@ -44,6 +44,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
 
     Route::resource('vehicles', VehicleController::class);
     Route::resource('customers', CustomerController::class);
+    Route::get('customers/{customer}/export-invoice', [CustomerController::class, 'exportInvoice'])->name('customers.export-invoice');
     Route::resource('contracts', ContractController::class);
     Route::resource('quotes', PriceQuoteController::class);
     Route::resource('shipments', ShipmentController::class);
