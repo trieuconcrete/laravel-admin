@@ -202,7 +202,7 @@ function addGoodRow(goodsTable, goodsCount) {
             <div class="text-danger" id="error-goods-${goodsCount}-notes"></div>
         </td>
         <td>
-            <input type="number" name="goods[${goodsCount}][quantity]" class="form-control form-control-sm" min="1" required>
+            <input type="number" name="goods[${goodsCount}][quantity]" class="form-control form-control-sm" min="1">
             <div class="text-danger" id="error-goods-${goodsCount}-quantity"></div>
         </td>
         <td>
@@ -210,7 +210,7 @@ function addGoodRow(goodsTable, goodsCount) {
             <div class="text-danger" id="error-goods-${goodsCount}-weight"></div>
         </td>
         <td>
-            <input type="number" name="goods[${goodsCount}][unit]" class="form-control form-control-sm unit-input" required>
+            <input type="number" name="goods[${goodsCount}][unit]" class="form-control form-control-sm unit-input">
             <div class="text-danger" id="error-goods-${goodsCount}-unit"></div>
         </td>
         <td>
@@ -434,10 +434,10 @@ function validateShipmentForm(form) {
         
         const rowIndex = input.name.match(/\[(\d+)\]/)[1];
         const nameValue = input.value.trim();
-        const quantityInput = form.querySelector(`input[name="goods[${rowIndex}][quantity]"]`);
-        const quantityValue = quantityInput ? quantityInput.value.trim() : '';
-        const unitInput = form.querySelector(`input[name="goods[${rowIndex}][unit]"]`);
-        const unitValue = unitInput ? unitInput.value.trim() : '';
+        // const quantityInput = form.querySelector(`input[name="goods[${rowIndex}][quantity]"]`);
+        // const quantityValue = quantityInput ? quantityInput.value.trim() : '';
+        // const unitInput = form.querySelector(`input[name="goods[${rowIndex}][unit]"]`);
+        // const unitValue = unitInput ? unitInput.value.trim() : '';
         
         // Kiểm tra tên hàng hóa
         if (nameValue === '') {
@@ -450,24 +450,24 @@ function validateShipmentForm(form) {
         }
         
         // Kiểm tra số lượng
-        if (quantityValue === '' || parseInt(quantityValue) < 1) {
-            goodsErrorMessage = 'Số lượng phải lớn hơn 0!';
-            goodsErrorField = quantityInput;
-            goodsValid = false;
-            // Hiển thị lỗi trực tiếp trong trường
-            document.getElementById(`error-goods-${rowIndex}-quantity`).textContent = goodsErrorMessage;
-            return;
-        }
+        // if (quantityValue === '' || parseInt(quantityValue) < 1) {
+        //     goodsErrorMessage = 'Số lượng phải lớn hơn 0!';
+        //     goodsErrorField = quantityInput;
+        //     goodsValid = false;
+        //     // Hiển thị lỗi trực tiếp trong trường
+        //     document.getElementById(`error-goods-${rowIndex}-quantity`).textContent = goodsErrorMessage;
+        //     return;
+        // }
         
-        // Kiểm tra đơn vị
-        if (unitValue === '') {
-            goodsErrorMessage = 'Giá trị không được để trống!';
-            goodsErrorField = unitInput;
-            goodsValid = false;
-            // Hiển thị lỗi trực tiếp trong trường
-            document.getElementById(`error-goods-${rowIndex}-unit`).textContent = goodsErrorMessage;
-            return;
-        }
+        // // Kiểm tra đơn vị
+        // if (unitValue === '') {
+        //     goodsErrorMessage = 'Giá trị không được để trống!';
+        //     goodsErrorField = unitInput;
+        //     goodsValid = false;
+        //     // Hiển thị lỗi trực tiếp trong trường
+        //     document.getElementById(`error-goods-${rowIndex}-unit`).textContent = goodsErrorMessage;
+        //     return;
+        // }
     });
     
     if (!goodsValid) {
