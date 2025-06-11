@@ -162,7 +162,7 @@
                          class="w-full h-full rounded-full bg-white">
                 </div>
                 <h1 class="text-2xl font-bold text-gray-900 mb-2" data-vi="Nguyen Trieu" data-en="Nguyen Trieu">Nguyen Trieu</h1>
-                <p class="text-gray-600 mb-4" data-vi="Web Developer" data-en="Web Developer">Web Developer</p>
+                <p class="text-gray-600 mb-4" data-vi="Senior Web Developer" data-en="Web Developer">Senior Web Developer</p>
                 <div class="flex justify-center space-x-3 mb-5">
                     <a href="https://github.com/trieuconcrete" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors">
                         <i class="fab fa-github text-xl"></i>
