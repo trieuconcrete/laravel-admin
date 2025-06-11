@@ -16,13 +16,25 @@
             </div>
         </div>
         <div class="prose max-w-none">
-            <p class="text-gray-700 leading-relaxed" data-vi="Xin chào! Tôi là Nguyen Trieu, một Web Developer với đam mê xây dựng các giải pháp công nghệ sáng tạo và hiệu quả. Với hơn 8 năm kinh nghiệm trong lĩnh vực phát triển phần mềm, tôi đã tham gia và dẫn dắt nhiều dự án từ ý tưởng đến sản phẩm hoàn thiện." data-en="Hello! I'm Nguyen Trieu, a Web Developer passionate about building innovative and efficient technology solutions. With over 8 years of experience in software development, I have participated in and led many projects from concept to finished product.">
-                Xin chào! Tôi là Nguyen Trieu, một Web Developer với đam mê xây dựng các giải pháp công nghệ sáng tạo và hiệu quả. 
-                Với hơn 8 năm kinh nghiệm trong lĩnh vực phát triển phần mềm, tôi đã tham gia nhiều dự án từ ý tưởng đến sản phẩm hoàn thiện.
+            <p class="text-gray-700 leading-relaxed" data-vi="Xin chào!
+                Tôi là Nguyen Trieu, một Web Developer với đam mê xây dựng các giải pháp công nghệ sáng tạo, hiệu quả và thực tiễn. 
+                Với hơn 8 năm kinh nghiệm trong lĩnh vực phát triển phần mềm, tôi đã tham gia nhiều dự án từ giai đoạn lên ý tưởng đến khi sản phẩm được triển khai hoàn chỉnh."
+                data-en="Hello! 
+                I'm Nguyen Trieu, a Web Developer passionate about building innovative, efficient, and practical technology solutions. With over 8 years of experience in software development, I have participated in numerous projects from the initial idea phase to full product deployment.">
+                Xin chào! 
+                Tôi là Nguyen Trieu, một Web Developer với đam mê xây dựng các giải pháp công nghệ sáng tạo, hiệu quả và thực tiễn. 
+                Với hơn 8 năm kinh nghiệm trong lĩnh vực phát triển phần mềm, tôi đã tham gia nhiều dự án từ giai đoạn lên ý tưởng đến khi sản phẩm được triển khai hoàn chỉnh.
             </p>
-            <p class="text-gray-700 leading-relaxed mt-4" data-vi="Tôi luôn tìm kiếm cơ hội để học hỏi công nghệ mới và áp dụng chúng vào thực tế. Hiện tại, tôi đang tập trung vào việc xây dựng các ứng dụng web quy mô lớn với hiệu suất cao và trải nghiệm người dùng tối ưu." data-en="I am always looking for opportunities to learn new technologies and apply them in practice. Currently, I am focusing on building large-scale web applications with high performance and optimal user experience.">
-                Tôi luôn tìm kiếm cơ hội để học hỏi công nghệ mới và áp dụng chúng vào thực tế. 
-                Hiện tại, tôi đang tập trung vào việc xây dựng các ứng dụng web quy mô lớn với hiệu suất cao và trải nghiệm người dùng tối ưu.
+            <p class="text-gray-700 leading-relaxed mt-4" 
+            data-vi="Tôi luôn tìm kiếm cơ hội để học hỏi công nghệ mới và áp dụng vào thực tế, nhằm tạo ra các sản phẩm có giá trị và đáp ứng nhu cầu thực tiễn. 
+                Hiện tại, tôi đang tập trung vào việc phát triển các ứng dụng web quy mô lớn, chú trọng vào hiệu suất hệ thống và trải nghiệm người dùng tối ưu.
+                Nghiên cứu ứng dụng AI vào quy trình làm việc, nhằm nâng cao năng suất và tối ưu chất lượng đầu ra cho các sản phẩm phần mềm." 
+            data-en="I constantly seek opportunities to learn new technologies and apply them in real-world scenarios to create valuable products that meet practical needs. 
+                Currently, I am focusing on developing large-scale web applications, with an emphasis on system performance and optimal user experience.
+                I am also exploring the application of AI in development workflows to enhance productivity and optimize output quality for software products.">
+                Tôi luôn tìm kiếm cơ hội để học hỏi công nghệ mới và áp dụng vào thực tế, nhằm tạo ra các sản phẩm có giá trị và đáp ứng nhu cầu thực tiễn. 
+                Hiện tại, tôi đang tập trung vào việc phát triển các ứng dụng web quy mô lớn, chú trọng vào hiệu suất hệ thống và trải nghiệm người dùng tối ưu.
+                Nghiên cứu ứng dụng AI vào quy trình làm việc, nhằm nâng cao năng suất và tối ưu chất lượng đầu ra cho các sản phẩm phần mềm.
             </p>
         </div>
         <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
@@ -58,10 +70,16 @@
             <div class="flex flex-wrap gap-2">
                 <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
                     <i class="fab fa-php mr-1"></i>PHP</span>
-                <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Laravel</span>
+                <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-laravel mr-1"></i>Laravel</span>
                 <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                     <i class="fab fa-python mr-1"></i>Python</span>
-                <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Django</span>
+                <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-django mr-1"></i>Django</span>
+                <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-node-js mr-1"></i>Node.js</span>
+                <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-nest-js mr-1"></i>NestJS</span>
             </div>
         </div>
         
@@ -80,12 +98,12 @@
                     <i class="fab fa-js mr-1"></i>JavaScript</span>
                 <span class="skill-tag px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
                     <i class="fab fa-js mr-1"></i>jQuery</span>
-                {{-- <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                <span class="skill-tag px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                     <i class="fab fa-vuejs mr-1"></i>NuxtJS
                 </span>
                 <span class="skill-tag px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">
                     <i class="fab fa-react mr-1"></i>NextJS
-                </span> --}}
+                </span>
             </div>
         </div>
 
@@ -97,6 +115,9 @@
                 </span>
                 <span class="skill-tag px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
                     <i class="fas fa-shopping-cart mr-1"></i>EC-CUBE
+                </span>
+                <span class="skill-tag px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                    <i class="fab fa-shopify mr-1"></i>Shopify
                 </span>
             </div>
         </div>
