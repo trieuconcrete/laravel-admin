@@ -62,6 +62,11 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link menu-link" href="{{ route('admin.car-rental.index') }}">
+                        <i class="ri-suitcase-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.car_rental_management') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link menu-link" href="{{ route('admin.shipments.index') }}">
                         <i class="ri-route-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.shipment_management') }}</span>
                     </a>

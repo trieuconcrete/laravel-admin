@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\ShipmentController;
+use App\Http\Controllers\Admin\CarRentalController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PriceQuoteController;
 use App\Http\Controllers\Admin\ResetPasswordController;
@@ -47,6 +48,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::get('customers/{customer}/export-invoice', [CustomerController::class, 'exportInvoice'])->name('customers.export-invoice');
     Route::resource('contracts', ContractController::class);
     Route::resource('quotes', PriceQuoteController::class);
+    Route::resource('car-rental', CarRentalController::class);
     Route::resource('shipments', ShipmentController::class);
     Route::resource('salary', SalaryController::class);
     

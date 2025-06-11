@@ -6,6 +6,7 @@ return [
     'driver_management' => 'Driver Management',
     'vehicles_management' => 'Vehicles Management',
     'trips_management' => 'Trips Management',
+    'car_rental_management' => 'Car Rental Management',
     'settings' => 'Settings',
     'income_and_expense_management'  => 'Income and expense management'
 ];
