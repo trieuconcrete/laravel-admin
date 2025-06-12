@@ -231,6 +231,16 @@ server {
         index index.html;
         try_files $uri $uri/ =404;
     }
+
+    # Redirect /webdating → /webdating/
+    location = /webdating {
+        return 301 /webdating/;
+    }
+    location /webdating/ {
+        root /var/www/html/;
+        index index.html;
+        try_files $uri $uri/ =404;
+    }
 }
 ```
 
