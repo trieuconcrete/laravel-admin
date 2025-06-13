@@ -40,7 +40,7 @@
                             <div class="col-md-3">
                                 <select class="form-select" id="statusFilter" name="status">
                                     <option value="">Tất cả trạng thái</option>
-                                    @foreach ($quoteStatuses as $val => $label)
+                                    @foreach ($carRentalstatuses as $val => $label)
                                         <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
                                     @endforeach
                                 </select>
@@ -70,7 +70,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($quotes as $quote)
+                                @foreach ($carRentals as $carRental)
                                     <tr>
                                         <td>
                                             <div class="btn-group">
@@ -78,30 +78,30 @@
                                                     class="btn btn-sm btn-outline-primary btn-show-quote" 
                                                     data-bs-toggle="modal" 
                                                     data-bs-target="#detailModal"
-                                                    data-id="{{ $quote->id }}"
+                                                    data-id="{{ $carRental->id }}"
                                                 >
                                                     Chi tiết
                                                 </button>
                                                 <button type="button"
                                                         class="btn btn-sm btn-outline-danger delete-quote-btn"
-                                                        data-quote-id="{{ $quote->id }}">
+                                                        data-quote-id="{{ $carRental->id }}">
                                                     Xóa
                                                 </button>
                                                 
-                                                <form action="{{ route('admin.quotes.destroy', $quote) }}"
+                                                <form action="{{ route('admin.quotes.destroy', $carRental) }}"
                                                     method="POST"
                                                     class="delete-quote-form"
-                                                    id="delete-form-{{ $quote->id }}">
+                                                    id="delete-form-{{ $carRental->id }}">
                                                     @csrf
                                                     @method('DELETE')
                                                 </form>
                                             </div>
                                         </td>
-                                        <td>{{ optional($quote->customer)->name }}</td>
-                                        <td><span class="badge bg-{{ $quote->getStatusColorAttribute() }}">{{ $quote->getStatusLabelAttribute() }}</span></td>
-                                        <td>@formatDate($quote->pickup_datetime)</td>
-                                        <td>@formatDate($quote->valid_until)</td>
-                                        <td><a href="{{ optional(optional($quote->attachments)->first())->document_file_url }}" class="" target="_blank">File thuê xe excel</a></td>
+                                        <td>{{ optional($carRental->customer)->name }}</td>
+                                        <td>{{ number_format($carRental->calculateTotalMoney()) }}</td>
+                                        <td><span class="badge bg-{{ $carRental->getStatusColorAttribute() }}">{{ $carRental->getStatusLabelAttribute() }}</span></td>
+                                        <td>@formatDate($carRental->created_at)</td>
+                                        <td><a href="{{ $carRental->file }}" class="" target="_blank">File thuê xe excel</a></td>
                                     </tr>
 
                                 @endforeach
@@ -110,7 +110,7 @@
                     </div>
                 </div>
             </div>
-            {{ $quotes->links('vendor.pagination.bootstrap-5') }}
+            {{ $carRentals->links('vendor.pagination.bootstrap-5') }}
         </div> <!-- end col -->
     </div>
 
@@ -144,7 +144,7 @@
                             <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                             <select class="form-select" name="status">
                                 <option value="">Chọn loại thuê xe </option>
-                                @foreach ($quoteStatuses as $val => $label)
+                                @foreach ($carRentalstatuses as $val => $label)
                                     <option value="{{ $val }}">{{ $label }}</option>
                                 @endforeach
                             </select>
