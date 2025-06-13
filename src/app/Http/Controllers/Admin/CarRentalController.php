@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\Quote;
+use App\Models\CarRental;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\Interface\CustomerRepositoryInterface as CustomerRepository;
-use App\Http\Requests\Quote\UpdateQuoteRequest;
-use App\Services\QuoteService;
-use App\Http\Requests\Quote\StoreQuoteRequest;
+use App\Http\Requests\CarRental\UpdateCarRentalRequest;
+use App\Services\CarRentalService;
+use App\Http\Requests\CarRental\StoreCarRentalRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -16,11 +16,11 @@ class CarRentalController extends Controller
 {
     /**
      * Summary of __construct
-     * @param \App\Services\QuoteService $quoteService
+     * @param \App\Services\CarRentalService $carRentalService
      * @param \App\Repositories\Interface\CustomerRepositoryInterface $customerRepository
      */
     public function __construct(
-        protected QuoteService $quoteService,
+        protected CarRentalService $carRentalService,
         protected CustomerRepository $customerRepository
     ) {}
 
@@ -32,14 +32,10 @@ class CarRentalController extends Controller
     public function index(Request $request)
     {
         $customers = $this->customerRepository->all()->pluck('name', 'id');
-        $quoteStatuses = Quote::getStatuses();
-        $quotes = $this->quoteService->getFilteredQuotes($request->all());
+        $carRentals = CarRental::with('customer')->paginate(10);
+        $carRentalstatuses = CarRental::getStatuses();
 
-        return view('admin.car_rental.index', compact(
-            'customers',
-            'quoteStatuses',
-            'quotes'
-        ));
+        return view('admin.car_rental.index', compact('carRentals', 'carRentalstatuses', 'customers'));
     }
 
     /**
@@ -53,17 +49,16 @@ class CarRentalController extends Controller
 
     /**
      * Summary of store
-     * @param \App\Http\Requests\Quote\StoreQuoteRequest $request
+     * @param \App\Http\Requests\CarRental\StoreCarRentalRequest $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function store(StoreQuoteRequest $request)
+    public function store(StoreCarRentalRequest $request)
     {
         DB::beginTransaction();
         try {
-            $this->quoteService->store($request);
-
+            // Log the request data for debugging
             DB::commit();
-            return response()->json(['message' => 'Quote created successfully.'], 200);
+            return response()->json(['message' => 'CarRental created successfully.'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Vehicle creation failed', ['error' => $e->getMessage()]);
@@ -73,58 +68,53 @@ class CarRentalController extends Controller
 
     public function show($id)
     {
-        $quote = Quote::with(['customer', 'attachments'])->findOrFail($id);
-        $customers = $this->customerRepository->all()->pluck('name', 'id');
-        $quoteStatuses = Quote::getStatuses();
-    
+        $carRental = CarRental::with(['carRentalVehicles'])->findOrFail($id);
         if (request()->ajax()) {
-            return view('admin.car_rental.partials.detail', compact('quote', 'customers', 'quoteStatuses'))->render();
+            return view('admin.car_rental.partials.detail', compact('carRental'))->render();
         }
         
         return abort(404);    }
 
-    public function edit(Quote $contract)
+    public function edit(CarRental $carRental)
     {
-        return view('admin.car_rental.edit', compact('user'));
+        return view('admin.car_rental.edit', compact('carRental'));
     }
 
 
     /**
      * Summary of update
-     * @param \App\Http\Requests\Quote\UpdateQuoteRequest $request
-     * @param \App\Models\Quote $quote
+     * @param \App\Http\Requests\CarRental\UpdateCarRentalRequest $request
+     * @param \App\Models\CarRental $CarRental
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function update(UpdateQuoteRequest $request, Quote $quote)
+    public function update(UpdateCarRentalRequest $request, CarRental $CarRental)
     {
         DB::beginTransaction();
         try {
-            $this->quoteService->update($request, $quote);
-
+            // Log the request data for debugging
             DB::commit();
 
-            return response()->json(['message' => 'Quote update successfully.'], 200);
+            return response()->json(['message' => 'CarRental update successfully.'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Quote update failed', ['error' => $e->getMessage()]);
+            Log::error('CarRental update failed', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
         }
     }
 
     /**
      * Summary of destroy
-     * @param \App\Models\Quote $quote
+     * @param \App\Models\CarRental $CarRental
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(Quote $quote)
+    public function destroy(CarRental $carRental)
     {
         DB::beginTransaction();
         try {
-            $quote->histories()->delete();
-            $quote->attachments()->delete();
-            $quote->delete();
+            $carRental->carRentalVehicles()->delete();
+            $carRental->delete();
             DB::commit();
-            return back()->with('success', 'Quote deleted successfully.');
+            return back()->with('success', 'CarRental deleted successfully.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Vehicle creation failed', ['error' => $e->getMessage()]);
