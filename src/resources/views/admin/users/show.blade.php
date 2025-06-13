@@ -378,6 +378,10 @@
                                                             <i class="ri-file-excel-2-line me-1"></i>
                                                             Xuất Bảng Lương
                                                         </button>
+                                                        <button type="button" data-bs-toggle="modal" data-bs-target="#salaryAdvanceModal" class="btn btn-sm btn-primary d-inline-flex align-items-center" style="white-space: nowrap;">
+                                                            <i class="ri-currency-fill me-1"></i>
+                                                            Ứng Lương
+                                                        </button>
                                                     </form>
                                                 </div>
                                             </div>
@@ -564,6 +568,48 @@
 
 </div>
 <!-- container-fluid -->
+
+<!-- Add Car Rental Modal -->
+<div class="modal fade" id="salaryAdvanceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yêu cầu ứng lương</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <hr>
+            <form id="add-quote-form" enctype="multipart/form-data" action="{{ route('admin.quotes.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Số tiền ứng <span class="text-danger">*</span></label>
+                            <input class="form-control" rows="3" placeholder="Số tiền" name="amount" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                            <select class="form-select" name="status">
+                                <option value="pending">Chờ duyệt</option>
+                                <option value="approved">Đã duyệt</option>
+                                <option value="rejected">Từ chối</option>
+                                <option value="paid" selected>Đã thanh toán</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Lý do</label>
+                        <textarea class="form-control" rows="3" placeholder="Nhập lý do" name="reason"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Tạo </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @endsection
 

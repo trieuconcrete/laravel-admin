@@ -49,7 +49,8 @@ class User extends Authenticatable
         'profile_image',
         'address',
         'gender',
-        'notes'
+        'notes',
+        'salary_advance_amount'
     ];
 
     /**
