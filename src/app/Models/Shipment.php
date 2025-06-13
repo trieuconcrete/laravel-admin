@@ -340,4 +340,27 @@ class Shipment extends Model
             $subQuery->where('status', UserStatus::ACTIVE);
         })->whereNotNull('user_id')->first()->user ?? null;
     }
+
+    /**
+     * Summary of shipmentDeductionTypeDriverAndBusboy
+     * @param mixed $userId
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<ShipmentDeduction, Shipment>
+     */
+    public function shipmentDeductionTypeDriverAndBusboy($userId)
+    {
+        return $this->shipmentDeductions()->whereHas('shipmentDeductionType', function($query) {
+            $query->where('type', ShipmentDeductionType::TYPE_DRIVER_AND_BUSBOY);
+        })->where('user_id', $userId);
+    }
+
+    /**
+     * Summary of shipmentDeductionTypeExpense
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<ShipmentDeduction, Shipment>
+     */
+    public function shipmentDeductionTypeExpense()
+    {
+        return  $this->shipmentDeductions()->whereHas('shipmentDeductionType', function($query) {
+            $query->where('type', ShipmentDeductionType::TYPE_EXPENSE);
+        });
+    }
 }

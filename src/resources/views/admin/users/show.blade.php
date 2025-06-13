@@ -499,9 +499,6 @@
                                                     <td>
                                                         @if($detail['allowance'] > 0)
                                                             {{ number_format($detail['allowance']) }}
-                                                            @if($detail['allowance_note'])
-                                                                <small class="text-muted">{{ $detail['allowance_note'] }}</small>
-                                                            @endif
                                                         @else
                                                             -
                                                         @endif

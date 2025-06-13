@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Shipment;
 use App\Repositories\Interface\ShipmentRepositoryInterface;
+use App\Models\User;
 
 class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInterface
 {
@@ -48,5 +49,44 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
         return $query->with(['driver', 'vehicle', 'goods', 'shipmentDeductions.shipmentDeductionType'])
             ->orderByDesc('departure_time')
             ->paginate($perPage ?? $this->getPaginationLimit());
+    }
+
+    /**
+     * Get shipments for a user in a specific month and year
+     * 
+     * @param User $user
+     * @param int $month
+     * @param int $year
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getUserShipments(User $user, int $month, int $year)
+    {
+        return Shipment::whereHas('shipmentDeductions', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->whereMonth('departure_time', $month)
+            ->whereYear('departure_time', $year)
+            ->with(['shipmentDeductions', 'shipmentDeductions.shipmentDeductionType'])
+            ->orderBy('departure_time')
+            ->get();
+    }
+    
+    /**
+     * Get shipments for a user between specific dates
+     * 
+     * @param User $user
+     * @param \Carbon\Carbon $startDate
+     * @param \Carbon\Carbon $endDate
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getUserShipmentsByDateRange(User $user, $startDate, $endDate)
+    {
+        return Shipment::whereHas('shipmentDeductions', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->whereBetween('departure_time', [$startDate, $endDate])
+            ->with(['shipmentDeductions', 'shipmentDeductions.shipmentDeductionType'])
+            ->orderBy('departure_time')
+            ->get();
     }
 }

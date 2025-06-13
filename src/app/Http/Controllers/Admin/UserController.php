@@ -23,6 +23,7 @@ use App\Enum\UserStatus as EnumUserStatus;
 use App\Http\Requests\User\UpdateUserRequest;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Summary of UserController
@@ -44,36 +45,26 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::query();
-
-        if ($request->filled('search')) {
-            $query->where('full_name', 'like', '%' . $request->search . '%')
-                ->orWhere('email', 'like', '%' . $request->search . '%')
-                ->orWhere('employee_code', 'like', '%' . $request->search . '%');
-        }
-
-        if ($request->filled('position_id')) {
-            $query->where('position_id', $request->position_id);
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        $users = $query->where('id', '!=', auth()->user()->id)
-            ->whereNull('deleted_at')
-            ->latest()
-            ->paginate(10);
-        $positions = Position::pluck('name', 'id');
-        $licenses = DriverLicense::getCarLicenseTypes();
-        $statuses = EnumUserStatus::options();
+        // Prepare filters from request
+        $filters = [
+            'search' => $request->search,
+            'position_id' => $request->position_id,
+            'status' => $request->status,
+            'exclude_current_user' => Auth::id()
+        ];
         
-        return view('admin.users.index', compact([
-            'users',
-            'positions', 
-            'licenses',
-            'statuses'
-        ]));
+        // Get users with filters
+        $users = $this->userService->getUsersWithFilters($filters, 10);
+        
+        // Get data for listing page
+        $listingData = $this->userService->getUserListingData();
+        
+        return view('admin.users.index', [
+            'users' => $users,
+            'positions' => $listingData['positions'],
+            'licenses' => $listingData['licenses'],
+            'statuses' => $listingData['statuses']
+        ]);
     }
 
     /**
@@ -115,6 +106,8 @@ class UserController extends Controller
     public function show(User $user, Request $request)
     {
         $this->authorize('view', $user);
+        
+        // Get reference data
         $positions = Position::pluck('name', 'id');
         $licenses = DriverLicense::getCarLicenseTypes();
         $statuses = EnumUserStatus::options();
@@ -122,65 +115,12 @@ class UserController extends Controller
         
         // Get selected month or default to current month
         $selectedMonth = $request->get('month', now()->format('m/Y'));
-        list($month, $year) = explode('/', $selectedMonth);
         
-        // Get shipments for the user (as driver or co-driver) for the selected month
-        $shipments = Shipment::whereHas('shipmentDeductions', function($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->whereMonth('departure_time', $month)
-            ->whereYear('departure_time', $year)
-            ->with(['shipmentDeductions', 'shipmentDeductions.shipmentDeductionType'])
-            ->orderBy('departure_time')
-            ->get();
-            
-        // Calculate salary details
-        $salaryBase = $user->salary_base ?? 0;
-        $totalAllowance = 0;
-        $totalExpenses = 0;
-        $insuranceDeduction = 0;
-        $salaryDetails = [];
+        // Get salary details from service
+        $salaryData = $this->userService->getSalaryDetails($user, $selectedMonth);
         
-        // Process shipment deductions for salary calculation
-        foreach ($shipments as $shipment) {
-            $shipmentAllowance = 0;
-            $shipmentAmount = 0;
-            $notes = '';
-            foreach ($shipment->shipmentDeductions as $deduction) {
-                if ($deduction->user_id == $user->id) {
-                    // Check if this is an allowance (driver_and_busboy) or expense
-                    if ($deduction->shipmentDeductionType && $deduction->shipmentDeductionType->type == ShipmentDeductionType::TYPE_DRIVER_AND_BUSBOY) {
-                        $shipmentAllowance += $deduction->amount;
-                        $totalAllowance += $deduction->amount;
-                        $notes = $deduction->notes;
-                    } else if ($deduction->shipmentDeductionType && $deduction->shipmentDeductionType->type == ShipmentDeductionType::TYPE_EXPENSE) {
-                        $shipmentAmount += $deduction->amount;
-                        $totalExpenses += $deduction->amount; // Add to total expenses
-                    }
-                }
-            }
-            
-            // Add to salary details if there's an amount or allowance
-            if ($shipmentAmount > 0 || $shipmentAllowance > 0) {
-                $salaryDetails[] = [
-                    'shipment_id' => $shipment->id,
-                    'shipment_code' => $shipment->shipment_code,
-                    'date' => $shipment->departure_time,
-                    'amount' => $shipmentAmount,
-                    'allowance' => $shipmentAllowance,
-                    'allowance_note' => $notes,
-                    'status' => $shipment->status_label,
-                    'notes' => $shipment->notes
-                ];
-            }
-        }
-        
-        // Calculate insurance deduction (10% of total: salary base + allowances + expenses)
-        $totalBeforeInsurance = $salaryBase + $totalAllowance + $totalExpenses;
-        $insuranceDeduction = $totalBeforeInsurance * 0.1; // 10% of total
-        
-        // Calculate total salary - updated formula
-        $totalSalary = $totalBeforeInsurance - $insuranceDeduction;
+        // Extract data from service response
+        extract($salaryData);
         
         return view('admin.users.show', compact(
             'user', 'positions', 'licenses', 'statuses', 'licenseStatuses',
@@ -264,27 +204,8 @@ class UserController extends Controller
         
         // Lấy tháng được chọn hoặc mặc định là tháng hiện tại
         $selectedMonth = $request->get('month', now()->format('m/Y'));
-        list($month, $year) = explode('/', $selectedMonth);
         
-        // Format month for query
-        $formattedMonth = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT);
-        
-        // Get shipments for the user for the selected month
-        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
-        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
-        
-        $shipments = Shipment::whereHas('shipmentDeductions', function($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->whereBetween('departure_time', [$startDate, $endDate])
-            ->with(['shipmentDeductions', 'shipmentDeductions.shipmentDeductionType'])
-            ->orderBy('departure_time')
-            ->get();
-        
-        // Tạo tên file
-        $timestamp = Carbon::now()->format('Ymd_His');
-        $fileName = 'bangluong_' . $user->employee_code . '_' . $month . '_' . $year . '_' . $timestamp . '.xlsx';
-        
-        return Excel::download(new SalaryExport($user, $shipments, $formattedMonth), $fileName);
+        // Use service to handle export logic
+        return $this->userService->exportUserSalary($user, $selectedMonth);
     }
 }
