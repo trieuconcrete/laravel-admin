@@ -3,6 +3,7 @@
 namespace App\Repositories\Eloquent;
 
 use App\Models\User;
+use App\Models\Shipment;
 use App\Repositories\Interface\UserRepositoryInterface;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
@@ -42,10 +43,49 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     /**
      * Summary of getUserByConditions
      * @param array $conditions
-     * @return \Illuminate\Database\Eloquent\Collection<int, TModel>
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getUserByConditions(array $conditions = [])
     {
         return $this->model->where($conditions)->get();
+    }
+
+    /**
+     * Summary of getUsersWithFilters
+     * @param array $filters
+     * @param mixed $perPage
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
+    public function getUsersWithFilters(array $filters = [], ?int $perPage = 10) 
+    {
+        $query = $this->model->query();
+
+        // Apply search filter
+        if (!empty($filters['search'])) {
+            $query->where(function($q) use ($filters) {
+                $q->where('full_name', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('email', 'like', '%' . $filters['search'] . '%')
+                  ->orWhere('employee_code', 'like', '%' . $filters['search'] . '%');
+            });
+        }
+
+        // Apply position filter
+        if (!empty($filters['position_id'])) {
+            $query->where('position_id', $filters['position_id']);
+        }
+
+        // Apply status filter
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Exclude current user and deleted users
+        if (!empty($filters['exclude_current_user'])) {
+            $query->where('id', '!=', $filters['exclude_current_user']);
+        }
+        
+        $query->whereNull('deleted_at');
+        
+        return $query->latest()->paginate($perPage);
     }
 }

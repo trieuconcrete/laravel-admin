@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Interface;
 
+use App\Models\User;
+
 interface UserRepositoryInterface extends BaseRepositoryInterface
 {
     public function getUsers();
@@ -13,7 +15,15 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
     /**
      * Summary of getUserByConditions
      * @param array $conditions
-     * @return \Illuminate\Database\Eloquent\Collection<int, TModel>
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getUserByConditions(array $conditions = []);
+
+    /**
+     * Summary of getUsersWithFilters
+     * @param array $filters
+     * @param mixed $perPage
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
+    public function getUsersWithFilters(array $filters = [], ?int $perPage = 10);
 }
