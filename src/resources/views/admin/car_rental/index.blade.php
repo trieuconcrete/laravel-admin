@@ -174,14 +174,14 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <label class="form-label mb-0">Danh sách xe thuê</label>
                                 <button type="button" class="btn btn-sm btn-outline-primary" id="addGoodBtn">
-                                    <i class="fas fa-plus me-1"></i>Thêm xe
+                                    <i class="fas fa-plus me-1"></i>Thêm phương tiện
                                 </button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table table-sm" id="vehiclesTable">
                                     <thead>
                                         <tr>
-                                            <th width="200">Xe <span class="text-danger">*</span></th>
+                                            <th width="200">Phương tiện <span class="text-danger">*</span></th>
                                             <th width="250">Tên hàng</th>
                                             <th width="120">Đơn vị</th>
                                             <th width="50">Số lượng</th>
