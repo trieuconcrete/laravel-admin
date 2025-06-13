@@ -210,7 +210,7 @@ function addGoodRow(goodsTable, goodsCount) {
             <div class="text-danger" id="error-goods-${goodsCount}-weight"></div>
         </td>
         <td>
-            <input type="number" name="goods[${goodsCount}][unit]" class="form-control form-control-sm unit-input">
+            <input type="text" name="goods[${goodsCount}][unit]" class="form-control form-control-sm unit-input">
             <div class="text-danger" id="error-goods-${goodsCount}-unit"></div>
         </td>
         <td>
@@ -220,8 +220,9 @@ function addGoodRow(goodsTable, goodsCount) {
     `;
     goodsTable.appendChild(row);
     
-    // Thêm event listener cho các trường số mới thêm vào
-    addNumericInputListeners(row.querySelectorAll('input[type="number"]'));
+    // Thêm event listener cho các trường số mới thêm vào (không bao gồm unit-input)
+    const numericInputs = row.querySelectorAll('input[type="number"]:not(.unit-input)');
+    addNumericInputListeners(numericInputs);
     
     // Apply VND formatting cho các unit input mới thêm vào
     const unitInputs = row.querySelectorAll('.unit-input');
@@ -250,7 +251,7 @@ function addGoodRow(goodsTable, goodsCount) {
                     }
                 }
                 
-                // Limit to 9 digits
+                // Allow up to 9 digits for the unit input
                 if (value.length > 9) {
                     value = value.substring(0, 9);
                 }
@@ -527,10 +528,46 @@ function validateShipmentForm(form) {
 function initShipmentForm(initialDriverCount) {
     driverRowCount = initialDriverCount;
     
-    // Thêm event listener cho tất cả các trường số hiện có
-    document.querySelectorAll('input[type="number"]').forEach(input => {
+    // Thêm event listener cho tất cả các trường số hiện có (ngoại trừ unit-input)
+    document.querySelectorAll('input[type="number"]:not(.unit-input)').forEach(input => {
         input.addEventListener('input', function() {
             this.value = this.value.replace(/[^0-9.]/g, '');
+        });
+    });
+    
+    // Thêm event listener cho các unit input hiện có
+    document.querySelectorAll('.unit-input').forEach(input => {
+        input.addEventListener('input', function() {
+            // Fallback if the global function is not available
+            let value = this.value;
+            
+            // Remove non-numeric characters and handle decimal part
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // If there's a decimal part, handle it
+            if (value.includes('.')) {
+                // Split into integer and decimal parts
+                let parts = value.split('.');
+                // If decimal part is .00, remove it completely
+                if (parts[1] === '00' || parts[1] === '0') {
+                    value = parts[0];
+                } else {
+                    // Otherwise keep only integer part
+                    value = parts[0];
+                }
+            }
+            
+            // Allow up to 9 digits for the unit input
+            if (value.length > 9) {
+                value = value.substring(0, 9);
+            }
+            
+            // Format with commas
+            if (value) {
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+            
+            this.value = value;
         });
     });
     

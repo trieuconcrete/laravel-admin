@@ -38,6 +38,7 @@ Route::get('/login', function () {
 Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', UserController::class);
     Route::get('users-export', [UserController::class, 'export'])->name('users.export');
+    Route::get('users/{user}/export-salary', [UserController::class, 'exportSalary'])->name('users.export-salary');
 
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update');

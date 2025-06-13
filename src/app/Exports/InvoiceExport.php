@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Customer;
 use App\Models\Setting;
+use App\Models\ShipmentDeductionType;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -76,8 +77,8 @@ class InvoiceExport implements WithTitle, WithStyles, ShouldAutoSize
         // Add invoice title
         $sheet->setCellValue('A5', 'BẢNG KÊ VẬN CHUYỂN');
         $sheet->setCellValue('A6', '(Tháng: ' . $monthName . ')');
-        $sheet->mergeCells('A5:H5');
-        $sheet->mergeCells('A6:H6');
+        $sheet->mergeCells('A5:K5');
+        $sheet->mergeCells('A6:K6');
         $sheet->getStyle('A5')->getFont()->setBold(true)->setSize(16);
         $sheet->getStyle('A6')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A5:A6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -101,15 +102,15 @@ class InvoiceExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->getStyle('H9:H11')->getFont()->setBold(true);
         
         // Table headers - Row 13
-        $headers = ['STT', 'Ngày', 'Điểm đi', 'Điểm đến', 'Số chuyến', 'Khối lượng (kg)', 'Đơn giá', 'Phụ thu', 'Thành tiền', 'Ghi chú'];
-        $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+        $headers = ['STT', 'Ngày', 'Điểm đi', 'Điểm đến', 'Số chuyến', 'Khối lượng (kg)', 'Đơn giá', 'Phụ thu', 'Thành tiền', 'Ghi chú', 'XE'];
+        $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'];
         
         foreach ($columns as $index => $column) {
             $sheet->setCellValue($column . '13', $headers[$index]);
         }
         
         // Style the header row
-        $sheet->getStyle('A13:J13')->applyFromArray([
+        $sheet->getStyle('A13:K13')->applyFromArray([
             'font' => [
                 'bold' => true,
             ],
@@ -129,7 +130,8 @@ class InvoiceExport implements WithTitle, WithStyles, ShouldAutoSize
         ]);
         
         // Set column widths
-        $sheet->getColumnDimension('A')->setWidth(5);  // STT - narrow
+        $sheet->getColumnDimension('A')->setAutoSize(false);
+        $sheet->getColumnDimension('A')->setWidth(5);  // STT - extremely narrow
         $sheet->getColumnDimension('B')->setWidth(12); // Ngày
         $sheet->getColumnDimension('C')->setWidth(15); // Điểm đi
         $sheet->getColumnDimension('D')->setWidth(15); // Điểm đến
@@ -139,12 +141,14 @@ class InvoiceExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->getColumnDimension('H')->setWidth(12); // Phụ thu
         $sheet->getColumnDimension('I')->setWidth(15); // Thành tiền
         $sheet->getColumnDimension('J')->setWidth(20); // Ghi chú
+        $sheet->getColumnDimension('K')->setWidth(15); // XE
         
         // Add data rows starting from row 14
         $row = 14;
         $totalAmount = 0;
         
         foreach ($this->shipments as $index => $shipment) {
+            // dd($shipment);
             $sheet->setCellValue('A' . $row, $index + 1);
             $sheet->setCellValue('B' . $row, $shipment['departure_time']);
             $sheet->setCellValue('C' . $row, $shipment['origin']);
@@ -155,6 +159,7 @@ class InvoiceExport implements WithTitle, WithStyles, ShouldAutoSize
             $sheet->setCellValue('H' . $row, $shipment['combined_fees'] ?? 0); // Phụ thu
             $sheet->setCellValue('I' . $row, $shipment['total_amount']);
             $sheet->setCellValue('J' . $row, $shipment['notes']);
+            $sheet->setCellValue('K' . $row, $shipment['plate_number']);
             
             $totalAmount += $shipment['total_amount'];
             $row++;
@@ -176,7 +181,7 @@ class InvoiceExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->setCellValue('I' . ($summaryStartRow + 2), $grandTotal);
         
         // Style the data rows including summary rows
-        $dataRange = 'A14:J' . ($summaryStartRow + 2);
+        $dataRange = 'A14:K' . ($summaryStartRow + 2);
         $sheet->getStyle($dataRange)->applyFromArray([
             'borders' => [
                 'allBorders' => [
@@ -210,6 +215,8 @@ class InvoiceExport implements WithTitle, WithStyles, ShouldAutoSize
             for ($col = 'A'; $col < 'H'; $col++) {
                 $sheet->setCellValue($col . ($summaryStartRow + $i), '');
             }
+            // Also clear K column in summary rows
+            $sheet->setCellValue('K' . ($summaryStartRow + $i), '');
         }
         
         // Add signature section

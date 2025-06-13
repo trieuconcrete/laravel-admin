@@ -74,7 +74,7 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
                 $query->with(['shipmentDeductionType' => function ($query) {
                     $query->where('type', ShipmentDeductionType::TYPE_EXPENSE);
                 }]);
-            }])
+            }, 'vehicle'])
             ->get();
     }
 }

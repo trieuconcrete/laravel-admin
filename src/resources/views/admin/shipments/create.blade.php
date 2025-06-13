@@ -215,7 +215,7 @@
                                                                             @error('goods.'.$i.'.weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                                         </td>
                                                                         <td>
-                                                                            <input type="number" name="goods[{{ $i }}][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.'.$i.'.unit', $good['unit'] ?? '') }}">
+                                                                            <input type="text" name="goods[{{ $i }}][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.'.$i.'.unit', $good['unit'] ?? '') }}">
                                                                             @error('goods.'.$i.'.unit')<span class="text-danger">{{ $message }}</span>@enderror
                                                                         </td>
                                                                         <td>
@@ -242,7 +242,7 @@
                                                                         <div class="text-danger" id="error-goods-0-weight">@error('goods.0.weight'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="number" name="goods[0][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.0.unit') }}">
+                                                                        <input type="text" name="goods[0][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.0.unit') }}">
                                                                         <div class="text-danger" id="error-goods-0-unit">@error('goods.0.unit'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>

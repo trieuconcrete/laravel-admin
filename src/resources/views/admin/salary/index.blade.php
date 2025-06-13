@@ -16,70 +16,6 @@
                 <!--end col-->
             </div>
 
-            <!-- Dashboard Cards -->
-            <div class="row mb-4">
-                <div class="col-md-6 col-lg-3 mb-3">
-                    <div class="card card-dashboard h-100" style="border-left-color: #4e73df;">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <div class="text-muted">Tổng nhân viên</div>
-                                    <h4 class="mt-2">78</h4>
-                                </div>
-                                <div>
-                                    <i class="ri-team-fill fs-1 text-muted"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3 mb-3">
-                    <div class="card card-dashboard h-100" style="border-left-color: #1cc88a;">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <div class="text-muted">Tổng lương đã trả (T4/2025)</div>
-                                    <h4 class="mt-2">1.25 tỷ</h4>
-                                </div>
-                                <div>
-                                    <i class="ri-currency-fill fs-1 text-success"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3 mb-3">
-                    <div class="card card-dashboard h-100" style="border-left-color: #f6c23e;">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <div class="text-muted">Lương chờ xử lý</div>
-                                    <h4 class="mt-2">268 triệu</h4>
-                                </div>
-                                <div>
-                                    <i class="ri-time-fill fs-1 text-warning"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3 mb-3">
-                    <div class="card card-dashboard h-100" style="border-left-color: #e74a3b;">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <div class="text-muted">Chi phí lương TB/nhân viên</div>
-                                    <h4 class="mt-2">16.8 triệu</h4>
-                                </div>
-                                <div>
-                                    <i class="ri-line-chart-fill fs-1 text-danger"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Charts & Statistics -->
             <div class="row mb-4">
                 <div class="col-lg-4 mb-4">
@@ -98,26 +34,19 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        @forelse($departmentStats as $dept)
+                                        @if($dept['code'] != \App\Models\Position::POSITION_GD)
                                         <tr>
-                                            <td>Tài xế</td>
-                                            <td>42</td>
-                                            <td>680 triệu</td>
+                                            <td>{{ $dept['name'] }}</td>
+                                            <td>{{ $dept['count'] }}</td>
+                                            <td>{{ number_format($dept['total_salary'], 0, ',', '.') }} ₫</td>
                                         </tr>
+                                        @endif
+                                        @empty
                                         <tr>
-                                            <td>Kỹ thuật</td>
-                                            <td>15</td>
-                                            <td>320 triệu</td>
+                                            <td colspan="3" class="text-center">Không có dữ liệu bộ phận</td>
                                         </tr>
-                                        <tr>
-                                            <td>Quản lý</td>
-                                            <td>8</td>
-                                            <td>240 triệu</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Văn phòng</td>
-                                            <td>13</td>
-                                            <td>278 triệu</td>
-                                        </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
@@ -130,8 +59,112 @@
                             <h6 class="mb-0">Biểu đồ chi phí lương theo tháng</h6>
                         </div>
                         <div class="card-body">
-                            <div id="column_chart_datalabel" data-colors='["--vz-primary"]' class="apex-charts" dir="ltr"></div>
+                            <div id="salary_monthly_chart" data-colors='["--vz-primary"]' class="apex-charts" dir="ltr"></div>
                         </div>
+                        
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Chart data
+                            var chartData = @json($chartData);
+                            
+                            // Prepare series and categories
+                            var months = [];
+                            var salaryData = [];
+                            
+                            chartData.forEach(function(item) {
+                                months.push(item.month);
+                                salaryData.push(Math.round(item.total / 1000000)); // Convert to millions for better display
+                            });
+                            
+                            // Chart options
+                            var options = {
+                                chart: {
+                                    height: 350,
+                                    type: 'bar',
+                                    toolbar: {
+                                        show: false
+                                    }
+                                },
+                                plotOptions: {
+                                    bar: {
+                                        dataLabels: {
+                                            position: 'top'
+                                        },
+                                        columnWidth: '40%',
+                                    }
+                                },
+                                dataLabels: {
+                                    enabled: true,
+                                    formatter: function(val) {
+                                        return val + ' triệu';
+                                    },
+                                    offsetY: -20,
+                                    style: {
+                                        fontSize: '12px',
+                                        colors: ["#304758"]
+                                    }
+                                },
+                                series: [{
+                                    name: 'Tổng lương',
+                                    data: salaryData
+                                }],
+                                xaxis: {
+                                    categories: months,
+                                    position: 'bottom',
+                                    axisBorder: {
+                                        show: false
+                                    },
+                                    axisTicks: {
+                                        show: false
+                                    },
+                                    crosshairs: {
+                                        fill: {
+                                            type: 'gradient',
+                                            gradient: {
+                                                colorFrom: '#D8E3F0',
+                                                colorTo: '#BED1E6',
+                                                stops: [0, 100],
+                                                opacityFrom: 0.4,
+                                                opacityTo: 0.5,
+                                            }
+                                        }
+                                    },
+                                    tooltip: {
+                                        enabled: true,
+                                    }
+                                },
+                                yaxis: {
+                                    axisBorder: {
+                                        show: false
+                                    },
+                                    axisTicks: {
+                                        show: false,
+                                    },
+                                    labels: {
+                                        show: true,
+                                        formatter: function(val) {
+                                            return val + ' triệu';
+                                        }
+                                    }
+                                },
+                                title: {
+                                    text: 'Chi phí lương theo tháng (triệu đồng)',
+                                    floating: false,
+                                    offsetY: 0,
+                                    align: 'center',
+                                    style: {
+                                        color: '#444',
+                                        fontWeight: '500',
+                                    }
+                                },
+                                colors: ['#4e73df']
+                            };
+                            
+                            // Initialize chart
+                            var chart = new ApexCharts(document.querySelector("#salary_monthly_chart"), options);
+                            chart.render();
+                        });
+                        </script>
                     </div>
                 </div>
             </div>
@@ -139,56 +172,47 @@
             <!-- Filter Section -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <div class="row g-3">
+                    <form action="{{ route('admin.salary.index') }}" method="GET">
+                        <div class="row g-3">
                         <div class="col-md-3">
-                            <select class="form-select" id="periodFilter">
-                                <option value="">Kỳ lương: Tất cả</option>
-                                <option value="1" selected>Tháng 4/2025</option>
-                                <option value="2">Tháng 3/2025</option>
-                                <option value="3">Tháng 2/2025</option>
+                            <select class="form-select" id="periodFilter" name="month">
+                                @php
+                                    $currentMonth = Carbon\Carbon::now();
+                                    // Generate last 12 months
+                                    for($i = 0; $i < 12; $i++) {
+                                        $monthOption = $currentMonth->copy()->subMonths($i)->format('m/Y');
+                                        $selected = $selectedMonth == $monthOption ? 'selected' : '';
+                                        echo "<option value=\"$monthOption\" $selected>Tháng $monthOption</option>";
+                                    }
+                                @endphp
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <select class="form-select" id="departmentFilter">
+                            <select class="form-select" id="departmentFilter" name="department">
                                 <option value="">Bộ phận: Tất cả</option>
-                                <option value="1">Tài xế</option>
-                                <option value="2">Kỹ thuật</option>
-                                <option value="3">Quản lý</option>
-                                <option value="4">Văn phòng</option>
+                                @foreach($departmentStats as $dept)
+                                <option value="{{ $dept['name'] }}" {{ request('department') == $dept['name'] ? 'selected' : '' }}>{{ $dept['name'] }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-md-4">
                             <div class="input-group">
-                                <input type="text" class="form-control" placeholder="Tìm kiếm nhân viên...">
+                                <input type="text" class="form-control" name="search" value="{{ request('search') }}" placeholder="Tìm kiếm nhân viên...">
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <button class="btn btn-outline-primary w-100">
+                            <button type="submit" class="btn btn-outline-primary w-100">
                                 <i class="ri-search-line"></i>  Tìm kiếm
                             </button>
                         </div>
+                        </div>
+                    </form>
                     </div>
                 </div>
             </div>
 
             <!-- Salary Table -->
             <div class="card">
-                <div class="card-header bg-white">
-                    <ul class="nav nav-tabs card-header-tabs">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#">Tất cả bảng lương</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Đã thanh toán</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Đang chờ duyệt</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">Chưa thanh toán</a>
-                        </li>
-                    </ul>
-                </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
@@ -200,113 +224,51 @@
                                     <th>Bộ phận</th>
                                     <th>Lương cơ bản</th>
                                     <th>Phụ cấp</th>
-                                    <th>Thưởng</th>
-                                    <th>Khấu trừ</th>
+                                    <th>Chi phí chuyến hàng</th>
+                                    <th>Tổng trước BHXH</th>
+                                    <th>BHXH (10%)</th>
                                     <th>Tổng lương</th>
-                                    <th>Trạng thái</th>
+                                    {{--  <th>Trạng thái</th>  --}}
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
+                                @forelse($salaries as $salary)
+                                <tr data-period="{{ $selectedMonth }}" data-status="{{ $salary['status'] }}">
                                     <td>
                                         <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewSalaryModal">
+                                            <a href="{{ route('admin.users.show', ['user' => $salary['user_id']]) }}" class="btn btn-sm btn-outline-primary">
                                                 Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
+                                            </a>
                                         </div>
                                     </td>
-                                    <td>NV001</td>
-                                    <td>Nguyễn Văn A</td>
-                                    <td>Tài xế</td>
-                                    <td>15,000,000 ₫</td>
-                                    <td>3,000,000 ₫</td>
-                                    <td>2,500,000 ₫</td>
-                                    <td>1,200,000 ₫</td>
-                                    <td>19,300,000 ₫</td>
-                                    <td><span class="status-indicator status-paid text-success">Đã thanh toán</span></td>
+                                    <td>{{ $salary['employee_code'] }}</td>
+                                    <td>{{ $salary['name'] }}</td>
+                                    <td>{{ $salary['department'] }}</td>
+                                    <td>{{ number_format($salary['base_salary']) }} ₫</td>
+                                    <td>{{ number_format($salary['allowance']) }} ₫</td>
+                                    <td>{{ number_format($salary['shipment_earnings']) }} ₫</td>
+                                    <td>{{ number_format($salary['base_salary'] + $salary['allowance'] + $salary['shipment_earnings']) }} ₫</td>
+                                    <td>{{ number_format($salary['insurance']) }} ₫</td>
+                                    <td>{{ number_format($salary['total']) }} ₫</td>
+                                    {{--  <td>
+                                        @if($salary['status'] == 'paid')
+                                            <span class="status-indicator status-paid text-success badge bg-success-subtle">Đã thanh toán</span>
+                                        @elseif($salary['status'] == 'pending')
+                                            <span class="status-indicator status-pending text-warning badge bg-warning-subtle">Chờ duyệt</span>
+                                        @else
+                                            <span class="status-indicator status-unpaid text-danger badge bg-danger-subtle">Chưa thanh toán</span>
+                                        @endif
+                                    </td>  --}}
                                 </tr>
+                                @empty
                                 <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewSalaryModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>NV015</td>
-                                    <td>Trần Thị B</td>
-                                    <td>Văn phòng</td>
-                                    <td>18,000,000 ₫</td>
-                                    <td>2,000,000 ₫</td>
-                                    <td>1,500,000 ₫</td>
-                                    <td>800,000 ₫</td>
-                                    <td>20,700,000 ₫</td>
-                                    <td><span class="status-indicator status-paid text-success"> Đã thanh toán</span></td>
+                                    <td colspan="10" class="text-center">Không có dữ liệu lương</td>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewSalaryModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>NV032</td>
-                                    <td>Phạm Văn C</td>
-                                    <td>Kỹ thuật</td>
-                                    <td>20,000,000 ₫</td>
-                                    <td>2,500,000 ₫</td>
-                                    <td>0 ₫</td>
-                                    <td>1,500,000 ₫</td>
-                                    <td>21,000,000 ₫</td>
-                                    <td><span class="status-indicator status-pending text-warning"> Chờ duyệt</span></td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#viewSalaryModal">
-                                                Chi tiết
-                                            </button>
-                                            <button class="btn btn-sm btn-outline-danger">
-                                                Xóa
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td>NV048</td>
-                                    <td>Lê Thị D</td>
-                                    <td>Quản lý</td>
-                                    <td>25,000,000 ₫</td>
-                                    <td>5,000,000 ₫</td>
-                                    <td>3,000,000 ₫</td>
-                                    <td>2,200,000 ₫</td>
-                                    <td>30,800,000 ₫</td>
-                                    <td><span class="status-indicator status-unpaid text-danger">Chưa thanh toán</span></td>
-                                </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
-                    <nav>
-                        <ul class="pagination justify-content-end">
-                            <li class="page-item disabled">
-                                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
-                            </li>
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                            <li class="page-item">
-                                <a class="page-link" href="#">Sau</a>
-                            </li>
-                        </ul>
-                    </nav>
+                    {{ $users->appends(request()->query())->links() }}
                 </div>
             </div>
         </div> <!-- end col -->
@@ -319,28 +281,98 @@
 
 @push('scripts')
 <script>
-    $(document).ready(function () {
-        $('.delete-user-btn').click(function (e) {
+    $(document).ready(function() {
+        // Tab functionality
+        $('.nav-tabs .nav-link').click(function(e) {
             e.preventDefault();
-    
-            var form = $(this).closest('.delete-user-form');
-    
-            Swal.fire({
-                title: 'Bạn chắc chắn muốn xóa?',
-                // text: "Hành động này không thể hoàn tác!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Xóa',
-                cancelButtonText: 'Hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
-                }
-            });
+            const status = $(this).data('status');
+            
+            // Activate the clicked tab
+            $('.nav-tabs .nav-link').removeClass('active');
+            $(this).addClass('active');
+            
+            // Save active tab to localStorage
+            localStorage.setItem('activeSalaryTab', status);
+            
+            // Show all rows if 'all' is selected
+            if (status === 'all') {
+                $('tbody tr').show();
+            } else {
+                // Hide all rows first
+                $('tbody tr').hide();
+                
+                // Show only rows with matching status
+                $('tbody tr').each(function() {
+                    const rowStatus = $(this).find('.status-indicator').text().trim().toLowerCase();
+                    
+                    if (status === 'paid' && rowStatus === 'đã thanh toán') {
+                        $(this).show();
+                    } else if (status === 'pending' && rowStatus === 'chờ duyệt') {
+                        $(this).show();
+                    } else if (status === 'unpaid' && rowStatus === 'chưa thanh toán') {
+                        $(this).show();
+                    }
+                });
+            }
         });
+        
+        // Client-side search filtering
+        $('input[name="search"]').on('keyup', function() {
+            const searchText = $(this).val().toLowerCase();
+            
+            if (searchText.length > 0) {
+                $('tbody tr:visible').each(function() {
+                    const rowName = $(this).find('td:eq(2)').text().toLowerCase();
+                    const rowCode = $(this).find('td:eq(1)').text().toLowerCase();
+                    
+                    if (rowName.includes(searchText) || rowCode.includes(searchText)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+        });
+        
+        // Update tab counts
+        function updateTabCounts() {
+            const totalRows = $('tbody tr').length;
+            const paidRows = $('tbody tr').filter(function() {
+                return $(this).find('.status-paid').length > 0;
+            }).length;
+            const pendingRows = $('tbody tr').filter(function() {
+                return $(this).find('.status-pending').length > 0;
+            }).length;
+            const unpaidRows = $('tbody tr').filter(function() {
+                return $(this).find('.status-unpaid').length > 0;
+            }).length;
+            
+            $('#all-count').text(totalRows);
+            $('#paid-count').text(paidRows);
+            $('#pending-count').text(pendingRows);
+            $('#unpaid-count').text(unpaidRows);
+        }
+        
+        // Call on page load
+        updateTabCounts();
+        
+        // Restore active tab from localStorage if exists
+        const savedTab = localStorage.getItem('activeSalaryTab');
+        if (savedTab) {
+            $('.nav-tabs .nav-link[data-status="' + savedTab + '"]').click();
+        }
     });
+
+    function getChartColorsArray(t) {
+        if (null !== document.getElementById(t)) {
+            var e = document.getElementById(t).getAttribute("data-colors");
+            if (e) return (e = JSON.parse(e)).map(function(t) {
+                var e = t.replace(" ", "");
+                return -1 === e.indexOf(",") ? getComputedStyle(document.documentElement).getPropertyValue(e) || e : 2 == (t = t.split(",")).length ? "rgba(" + getComputedStyle(document.documentElement).getPropertyValue(t[0]) + "," + t[1] + ")" : e
+            });
+            console.warn("data-colors Attribute not found on:", t)
+        }
+    }
 
     function getChartColorsArray(t) {
         if (null !== document.getElementById(t)) {
