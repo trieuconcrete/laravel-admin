@@ -114,33 +114,33 @@
                 <div class="card-body">
                     <form action="{{ route('admin.shipments.index') }}" method="GET">
                         <div class="row g-3">
-                            <div class="col-md-3">
-                                <select class="form-select" name="status" onchange="this.form.submit()">
+                            <div class="col-md-2">
+                                <select class="form-select" name="status">
                                     <option value="">Tất cả trạng thái</option>
                                     @foreach($shipmentStatus as $key => $value)
                                         <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>{{ $value }}</option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="input-group">
                                     <span class="input-group-text">Từ</span>
                                     <input type="date" class="form-control" id="startDateFilter" name="departure_time" value="@formatDateForInput(request('departure_time'))">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <div class="input-group">
                                     <span class="input-group-text">Đến</span>
                                     <input type="date" class="form-control" id="endDateFilter" name="estimated_arrival_time" value="@formatDateForInput(request('estimated_arrival_time'))">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <div class="input-group">
                                     <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm mã chuyến, tuyến, tài xế..." value="{{ request('keyword') }}">
                                 </div>
                             </div>
-                            <div class="col-md-12 text-end">
-                                <button class="btn btn-outline-primary" type="submit">
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-primary w-100" type="submit">
                                     <i class="fas fa-filter me-2"></i>Tìm kiếm
                                 </button>
                             </div>

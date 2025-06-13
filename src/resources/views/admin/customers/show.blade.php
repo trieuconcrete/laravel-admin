@@ -77,11 +77,11 @@
                                     <div class="mb-3">
                                         <label class="form-label">Loại khách hàng: <span class="text-danger">*</span></label>
                                         <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="type" id="individualType" value="individual">
+                                            <input class="form-check-input" type="radio" name="type" id="individualType" value="individual" {{ $customer->type == \App\Models\Customer::TYPE_INDIVIDUAL ? 'checked' : '' }}>
                                             <label class="form-check-label" for="individualType">Cá nhân</label>
                                         </div>
                                         <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="type" id="businessType" value="business" checked>
+                                            <input class="form-check-input" type="radio" name="type" id="businessType" value="business" {{ $customer->type == \App\Models\Customer::TYPE_BUSINESS ? 'checked' : '' }}>
                                             <label class="form-check-label" for="businessType">Doanh nghiệp</label>
                                         </div>
                                     </div>

@@ -69,7 +69,8 @@ class CustomerService
                 'unit_price' => $shipment->unit_price,
                 'combined_fees' => $combinedFees,
                 'total_amount' => $totalAmount,
-                'notes' => $shipment->notes
+                'notes' => $shipment->notes,
+                'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : 'N/A'
             ];
         });
     }

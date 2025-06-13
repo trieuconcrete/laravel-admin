@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
 use App\Models\Position;
+use App\Models\Shipment;
+use App\Models\ShipmentDeductionType;
 use App\Exports\UserExport;
+use App\Exports\SalaryExport;
 use Illuminate\Http\Request;
 use App\Models\DriverLicense;
 use App\Http\Controllers\Controller;
@@ -106,17 +109,84 @@ class UserController extends Controller
     /**
      * Summary of show
      * @param \App\Models\User $user
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Contracts\View\View
      */
-    public function show(User $user)
+    public function show(User $user, Request $request)
     {
         $this->authorize('view', $user);
         $positions = Position::pluck('name', 'id');
         $licenses = DriverLicense::getCarLicenseTypes();
         $statuses = EnumUserStatus::options();
         $licenseStatuses = DriverLicense::getStatuses();
-
-        return view('admin.users.show', compact('user', 'positions', 'licenses', 'statuses', 'licenseStatuses'));
+        
+        // Get selected month or default to current month
+        $selectedMonth = $request->get('month', now()->format('m/Y'));
+        list($month, $year) = explode('/', $selectedMonth);
+        
+        // Get shipments for the user (as driver or co-driver) for the selected month
+        $shipments = Shipment::whereHas('shipmentDeductions', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->whereMonth('departure_time', $month)
+            ->whereYear('departure_time', $year)
+            ->with(['shipmentDeductions', 'shipmentDeductions.shipmentDeductionType'])
+            ->orderBy('departure_time')
+            ->get();
+            
+        // Calculate salary details
+        $salaryBase = $user->salary_base ?? 0;
+        $totalAllowance = 0;
+        $totalExpenses = 0;
+        $insuranceDeduction = 0;
+        $salaryDetails = [];
+        
+        // Process shipment deductions for salary calculation
+        foreach ($shipments as $shipment) {
+            $shipmentAllowance = 0;
+            $shipmentAmount = 0;
+            $notes = '';
+            foreach ($shipment->shipmentDeductions as $deduction) {
+                if ($deduction->user_id == $user->id) {
+                    // Check if this is an allowance (driver_and_busboy) or expense
+                    if ($deduction->shipmentDeductionType && $deduction->shipmentDeductionType->type == ShipmentDeductionType::TYPE_DRIVER_AND_BUSBOY) {
+                        $shipmentAllowance += $deduction->amount;
+                        $totalAllowance += $deduction->amount;
+                        $notes = $deduction->notes;
+                    } else if ($deduction->shipmentDeductionType && $deduction->shipmentDeductionType->type == ShipmentDeductionType::TYPE_EXPENSE) {
+                        $shipmentAmount += $deduction->amount;
+                        $totalExpenses += $deduction->amount; // Add to total expenses
+                    }
+                }
+            }
+            
+            // Add to salary details if there's an amount or allowance
+            if ($shipmentAmount > 0 || $shipmentAllowance > 0) {
+                $salaryDetails[] = [
+                    'shipment_id' => $shipment->id,
+                    'shipment_code' => $shipment->shipment_code,
+                    'date' => $shipment->departure_time,
+                    'amount' => $shipmentAmount,
+                    'allowance' => $shipmentAllowance,
+                    'allowance_note' => $notes,
+                    'status' => $shipment->status_label,
+                    'notes' => $shipment->notes
+                ];
+            }
+        }
+        
+        // Calculate insurance deduction (10% of total: salary base + allowances + expenses)
+        $totalBeforeInsurance = $salaryBase + $totalAllowance + $totalExpenses;
+        $insuranceDeduction = $totalBeforeInsurance * 0.1; // 10% of total
+        
+        // Calculate total salary - updated formula
+        $totalSalary = $totalBeforeInsurance - $insuranceDeduction;
+        
+        return view('admin.users.show', compact(
+            'user', 'positions', 'licenses', 'statuses', 'licenseStatuses',
+            'shipments', 'selectedMonth', 'salaryBase', 'totalAllowance', 
+            'totalExpenses', 'insuranceDeduction', 'totalSalary', 'salaryDetails'
+        ));
     }
 
     /**
@@ -179,5 +249,42 @@ class UserController extends Controller
         $fileName = 'users_' . $timestamp . '.xlsx';
 
         return Excel::download(new UserExport($users), $fileName);
+    }
+    
+    /**
+     * Xuất bảng lương của người dùng theo tháng
+     * 
+     * @param \App\Models\User $user
+     * @param \Illuminate\Http\Request $request
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportSalary(User $user, Request $request)
+    {
+        $this->authorize('view', $user);
+        
+        // Lấy tháng được chọn hoặc mặc định là tháng hiện tại
+        $selectedMonth = $request->get('month', now()->format('m/Y'));
+        list($month, $year) = explode('/', $selectedMonth);
+        
+        // Format month for query
+        $formattedMonth = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT);
+        
+        // Get shipments for the user for the selected month
+        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+        
+        $shipments = Shipment::whereHas('shipmentDeductions', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->whereBetween('departure_time', [$startDate, $endDate])
+            ->with(['shipmentDeductions', 'shipmentDeductions.shipmentDeductionType'])
+            ->orderBy('departure_time')
+            ->get();
+        
+        // Tạo tên file
+        $timestamp = Carbon::now()->format('Ymd_His');
+        $fileName = 'bangluong_' . $user->employee_code . '_' . $month . '_' . $year . '_' . $timestamp . '.xlsx';
+        
+        return Excel::download(new SalaryExport($user, $shipments, $formattedMonth), $fileName);
     }
 }

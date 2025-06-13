@@ -299,14 +299,18 @@
                         <!--end tab-pane-->
 
                         <div class="tab-pane" id="shipment" role="tabpanel">
-                            <div class="col-xxl-2 mb-5">
-                                <label for="salaryBase" class="form-label">Tháng</label>
-                                <select class="form-select">
-                                    @foreach(months_list() as $month)
-                                        <option value="{{ $month }}">{{ $month }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            <form action="{{ route('admin.users.show', $user->id) }}" method="GET" id="shipmentMonthForm">
+                                <input type="hidden" name="tab" value="shipment">
+                                <div class="col-xxl-2 mb-5">
+                                    <label for="month" class="form-label">Tháng</label>
+                                    <select class="form-select" name="month" id="month" onchange="document.getElementById('shipmentMonthForm').submit();">
+                                        @foreach(months_list() as $month)
+                                            <option value="{{ $month }}" {{ $selectedMonth == $month ? 'selected' : '' }}>{{ $month }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </form>
+                            
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead class="table-light">
@@ -318,88 +322,156 @@
                                             <th>Điểm đến</th>
                                             <th>Số tấn/chuyến</th>
                                             <th>Giá</th>
+                                            <th>Trạng thái</th>
                                             <th>Ghi chú</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>CH001</td>
-                                            <td>60LD 035.08</td>
-                                            <td>10/10/2025</td>
-                                            <td>CO</td>
-                                            <td>HANAM-TENMA-NASAN</td>
-                                            <td>8 T</td>
-                                            <td>{{ number_format(1000000) }}</td>
-                                            <td>Hoàn thành</td>
-                                        </tr>
-                                        <tr>
-                                            <td>CH002</td>
-                                            <td>60LD 035.08</td>
-                                            <td>10/10/2025</td>
-                                            <td>UZIN</td>
-                                            <td>6 DANH</td>
-                                            <td>14 T</td>
-                                            <td>{{ number_format(2300000) }}</td>
-                                            <td>Hoàn thành</td>
-                                        </tr>
-                                        <tr>
-                                            <td>CH002</td>
-                                            <td>60LD 035.08</td>
-                                            <td>11/10/2025</td>
-                                            <td>CO</td>
-                                            <td>SEOWANG</td>
-                                            <td>14 T</td>
-                                            <td>{{ number_format(1200000) }}</td>
-                                            <td>Hoàn thành</td>
-                                        </tr>
+                                        @if($shipments->count() > 0)
+                                            @foreach($shipments as $shipment)
+                                                <tr>
+                                                    <td>
+                                                        <a href="{{ route('admin.shipments.edit', $shipment->id) }}" class="text-primary">
+                                                            {{ $shipment->shipment_code }}
+                                                        </a>
+                                                    </td>
+                                                    <td>{{ $shipment->getDriverFromShipmentDeductions() ? $shipment?->getDriverFromShipmentDeductions()?->license_plate : 'N/A' }}</td>
+                                                    <td>@formatDate($shipment->departure_time)</td>
+                                                    <td>{{ $shipment->origin }}</td>
+                                                    <td>{{ $shipment->destination }}</td>
+                                                    <td>{{ $shipment->cargo_weight }} T</td>
+                                                    <td>{{ number_format($shipment->unit_price) }}</td>
+                                                    <td>
+                                                        <span class="badge {{ $shipment->status_badge_class }}">{{ $shipment->status_label }}</span>
+                                                    </td>
+                                                    <td>{{ $shipment->notes }}</td>
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td colspan="9" class="text-center">Không có chuyến hàng nào trong tháng này</td>
+                                            </tr>
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                         <!--end tab-pane-->
                         <div class="tab-pane" id="salary" role="tabpanel">
-                            <div class="row mb-5">
-                                <div class="col-xxl-2">
-                                    <div class="d-flex">
-                                        <div class="flex-shrink-0 text-start">
-                                            <h6 class="mb-1">Tháng</h6>
-                                            <select class="form-select">
-                                                @foreach(months_list() as $month)
-                                                    <option value="{{ $month }}">{{ $month }}</option>
-                                                @endforeach
-                                            </select>
+                            <div class="row mb-4">
+                                <div class="col-lg-6">
+                                    <div class="card">
+                                        <div class="card-header bg-soft-primary">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-grow-1">
+                                                    <h5 class="card-title mb-0">Bảng lương tháng</h5>
+                                                </div>
+                                                <div class="flex-shrink-0">
+                                                    <form action="{{ route('admin.users.show', $user->id) }}" method="GET" id="salaryMonthForm" class="d-flex align-items-center gap-2">
+                                                        <input type="hidden" name="tab" value="salary">
+                                                        <select class="form-select form-select-sm" name="month" id="salaryMonth" onchange="document.getElementById('salaryMonthForm').submit();">
+                                                            @foreach(months_list() as $month)
+                                                                <option value="{{ $month }}" {{ $selectedMonth == $month ? 'selected' : '' }}>{{ $month }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <button type="button" id="export-salary-btn" class="btn btn-sm btn-success d-inline-flex align-items-center" style="white-space: nowrap;">
+                                                            <i class="ri-file-excel-2-line me-1"></i>
+                                                            Xuất Bảng Lương
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <div class="table-responsive">
+                                                <table class="table table-borderless mb-0">
+                                                    <tbody>
+                                                        <tr class="border-bottom">
+                                                            <td class="fw-medium">Lương cơ bản</td>
+                                                            <td class="text-end">{{ number_format($salaryBase) }} đ</td>
+                                                        </tr>
+                                                        <tr class="border-bottom">
+                                                            <td class="fw-medium">Trợ cấp</td>
+                                                            <td class="text-end">{{ number_format($totalAllowance) }} đ</td>
+                                                        </tr>
+                                                        <tr class="border-bottom">
+                                                            <td class="fw-medium">Chi phí chuyến hàng</td>
+                                                            <td class="text-end">{{ number_format($totalExpenses) }} đ</td>
+                                                        </tr>
+                                                        <tr class="border-bottom bg-soft-light">
+                                                            <td class="fw-medium">Tổng trước khấu trừ</td>
+                                                            <td class="text-end fw-semibold">{{ number_format($salaryBase + $totalAllowance + $totalExpenses) }} đ</td>
+                                                        </tr>
+                                                        <tr class="border-bottom">
+                                                            <td class="fw-medium">Trừ BHXH (10%)</td>
+                                                            <td class="text-end text-danger">- {{ number_format($insuranceDeduction) }} đ</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="fw-bold fs-5">Tổng lương thực nhận</td>
+                                                            <td class="text-end fw-bold fs-5 text-success">{{ number_format($totalSalary) }} đ</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-xxl-10">   
-                                    <div class="table-responsive">
-                                        <table class="table table-nowrap table-striped-columns mb-0">
-                                            <thead class="table-dark">
-                                                <tr>
-                                                    <th scope="col">Tổng</th>
-                                                    <th scope="col">Lương cơ bản</th>
-                                                    <th scope="col">Trợ cấp</th>
-                                                    <th scope="col">Trừ tiến ứng</th>
-                                                    <th scope="col">Trừ BHXH</th>
-                                                    <th scope="col">Tổng lương còn lại</th>   
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>{{ number_format(12000000) }}</td>
-                                                    <td>{{ number_format(6000000) }}</td>
-                                                    <td>{{ number_format(300000) }}</td>
-                                                    <td>{{ number_format(num: 3000000) }}</td>
-                                                    <td>{{ number_format((5500000*10.5)/100) }}</td>
-                                                    <td>
-                                                        {{ number_format(15000000) }}
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                
+                                <div class="col-lg-6">
+                                    <div class="card">
+                                        <div class="card-header bg-soft-success">
+                                            <h5 class="card-title mb-0">Biểu đồ lương</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="salary_chart" class="apex-charts" dir="ltr" style="height: 250px;"></div>
+                                            <div class="text-center mt-3">
+                                                <div class="row">
+                                                    <div class="col-4">
+                                                        <div class="d-flex align-items-center justify-content-center gap-2">
+                                                            <div class="avatar-xs">
+                                                                <div class="avatar-title rounded-circle bg-light text-primary">
+                                                                    <i class="ri-money-cny-circle-line"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <p class="text-muted mb-0">Cơ bản</p>
+                                                                <h6>{{ number_format($salaryBase) }} đ</h6>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="d-flex align-items-center justify-content-center gap-2">
+                                                            <div class="avatar-xs">
+                                                                <div class="avatar-title rounded-circle bg-light text-success">
+                                                                    <i class="ri-exchange-dollar-line"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <p class="text-muted mb-0">Phụ cấp</p>
+                                                                <h6>{{ number_format($totalAllowance + $totalExpenses) }} đ</h6>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="d-flex align-items-center justify-content-center gap-2">
+                                                            <div class="avatar-xs">
+                                                                <div class="avatar-title rounded-circle bg-light text-danger">
+                                                                    <i class="ri-subtract-line"></i>
+                                                                </div>
+                                                            </div>
+                                                            <div>
+                                                                <p class="text-muted mb-0">Khấu trừ</p>
+                                                                <h6>{{ number_format($insuranceDeduction) }} đ</h6>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            
                             <hr>
                             <h5 class="mb-2">Chi tiết bảng lương</h5>
                             <div class="table-responsive">
@@ -408,33 +480,40 @@
                                         <tr>
                                             <th>Mã chuyến hàng</th>
                                             <th>Ngày</th>
-                                            <th>Số tiền</th>
+                                            <th>Chi phí chuyến hàng</th>
                                             <th>Trợ cấp</th>
                                             <th>Ghi chú</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>CH001</td>
-                                            <td>10/10/2025</td>
-                                            <td>{{ number_format(600000) }}</td>
-                                            <td>{{ number_format(30000) }} Cơm trưa</td>
-                                            <td>Hoàn thành</td>
-                                        </tr>
-                                        <tr>
-                                            <td>CH002</td>
-                                            <td>10/10/2025</td>
-                                            <td>{{ number_format(750000) }}</td>
-                                            <td>{{ number_format(100000) }} Đi sớm</td>
-                                            <td>Hoàn thành</td>
-                                        </tr>
-                                        <tr>
-                                            <td>CH002</td>
-                                            <td>11/10/2025</td>
-                                            <td>{{ number_format(750000) }}</td>
-                                            <td>{{ number_format(150000) }} Chủ nhật</td>
-                                            <td>Hoàn thành</td>
-                                        </tr>
+                                        @if(count($salaryDetails) > 0)
+                                            @foreach($salaryDetails as $detail)
+                                                <tr>
+                                                    <td>
+                                                        <a href="{{ route('admin.shipments.edit', $detail['shipment_id']) }}" class="text-primary">
+                                                            {{ $detail['shipment_code'] }}
+                                                        </a>
+                                                    </td>
+                                                    <td>@formatDate($detail['date'])</td>
+                                                    <td>{{ number_format($detail['amount']) }}</td>
+                                                    <td>
+                                                        @if($detail['allowance'] > 0)
+                                                            {{ number_format($detail['allowance']) }}
+                                                            @if($detail['allowance_note'])
+                                                                <small class="text-muted">{{ $detail['allowance_note'] }}</small>
+                                                            @endif
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $detail['notes'] }}</td>
+                                                </tr>
+                                            @endforeach
+                                        @else
+                                            <tr>
+                                                <td colspan="5" class="text-center">Không có dữ liệu lương trong tháng này</td>
+                                            </tr>
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>
@@ -570,7 +649,17 @@
         $('#activeTabInput').val(target);
     });
 
-    let activeTab = @json(session('active_tab'));
+    // Get active tab from URL parameter or session
+    function getParameterByName(name, url = window.location.href) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+    
+    let activeTab = getParameterByName('tab') || @json(session('active_tab'));
     if (activeTab) {
         $('.nav-tabs-custom .nav-link').removeClass('active');
         $('.tab-pane').removeClass('show active');
@@ -578,5 +667,102 @@
         $('.nav-tabs-custom .nav-link[href="#' + activeTab + '"]').addClass('active');
         $('#' + activeTab).addClass('show active');
     }
+
+    // Xử lý nút xuất bảng lương
+    $('#export-salary-btn').click(function () {
+        // Kiểm tra xem có dữ liệu lương không
+        const hasSalaryData = {{ count($salaryDetails) > 0 ? 'true' : 'false' }};
+        const hasSalaryBase = {{ $salaryBase > 0 ? 'true' : 'false' }};
+        
+        if (!hasSalaryData && !hasSalaryBase) {
+            Swal.fire({
+                title: 'Không có dữ liệu!',
+                text: 'Không có dữ liệu lương nào trong tháng {{ $selectedMonth }} cho {{ $user->full_name }}.',
+                icon: 'warning',
+                confirmButtonText: 'Đóng',
+                customClass: {
+                    confirmButton: 'btn btn-primary'
+                }
+            });
+            return;
+        }
+        
+        Swal.fire({
+            title: 'Xác nhận xuất bảng lương?',
+            text: 'Bạn có chắc chắn muốn xuất bảng lương tháng {{ $selectedMonth }} của {{ $user->full_name }} không?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Có, xuất ngay',
+            cancelButtonText: 'Hủy bỏ',
+            customClass: {
+                confirmButton: 'btn btn-success',
+                cancelButton: 'btn btn-light'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    text: 'Vui lòng chờ trong giây lát',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+
+                        const link = document.createElement('a');
+                        link.href = "{{ route('admin.users.export-salary', ['user' => $user->id, 'month' => $selectedMonth]) }}";
+                        link.download = '';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        setTimeout(() => {
+                            Swal.close();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Xuất bảng lương thành công',
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        }, 2000);
+                    }
+                });
+            }
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // ApexCharts options and config
+        var options = {
+            series: [{{ $salaryBase }}, {{ $totalAllowance }}, {{ $totalExpenses }}, {{ $insuranceDeduction }}],
+            chart: {
+                height: 250,
+                type: 'pie',
+            },
+            labels: ['Lương cơ bản', 'Trợ cấp', 'Chi phí', 'BHXH'],
+            colors: ['#0ab39c', '#299cdb', '#f7b84b', '#f06548'],
+            legend: {
+                show: false
+            },
+            dataLabels: {
+                enabled: false
+            },
+            responsive: [{
+                breakpoint: 480,
+                options: {
+                    chart: {
+                        height: 200
+                    }
+                }
+            }]
+        };
+        
+        var chart = new ApexCharts(document.querySelector("#salary_chart"), options);
+        chart.render();
+        
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    });
 </script>
 @endpush
