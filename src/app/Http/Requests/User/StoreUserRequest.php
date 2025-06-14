@@ -54,7 +54,7 @@ class StoreUserRequest extends FormRequest
                 Rule::unique('users', 'email')->whereNull('deleted_at')
             ],
             'birthday' => ['nullable', $this->getSystemDateFormatRule()],
-            'join_date' => ['nullable', $this->getSystemDateFormatRule()],
+            'join_date' => ['required', $this->getSystemDateFormatRule()],
             'salary_base' => ['nullable', 'numeric'],
             'status' => ['required'],
             'address' => ['nullable', 'string', 'max:255'],

@@ -50,7 +50,8 @@ class User extends Authenticatable
         'address',
         'gender',
         'notes',
-        'salary_advance_amount'
+        'salary_advance_amount',
+        'join_date'
     ];
 
     /**
@@ -106,6 +107,11 @@ class User extends Authenticatable
     public function license(): HasOne
     {
         return $this->hasOne(DriverLicense::class, 'user_id');
+    }
+
+    public function vehicle(): BelongsTo
+    {
+        return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 
     /**
