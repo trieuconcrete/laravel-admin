@@ -67,6 +67,7 @@ class UpdateUserRequest extends FormRequest
                     'salary_base' => ['nullable', 'numeric', 'min:0'],
                     'address' => 'nullable|max:100',
                     'tab' => 'nullable|string',
+                    'join_date' => 'required|' . $this->getSystemDateFormatRule(),
                 ];
                 break;
             case Constants::USER_ACTION_CHANGE_LICENSE:

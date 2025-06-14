@@ -1,5 +1,131 @@
 @extends('admin.layout')
 
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Income vs Expenses Chart
+        var incomeExpensesOptions = {
+            series: [{
+                name: 'Thu nhập',
+                data: {!! json_encode($chartData['income']) !!}
+            }, {
+                name: 'Chi phí',
+                data: {!! json_encode($chartData['expenses']) !!}
+            }],
+            chart: {
+                type: 'bar',
+                height: 350,
+                stacked: false,
+                toolbar: {
+                    show: false
+                }
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '55%',
+                    endingShape: 'rounded'
+                },
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                show: true,
+                width: 2,
+                colors: ['transparent']
+            },
+            xaxis: {
+                categories: {!! json_encode($chartData['months']) !!},
+            },
+            yaxis: {
+                title: {
+                    text: 'VNĐ'
+                },
+                labels: {
+                    formatter: function (value) {
+                        return new Intl.NumberFormat('vi-VN').format(value);
+                    }
+                }
+            },
+            fill: {
+                opacity: 1
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return new Intl.NumberFormat('vi-VN').format(val) + ' VNĐ';
+                    }
+                }
+            },
+            colors: ['#0ab39c', '#f06548']
+        };
+
+        var incomeExpensesChart = new ApexCharts(document.querySelector("#income-expenses-chart"), incomeExpensesOptions);
+        incomeExpensesChart.render();
+
+        // Shipments Count Chart
+        var shipmentsCountOptions = {
+            series: [{
+                name: 'Số lượng chuyến',
+                data: {!! json_encode($chartData['shipmentCounts']) !!}
+            }],
+            chart: {
+                type: 'area',
+                height: 350,
+                zoom: {
+                    enabled: false
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            xaxis: {
+                categories: {!! json_encode($chartData['months']) !!},
+            },
+            yaxis: {
+                title: {
+                    text: 'Số lượng'
+                },
+                labels: {
+                    formatter: function (value) {
+                        return Math.round(value);
+                    }
+                }
+            },
+            colors: ['#405189'],
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    inverseColors: false,
+                    opacityFrom: 0.5,
+                    opacityTo: 0.1,
+                    stops: [0, 90, 100]
+                },
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return val + ' chuyến';
+                    }
+                }
+            }
+        };
+
+        var shipmentsCountChart = new ApexCharts(document.querySelector("#shipments-count-chart"), shipmentsCountOptions);
+        shipmentsCountChart.render();
+    });
+</script>
+@endpush
+
 @section('content')
 
 <div class="container-fluid">
@@ -32,7 +158,7 @@
                 <!--end row-->
 
                 <div class="row">
-                    <div class="col-xl-3 col-md-6">
+                    <div class="col-xl-4 col-md-6">
                         <!-- card -->
                         <div class="card card-animate">
                             <div class="card-body">
@@ -43,7 +169,7 @@
                                 </div>
                                 <div class="d-flex align-items-end justify-content-between mt-4">
                                     <div>
-                                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ $totalUsers }}">0</span> </h4>
+                                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ $totalVehicles }}">0</span> </h4>
                                     </div>
                                     <div class="avatar-sm flex-shrink-0">
                                         <span class="avatar-title bg-success-subtle rounded fs-3">
@@ -55,7 +181,7 @@
                         </div><!-- end card -->
                     </div><!-- end col -->
 
-                    <div class="col-xl-3 col-md-6">
+                    <div class="col-xl-4 col-md-6">
                         <!-- card -->
                         <div class="card card-animate">
                             <div class="card-body">
@@ -66,7 +192,7 @@
                                 </div>
                                 <div class="d-flex align-items-end justify-content-between mt-4">
                                     <div>
-                                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ $activeUsers }}">0</span></h4>
+                                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ $totalDrivers }}">0</span></h4>
                                     </div>
                                     <div class="avatar-sm flex-shrink-0">
                                         <span class="avatar-title bg-info-subtle rounded fs-3">
@@ -78,7 +204,7 @@
                         </div><!-- end card -->
                     </div><!-- end col -->
 
-                    <div class="col-xl-3 col-md-6">
+                    <div class="col-xl-4 col-md-6">
                         <!-- card -->
                         <div class="card card-animate">
                             <div class="card-body">
@@ -89,7 +215,7 @@
                                 </div>
                                 <div class="d-flex align-items-end justify-content-between mt-4">
                                     <div>
-                                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ $inactiveUsers }}">0</span> </h4>
+                                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ $totalCustomers }}">0</span> </h4>
                                     </div>
                                     <div class="avatar-sm flex-shrink-0">
                                         <span class="avatar-title bg-warning-subtle rounded fs-3">
@@ -101,7 +227,7 @@
                         </div><!-- end card -->
                     </div><!-- end col -->
 
-                    <div class="col-xl-3 col-md-6">
+                    {{--  <div class="col-xl-3 col-md-6">
                         <!-- card -->
                         <div class="card card-animate">
                             <div class="card-body">
@@ -112,7 +238,7 @@
                                 </div>
                                 <div class="d-flex align-items-end justify-content-between mt-4">
                                     <div>
-                                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ $usersThisMonth }}">0</span> </h4>
+                                        <h4 class="fs-22 fw-semibold ff-secondary mb-4"><span class="counter-value" data-target="{{ $totalSalaryThisMonth }}">0</span> <small>VNĐ</small></h4>
                                     </div>
                                     <div class="avatar-sm flex-shrink-0">
                                         <span class="avatar-title bg-primary-subtle rounded fs-3">
@@ -122,8 +248,38 @@
                                 </div>
                             </div><!-- end card body -->
                         </div><!-- end card -->
-                    </div><!-- end col -->
+                    </div><!-- end col -->  --}}
                 </div> <!-- end row-->
+
+                <!-- Charts Section -->
+                <div class="row">
+                    <!-- Income vs Expenses Chart -->
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">Thu chi 6 tháng gần đây</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="income-expenses-chart" class="apex-charts" dir="ltr" style="height: 350px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Income vs Expenses Chart -->
+
+                    <!-- Shipments Count Chart -->
+                    <div class="col-xl-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title mb-0">Số lượng chuyến xe 6 tháng gần đây</h4>
+                            </div>
+                            <div class="card-body">
+                                <div id="shipments-count-chart" class="apex-charts" dir="ltr" style="height: 350px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Shipments Count Chart -->
+                </div>
+                <!-- End Charts Section -->
 
             </div> <!-- end .h-100-->
 

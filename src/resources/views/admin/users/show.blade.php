@@ -99,6 +99,31 @@
                                                     @enderror
                                                 </div>
                                             </div>
+                                            <div class="col-lg-6">
+                                                <div class="mb-3">
+                                                    <label for="joinDateInput" class="form-label">Ngày vào làm <span class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control" name="join_date" id="joinDateInput" placeholder="Enter your email" value="@formatDateForInput($user?->join_date)">
+                                                    @error('join_date')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-xxl-6">
+                                                <div class="mb-4">
+                                                    <label for="salaryBase" class="form-label">Trạng thái làm việc</label>
+                                                    <select name="status" class="form-select">
+                                                        @foreach($statuses as $key => $label)
+                                                            <option value="{{ $key }}"
+                                                                {{ (string) old('status', $user->status) === (string) $key ? 'selected' : '' }}>
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    @error('status')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
                                             <!--end col-->
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
@@ -134,22 +159,6 @@
                                                     <label for="address" class="form-label">Ghi chú</label>
                                                     <textarea row=3 class="form-control" name="notes" placeholder="Nhập ghi chú">{!! old('notes', $user->notes ) !!}</textarea>
                                                     @error('notes')
-                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                            <div class="col-xxl-6">
-                                                <div class="mb-4">
-                                                    <label for="salaryBase" class="form-label">Trạng thái làm việc</label>
-                                                    <select name="status" class="form-select">
-                                                        @foreach($statuses as $key => $label)
-                                                            <option value="{{ $key }}"
-                                                                {{ (string) old('status', $user->status) === (string) $key ? 'selected' : '' }}>
-                                                                {{ $label }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('status')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                                     @enderror
                                                 </div>
@@ -316,6 +325,7 @@
                                     <thead class="table-light">
                                         <tr>
                                             <th>Mã chuyến hàng</th>
+                                            <th>Khách hàng</th>
                                             <th>Biển số xe</th>
                                             <th>Ngày</th>
                                             <th>Điểm đi</th>
@@ -335,7 +345,12 @@
                                                             {{ $shipment->shipment_code }}
                                                         </a>
                                                     </td>
-                                                    <td>{{ $shipment->getDriverFromShipmentDeductions() ? $shipment?->getDriverFromShipmentDeductions()?->license_plate : 'N/A' }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.customers.show', $shipment->customer->id) }}" class="text-primary">
+                                                            {{ $shipment->customer->name ?? null }}
+                                                        </a>
+                                                    </td>
+                                                    <td>{{ $shipment?->vehicle?->plate_number ?? null}}</td>
                                                     <td>@formatDate($shipment->departure_time)</td>
                                                     <td>{{ $shipment->origin }}</td>
                                                     <td>{{ $shipment->destination }}</td>
@@ -370,7 +385,40 @@
                                                     <form action="{{ route('admin.users.show', $user->id) }}" method="GET" id="salaryMonthForm" class="d-flex align-items-center gap-2">
                                                         <input type="hidden" name="tab" value="salary">
                                                         <select class="form-select form-select-sm" name="month" id="salaryMonth" onchange="document.getElementById('salaryMonthForm').submit();">
-                                                            @foreach(months_list() as $month)
+                                                            @php
+                                                                $joinDate = $user->join_date ? \Carbon\Carbon::parse($user->join_date) : null;
+                                                                $currentDate = now();
+                                                                $monthsList = [];
+                                                                
+                                                                if ($joinDate) {
+                                                                    // Check if join date is in the current month
+                                                                    $isJoinDateCurrentMonth = $joinDate->format('m/Y') === $currentDate->format('m/Y');
+                                                                    
+                                                                    if ($isJoinDateCurrentMonth) {
+                                                                        // If join date is in current month, just use the current month
+                                                                        $monthsList = [$currentDate->format('m/Y')];
+                                                                    } else {
+                                                                        // Calculate months between join date and current date
+                                                                        $diffInMonths = $currentDate->diffInMonths($joinDate);
+                                                                        // Get months list from join date to current date
+                                                                        $monthsList = months_list($diffInMonths + 1);
+                                                                        
+                                                                        // Filter months to only include those >= join date
+                                                                        $filteredMonths = [];
+                                                                        foreach ($monthsList as $month) {
+                                                                            $monthDate = \Carbon\Carbon::createFromFormat('m/Y', $month)->startOfMonth();
+                                                                            if ($monthDate->greaterThanOrEqualTo($joinDate->startOfMonth())) {
+                                                                                $filteredMonths[] = $month;
+                                                                            }
+                                                                        }
+                                                                        $monthsList = array_reverse($filteredMonths); // Show newest months first
+                                                                    }
+                                                                } else {
+                                                                    $monthsList = months_list();
+                                                                }
+                                                            @endphp
+                                                            
+                                                            @foreach($monthsList as $month)
                                                                 <option value="{{ $month }}" {{ $selectedMonth == $month ? 'selected' : '' }}>{{ $month }}</option>
                                                             @endforeach
                                                         </select>
