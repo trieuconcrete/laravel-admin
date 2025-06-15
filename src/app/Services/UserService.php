@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Helpers\ImageHelper;
 use App\Models\User;
+use App\Models\SalaryAdvanceRequest;
 use App\Repositories\Interface\UserRepositoryInterface as UserRepository;
 use App\Repositories\Interface\DriverLicenseRepositoryInterface as DriverLicenseRepository;
 use Carbon\Carbon;
@@ -21,8 +22,11 @@ use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Repositories\Interface\PositionRepositoryInterface as PositionRepository;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Repositories\Interface\ShipmentRepositoryInterface as ShipmentRepository;
+use App\Repositories\Interface\SalaryAdvanceRequestRepositoryInterface as SalaryAdvanceRequestRepository;
 use App\Enum\UserStatus as EnumUserStatus;
+use Illuminate\Http\JsonResponse;
 
 class UserService
 {
@@ -38,6 +42,7 @@ class UserService
         protected DriverLicenseRepository $driverLicenseRepository,
         protected PositionRepository $positionRepository,
         protected ShipmentRepository $shipmentRepository,
+        protected SalaryAdvanceRequestRepository $salaryAdvanceRequestRepository,
     ) {}
 
     /**
@@ -278,5 +283,77 @@ class UserService
         
         // Generate and download the Excel file
         return Excel::download(new SalaryExport($user, $shipments, $formattedMonth), $fileName);
+    }
+    
+    /**
+     * Create a new salary advance request
+     *
+     * @param array $data
+     * @return SalaryAdvanceRequest
+     */
+    public function createSalaryAdvanceRequest(array $data): SalaryAdvanceRequest
+    {
+        // Format advance month if not provided
+        if (!isset($data['advance_month'])) {
+            $data['advance_month'] = Carbon::now()->format('Y-m-d');
+        }
+        
+        // Format amount (remove commas)
+        if (isset($data['amount'])) {
+            $data['amount'] = str_replace(',', '', $data['amount']);
+        }
+        
+        // Set request date if not provided
+        if (!isset($data['request_date'])) {
+            $data['request_date'] = Carbon::now();
+        }
+        
+        // Set created_by if not provided
+        if (!isset($data['created_by'])) {
+            $data['created_by'] = Auth::id() ?? null;
+        }
+        
+        return $this->salaryAdvanceRequestRepository->create($data);
+    }
+    
+    /**
+     * Get salary advance requests by user
+     *
+     * @param User $user
+     * @param string|null $month Format: m/Y
+     * @return array
+     */
+    public function getSalaryAdvanceRequests(User $user, ?string $month = null): array
+    {
+        if ($month) {
+            list($m, $y) = explode('/', $month);
+            $formattedMonth = $y . '-' . str_pad($m, 2, '0', STR_PAD_LEFT);
+            $requests = $this->salaryAdvanceRequestRepository->getByUserAndMonth($user, $formattedMonth);
+        } else {
+            $requests = $this->salaryAdvanceRequestRepository->getByUser($user);
+        }
+        
+        $formattedRequests = $requests->map(function ($request) {
+            return [
+                'id' => $request->id,
+                'request_code' => $request->request_code,
+                'amount' => $request->amount,
+                'formatted_amount' => number_format($request->amount, 0, ',', '.'),
+                'status' => $request->status,
+                'status_label' => $request->status_label,
+                'status_color' => $request->status_color,
+                'reason' => $request->reason,
+                'advance_month' => $request->advance_month,
+                'request_date' => $request->request_date,
+                'formatted_request_date' => $request->request_date ? $request->request_date->format(config('app.date_format', 'd/m/Y')) : null,
+                'created_at' => $request->created_at,
+                'formatted_created_at' => $request->created_at ? $request->created_at->format(config('app.date_format', 'd/m/Y')) : null,
+            ];
+        });
+        
+        return [
+            'requests' => $formattedRequests,
+            'statuses' => SalaryAdvanceRequest::getStatuses()
+        ];
     }
 }

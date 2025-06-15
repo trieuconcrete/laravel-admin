@@ -39,6 +39,8 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('users', UserController::class);
     Route::get('users-export', [UserController::class, 'export'])->name('users.export');
     Route::get('users/{user}/export-salary', [UserController::class, 'exportSalary'])->name('users.export-salary');
+    Route::post('users/{user}/salary-advance-request', [UserController::class, 'createSalaryAdvanceRequest'])->name('users.salary-advance-request');
+    Route::get('users/{user}/salary-advance-requests', [UserController::class, 'getSalaryAdvanceRequests'])->name('users.get-salary-advance-requests');
 
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update');
