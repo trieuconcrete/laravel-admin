@@ -626,21 +626,21 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <hr>
-            <form id="add-quote-form" enctype="multipart/form-data" action="{{ route('admin.quotes.store') }}" method="POST">
+            <form id="salaryAdvanceRequestForm" enctype="multipart/form-data" action="{{ route('admin.users.salary-advance-request', $user->id) }}" method="POST">
                 @csrf
+                <input type="hidden" name="user_id" value="{{ $user->id }}">
                 <div class="modal-body">
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Số tiền ứng <span class="text-danger">*</span></label>
-                            <input class="form-control" rows="3" placeholder="Số tiền" name="amount" />
+                            <input class="form-control number-format" rows="3" placeholder="Số tiền" name="amount" required />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                            <select class="form-select" name="status">
-                                <option value="pending">Chờ duyệt</option>
-                                <option value="approved">Đã duyệt</option>
-                                <option value="rejected">Từ chối</option>
-                                <option value="paid" selected>Đã thanh toán</option>
+                            <select class="form-select" name="status" required>
+                                @foreach(\App\Models\SalaryAdvanceRequest::getStatuses() as $value => $label)
+                                    <option value="{{ $value }}" {{ $value == 'paid' ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -649,10 +649,11 @@
                         <label class="form-label">Lý do</label>
                         <textarea class="form-control" rows="3" placeholder="Nhập lý do" name="reason"></textarea>
                     </div>
+                    <div id="salaryAdvanceRequestError" class="alert alert-danger mt-2" style="display: none;"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary">Tạo </button>
+                    <button type="submit" class="btn btn-primary" id="submitSalaryAdvanceRequest">Tạo</button>
                 </div>
             </form>
         </div>
@@ -853,7 +854,96 @@
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
-        })
+        });
+        
+        // Format number inputs
+        $('.number-format').on('input', function() {
+            let value = $(this).val().replace(/\D/g, '');
+            if (value !== '') {
+                value = parseInt(value, 10).toLocaleString('vi-VN');
+                $(this).val(value);
+            }
+        });
+        
+        // Handle salary advance request form submission
+        $('#salaryAdvanceRequestForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            const submitBtn = $('#submitSalaryAdvanceRequest');
+            const errorContainer = $('#salaryAdvanceRequestError');
+            
+            // Disable submit button and show loading
+            submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
+            errorContainer.hide();
+            
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                dataType: 'json',
+                success: function(response) {
+                    // Close modal
+                    $('#salaryAdvanceRequestModal').modal('hide');
+                    
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công!',
+                        text: response.message,
+                        confirmButtonText: 'Đóng',
+                        customClass: {
+                            confirmButton: 'btn btn-primary'
+                        }
+                    }).then(() => {
+                        // Reload page to show new data
+                        window.location.reload();
+                    });
+                },
+                error: function(xhr) {
+                    // Enable submit button
+                    submitBtn.prop('disabled', false).text('Tạo');
+                    
+                    // Show error message
+                    if (xhr.status === 422) {
+                        // Validation errors
+                        let errors = xhr.responseJSON.errors;
+                        let errorMessage = '<ul class="mb-0">';
+                        
+                        $.each(errors, function(key, value) {
+                            errorMessage += '<li>' + value[0] + '</li>';
+                        });
+                        
+                        errorMessage += '</ul>';
+                        errorContainer.html(errorMessage).show();
+                    } else {
+                        // Other errors
+                        errorContainer.text(xhr.responseJSON?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.').show();
+                    }
+                }
+            });
+        });
+    });
+    // Include the salary advance requests container in the salary tab
+    document.addEventListener('DOMContentLoaded', function() {
+        // Find the salary tab content
+        const salaryTabContent = document.querySelector('#salary');
+        if (salaryTabContent) {
+            // Create container if it doesn't exist
+            let container = document.getElementById('salaryAdvanceRequestsContainer');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'salaryAdvanceRequestsContainer';
+                container.className = 'mt-4';
+                salaryTabContent.appendChild(container);
+            }
+            
+            // Load salary advance requests
+            refreshSalaryAdvanceRequests();
+        }
     });
 </script>
+
+<!-- Include the salary advance requests handler script -->
+<script src="{{ asset('js/salary-advance-requests-handler.js') }}"></script>
 @endpush

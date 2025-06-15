@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
+use App\Repositories\Interface\SalaryAdvanceRequestRepositoryInterface;
+use App\Repositories\SalaryAdvanceRequestRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(SalaryAdvanceRequestRepositoryInterface::class, SalaryAdvanceRequestRepository::class);
     }
 
     /**

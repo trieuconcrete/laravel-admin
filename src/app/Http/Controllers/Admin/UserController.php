@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Position;
 use App\Models\Shipment;
 use App\Models\ShipmentDeductionType;
+use App\Models\SalaryAdvanceRequest;
 use App\Exports\UserExport;
 use App\Exports\SalaryExport;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Services\UserService;
 use App\Http\Requests\User\StoreUserRequest;
+use App\Http\Requests\SalaryAdvanceRequest\StoreSalaryAdvanceRequestRequest;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
 use App\Enum\UserStatus as EnumUserStatus;
@@ -119,13 +121,18 @@ class UserController extends Controller
         // Get salary details from service
         $salaryData = $this->userService->getSalaryDetails($user, $selectedMonth);
         
-        // Extract data from service response
+        // Get salary advance requests for the user
+        $salaryAdvanceData = $this->userService->getSalaryAdvanceRequests($user, $selectedMonth);
+        
+        // Extract data from service responses
         extract($salaryData);
+        extract($salaryAdvanceData);
         
         return view('admin.users.show', compact(
             'user', 'positions', 'licenses', 'statuses', 'licenseStatuses',
             'shipments', 'selectedMonth', 'salaryBase', 'totalAllowance', 
-            'totalExpenses', 'insuranceDeduction', 'totalSalary', 'salaryDetails'
+            'totalExpenses', 'insuranceDeduction', 'totalSalary', 'salaryDetails',
+            'requests'
         ));
     }
 
@@ -207,5 +214,69 @@ class UserController extends Controller
         
         // Use service to handle export logic
         return $this->userService->exportUserSalary($user, $selectedMonth);
+    }
+    
+    /**
+     * Create a new salary advance request for a user
+     * 
+     * @param User $user
+     * @param StoreSalaryAdvanceRequestRequest $request
+     * @return JsonResponse
+     */
+    public function createSalaryAdvanceRequest(User $user, StoreSalaryAdvanceRequestRequest $request): JsonResponse
+    {
+        $this->authorize('view', $user);
+        
+        DB::beginTransaction();
+        try {
+            $data = $request->validated();
+            $data['user_id'] = $user->id;
+            
+            // Use service to create salary advance request
+            $salaryAdvanceRequest = $this->userService->createSalaryAdvanceRequest($data);
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Tạo yêu cầu ứng lương thành công',
+                'data' => [
+                    'id' => $salaryAdvanceRequest->id,
+                    'request_code' => $salaryAdvanceRequest->request_code,
+                    'amount' => number_format($salaryAdvanceRequest->amount),
+                    'status' => $salaryAdvanceRequest->status_label,
+                    'status_color' => $salaryAdvanceRequest->status_color,
+                    'created_at' => $salaryAdvanceRequest->created_at->format('d/m/Y H:i')
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Create salary advance request failed', ['error' => $e->getMessage()]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Get salary advance requests for a user
+     *
+     * @param User $user
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getSalaryAdvanceRequests(User $user, Request $request)
+    {
+        $this->authorize('view', $user);
+        
+        // Get selected month or default to current month
+        $selectedMonth = $request->get('month', now()->format('m/Y'));
+        
+        // Get salary advance requests
+        $data = $this->userService->getSalaryAdvanceRequests($user, $selectedMonth);
+        
+        return response()->json($data);
     }
 }
