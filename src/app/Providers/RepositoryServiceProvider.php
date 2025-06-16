@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Repositories\Eloquent\CarRentalRepository;
 use Illuminate\Support\ServiceProvider;
 use App\Repositories\Interface\UserRepositoryInterface;
 use App\Repositories\Eloquent\UserRepository;
@@ -23,7 +24,7 @@ use App\Repositories\Interface\QuoteHistoryRepositoryInterface;
 use App\Repositories\Eloquent\QuoteHistoryRepository;
 use App\Repositories\Interface\ShipmentRepositoryInterface;
 use App\Repositories\Eloquent\ShipmentRepository;
-
+use App\Repositories\Interface\CarRentalRepositoryInterface;
 
 /**
  * Summary of RepositoryServiceProvider
@@ -46,6 +47,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(QuoteAttachmentRepositoryInterface::class, QuoteAttachmentRepository::class);
         $this->app->bind(QuoteHistoryRepositoryInterface::class, QuoteHistoryRepository::class);
         $this->app->bind(ShipmentRepositoryInterface::class, ShipmentRepository::class);
+        $this->app->bind(CarRentalRepositoryInterface::class, CarRentalRepository::class);
     }
 
     /**

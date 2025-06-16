@@ -21,12 +21,13 @@ class StoreCarRentalRequest extends FormRequest
     {
         return [
             'customer_id' => 'required',
-            'pickup_datetime' => 'required|' . $this->getSystemDateFormatRule(),
+            // 'pickup_datetime' => 'required|' . $this->getSystemDateFormatRule(),
             'status' => 'required',
             'valid_until' => 'nullable|after_or_equal:pickup_datetime|' . $this->getSystemDateFormatRule(),
-            'cargo_description' => 'nullable|string',
+            'description' => 'nullable|string',
             'notes' => 'nullable|string',
-            'document_file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:10240'
+            // 'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:10240'
+            'file' => 'required|file|max:10240'
         ];
     }
 
@@ -38,15 +39,15 @@ class StoreCarRentalRequest extends FormRequest
     {
         return [
             'customer_id.required' => 'Khách hàng là bắt buộc',
-            'status.required' => 'Loại báo giá là bắt buộc',
+            'status.required' => 'Trạng thái là bắt buộc',
             'pickup_datetime.required' => 'Ngày bắt đầu là bắt buộc',
             'pickup_datetime.date' => 'Ngày bắt đầu không đúng định dạng',
             'valid_until.required' => 'Ngày hết hạn là bắt buộc',
             'valid_until.date' => 'Ngày hết hạn không đúng định dạng',
             'valid_until.after_or_equal' => 'Ngày hết hạn phải sau hoặc bằng ngày bắt đầu',
-            'document_file.mimes' => 'File đính kèm phải có định dạng: pdf, doc, docx, xls, xlsx',
-            'document_file.required' => 'File đính kèm là băt buộc',
-            'document_file.max' => 'File đính kèm không được vượt quá 10MB'
+            'file.mimes' => 'File đính kèm phải có định dạng: pdf, doc, docx, xls, xlsx',
+            'file.required' => 'File đính kèm là băt buộc',
+            'file.max' => 'File đính kèm không được vượt quá 10MB'
         ];
     }
-} 
+}
