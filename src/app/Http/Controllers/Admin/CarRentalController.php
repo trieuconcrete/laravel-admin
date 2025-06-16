@@ -6,9 +6,11 @@ use App\Models\CarRental;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\Interface\CustomerRepositoryInterface as CustomerRepository;
+use App\Repositories\Interface\VehicleRepositoryInterface as VehicleRepository;
 use App\Http\Requests\CarRental\UpdateCarRentalRequest;
 use App\Services\CarRentalService;
 use App\Http\Requests\CarRental\StoreCarRentalRequest;
+use App\Models\VehicleType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -21,21 +23,24 @@ class CarRentalController extends Controller
      */
     public function __construct(
         protected CarRentalService $carRentalService,
-        protected CustomerRepository $customerRepository
+        protected CustomerRepository $customerRepository,
+        protected VehicleRepository $vehicleRepository
     ) {}
 
-    /**
-     * Summary of index
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Contracts\View\View
-     */
+    // /**
+    //  * Summary of index
+    //  * @param \Illuminate\Http\Request $request
+    //  * @return \Illuminate\Contracts\View\View
+    //  */
+
     public function index(Request $request)
     {
         $customers = $this->customerRepository->all()->pluck('name', 'id');
         $carRentals = CarRental::with('customer')->paginate(10);
         $carRentalstatuses = CarRental::getStatuses();
+        $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
 
-        return view('admin.car_rental.index', compact('carRentals', 'carRentalstatuses', 'customers'));
+        return view('admin.car_rental.index', compact('carRentals', 'carRentalstatuses', 'customers', 'vehicleTypes'));
     }
 
     /**
@@ -57,8 +62,9 @@ class CarRentalController extends Controller
         DB::beginTransaction();
         try {
             // Log the request data for debugging
+            $this->carRentalService->create($request->all());
             DB::commit();
-            return response()->json(['message' => 'CarRental created successfully.'], 200);
+            return response()->json(['message' => 'Tạo thông tin thuê xe thành công'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Vehicle creation failed', ['error' => $e->getMessage()]);
@@ -72,12 +78,18 @@ class CarRentalController extends Controller
         if (request()->ajax()) {
             return view('admin.car_rental.partials.detail', compact('carRental'))->render();
         }
-        
+
         return abort(404);    }
 
     public function edit(CarRental $carRental)
     {
-        return view('admin.car_rental.edit', compact('carRental'));
+        $customers = $this->customerRepository->all()->pluck('name', 'id');
+        $vehicles = $this->vehicleRepository->all()->pluck('name', 'id');
+        $carRentalstatuses = CarRental::getStatuses();
+        $carRentalVehicles = $carRental->carRentalVehicles;
+        $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
+
+        return view('admin.car_rental.edit', compact(['carRental', 'customers', 'carRentalstatuses', 'carRentalVehicles', 'vehicleTypes']));
     }
 
 
@@ -87,14 +99,14 @@ class CarRentalController extends Controller
      * @param \App\Models\CarRental $CarRental
      * @return mixed|\Illuminate\Http\JsonResponse
      */
-    public function update(UpdateCarRentalRequest $request, CarRental $CarRental)
+    public function update(UpdateCarRentalRequest $request, CarRental $carRental)
     {
         DB::beginTransaction();
         try {
             // Log the request data for debugging
             DB::commit();
-
-            return response()->json(['message' => 'CarRental update successfully.'], 200);
+            $this->carRentalService->update($carRental->id, $request->all());
+            return redirect()->route('admin.car-rental.edit', $carRental->id)->with('success', 'Cập nhật thông tin thuê xe thành công.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('CarRental update failed', ['error' => $e->getMessage()]);
@@ -114,7 +126,7 @@ class CarRentalController extends Controller
             $carRental->carRentalVehicles()->delete();
             $carRental->delete();
             DB::commit();
-            return back()->with('success', 'CarRental deleted successfully.');
+            return back()->with('success', 'Xóa thông tin thuê xe thành công.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Vehicle creation failed', ['error' => $e->getMessage()]);
