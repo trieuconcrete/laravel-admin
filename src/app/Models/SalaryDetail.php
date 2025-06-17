@@ -50,6 +50,8 @@ class SalaryDetail extends Model
         'notes',
         'created_by',
         'approved_by',
+        'total_allowance',
+        'total_expenses'
     ];
 
     /**

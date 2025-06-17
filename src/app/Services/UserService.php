@@ -348,6 +348,8 @@ class UserService
                 'formatted_request_date' => $request->request_date ? $request->request_date->format(config('app.date_format', 'd/m/Y')) : null,
                 'created_at' => $request->created_at,
                 'formatted_created_at' => $request->created_at ? $request->created_at->format(config('app.date_format', 'd/m/Y')) : null,
+                'type_color' => $request->type_color,
+                'type_label' => $request->type_label
             ];
         });
         

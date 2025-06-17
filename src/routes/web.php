@@ -54,6 +54,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('car-rental', CarRentalController::class);
     Route::resource('shipments', ShipmentController::class);
     Route::resource('salary', SalaryController::class);
+    Route::post('salary/sync', [SalaryController::class, 'sync'])->name('salary.sync');
     
     // Quản lý cài đặt
     Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');

@@ -42,7 +42,7 @@ function refreshSalaryAdvanceRequests() {
             let html = `
                 <div class="card mt-4">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">Danh sách đơn ứng lương</h5>
+                        <h5 class="card-title mb-0">Danh sách yêu cầu</h5>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -50,9 +50,9 @@ function refreshSalaryAdvanceRequests() {
                                 <thead>
                                     <tr>
                                         <th>Mã đơn</th>
+                                        <th>Loại yêu cầu</th>
                                         <th>Ngày yêu cầu</th>
                                         <th>Số tiền</th>
-                                        <th>Tháng ứng</th>
                                         <th>Lý do</th>
                                         <th>Trạng thái</th>
                                     </tr>
@@ -64,9 +64,11 @@ function refreshSalaryAdvanceRequests() {
                 html += `
                     <tr>
                         <td>${request.request_code}</td>
+                        <td>
+                            <span class="badge bg-${request.type_color}">${request.type_label}</span>
+                        </td>
                         <td>${request.formatted_request_date}</td>
                         <td>${request.formatted_amount} đ</td>
-                        <td>${request.advance_month}</td>
                         <td>${request.reason || 'Không có'}</td>
                         <td>
                             <span class="badge bg-${request.status_color}">${request.status_label}</span>

@@ -428,7 +428,7 @@
                                                         </button>
                                                         <button type="button" data-bs-toggle="modal" data-bs-target="#salaryAdvanceModal" class="btn btn-sm btn-primary d-inline-flex align-items-center" style="white-space: nowrap;">
                                                             <i class="ri-currency-fill me-1"></i>
-                                                            Ứng Lương
+                                                            Yêu Cầu
                                                         </button>
                                                     </form>
                                                 </div>
@@ -449,6 +449,18 @@
                                                         <tr class="border-bottom">
                                                             <td class="fw-medium">Chi phí chuyến hàng</td>
                                                             <td class="text-end">{{ number_format($totalExpenses) }} đ</td>
+                                                        </tr>
+                                                        <tr class="border-bottom">
+                                                            <td class="fw-medium">Tiền thưởng</td>
+                                                            <td class="text-end">{{ number_format($totalBonus) }} đ</td>
+                                                        </tr>
+                                                        <tr class="border-bottom">
+                                                            <td class="fw-medium">Tiền phạt</td>
+                                                            <td class="text-end text-danger">- {{ number_format($totalPenalty) }} đ</td>
+                                                        </tr>
+                                                        <tr class="border-bottom">
+                                                            <td class="fw-medium">Ứng lương</td>
+                                                            <td class="text-end text-danger">- {{ number_format($totalOtherDeduction) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom bg-soft-light">
                                                             <td class="fw-medium">Tổng trước khấu trừ</td>
@@ -499,8 +511,8 @@
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <p class="text-muted mb-0">Phụ cấp</p>
-                                                                <h6>{{ number_format($totalAllowance + $totalExpenses) }} đ</h6>
+                                                                <p class="text-muted mb-0">Phụ cấp và thưởng</p>
+                                                                <h6>{{ number_format($totalAllowance + $totalExpenses + $totalBonus) }} đ</h6>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -512,8 +524,8 @@
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <p class="text-muted mb-0">Khấu trừ</p>
-                                                                <h6>{{ number_format($insuranceDeduction) }} đ</h6>
+                                                                <p class="text-muted mb-0">Khấu trừ (BHXH, Phạt, Ứng lương)</p>
+                                                                <h6>{{ number_format($insuranceDeduction + $totalOtherDeduction + $totalPenalty) }} đ</h6>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -622,7 +634,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Yêu cầu ứng lương</h5>
+                <h5 class="modal-title">Yêu cầu</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <hr>
@@ -632,8 +644,22 @@
                 <div class="modal-body">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Số tiền ứng <span class="text-danger">*</span></label>
+                            <label class="form-label">Số tiền <span class="text-danger">*</span></label>
                             <input class="form-control number-format" type="text" placeholder="Số tiền" name="amount" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ngày yêu cầu <span class="text-danger">*</span></label>
+                            <input class="form-control" type="date" name="advance_month" required />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Loại <span class="text-danger">*</span></label>
+                            <select class="form-select" name="type" required>
+                                @foreach(\App\Models\SalaryAdvanceRequest::getTypes() as $value => $label)
+                                    <option value="{{ $value }}" {{ $value == 'salary' ? 'selected' : '' }}>{{ $label }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
@@ -864,18 +890,39 @@
     document.addEventListener("DOMContentLoaded", function() {
         // ApexCharts options and config
         var options = {
-            series: [{{ $salaryBase }}, {{ $totalAllowance }}, {{ $totalExpenses }}, {{ $insuranceDeduction }}],
+            series: [{{ $salaryBase }}, {{ $totalAllowance }}, {{ $totalExpenses }}, {{ $insuranceDeduction }}, {{ $totalOtherDeduction }}, {{ $totalPenalty }}, {{ $totalBonus }}],
             chart: {
                 height: 250,
                 type: 'pie',
             },
-            labels: ['Lương cơ bản', 'Trợ cấp', 'Chi phí', 'BHXH'],
-            colors: ['#0ab39c', '#299cdb', '#f7b84b', '#f06548'],
+            labels: ['Lương cơ bản', 'Trợ cấp', 'Chi phí', 'BHXH', 'Khấu trừ', 'Phạt', 'Thưởng'],
+            colors: ['#0ab39c', '#299cdb', '#f7b84b', '#f06548', '#ff9f43', '#ea5455', '#28c76f'],
             legend: {
-                show: false
+                show: true,
+                position: 'bottom',
+                horizontalAlign: 'center',
+                fontSize: '14px',
+                markers: {
+                    width: 12,
+                    height: 12,
+                    radius: 12
+                },
+                itemMargin: {
+                    horizontal: 6,
+                    vertical: 3
+                }
             },
             dataLabels: {
-                enabled: false
+                enabled: true,
+                formatter: function(val, opts) {
+                    return opts.w.config.series[opts.seriesIndex].toLocaleString('vi-VN') + ' đ';
+                },
+                style: {
+                    fontSize: '12px'
+                },
+                dropShadow: {
+                    enabled: false
+                }
             },
             responsive: [{
                 breakpoint: 480,
