@@ -112,7 +112,6 @@ class UserController extends Controller
         // Get reference data
         $positions = Position::pluck('name', 'id');
         $licenses = DriverLicense::getCarLicenseTypes();
-        $statuses = EnumUserStatus::options();
         $licenseStatuses = DriverLicense::getStatuses();
         
         // Get selected month or default to current month
@@ -127,6 +126,7 @@ class UserController extends Controller
         // Extract data from service responses
         extract($salaryData);
         extract($salaryAdvanceData);
+        $statuses = EnumUserStatus::options();
         
         return view('admin.users.show', compact(
             'user', 'positions', 'licenses', 'statuses', 'licenseStatuses',
