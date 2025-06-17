@@ -45,7 +45,8 @@ class ShipmentService
                 'notes' => $data['notes'] ?? null,
                 'status' => $data['status'],
                 'distance' => $data['distance'] ?? null,
-                'unit_price' => $data['unit_price'] ?? null
+                'unit_price' => $data['unit_price'] ?? null,
+                'created_by' => auth()->id(),
             ];
             $shipment = Shipment::create($shipmentData);
 
