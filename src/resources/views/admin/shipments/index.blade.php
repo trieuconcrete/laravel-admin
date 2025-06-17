@@ -161,6 +161,8 @@
                                     <th>Tài xế</th>
                                     <th>Phương tiện</th>
                                     <th>Thời gian</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Người tạo</th>
                                     <th>Trạng thái</th>
                                 </tr>
                             </thead>
@@ -193,6 +195,8 @@
                                         <div>KH: @formatDate($shipment->departure_time)</div>
                                         <div>DK: @formatDate($shipment->estimated_arrival_time)</div>
                                     </td>
+                                    <td>@formatDate($shipment->created_at)</td>
+                                    <td>{{ $shipment->creator->full_name ?? null }}</td>
                                     <td><span class="badge {{ $shipment->statusBadgeClass }}">{{ $shipment->status_label }}</span></td>
                                 </tr>
                                 @endforeach
