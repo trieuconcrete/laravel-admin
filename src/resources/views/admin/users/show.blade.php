@@ -633,7 +633,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Số tiền ứng <span class="text-danger">*</span></label>
-                            <input class="form-control number-format" rows="3" placeholder="Số tiền" name="amount" required />
+                            <input class="form-control number-format" type="text" placeholder="Số tiền" name="amount" required />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
@@ -663,7 +663,47 @@
 @endsection
 
 @push('scripts')
+<!-- Include the salary advance requests handler script -->
+<script src="{{ asset('js/salary-advance-requests-handler.js') }}"></script>
 <script>
+    // Number formatting for currency inputs
+    document.querySelectorAll('.number-format').forEach(function(input) {
+        input.addEventListener('input', function(e) {
+            // Remove non-numeric characters except decimal point
+            let value = this.value.replace(/[^0-9.]/g, '');
+            
+            // Ensure only one decimal point
+            const decimalPoints = value.match(/\./g);
+            if (decimalPoints && decimalPoints.length > 1) {
+                const parts = value.split('.');
+                value = parts[0] + '.' + parts.slice(1).join('');
+            }
+            
+            // Format with thousand separators
+            if (value) {
+                // Split by decimal point
+                const parts = value.split('.');
+                // Add thousand separators to the integer part
+                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                // Join back with decimal part if it exists
+                value = parts.join('.');
+            }
+            
+            this.value = value;
+            
+            // Store the raw numeric value in a data attribute for form submission
+            this.dataset.rawValue = this.value.replace(/,/g, '');
+        });
+    });
+    
+    // Handle form submission to use raw numeric values
+    document.getElementById('salaryAdvanceRequestForm').addEventListener('submit', function(e) {
+        const amountInput = this.querySelector('input[name="amount"]');
+        if (amountInput && amountInput.dataset.rawValue) {
+            amountInput.value = amountInput.dataset.rawValue;
+        }
+    });
+
     document.getElementById('avatarInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
     
@@ -883,8 +923,6 @@
                 data: form.serialize(),
                 dataType: 'json',
                 success: function(response) {
-                    // Close modal
-                    $('#salaryAdvanceRequestModal').modal('hide');
                     
                     // Show success message
                     Swal.fire({
@@ -896,8 +934,14 @@
                             confirmButton: 'btn btn-primary'
                         }
                     }).then(() => {
+                        // Reset form
+                        form[0].reset();
+                        // Reset submit button
+                        submitBtn.prop('disabled', false).html('Lưu');
+                        // Close modal
+                        $('#salaryAdvanceModal').modal('hide');
                         // Reload page to show new data
-                        window.location.reload();
+                        refreshSalaryAdvanceRequests();
                     });
                 },
                 error: function(xhr) {
@@ -943,7 +987,4 @@
         }
     });
 </script>
-
-<!-- Include the salary advance requests handler script -->
-<script src="{{ asset('js/salary-advance-requests-handler.js') }}"></script>
 @endpush

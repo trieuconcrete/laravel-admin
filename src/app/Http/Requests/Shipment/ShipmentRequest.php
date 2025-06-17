@@ -116,7 +116,7 @@ class ShipmentRequest extends FormRequest
             'drivers' => 'array',
             'drivers.*.user_id' => 'required|exists:users,id',
             'drivers.*.deductions' => 'array',
-            'drivers.*.deductions.*' => 'nullable|numeric|min:0',
+            'drivers.*.deductions.*' => 'nullable'
         ];
     }
 

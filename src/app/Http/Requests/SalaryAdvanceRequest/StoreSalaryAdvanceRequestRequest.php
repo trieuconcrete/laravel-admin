@@ -18,6 +18,20 @@ class StoreSalaryAdvanceRequestRequest extends FormRequest
     }
 
     /**
+     * Summary of prepareForValidation
+     * @return void
+     */
+    public function prepareForValidation()
+    {
+        if ($this->amount) {
+            $this->merge([
+                'amount' => str_replace('.', '', $this->amount),
+            ]);
+        }
+    }
+
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, mixed>
@@ -25,7 +39,7 @@ class StoreSalaryAdvanceRequestRequest extends FormRequest
     public function rules()
     {
         return [
-            'amount' => 'required|numeric|min:1',
+            'amount' => 'required|numeric|min:1|max:999999999',
             'status' => 'required|string|in:' . implode(',', array_keys(SalaryAdvanceRequest::getStatuses())),
             'reason' => 'nullable|string|max:500',
             'user_id' => 'required|exists:users,id',

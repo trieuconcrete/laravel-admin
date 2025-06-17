@@ -6,9 +6,6 @@
  */
 
 document.addEventListener("DOMContentLoaded", function() {
-    // Initialize the form submission handler
-    initSalaryAdvanceRequestForm();
-    
     // Listen for month changes to reload the requests
     const monthSelect = document.getElementById('month-select');
     if (monthSelect) {
@@ -17,79 +14,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
-
-/**
- * Initialize the salary advance request form
- */
-function initSalaryAdvanceRequestForm() {
-    const form = document.getElementById('salaryAdvanceRequestForm');
-    if (!form) return;
-    
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const submitBtn = $('#salaryAdvanceRequestSubmitBtn');
-        const errorContainer = $('#salaryAdvanceRequestErrors');
-        
-        // Clear previous errors
-        errorContainer.hide().empty();
-        
-        // Disable submit button
-        submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
-        
-        // Submit form via AJAX
-        $.ajax({
-            url: form.action,
-            type: 'POST',
-            data: new FormData(form),
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                // Enable submit button
-                submitBtn.prop('disabled', false).text('Tạo');
-                
-                // Reset form
-                form.reset();
-                
-                // Close modal
-                $('#salaryAdvanceRequestModal').modal('hide');
-                
-                // Show success message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Thành công!',
-                    text: response.message || 'Tạo yêu cầu ứng lương thành công',
-                    showConfirmButton: false,
-                    timer: 2000
-                });
-                
-                // Refresh the salary advance requests list
-                refreshSalaryAdvanceRequests();
-            },
-            error: function(xhr) {
-                // Enable submit button
-                submitBtn.prop('disabled', false).text('Tạo');
-                
-                // Show error message
-                if (xhr.status === 422) {
-                    // Validation errors
-                    let errors = xhr.responseJSON.errors;
-                    let errorMessage = '<ul class="mb-0">';
-                    
-                    $.each(errors, function(key, value) {
-                        errorMessage += '<li>' + value[0] + '</li>';
-                    });
-                    
-                    errorMessage += '</ul>';
-                    errorContainer.html(errorMessage).show();
-                } else {
-                    // Other errors
-                    errorContainer.text(xhr.responseJSON?.message || 'Đã xảy ra lỗi. Vui lòng thử lại.').show();
-                }
-            }
-        });
-    });
-}
 
 /**
  * Refresh the salary advance requests list
@@ -141,7 +65,7 @@ function refreshSalaryAdvanceRequests() {
                     <tr>
                         <td>${request.request_code}</td>
                         <td>${request.formatted_request_date}</td>
-                        <td class="text-end">${request.formatted_amount} đ</td>
+                        <td>${request.formatted_amount} đ</td>
                         <td>${request.advance_month}</td>
                         <td>${request.reason || 'Không có'}</td>
                         <td>
