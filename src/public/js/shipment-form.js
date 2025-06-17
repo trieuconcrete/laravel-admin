@@ -131,6 +131,10 @@ function addDriverRow(personTable, personDeductionTypes, users) {
         </td>
         ${deductionInputs}
         <td>
+            <input type="text" name="drivers[${driverRowCount}][deductions][notes]" class="form-control form-control-sm">
+            <div class="text-danger" id="error-drivers-${driverRowCount}-deductions-notes"></div>
+        </td>
+        <td>
             <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, ${driverRowCount})"><i class="ri-delete-bin-fill"></i></button>
             <input type="hidden" name="driver_rows[]" value="${driverRowCount}">
         </td>

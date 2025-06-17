@@ -156,6 +156,13 @@ class ShipmentService
                         $user_id = (int)$person['user_id'];
                         
                         if (!empty($person['deductions'])) {
+                            // Extract notes from deductions array if it exists
+                            $notes = null;
+                            if (isset($person['deductions']['notes'])) {
+                                $notes = $person['deductions']['notes'];
+                                unset($person['deductions']['notes']); // Remove notes from deductions array
+                            }
+                            
                             foreach ($person['deductions'] as $deduction_type_id => $amount) {
                                 // Kiểm tra deduction_type_id và amount có hợp lệ
                                 if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0) {
@@ -164,6 +171,7 @@ class ShipmentService
                                         'shipment_id' => $shipment->id,
                                         'shipment_deduction_type_id' => (int)$deduction_type_id ?? null,
                                         'amount' => (float)$amount ?? null,
+                                        'notes' => $notes, // Add notes field
                                     ]);
                                 }
                             }

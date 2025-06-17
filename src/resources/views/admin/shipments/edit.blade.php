@@ -281,6 +281,7 @@
                                                                 @foreach($personDeductionTypes as $type)
                                                                     <th>{{ $type->name }}</th>
                                                                 @endforeach
+                                                                <th>Notes</th>
                                                                 <th></th>
                                                             </tr>
                                                         </thead>
@@ -313,6 +314,10 @@
                                                                             @error('drivers.'.$i.'.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
                                                                     @endforeach
+                                                                    <td>
+                                                                        <input type="text" name="drivers[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.notes', isset($driver['deductions'][$type->id]['notes']) ? $driver['deductions'][$type->id]['notes'] : '') }}">
+                                                                        @error('drivers.{{ $i }}.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    </td>
                                                                     <td>
                                                                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
                                                                         <input type="hidden" name="driver_rows[]" value="{{ $i }}">

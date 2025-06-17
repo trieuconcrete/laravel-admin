@@ -343,7 +343,7 @@ class UserService
                 'status_label' => $request->status_label,
                 'status_color' => $request->status_color,
                 'reason' => $request->reason,
-                'advance_month' => $request->advance_month,
+                'advance_month' => $request->advance_month ? $request->advance_month->format('m/Y') : null,
                 'request_date' => $request->request_date,
                 'formatted_request_date' => $request->request_date ? $request->request_date->format(config('app.date_format', 'd/m/Y')) : null,
                 'created_at' => $request->created_at,
