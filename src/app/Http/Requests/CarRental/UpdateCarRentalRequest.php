@@ -21,11 +21,10 @@ class UpdateCarRentalRequest extends FormRequest
     {
         return [
             'customer_id' => 'required',
-            // 'pickup_datetime' => 'required|' . $this->getSystemDateFormatRule(),
-            // 'valid_until' => 'nullable|after_or_equal:pickup_datetime|' . $this->getSystemDateFormatRule(),
+            'status' => 'required',
             'description' => 'nullable|string',
             'notes' => 'nullable|string',
-            // 'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240'
+            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240'
         ];
     }
 
@@ -37,13 +36,11 @@ class UpdateCarRentalRequest extends FormRequest
     {
         return [
             'customer_id.required' => 'Khách hàng là bắt buộc',
-            'pickup_datetime.required' => 'Ngày bắt đầu là bắt buộc',
+            'status.required' => 'Trạng thái là bắt buộc',
             'pickup_datetime.date' => 'Ngày bắt đầu không đúng định dạng',
-            'valid_until.required' => 'Ngày hết hạn là bắt buộc',
             'valid_until.date' => 'Ngày hết hạn không đúng định dạng',
             'valid_until.after_or_equal' => 'Ngày hết hạn phải sau hoặc bằng ngày bắt đầu',
             'file.mimes' => 'File đính kèm phải có định dạng: pdf, doc, docx, xls, xlsx',
-            'file.required' => 'File đính kèm là băt buộc',
             'file.max' => 'File đính kèm không được vượt quá 10MB'
         ];
     }
