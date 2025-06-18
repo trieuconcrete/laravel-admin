@@ -25,6 +25,10 @@ use App\Repositories\Eloquent\QuoteHistoryRepository;
 use App\Repositories\Interface\ShipmentRepositoryInterface;
 use App\Repositories\Eloquent\ShipmentRepository;
 use App\Repositories\Interface\CarRentalRepositoryInterface;
+use App\Repositories\Eloquent\SalaryDetailRepository;
+use App\Repositories\Eloquent\SalaryPeriodRepository;
+use App\Repositories\Interface\SalaryPeriodRepositoryInterface;
+use App\Repositories\Interface\SalaryDetailRepositoryInterface;
 
 /**
  * Summary of RepositoryServiceProvider
@@ -48,6 +52,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(QuoteHistoryRepositoryInterface::class, QuoteHistoryRepository::class);
         $this->app->bind(ShipmentRepositoryInterface::class, ShipmentRepository::class);
         $this->app->bind(CarRentalRepositoryInterface::class, CarRentalRepository::class);
+        $this->app->bind(SalaryDetailRepositoryInterface::class, SalaryDetailRepository::class);
+        $this->app->bind(SalaryPeriodRepositoryInterface::class, SalaryPeriodRepository::class);
     }
 
     /**

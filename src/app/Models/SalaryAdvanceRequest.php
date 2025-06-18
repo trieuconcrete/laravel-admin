@@ -35,6 +35,7 @@ class SalaryAdvanceRequest extends Model
         'status',
         'created_by',
         'updated_by',
+        'type'
     ];
 
     /**
@@ -62,6 +63,11 @@ class SalaryAdvanceRequest extends Model
     const STATUS_DEDUCTED = 'deducted';
     const STATUS_CANCELLED = 'cancelled';
 
+    const TYPE_SALARY = 'salary';
+    const TYPE_BONUS = 'bonus';
+    const TYPE_PENALTY = 'penalty';
+    const TYPE_OTHER = 'other';
+
     /**
      * Get all available statuses
      *
@@ -78,6 +84,47 @@ class SalaryAdvanceRequest extends Model
             self::STATUS_DEDUCTED => 'Đã khấu trừ',
             self::STATUS_CANCELLED => 'Đã hủy',
         ];
+    }
+
+    
+    /**
+     * Get all available types
+     *
+     * @return array
+     */
+    public static function getTypes(): array
+    {
+        return [
+            self::TYPE_SALARY => 'Ứng lương',
+            self::TYPE_BONUS => 'Tiền thưởng',
+            self::TYPE_PENALTY => 'Phạt',
+            // self::TYPE_OTHER => 'Khác',
+        ];
+    }
+
+    /**
+     * Get type label attribute
+     *
+     * @return string
+     */
+    public function getTypeLabelAttribute(): string
+    {
+        return self::getTypes()[$this->type] ?? 'Ứng lương';
+    }
+
+    /**
+     * Get type color attribute for UI
+     *
+     * @return string
+     */
+    public function getTypeColorAttribute(): string
+    {
+        return match($this->type) {
+            self::TYPE_SALARY => 'warning',
+            self::TYPE_BONUS => 'success',
+            self::TYPE_PENALTY => 'danger',
+            default => 'secondary',
+        };
     }
 
     /**
@@ -213,24 +260,36 @@ class SalaryAdvanceRequest extends Model
     }
 
     /**
-     * Generate request code
+     * Generate a unique request code
      *
+     * @param string $type The request type
      * @return string
      */
-    public static function generateRequestCode(): string
+    public static function generateRequestCode($type = self::TYPE_SALARY)
     {
-        $date = Carbon::now()->format('Ymd');
-        $lastRequest = self::whereDate('created_at', Carbon::today())
+        $date = now()->format('ymd');
+        
+        // Get prefix based on request type
+        $prefix = match ($type) {
+            self::TYPE_SALARY => 'UL',
+            self::TYPE_BONUS => 'THUONG',
+            self::TYPE_PENALTY => 'PHAT',
+            default => 'UL',
+        };
+        
+        // Find the last request with the same prefix and date
+        $lastRequest = self::where('request_code', 'like', $prefix . $date . '%')
                            ->orderBy('id', 'desc')
                            ->first();
         
-        if ($lastRequest && preg_match('/UL' . $date . '(\d{5})/', $lastRequest->request_code, $matches)) {
+        // Check for existing requests with the same prefix
+        if ($lastRequest && preg_match('/' . $prefix . $date . '(\d{5})/', $lastRequest->request_code, $matches)) {
             $sequence = intval($matches[1]) + 1;
         } else {
             $sequence = 1;
         }
         
-        return 'UL' . $date . str_pad($sequence, 5, '0', STR_PAD_LEFT);
+        return $prefix . $date . str_pad($sequence, 5, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -243,7 +302,7 @@ class SalaryAdvanceRequest extends Model
         // Auto generate request code
         static::creating(function ($request) {
             if (empty($request->request_code)) {
-                $request->request_code = self::generateRequestCode();
+                $request->request_code = self::generateRequestCode($request->type);
             }
             
             if (empty($request->request_date)) {

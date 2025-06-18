@@ -11,6 +11,15 @@
                         <div class="flex-grow-1">
                             <h4><i class="ri-currency-fill fs-1"></i> Quản lý lương</h4>
                         </div>
+                        <div class="mt-3 mt-lg-0">
+                            <div class="row g-3 mb-0 align-items-center">
+                                <div class="col-auto">
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target=".sync-salary-model">Đồng bộ lương</button>
+                                </div>
+                                <!--end col-->
+                            </div>
+                            <!--end row-->
+                        </div>
                     </div><!-- end card header -->
                 </div>
                 <!--end col-->
@@ -225,6 +234,9 @@
                                     <th>Lương cơ bản</th>
                                     <th>Phụ cấp</th>
                                     <th>Chi phí chuyến hàng</th>
+                                    <th>Thưởng</th>
+                                    <th>Phạt</th>
+                                    <th>Ứng lương</th>
                                     <th>Tổng trước BHXH</th>
                                     <th>BHXH (10%)</th>
                                     <th>Tổng lương</th>
@@ -246,8 +258,11 @@
                                     <td>{{ $salary['department'] }}</td>
                                     <td>{{ number_format($salary['base_salary']) }} ₫</td>
                                     <td>{{ number_format($salary['allowance']) }} ₫</td>
-                                    <td>{{ number_format($salary['shipment_earnings']) }} ₫</td>
-                                    <td>{{ number_format($salary['base_salary'] + $salary['allowance'] + $salary['shipment_earnings']) }} ₫</td>
+                                    <td>{{ number_format($salary['total_expenses']) }} ₫</td>
+                                    <td>{{ number_format($salary['bonus']) }} ₫</td>
+                                    <td>{{ number_format($salary['penalty']) }} ₫</td>
+                                    <td>{{ number_format($salary['other_deduction']) }} ₫</td>
+                                    <td>{{ number_format($salary['total_salary']) }} ₫</td>
                                     <td>{{ number_format($salary['insurance']) }} ₫</td>
                                     <td>{{ number_format($salary['total']) }} ₫</td>
                                     {{--  <td>
@@ -478,5 +493,70 @@
         },
         colors: chartPieGradientColors
     }, (chart = new ApexCharts(document.querySelector("#gradient_chart"), options)).render());
+</script>
+<!-- Sync Salary Modal -->
+<div class="modal fade sync-salary-model" tabindex="-1" role="dialog" aria-labelledby="syncSalaryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="syncSalaryModalLabel">Đồng bộ dữ liệu lương</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="syncSalaryForm" action="{{ route('admin.salary.sync') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="salaryPeriodMonth" class="form-label">Kỳ lương</label>
+                        <select class="form-select" id="salaryPeriodMonth" name="month" required>
+                            @php
+                                $currentMonth = Carbon\Carbon::now();
+                                // Generate last 12 months
+                                for($i = 0; $i < 12; $i++) {
+                                    $monthOption = $currentMonth->copy()->subMonths($i)->format('m/Y');
+                                    $selected = $selectedMonth == $monthOption ? 'selected' : '';
+                                    echo "<option value=\"$monthOption\" $selected>Tháng $monthOption</option>";
+                                }
+                            @endphp
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="salaryPeriodName" class="form-label">Tên kỳ lương</label>
+                        <input type="text" class="form-control" id="salaryPeriodName" name="period_name" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="salaryPeriodNotes" class="form-label">Ghi chú</label>
+                        <textarea class="form-control" id="salaryPeriodNotes" name="notes" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-success" id="syncSalaryBtn">Đồng bộ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Update period name when month changes
+        $('#salaryPeriodMonth').on('change', function() {
+            const selectedMonth = $(this).val();
+            $('#salaryPeriodName').val('Kỳ lương tháng ' + selectedMonth);
+        });
+        
+        // Trigger change on load to set initial value
+        $('#salaryPeriodMonth').trigger('change');
+        
+        // Handle sync button click
+        $('#syncSalaryBtn').on('click', function() {
+            // Show loading indicator
+            $(this).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
+            $(this).prop('disabled', true);
+            
+            // Submit the form
+            $('#syncSalaryForm').submit();
+        });
+    });
 </script>
 @endpush

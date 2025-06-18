@@ -168,4 +168,22 @@ class User extends Authenticatable
             }
         });
     }
+
+    public function salaryAdvanceRequests()
+    {
+        return $this->hasMany(SalaryAdvanceRequest::class, 'user_id');
+    }
+
+    /**
+     * Summary of getTotalSalaryAdvancesRequest
+     * @param mixed $type
+     * @param mixed $startDate
+     * @param mixed $endDate
+     */
+    public function getTotalSalaryAdvancesRequest($type, $startDate, $endDate)
+    {
+        return $this->salaryAdvanceRequests()->where('type', $type)
+            ->whereBetween('advance_month', [$startDate, $endDate])
+            ->sum('amount');
+    }
 }

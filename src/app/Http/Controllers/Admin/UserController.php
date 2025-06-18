@@ -122,6 +122,14 @@ class UserController extends Controller
         
         // Get salary advance requests for the user
         $salaryAdvanceData = $this->userService->getSalaryAdvanceRequests($user, $selectedMonth);
+
+        $startDate = Carbon::parse($request->get('month', now()))->startOfMonth();
+        $endDate = Carbon::parse($request->get('month', now()))->endOfMonth();
+
+        $totalOtherDeduction = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
+        $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
+        $totalPenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
+        
         
         // Extract data from service responses
         extract($salaryData);
@@ -132,7 +140,7 @@ class UserController extends Controller
             'user', 'positions', 'licenses', 'statuses', 'licenseStatuses',
             'shipments', 'selectedMonth', 'salaryBase', 'totalAllowance', 
             'totalExpenses', 'insuranceDeduction', 'totalSalary', 'salaryDetails',
-            'requests'
+            'requests', 'totalOtherDeduction', 'totalBonus', 'totalPenalty'
         ));
     }
 
@@ -239,7 +247,7 @@ class UserController extends Controller
             
             return response()->json([
                 'success' => true,
-                'message' => 'Tạo yêu cầu ứng lương thành công',
+                'message' => 'Tạo yêu cầu thành công',
                 'data' => [
                     'id' => $salaryAdvanceRequest->id,
                     'request_code' => $salaryAdvanceRequest->request_code,
