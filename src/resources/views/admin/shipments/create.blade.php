@@ -284,6 +284,7 @@
                                                                 @foreach($personDeductionTypes as $type)
                                                                     <th>{{ $type->name }}</th>
                                                                 @endforeach
+                                                                <th>Notes</th>
                                                                 <th></th>
                                                             </tr>
                                                         </thead>
@@ -311,6 +312,10 @@
                                                                         </td>
                                                                     @endforeach
                                                                     <td>
+                                                                        <input type="text" name="drivers[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.notes', $driver['deductions'][$type->id]['notes'] ?? '') }}">
+                                                                        @error('drivers.{{ $i }}.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    </td>
+                                                                    <td>
                                                                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
                                                                         <input type="hidden" name="driver_rows[]" value="{{ $i }}">
                                                                     </td>
@@ -333,6 +338,10 @@
                                                                         @error('drivers.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                 @endforeach
+                                                                <td>
+                                                                    <input type="text" name="drivers[0][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.notes', $driver['deductions'][$type->id]['notes'] ?? '') }}">
+                                                                    @error('drivers.0.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                </td>
                                                                 <td>
                                                                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, 0)"><i class="ri-delete-bin-fill"></i></button>
                                                                     <input type="hidden" name="driver_rows[]" value="0">
@@ -469,6 +478,38 @@
         
         // Thêm event listener cho nút thêm người
         document.getElementById('addPersonBtn').onclick = function() {
+            // Kiểm tra số lượng user trước khi thêm
+            const selectedIds = getSelectedUserIds();
+            const totalUsers = Object.keys(users).length;
+            const currentRows = personTable.querySelectorAll('tr').length;
+            
+            console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUsers, 'Current Rows:', currentRows);
+            
+            // Kiểm tra số lượng hàng hiện tại với tổng số users
+            if (currentRows >= totalUsers) {
+                Swal.fire({
+                    title: 'Không thể thêm',
+                    text: 'Đã sử dụng hết tất cả nhân sự có sẵn. Số lượng nhân sự: ' + totalUsers,
+                    icon: 'warning',
+                    confirmButtonText: 'Đóng'
+                });
+                return false;
+            }
+            
+            // Kiểm tra nếu đã sử dụng hết tất cả người dùng
+            if (selectedIds.length >= totalUsers) {
+                Swal.fire({
+                    title: 'Không thể thêm',
+                    text: 'Đã sử dụng hết tất cả nhân sự có sẵn',
+                    icon: 'warning',
+                    confirmButtonText: 'Đóng'
+                });
+                return false;
+            }
+            
+            // Log users object for debugging
+            console.log('Users object:', users);
+            // Nếu còn người dùng khả dụng, thêm hàng mới
             addDriverRow(personTable, personDeductionTypes, users);
         };
         

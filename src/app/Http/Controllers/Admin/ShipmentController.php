@@ -55,8 +55,8 @@ class ShipmentController extends Controller
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
         $vehicles = Vehicle::where('status', Vehicle::STATUS_ACTIVE)->pluck('plate_number', 'vehicle_id');
         $users = User::whereIn('role', ['driver', 'assistant', 'helper'])->where('status', UserStatus::ACTIVE)->pluck('full_name', 'id');
-        $deductionTypes = ShipmentDeductionType::where('type', 'expense')->get();
-        $personDeductionTypes =ShipmentDeductionType::where('type','driver_and_busboy')->get();
+        $deductionTypes = ShipmentDeductionType::where('type', 'expense')->where('status', 'active')->get();
+        $personDeductionTypes =ShipmentDeductionType::where('type','driver_and_busboy')->where('status', 'active')->get();
         return view('admin.shipments.create', compact('customers', 'vehicles', 'users', 'deductionTypes', 'personDeductionTypes'));
     }
 
@@ -87,8 +87,8 @@ class ShipmentController extends Controller
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
         $vehicles = Vehicle::where('status', Vehicle::STATUS_ACTIVE)->pluck('plate_number', 'vehicle_id');
         $users = User::whereIn('role', ['driver', 'assistant', 'helper'])->where('status', UserStatus::ACTIVE)->pluck('full_name', 'id');
-        $deductionTypes = ShipmentDeductionType::where('type', 'expense')->get();
-        $personDeductionTypes = ShipmentDeductionType::where('type','driver_and_busboy')->get();
+        $deductionTypes = ShipmentDeductionType::where('type', 'expense')->where('status', 'active')->get();
+        $personDeductionTypes = ShipmentDeductionType::where('type','driver_and_busboy')->where('status', 'active')->get();
         $shipmentStatus = Shipment::$statuses;
         
         // Chuẩn bị dữ liệu cho form edit

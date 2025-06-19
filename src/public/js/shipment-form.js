@@ -34,6 +34,9 @@ function removeDriverRow(button, rowIndex) {
     
     // Cập nhật lại danh sách dropdown và trạng thái nút thêm
     updateUserDropdowns();
+    
+    // Cập nhật trạng thái nút thêm nhân sự
+    updateAddPersonButtonState();
 }
 
 /**
@@ -72,9 +75,6 @@ function updateUserDropdowns() {
             }
         });
     });
-    
-    // Cập nhật trạng thái nút thêm nhân sự
-    updateAddPersonButtonState();
 }
 
 /**
@@ -88,6 +88,8 @@ function addDriverRow(personTable, personDeductionTypes, users) {
     // Kiểm tra xem còn người dùng khả dụng không
     const selectedIds = getSelectedUserIds();
     const totalUsers = Object.keys(users).length;
+    
+    console.log('Selected IDs:', selectedIds.length, 'Total Users:', totalUsers);
     
     // Nếu đã chọn hết tất cả người dùng, không cho thêm nữa
     if (selectedIds.length >= totalUsers) {
@@ -180,10 +182,7 @@ function addDriverRow(personTable, personDeductionTypes, users) {
     });
     
     // Kiểm tra nếu đã sử dụng hết tất cả người dùng, vô hiệu hóa nút thêm
-    if (selectedIds.length + 1 >= totalUsers) {
-        document.getElementById('addPersonBtn').disabled = true;
-        document.getElementById('addPersonBtn').classList.replace('btn-outline-primary', 'btn-outline-secondary');
-    }
+    updateAddPersonButtonState();
     
     return true;
 }
@@ -293,12 +292,13 @@ function updateAddPersonButtonState() {
     const totalUsers = Object.keys(users).length;
     const addPersonBtn = document.getElementById('addPersonBtn');
     
+    console.log('updateAddPersonButtonState - Selected IDs:', selectedIds.length, 'Total Users:', totalUsers);
+    
+    // Nếu đã sử dụng hết tất cả người dùng, vô hiệu hóa nút thêm
     if (selectedIds.length >= totalUsers) {
-        // Nếu đã sử dụng hết tất cả người dùng, vô hiệu hóa nút thêm
         addPersonBtn.disabled = true;
         addPersonBtn.classList.replace('btn-outline-primary', 'btn-outline-secondary');
     } else {
-        // Nếu còn người dùng khả dụng, kích hoạt nút thêm
         addPersonBtn.disabled = false;
         if (addPersonBtn.classList.contains('btn-outline-secondary')) {
             addPersonBtn.classList.replace('btn-outline-secondary', 'btn-outline-primary');
@@ -530,7 +530,14 @@ function validateShipmentForm(form) {
  * @param {number} initialDriverCount - Số lượng hàng driver ban đầu
  */
 function initShipmentForm(initialDriverCount) {
-    driverRowCount = initialDriverCount;
+    // Khởi tạo giá trị ban đầu cho driverRowCount
+    driverRowCount = initialDriverCount - 1;
+    
+    // Khởi tạo các dropdown user_id
+    updateUserDropdowns();
+    
+    // Cập nhật trạng thái nút thêm nhân sự
+    updateAddPersonButtonState();
     
     // Thêm event listener cho tất cả các trường số hiện có (ngoại trừ unit-input)
     document.querySelectorAll('input[type="number"]:not(.unit-input)').forEach(input => {

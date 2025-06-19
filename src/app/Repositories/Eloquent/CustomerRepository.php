@@ -72,7 +72,8 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
             ->whereBetween('departure_time', [$startDate, $endDate])
             ->with(['shipmentDeductions' => function ($query) {
                 $query->with(['shipmentDeductionType' => function ($query) {
-                    $query->where('type', ShipmentDeductionType::TYPE_EXPENSE);
+                    $query->where('type', ShipmentDeductionType::TYPE_EXPENSE)
+                        ->where('status', 'active');
                 }]);
             }, 'vehicle'])
             ->get();

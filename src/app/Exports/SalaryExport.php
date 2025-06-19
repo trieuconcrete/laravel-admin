@@ -19,6 +19,8 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Models\SalaryAdvanceRequest;
+USE App\Constants;
 
 class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
 {
@@ -37,7 +39,7 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         $this->user = $user;
         $this->shipments = $shipments;
         $this->month = $month;
-        $this->deductionTypes = ShipmentDeductionType::all()->keyBy('id');
+        $this->deductionTypes = ShipmentDeductionType::where('status', 'active')->get()->keyBy('id');
     }
 
     /**
@@ -146,11 +148,11 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Set widths for dynamic deduction columns
         foreach ($deductionColumns as $name => $columnLetter) {
-            $sheet->getColumnDimension($columnLetter)->setWidth(15); // Deduction columns
+            $sheet->getColumnDimension($columnLetter)->setWidth(20); // Deduction columns
         }
         
         // Set width for notes column (last column)
-        $sheet->getColumnDimension($notesColumnLetter)->setWidth(25); // GHI CHÚ
+        $sheet->getColumnDimension($notesColumnLetter)->setWidth(15); // GHI CHÚ
         
         // Style the header row
         $sheet->getStyle('A8:' . $lastHeaderColumn . '8')->applyFromArray([
@@ -188,6 +190,17 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         // Format the base salary cell
         $sheet->getStyle('E' . $row)->getNumberFormat()->setFormatCode('#,##0');
         $sheet->getStyle('E' . $row)->getFont()->setBold(true);
+        
+        // Apply special formatting to the base salary row
+        $baseSalaryRowRange = 'A' . $row . ':' . $lastHeaderColumn . $row;
+        $sheet->getStyle($baseSalaryRowRange)->applyFromArray([
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'F2F2F2',
+                ],
+            ],
+        ]);
         
         // Move to next row for shipment data
         $row++;
@@ -254,11 +267,6 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Add base salary row with deduction sums
         $totalRow = $row;
-        $sheet->setCellValue('A' . $totalRow, 'LƯƠNG CƠ BẢN:');
-        $sheet->mergeCells('A' . $totalRow . ':D' . $totalRow);
-        $sheet->getStyle('A' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('E' . $totalRow, $this->user->salary_base);
-        $sheet->getStyle('E' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
         
         // Add deduction sums to the same row
         foreach ($deductionColumns as $deductionName => $column) {
@@ -276,56 +284,187 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         // Add empty cell in notes column for the total row
         $sheet->setCellValue($notesColumnLetter . $totalRow, '');
         
+        // Apply table borders to the entire data section (from header row to total row)
+        $dataRange = 'A8:' . $lastHeaderColumn . $totalRow;
+        $sheet->getStyle($dataRange)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                ],
+                'outline' => [
+                    'borderStyle' => Border::BORDER_MEDIUM,
+                ],
+            ],
+        ]);
+        
+        // Apply special formatting to the total row
+        $totalRowRange = 'A' . $totalRow . ':' . $lastHeaderColumn . $totalRow;
+        $sheet->getStyle($totalRowRange)->applyFromArray([
+            'font' => [
+                'bold' => true,
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => [
+                    'rgb' => 'E2EFDA',
+                ],
+            ],
+            'borders' => [
+                'top' => [
+                    'borderStyle' => Border::BORDER_MEDIUM,
+                ],
+                'bottom' => [
+                    'borderStyle' => Border::BORDER_MEDIUM,
+                ],
+            ],
+        ]);
+        
         // Move to next row for total
         $row++;
         $totalRow = $row;
         
-        // Add total row
-        $sheet->setCellValue('A' . $totalRow, 'TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY:');
-        $sheet->mergeCells('A' . $totalRow . ':D' . $totalRow);
-        $sheet->getStyle('A' . $totalRow)->getFont()->setBold(true);
-        $sheet->getStyle('A' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        // Get salary advance data for the month
+        $startDate = Carbon::parse($this->month)->startOfMonth();
+        $endDate = Carbon::parse($this->month)->endOfMonth();
+        $totalTypeSalary = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
+        $totalTypeBonus = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
+        $totalTypePenalty = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
         
-        // Calculate total salary (Lương Cơ Bản + Tổng chi phí)
+        // Add LƯƠNG CƠ BẢN row (base salary with deduction sums)
+        $baseSalaryRow = $row++;
+        $sheet->setCellValue('A' . $baseSalaryRow, 'LƯƠNG CƠ BẢN:');
+        $sheet->mergeCells('A' . $baseSalaryRow . ':D' . $baseSalaryRow);
+        $sheet->getStyle('A' . $baseSalaryRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $baseSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('E' . $baseSalaryRow, $this->user->salary_base);
+        $sheet->getStyle('E' . $baseSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        
+        // Highlight LƯƠNG CƠ BẢN row with yellow background
+        $sheet->getStyle('A' . $baseSalaryRow . ':E' . $baseSalaryRow)->applyFromArray([
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'color' => ['rgb' => 'FFFF00'],
+            ],
+        ]);
+        
+        // Add empty cell in notes column for the base salary row
+        $sheet->setCellValue($notesColumnLetter . $baseSalaryRow, '');
+        
+        // Add TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY row
+        $totalSalaryRow = $row++;
         $totalSalary = $this->user->salary_base + $totalDeductions;
+        $sheet->setCellValue('A' . $totalSalaryRow, 'TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY:');
+        $sheet->mergeCells('A' . $totalSalaryRow . ':D' . $totalSalaryRow);
+        $sheet->getStyle('A' . $totalSalaryRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $totalSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('E' . $totalSalaryRow, $totalSalary);
+        $sheet->getStyle('E' . $totalSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
         
-        // Add the total salary amount in column E
-        $sheet->setCellValue('E' . $totalRow, $totalSalary);
-        $sheet->getStyle('E' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
+        // Highlight TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY row with yellow background
+        $sheet->getStyle('A' . $totalSalaryRow . ':E' . $totalSalaryRow)->applyFromArray([
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'color' => ['rgb' => 'FFFF00'],
+            ],
+        ]);
         
-        // Move to next row for insurance deduction
-        $row++;
-        $insuranceRow = $row;
+        // Add empty cell in notes column for the total salary row
+        $sheet->setCellValue($notesColumnLetter . $totalSalaryRow, '');
         
-        // Add insurance deduction row (10% of total: base salary + deductions)
-        $totalBeforeInsurance = $this->user->salary_base + $totalDeductions;
-        $insuranceAmount = $totalBeforeInsurance * 0.1; // 10% of total
+        // Add THƯỞNG row
+        $bonusRow = $row++;
+        $sheet->setCellValue('A' . $bonusRow, 'THƯỞNG:');
+        $sheet->mergeCells('A' . $bonusRow . ':D' . $bonusRow);
+        $sheet->getStyle('A' . $bonusRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $bonusRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('E' . $bonusRow, $totalTypeBonus);
+        $sheet->getStyle('E' . $bonusRow)->getNumberFormat()->setFormatCode('#,##0');
+        
+        // Highlight THƯỞNG row with yellow background
+        $sheet->getStyle('A' . $bonusRow . ':E' . $bonusRow)->applyFromArray([
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'color' => ['rgb' => 'FFFF00'],
+            ],
+        ]);
+        
+        // Add empty cell in notes column for the bonus row
+        $sheet->setCellValue($notesColumnLetter . $bonusRow, '');
+        
+        // Add ĐÃ ỨNG LƯƠNG row
+        $advanceSalaryRow = $row++;
+        $sheet->setCellValue('A' . $advanceSalaryRow, 'TRỪ ỨNG LƯƠNG:');
+        $sheet->mergeCells('A' . $advanceSalaryRow . ':D' . $advanceSalaryRow);
+        $sheet->getStyle('A' . $advanceSalaryRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $advanceSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('E' . $advanceSalaryRow, $totalTypeSalary);
+        $sheet->getStyle('E' . $advanceSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        
+        // Highlight TỔNG ỨNG LƯƠNG row with yellow background
+        $sheet->getStyle('A' . $advanceSalaryRow . ':E' . $advanceSalaryRow)->applyFromArray([
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'color' => ['rgb' => 'FFFF00'],
+            ],
+        ]);
+        
+        // Add empty cell in notes column for the advance salary row
+        $sheet->setCellValue($notesColumnLetter . $advanceSalaryRow, '');
+        
+        // Add PHẠT row
+        $penaltyRow = $row++;
+        $sheet->setCellValue('A' . $penaltyRow, 'TRỪ PHẠT:');
+        $sheet->mergeCells('A' . $penaltyRow . ':D' . $penaltyRow);
+        $sheet->getStyle('A' . $penaltyRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $penaltyRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('E' . $penaltyRow, $totalTypePenalty);
+        $sheet->getStyle('E' . $penaltyRow)->getNumberFormat()->setFormatCode('#,##0');
+        
+        // Highlight PHẠT row with yellow background
+        $sheet->getStyle('A' . $penaltyRow . ':E' . $penaltyRow)->applyFromArray([
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'color' => ['rgb' => 'FFFF00'],
+            ],
+        ]);
+        
+        // Add empty cell in notes column for the penalty row
+        $sheet->setCellValue($notesColumnLetter . $penaltyRow, '');
+        
+        // Calculate total before insurance
+        $totalBeforeInsurance = ($this->user->salary_base + $totalDeductions + $totalTypeBonus) - ($totalTypeSalary + $totalTypePenalty);
+        
+        // Add TRỪ BHXH row
+        $insuranceRow = $row++;
+        $insuranceDeduction = $totalBeforeInsurance * (Constants::TAX_IN_VAT/100); // 10% of total
         $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (10%):');
         $sheet->mergeCells('A' . $insuranceRow . ':D' . $insuranceRow);
+        $sheet->getStyle('A' . $insuranceRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $insuranceRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('E' . $insuranceRow, $insuranceAmount);
+        $sheet->setCellValue('E' . $insuranceRow, $insuranceDeduction);
         $sheet->getStyle('E' . $insuranceRow)->getNumberFormat()->setFormatCode('#,##0');
         
-        // Move to next row for remaining salary
-        $row++;
-        $remainingSalaryRow = $row;
-        
-        // Add remaining salary row (total before insurance - insurance)
-        $remainingSalary = $totalBeforeInsurance - $insuranceAmount;
+        // Add TỔNG LƯƠNG CÒN LẠI row
+        $remainingSalaryRow = $row++;
+        $totalSalaryRemaining = $totalBeforeInsurance - $insuranceDeduction;
         $sheet->setCellValue('A' . $remainingSalaryRow, 'TỔNG LƯƠNG CÒN LẠI:');
         $sheet->mergeCells('A' . $remainingSalaryRow . ':D' . $remainingSalaryRow);
+        $sheet->getStyle('A' . $remainingSalaryRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $remainingSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('E' . $remainingSalaryRow, $remainingSalary);
+        $sheet->setCellValue('E' . $remainingSalaryRow, $totalSalaryRemaining);
         $sheet->getStyle('E' . $remainingSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
         
-        // Style the additional calculation rows
-        $calculationStartRow = $totalRow;
-        $calculationEndRow = $row;
+        // Style the additional calculation rows (separate from the main table)
+        $calculationStartRow = $baseSalaryRow;
+        $calculationEndRow = $remainingSalaryRow;
         $calculationRange = 'A' . $calculationStartRow . ':E' . $calculationEndRow;
         $sheet->getStyle($calculationRange)->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
+                ],
+                'outline' => [
+                    'borderStyle' => Border::BORDER_MEDIUM,
                 ],
             ],
             'alignment' => [
@@ -355,26 +494,26 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         // Add empty cell in notes column for the remaining salary row
         $sheet->setCellValue($notesColumnLetter . $remainingSalaryRow, '');
         
-        // Set number formats for base salary column
-        $sheet->getStyle('E6:E' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
+        // Set number formats for base salary column (only for the data table, not calculation section)
+        $sheet->getStyle('E9:E' . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
         
         // Set number formats for deduction columns
         foreach ($deductionColumns as $column) {
-            $sheet->getStyle($column . '6:' . $column . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
+            $sheet->getStyle($column . '9:' . $column . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
         }
         
         // Set text alignment
-        $sheet->getStyle('A6:B' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('E6:E' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('A9:B' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('E9:E' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         
         // Set alignment for notes column
-        $sheet->getStyle($notesColumnLetter . '6:' . $notesColumnLetter . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
-        $sheet->getStyle($notesColumnLetter . '6:' . $notesColumnLetter . $totalRow)->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
-        $sheet->getStyle($notesColumnLetter . '6:' . $notesColumnLetter . $totalRow)->getAlignment()->setWrapText(true);
+        $sheet->getStyle($notesColumnLetter . '9:' . $notesColumnLetter . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+        $sheet->getStyle($notesColumnLetter . '9:' . $notesColumnLetter . $totalRow)->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->getStyle($notesColumnLetter . '9:' . $notesColumnLetter . $totalRow)->getAlignment()->setWrapText(true);
         
         // Set alignment for deduction columns
         foreach ($deductionColumns as $column) {
-            $sheet->getStyle($column . '6:' . $column . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            $sheet->getStyle($column . '9:' . $column . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         }
 
         return $sheet;

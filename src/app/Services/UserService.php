@@ -192,19 +192,17 @@ class UserService
             $shipmentAllowance = $shipment->shipmentDeductionTypeDriverAndBusboy($user->id)->sum('amount') ?? 0;
             $shipmentAmount = $shipment->shipmentDeductionTypeExpense()->sum('amount') ?? 0;
             
-            // Add to salary details if there's an amount or allowance
-            if ($shipmentAmount > 0 || $shipmentAllowance > 0) {
-                $salaryDetails[] = [
-                    'shipment_id' => $shipment->id,
-                    'shipment_code' => $shipment->shipment_code,
-                    'date' => $shipment->departure_time,
-                    'amount' => $shipmentAmount,
-                    'allowance' => $shipmentAllowance,
-                    'allowance_note' => $shipment->notes,
-                    'status' => $shipment->status_label,
-                    'notes' => $shipment->notes
-                ];
-            }
+            // Add to salary details
+            $salaryDetails[] = [
+                'shipment_id' => $shipment->id,
+                'shipment_code' => $shipment->shipment_code,
+                'date' => $shipment->departure_time,
+                'amount' => $shipmentAmount,
+                'allowance' => $shipmentAllowance,
+                'allowance_note' => $shipment->notes,
+                'status' => $shipment->status_label,
+                'notes' => $shipment->notes
+            ];
         }
 
         $totalAllowance = array_sum(array_column($salaryDetails, 'allowance')) ?? 0;
@@ -212,7 +210,7 @@ class UserService
         
         // Calculate insurance deduction (10% of total: salary base + allowances + expenses)
         $totalBeforeInsurance = ($user->salary_base ?? 0) + $totalAllowance + $totalExpenses;
-        $insuranceDeduction = $totalBeforeInsurance * 0.1; // 10% of total
+        $insuranceDeduction = $totalBeforeInsurance * (Constants::TAX_IN_VAT/100); // 10% of total
         
         // Calculate total salary - updated formula
         $totalSalary = $totalBeforeInsurance - $insuranceDeduction;
@@ -220,11 +218,11 @@ class UserService
         return [
             'shipments' => $shipments,
             'selectedMonth' => $selectedMonth,
-            'salaryBase' => $user->salary_base ?? 0,
-            'totalAllowance' => $totalAllowance,
-            'totalExpenses' => $totalExpenses,
-            'insuranceDeduction' => $insuranceDeduction,
-            'totalSalary' => $totalSalary,
+            'salaryBase' => $user->salary_base ?? 0, // lương cơ bản
+            'totalAllowance' => $totalAllowance, // tổng phụ cấp
+            'totalExpenses' => $totalExpenses, // tổng chi phí
+            'insuranceDeduction' => $insuranceDeduction, // khấu trừ bảo hiểm
+            'totalSalary' => $totalSalary, // tổng lương
             'salaryDetails' => $salaryDetails
         ];
     }
@@ -276,7 +274,7 @@ class UserService
         
         // Get shipments for the user for the selected month using date range
         $shipments = $this->shipmentRepository->getUserShipmentsByDateRange($user, $startDate, $endDate);
-        
+            
         // Create filename
         $timestamp = Carbon::now()->format('Ymd_His');
         $fileName = 'bangluong_' . $user->employee_code . '_' . $month . '_' . $year . '_' . $timestamp . '.xlsx';

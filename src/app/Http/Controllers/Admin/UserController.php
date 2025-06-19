@@ -119,12 +119,13 @@ class UserController extends Controller
         
         // Get salary details from service
         $salaryData = $this->userService->getSalaryDetails($user, $selectedMonth);
-        
+         
         // Get salary advance requests for the user
         $salaryAdvanceData = $this->userService->getSalaryAdvanceRequests($user, $selectedMonth);
 
-        $startDate = Carbon::parse($request->get('month', now()))->startOfMonth();
-        $endDate = Carbon::parse($request->get('month', now()))->endOfMonth();
+        $parsedMonth = Carbon::createFromFormat('m/Y', $selectedMonth);
+        $startDate = $parsedMonth->copy()->startOfMonth();
+        $endDate = $parsedMonth->copy()->endOfMonth();
 
         $totalOtherDeduction = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
         $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
