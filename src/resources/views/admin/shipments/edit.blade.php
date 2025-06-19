@@ -453,6 +453,38 @@
         
         // Thêm event listener cho nút thêm người
         document.getElementById('addPersonBtn').onclick = function() {
+            // Kiểm tra số lượng user trước khi thêm
+            const selectedIds = getSelectedUserIds();
+            const totalUsers = Object.keys(users).length;
+            const currentRows = personTable.querySelectorAll('tr').length;
+            
+            console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUsers, 'Current Rows:', currentRows);
+            
+            // Kiểm tra số lượng hàng hiện tại với tổng số users
+            if (currentRows >= totalUsers) {
+                Swal.fire({
+                    title: 'Không thể thêm',
+                    text: 'Đã sử dụng hết tất cả nhân sự có sẵn. Số lượng nhân sự: ' + totalUsers,
+                    icon: 'warning',
+                    confirmButtonText: 'Đóng'
+                });
+                return false;
+            }
+            
+            // Kiểm tra nếu đã sử dụng hết tất cả người dùng
+            if (selectedIds.length >= totalUsers) {
+                Swal.fire({
+                    title: 'Không thể thêm',
+                    text: 'Đã sử dụng hết tất cả nhân sự có sẵn',
+                    icon: 'warning',
+                    confirmButtonText: 'Đóng'
+                });
+                return false;
+            }
+            
+            // Log users object for debugging
+            console.log('Users object:', users);
+            // Nếu còn người dùng khả dụng, thêm hàng mới
             addDriverRow(personTable, personDeductionTypes, users);
         };
         

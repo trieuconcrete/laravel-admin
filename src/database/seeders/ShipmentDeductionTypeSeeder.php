@@ -8,11 +8,15 @@ class ShipmentDeductionTypeSeeder extends Seeder
 {
     public function run()
     {
+        ShipmentDeductionType::whereNotNull('id')->update([
+            'status' => 'inactive',
+        ]);
+
         $expenseTypes = [
-            'Bốc xếp', 'Neo xe', 'Công an', 'Cầu Đường', 'Tiền tự cầu', 'Khác',
+            'BỐC XẾP', 'CHI PHÍ CẦU ĐƯỜNG', 'CHI PHÍ KHÁC',
         ];
         $driverAndBusboyTypes = [
-            'Phụ cấp cơm trưa', 'Phụ cấp cơm tối', 'Phụ cấp chủ nhật', 'phụ cấp đi sớm', 'phụ cấp về khuya', 'phụ cấp lễ', 'phụ cấp khác',
+            'PHỤ CẤP TÀI 2', 'PHỤ CẤP TÀI 3', 'PHỤ CẤP CHỦ NHẬT', 'PHỤ CẤP ĐI XA', 'PHỤ CẤP SỚM/ĐÊM', 'PHỤ CẤP LƠ', 'PHỤ CẤP CƠM TỐI', 'PHỤ CẤP KHÁC',
         ];
 
         foreach ($expenseTypes as $name) {

@@ -349,7 +349,8 @@ class Shipment extends Model
     public function shipmentDeductionTypeDriverAndBusboy($userId)
     {
         return $this->shipmentDeductions()->whereHas('shipmentDeductionType', function($query) {
-            $query->where('type', ShipmentDeductionType::TYPE_DRIVER_AND_BUSBOY);
+            $query->where('type', ShipmentDeductionType::TYPE_DRIVER_AND_BUSBOY)
+                ->where('status', 'active');
         })->where('user_id', $userId);
     }
 
@@ -360,7 +361,8 @@ class Shipment extends Model
     public function shipmentDeductionTypeExpense()
     {
         return  $this->shipmentDeductions()->whereHas('shipmentDeductionType', function($query) {
-            $query->where('type', ShipmentDeductionType::TYPE_EXPENSE);
+            $query->where('type', ShipmentDeductionType::TYPE_EXPENSE)
+                ->where('status', 'active');
         });
     }
 }

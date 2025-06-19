@@ -157,6 +157,7 @@
                                 <tr>
                                     <th>Thao tác</th>
                                     <th>Mã chuyến</th>
+                                    <th>Khách hàng</th>
                                     <th>Tuyến đường</th>
                                     <th>Tài xế</th>
                                     <th>Phương tiện</th>
@@ -188,6 +189,11 @@
                                         </div>
                                     </td>
                                     <td><strong>{{ $shipment->shipment_code }}</strong></td>
+                                    <td>
+                                        <a href="{{ route('admin.customers.show', $shipment->customer->id) }}" class="text-primary" target="_blank">
+                                            {{ $shipment->customer->name ?? '' }}
+                                        </a>
+                                    </td>
                                     <td>{{ $shipment->origin }} - {{ $shipment->destination }}</td>
                                     <td>{{ $shipment->getDriverFromShipmentDeductions()->full_name ?? '' }}</td>
                                     <td>{{ $shipment->vehicle ? $shipment->vehicle->plate_number : '' }}</td>
