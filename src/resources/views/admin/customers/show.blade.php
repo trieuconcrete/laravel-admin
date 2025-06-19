@@ -219,9 +219,9 @@
                                 <thead>
                                     <tr>
                                         <th>Ngày</th>
-                                        <th>Loại</th>
-                                        <th>Tên Bảng kê/Dịch vụ</th>
                                         <th>Số tiền</th>
+                                        <th>Chú thích</th>
+                                        <th>Phương thức</th>
                                         <th>Trạng thái</th>
                                         <th>Ngày tạo</th>
                                         <th>Thao tác</th>
@@ -230,9 +230,9 @@
                                 <tbody>
                                     <tr>
                                         <td>15/04/2025</td>
-                                        <td>Bảng kê chuyến hàng</td>
-                                        <td>Tháng 6</td>
                                         <td class="text-success">25,000,000 VNĐ</td>
+                                        <th>Bảng kê vận chuyển 06/2025</th>
+                                        <th>Chuyển khoản ngân hàng</th>
                                         <td><span class="badge bg-success">Đã thanh toán</span></td>
                                         <td>15/04/2025</td>
                                         <td>
@@ -268,7 +268,7 @@
                 @csrf
                 <div class="modal-body">
                 
-                    <div class="row mb-3">
+                    {{-- <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Loại thanh toán <span class="text-danger">*</span></label>
                             <select name="" id="" class="form-control">
@@ -280,7 +280,7 @@
                             <label class="form-label">Tháng <span class="text-danger">*</span></label>
                             <input type="month" id="month" class="form-control" value="{{ date('Y-m') }}">
                         </div>
-                    </div>
+                    </div> --}}
 
                     <div class="row mb-3">
                         <div class="col-md-6">
@@ -290,6 +290,16 @@
                         <div class="col-md-6">
                             <label class="form-label">Ngày thanh toán <span class="text-danger">*</span></label>
                             <input class="form-control" type="date" name="advance_month" required />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
+                            <select name="" id="" class="form-control">
+                                <option value="">Chuyển khoản ngân hàng</option>
+                                <option value="">Tiền mặt</option>
+                            </select>
                         </div>
                     </div>
 
