@@ -26,7 +26,7 @@
                         </div>
                     </div>
                 </div>
-
+                <hr>
                 <!-- Nav Tabs -->
                 <ul class="nav nav-tabs" id="customerDetailTab">
                     <li class="nav-item">
@@ -39,7 +39,6 @@
                         <a class="nav-link" data-bs-toggle="tab" href="#transactions">Lịch sử giao dịch</a>
                     </li>
                 </ul>
-
                 <!-- Tab Content -->
                 <div class="tab-content p-3 border border-top-0 rounded-bottom">
                     <!-- General Info Tab -->
@@ -213,57 +212,29 @@
                     <div class="tab-pane fade" id="transactions">
                         <div class="d-flex justify-content-between mb-3">
                             <h6>Lịch sử giao dịch</h6>
-                            <button class="btn btn-sm btn-primary"><i class="fas fa-plus me-1"></i>Thêm giao dịch</button>
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#transactionModal"><i class="fas fa-plus me-1"></i>Thêm giao dịch</button>
                         </div>
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
                                         <th>Ngày</th>
-                                        <th>Loại giao dịch</th>
+                                        <th>Loại</th>
+                                        <th>Tên Bảng kê/Dịch vụ</th>
                                         <th>Số tiền</th>
-                                        <th>Số tham chiếu</th>
                                         <th>Trạng thái</th>
+                                        <th>Ngày tạo</th>
                                         <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td>15/04/2025</td>
-                                        <td>Hóa đơn</td>
-                                        <td class="text-danger">-25,000,000 VNĐ</td>
-                                        <td>INV-2025-0123</td>
+                                        <td>Bảng kê chuyến hàng</td>
+                                        <td>Tháng 6</td>
+                                        <td class="text-success">25,000,000 VNĐ</td>
                                         <td><span class="badge bg-success">Đã thanh toán</span></td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <a href="" class="btn btn-sm btn-outline-primary">Sửa</a>
-                                                <button class="btn btn-sm btn-outline-danger">
-                                                    Xóa
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>20/03/2025</td>
-                                        <td>Thanh toán</td>
-                                        <td class="text-success">+30,000,000 VNĐ</td>
-                                        <td>PAY-2025-0098</td>
-                                        <td><span class="badge bg-success">Hoàn thành</span></td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <a href="" class="btn btn-sm btn-outline-primary">Sửa</a>
-                                                <button class="btn btn-sm btn-outline-danger">
-                                                    Xóa
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>05/03/2025</td>
-                                        <td>Hóa đơn</td>
-                                        <td class="text-danger">-30,000,000 VNĐ</td>
-                                        <td>INV-2025-0087</td>
-                                        <td><span class="badge bg-success">Đã thanh toán</span></td>
+                                        <td>15/04/2025</td>
                                         <td>
                                             <div class="btn-group">
                                                 <a href="" class="btn btn-sm btn-outline-primary">Sửa</a>
@@ -283,6 +254,59 @@
     </div>
 </div>
 <!-- container-fluid -->
+
+<!-- Add Transaction Modal -->
+<div class="modal fade" id="transactionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm giao dịch</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <hr>
+            <form id="transactionRequestForm" enctype="multipart/form-data" action="#" method="POST">
+                @csrf
+                <div class="modal-body">
+                
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Loại thanh toán <span class="text-danger">*</span></label>
+                            <select name="" id="" class="form-control">
+                                <option value="">Bảng kê chuyến hàng</option>
+                                <option value="">Dịch vụ thuê xe</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tháng <span class="text-danger">*</span></label>
+                            <input type="month" id="month" class="form-control" value="{{ date('Y-m') }}">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Số tiền <span class="text-danger">*</span></label>
+                            <input class="form-control number-format" type="text" placeholder="Số tiền" name="amount" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ngày thanh toán <span class="text-danger">*</span></label>
+                            <input class="form-control" type="date" name="advance_month" required />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Chú thích</label>
+                        <textarea class="form-control" rows="3" placeholder="Nhập chú thích" name="notes"></textarea>
+                    </div>
+                    <div id="transactionRequestError" class="alert alert-danger mt-2" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="submittransactionRequest">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @endsection
 
