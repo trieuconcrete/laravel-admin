@@ -8,3 +8,7 @@ img.h-24 {
     width: 64px;
     height: 64px;
 }
+
+.table-fixed {
+    table-layout: fixed;
+}

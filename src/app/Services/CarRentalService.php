@@ -6,10 +6,10 @@ use App\Models\CarRental;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use App\Helpers\ImageHelper;
 use App\Repositories\Interface\CarRentalRepositoryInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CarRentalService
 {
@@ -29,6 +29,15 @@ class CarRentalService
             $vehicleData = $data['vehicles'] ?? [];
             unset($data['vehicles']);
 
+            if (isset($data['file']) && $data['file'] instanceof \Illuminate\Http\UploadedFile) {
+                $result = FileUploadService::upload(
+                    $data['file'],
+                    'car_rentals',
+                    'original'
+                );
+                $data['file'] = $result["file_name"];
+            }
+
             $carRental = $this->carRentalRepository->create($data);
 
             if (!empty($vehicleData)) {
@@ -38,6 +47,7 @@ class CarRentalService
             return $carRental;
         });
     }
+
 
     public function update(int $id, array $data): ?CarRental
     {
@@ -50,6 +60,22 @@ class CarRentalService
 
             $vehicleData = $data['vehicles'] ?? null;
             unset($data['vehicles']);
+
+            if (isset($data['file']) && $data['file'] instanceof \Illuminate\Http\UploadedFile) {
+                $filePath = "uploads/car_rentals/" . $carRental->file;
+
+                if (Storage::disk('public')->exists($filePath)) {
+                    FileUploadService::delete($filePath);
+                }
+
+                $uploadResult = FileUploadService::upload(
+                    $data['file'],
+                    'car_rentals',
+                    'original'
+                );
+
+                $data['file'] = $uploadResult['file_name'];
+            }
 
             $carRental->update($data);
 

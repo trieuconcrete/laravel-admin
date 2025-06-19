@@ -21,13 +21,20 @@ class StoreCarRentalRequest extends FormRequest
     {
         return [
             'customer_id' => 'required',
-            // 'pickup_datetime' => 'required|' . $this->getSystemDateFormatRule(),
             'status' => 'required',
-            'valid_until' => 'nullable|after_or_equal:pickup_datetime|' . $this->getSystemDateFormatRule(),
             'description' => 'nullable|string',
             'notes' => 'nullable|string',
-            // 'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:10240'
-            'file' => 'required|file|max:10240'
+            'file' => 'nullable|file|max:10240',
+            'vehicles' => 'required|array',
+            'vehicles.*.vehicle_id' => 'required',
+            'vehicles.*.product_name' => 'required|string|max:255',
+            'vehicles.*.unit' => 'required|in:tháng,ngày',
+            'vehicles.*.amount' => 'required|integer|min:1',
+            'vehicles.*.price' => 'required|numeric|min:0',
+            'vehicles.*.money' => 'nullable|numeric|min:0',
+            'vehicles.*.start_date' => 'required|date',
+            'vehicles.*.end_date' => 'required|date',
+            'vehicles.*.notes' => 'nullable',
         ];
     }
 
@@ -40,14 +47,17 @@ class StoreCarRentalRequest extends FormRequest
         return [
             'customer_id.required' => 'Khách hàng là bắt buộc',
             'status.required' => 'Trạng thái là bắt buộc',
-            'pickup_datetime.required' => 'Ngày bắt đầu là bắt buộc',
-            'pickup_datetime.date' => 'Ngày bắt đầu không đúng định dạng',
-            'valid_until.required' => 'Ngày hết hạn là bắt buộc',
             'valid_until.date' => 'Ngày hết hạn không đúng định dạng',
             'valid_until.after_or_equal' => 'Ngày hết hạn phải sau hoặc bằng ngày bắt đầu',
             'file.mimes' => 'File đính kèm phải có định dạng: pdf, doc, docx, xls, xlsx',
-            'file.required' => 'File đính kèm là băt buộc',
-            'file.max' => 'File đính kèm không được vượt quá 10MB'
+            'file.max' => 'File đính kèm không được vượt quá 10MB',
+            'vehicles.*.vehicle_id.required' => 'Phương tiện là bắt buộc',
+            'vehicles.*.unit.required' => 'Đơn vị là bắt buộc',
+            'vehicles.*.amount.required' => 'Số lượng là bắt buộc',
+            'vehicles.*.price.required' => 'Đơn giá là bắt buộc',
+            'vehicles.*.start_date.required' => 'Ngày bắt đầu là bắt buộc',
+            'vehicles.*.end_date.required' => 'Ngày kết thúc là bắt buộc',
+            'vehicles.*.product_name.required' => 'Tên hàng là bắt buộc',
         ];
     }
 }

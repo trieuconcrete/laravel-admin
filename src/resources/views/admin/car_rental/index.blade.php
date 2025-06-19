@@ -166,19 +166,19 @@
                                 <i class="fas fa-plus me-1"></i>Thêm phương tiện
                             </button>
                         </div>
-                        <div class="table-responsive">
-                            <table class="table table-sm" id="vehiclesTable">
+                        <div class="table-responsive table-fixed">
+                            <table class="table table-sm table-fixed" id="vehiclesTable">
                                 <thead>
                                     <tr>
                                         <th width="200">Phương tiện <span class="text-danger">*</span></th>
                                         <th width="250">Tên hàng</th>
                                         <th width="120">Đơn vị</th>
-                                        <th width="50">Số lượng</th>
-                                        <th>Đơn giá</th>
-                                        <th>Thành tiền</th>
-                                        <th>Ngày bắt đầu</th>
-                                        <th>Ngày kết thúc</th>
-                                        <th>Ghi chú</th>
+                                        <th width="100">Số lượng</th>
+                                        <th width="100">Đơn giá</th>
+                                        <th width="100">Thành tiền</th>
+                                        <th width="150">Ngày bắt đầu</th>
+                                        <th width="150">Ngày kết thúc</th>
+                                        <th width="100">Ghi chú</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -195,15 +195,15 @@
                                         'index' => $i
                                         ])->render() !!}
                                         @endforeach
-                                    @endif
-
-                                    <template id="vehicle-row-template">
+                                    @else
+                                        <template id="vehicle-row-template">
                                         {!! view('admin.car_rental.partials.vehicle-row', [
                                         'vehicleTypes' => $vehicleTypes,
                                         'vehicle' => [],
                                         'index' => '__INDEX__'
                                         ])->render() !!}
                                     </template>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>

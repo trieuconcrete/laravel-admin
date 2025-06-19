@@ -66,8 +66,15 @@
 
                                 <div class="mb-4">
                                     <label class="block text-gray-700">File thuê xe</label>
-                                    {{-- <input type="file" name="file" id="avatarInput" class="form-control mt-1 border p-2 rounded">
-                                    <img id="avatarPreview" src="{{ isset($carRental) && $carRental->file ? asset('storage/' . $carRental->file) : asset('no-image.jpeg') }}" class="w-24 h-24 rounded-full mt-4" alt="File thuê xe"> --}}
+                                    <input type="file" name="file" class="form-control mt-1 border p-2 rounded">
+                                    @if (!empty($carRental->file))
+                                    <div class="mt-2">
+                                        <label class="block text-gray-600">Tệp hiện tại:</label>
+                                        <a href="{{ asset('storage/uploads/car_rentals/' . $carRental->file) }}" target="_blank" class="text-blue-600 underline">
+                                            {{ $carRental->file }}
+                                        </a>
+                                    </div>
+                                    @endif
                                 </div>
 
                                 <hr>
@@ -80,20 +87,20 @@
                                         </button>
                                     </div>
                                     <div class="table-responsive">
-                                        <table class="table table-sm" id="vehiclesTable">
+                                        <table class="table table-sm table-fixed" id="vehiclesTable">
                                             <thead>
                                                 <tr>
                                                     <th width="200">Phương tiện <span class="text-danger">*</span>
                                                     </th>
                                                     <th width="250">Tên hàng</th>
                                                     <th width="120">Đơn vị</th>
-                                                    <th width="50">Số lượng</th>
-                                                    <th>Đơn giá</th>
-                                                    <th>Thành tiền</th>
-                                                    <th>Ngày bắt đầu</th>
-                                                    <th>Ngày kết thúc</th>
-                                                    <th>Ghi chú</th>
-                                                    <th></th>
+                                                    <th width="100">Số lượng</th>
+                                                    <th width="100">Đơn giá</th>
+                                                    <th width="100">Thành tiền</th>
+                                                    <th width="150">Ngày bắt đầu</th>
+                                                    <th width="150">Ngày kết thúc</th>
+                                                    <th width="100">Ghi chú</th>
+                                                    <th width="100"></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
