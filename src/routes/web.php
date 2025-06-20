@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PriceQuoteController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
+use App\Http\Controllers\Admin\PaymentTransactionController;
 
 Route::get('/', [HomepageController::class, 'index'])->name('homepage');
 Route::get('/trangchu', [HomepageController::class, 'index1'])->name('homepage1');
@@ -49,6 +50,11 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('vehicles', VehicleController::class);
     Route::resource('customers', CustomerController::class);
     Route::get('customers/{customer}/export-invoice', [CustomerController::class, 'exportInvoice'])->name('customers.export-invoice');
+    Route::post('customers/{customer}/store-transaction', [PaymentTransactionController::class, 'storeTransaction'])->name('customers.store-transaction');
+    Route::get('customers/{customer}/transactions', [PaymentTransactionController::class, 'getTransactions'])->name('customers.transactions');
+    Route::get('customers/{customer}/transactions/{transaction}/edit', [PaymentTransactionController::class, 'editTransaction'])->name('customers.edit-transaction');
+    Route::put('customers/{customer}/transactions/{transaction}', [PaymentTransactionController::class, 'updateTransaction'])->name('customers.update-transaction');
+    Route::delete('customers/{customer}/transactions/{transaction}', [PaymentTransactionController::class, 'destroyTransaction'])->name('customers.destroy-transaction');
     Route::resource('contracts', ContractController::class);
     Route::resource('quotes', PriceQuoteController::class);
     Route::resource('car-rental', CarRentalController::class);

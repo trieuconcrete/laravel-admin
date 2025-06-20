@@ -28,21 +28,15 @@
                 </div>
                 <hr>
                 <!-- Nav Tabs -->
-                <ul class="nav nav-tabs" id="customerDetailTab">
-                    <li class="nav-item">
-                        <a class="nav-link active" data-bs-toggle="tab" href="#generalInfo">Thông tin chung</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#monthlyReport">Bảng kê theo tháng</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="tab" href="#transactions">Lịch sử giao dịch</a>
-                    </li>
-                </ul>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <button class="nav-link" id="nav-overview-tab" data-bs-toggle="tab" data-bs-target="#generalInfo" type="button" role="tab" aria-controls="generalInfo" aria-selected="false">Tổng quan</button>
+                    <button class="nav-link" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#monthlyReport" type="button" role="tab" aria-controls="monthlyReport" aria-selected="false">Bảng kê theo tháng</button>
+                    <button class="nav-link active" id="nav-transactions-tab" data-bs-toggle="tab" data-bs-target="#transactions" type="button" role="tab" aria-controls="transactions" aria-selected="true">Giao dịch</button>
+                </div>
                 <!-- Tab Content -->
                 <div class="tab-content p-3 border border-top-0 rounded-bottom">
                     <!-- General Info Tab -->
-                    <div class="tab-pane fade show active" id="generalInfo">
+                    <div class="tab-pane fade" id="generalInfo">
                         <form action="{{ route('admin.customers.update', $customer) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
@@ -209,43 +203,105 @@
                     </div>
 
                     <!-- Transactions Tab -->
-                    <div class="tab-pane fade" id="transactions">
+                    <div class="tab-pane fade show active" id="transactions">
                         <div class="d-flex justify-content-between mb-3">
                             <h6>Lịch sử giao dịch</h6>
                             <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#transactionModal"><i class="fas fa-plus me-1"></i>Thêm giao dịch</button>
                         </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Ngày</th>
-                                        <th>Số tiền</th>
-                                        <th>Chú thích</th>
-                                        <th>Phương thức</th>
-                                        <th>Trạng thái</th>
-                                        <th>Ngày tạo</th>
-                                        <th>Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>15/04/2025</td>
-                                        <td class="text-success">25,000,000 VNĐ</td>
-                                        <th>Bảng kê vận chuyển 06/2025</th>
-                                        <th>Chuyển khoản ngân hàng</th>
-                                        <td><span class="badge bg-success">Đã thanh toán</span></td>
-                                        <td>15/04/2025</td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <a href="" class="btn btn-sm btn-outline-primary">Sửa</a>
-                                                <button class="btn btn-sm btn-outline-danger">
-                                                    Xóa
+                        
+                        <!-- Search Form -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">Tìm kiếm giao dịch</h6>
+                            </div>
+                            <div class="card-body">
+                                <form id="transactionSearchForm" method="GET" action="{{ route('admin.customers.transactions', $customer) }}">
+                                    <input type="hidden" name="active_tab" value="transactions">
+                                    <div class="row g-3">
+                                        <div class="col-md-6 col-lg-3">
+                                            <label class="form-label">Từ ngày</label>
+                                            <input type="date" name="start_date" class="form-control" value="{{ request('start_date') ?? '' }}">
+                                            @error('start_date')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 col-lg-3">
+                                            <label class="form-label">Đến ngày</label>
+                                            <input type="date" name="end_date" class="form-control" value="{{ request('end_date') ?? '' }}">
+                                            @error('end_date')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 col-lg-3">
+                                            <label class="form-label">Số tiền từ</label>
+                                            <input type="text" name="amount_min" class="form-control number-format" value="{{ request('amount_min') ?? '' }}" placeholder="Số tiền từ">
+                                            @error('amount_min')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 col-lg-3">
+                                            <label class="form-label">Số tiền đến</label>
+                                            <input type="text" name="amount_max" class="form-control number-format" value="{{ request('amount_max') ?? '' }}" placeholder="Số tiền đến">
+                                            @error('amount_max')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 col-lg-3">
+                                            <label class="form-label">Loại giao dịch</label>
+                                            <select name="transaction_type" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                @foreach(\App\Models\Transaction::getTypes() as $key => $type)
+                                                    <option value="{{ $key }}" {{ request('transaction_type') == $key ? 'selected' : '' }}>{{ $type }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('transaction_type')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 col-lg-3">
+                                            <label class="form-label">Phương thức thanh toán</label>
+                                            <select name="payment_method" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                @foreach(\App\Models\Payment::getPaymentMethods() as $key => $method)
+                                                    <option value="{{ $key }}" {{ request('payment_method') == $key ? 'selected' : '' }}>{{ $method }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('payment_method')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <div class="col-md-6 col-lg-3">
+                                            <label class="form-label">Trạng thái</label>
+                                            <select name="payment_status" class="form-select">
+                                                <option value="">Tất cả</option>
+                                                @foreach(\App\Models\Payment::getStatuses() as $key => $status)
+                                                    <option value="{{ $key }}" {{ request('payment_status') == $key ? 'selected' : '' }}>{{ $status }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('payment_status')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="row mt-3">
+                                        <div class="col-12 d-flex justify-content-center">
+                                            <div class="d-flex gap-3">
+                                                <button type="submit" class="btn btn-primary px-4">
+                                                    <i class="fas fa-search me-2"></i>Tìm kiếm
                                                 </button>
+                                                <a href="{{ route('admin.customers.transactions', $customer) }}?active_tab=transactions" class="btn btn-outline-secondary px-4">
+                                                    <i class="fas fa-undo me-2"></i>Đặt lại
+                                                </a>
                                             </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- Transaction Results -->
+                        <div id="transaction-results">
+                            @include('admin.customers.partials.transaction-table', ['transactions' => $transactions ?? collect()])
                         </div>
                     </div>
                 </div>
@@ -264,24 +320,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <hr>
-            <form id="transactionRequestForm" enctype="multipart/form-data" action="#" method="POST">
+            <form id="transactionForm" enctype="multipart/form-data" method="POST" action="{{ route('admin.customers.store-transaction', $customer) }}">
                 @csrf
                 <div class="modal-body">
-                
-                    {{-- <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Loại thanh toán <span class="text-danger">*</span></label>
-                            <select name="" id="" class="form-control">
-                                <option value="">Bảng kê chuyến hàng</option>
-                                <option value="">Dịch vụ thuê xe</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Tháng <span class="text-danger">*</span></label>
-                            <input type="month" id="month" class="form-control" value="{{ date('Y-m') }}">
-                        </div>
-                    </div> --}}
-
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Số tiền <span class="text-danger">*</span></label>
@@ -289,17 +330,21 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Ngày thanh toán <span class="text-danger">*</span></label>
-                            <input class="form-control" type="date" name="advance_month" required />
+                            <input class="form-control" type="date" name="payment_date" value="@formatDateForInput(date('Y-m-d'))" required />
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
-                            <select name="" id="" class="form-control">
-                                <option value="">Chuyển khoản ngân hàng</option>
-                                <option value="">Tiền mặt</option>
+                            <select name="payment_method" class="form-control">
+                                @foreach(\App\Models\Payment::getPaymentMethods() as $key => $method)
+                                    <option value="{{ $key }}">{{ $method }}</option>
+                                @endforeach
                             </select>
+                            @error('payment_method')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 
@@ -307,11 +352,65 @@
                         <label class="form-label">Chú thích</label>
                         <textarea class="form-control" rows="3" placeholder="Nhập chú thích" name="notes"></textarea>
                     </div>
-                    <div id="transactionRequestError" class="alert alert-danger mt-2" style="display: none;"></div>
+                    <div id="transactionFormErrors" class="alert alert-danger mt-2" style="display: none;"></div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary" id="submittransactionRequest">Lưu</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Transaction Modal -->
+<div class="modal fade" id="editTransactionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa giao dịch</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <hr>
+            <form id="editTransactionForm" enctype="multipart/form-data" method="POST">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="transaction_id" id="edit_transaction_id">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Số tiền <span class="text-danger">*</span></label>
+                            <input class="form-control number-format" type="text" placeholder="Số tiền" name="amount" id="edit_amount" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ngày thanh toán <span class="text-danger">*</span></label>
+                            <input class="form-control" type="date" name="payment_date" id="edit_payment_date" required />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
+                            <select name="payment_method" id="edit_payment_method" class="form-control">
+                                @foreach(\App\Models\Payment::getPaymentMethods() as $key => $method)
+                                    <option value="{{ $key }}">{{ $method }}</option>
+                                @endforeach
+                            </select>
+                            @error('payment_method')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Chú thích</label>
+                        <textarea class="form-control" rows="3" placeholder="Nhập chú thích" name="notes" id="edit_notes"></textarea>
+                    </div>
+                    <div id="editTransactionFormErrors" class="alert alert-danger mt-2" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
                 </div>
             </form>
         </div>
@@ -572,6 +671,361 @@
                 }
             });
         }
+                
+        // Transaction form submission
+        $('#transactionForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
+            const errorContainer = $('#transactionFormErrors');
+            
+            // Disable submit button and show loading state
+            submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
+            errorContainer.hide();
+            
+            // Get form data
+            const formData = new FormData(form[0]);
+            
+            // Send AJAX request
+            $.ajax({
+                    url: '{{ route("admin.customers.store-transaction", $customer) }}',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        // Close modal
+                        $('#transactionModal').modal('hide');
+                        
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công',
+                            text: response.message || 'Giao dịch đã được tạo thành công.'
+                        }).then(() => {
+                            // Reload the page to show the new transaction
+                            window.location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        // Show error message
+                        let errorMessage = 'Đã xảy ra lỗi khi tạo giao dịch.';
+                        
+                        if (xhr.responseJSON) {
+                            if (xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            }
+                            
+                            // Handle validation errors
+                            if (xhr.responseJSON.errors) {
+                                errorMessage = '<ul>';
+                                $.each(xhr.responseJSON.errors, function(key, value) {
+                                    errorMessage += '<li>' + value + '</li>';
+                                });
+                                errorMessage += '</ul>';
+                            }
+                        }
+                        
+                        errorContainer.html(errorMessage).show();
+                    },
+                    complete: function() {
+                        // Re-enable submit button
+                        submitBtn.prop('disabled', false).html('Lưu');
+                    }
+                });
+            });
+            
+        // Transaction search form AJAX submission
+        $('#transactionSearchForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            const resultsContainer = $('#transaction-results');
+            
+            // Clear previous validation errors
+            form.find('.is-invalid').removeClass('is-invalid');
+            form.find('.invalid-feedback').hide();
+            
+            // Show loading indicator
+            resultsContainer.html('<div class="text-center my-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+            
+            // Get form data
+            const formData = new FormData(form[0]);
+            const searchUrl = form.attr('action') + '?' + new URLSearchParams(formData).toString();
+            
+            // Update browser URL without reloading the page
+            window.history.pushState({}, '', searchUrl);
+            
+            // Send AJAX request
+            $.ajax({
+                url: searchUrl,
+                type: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        resultsContainer.html(response.html);
+                    } else {
+                        resultsContainer.html('<div class="alert alert-danger">' + (response.message || 'Đã xảy ra lỗi khi tìm kiếm giao dịch.') + '</div>');
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                        // Handle validation errors
+                        const errors = xhr.responseJSON.errors;
+                        
+                        // Display validation errors for each field
+                        $.each(errors, function(field, messages) {
+                            const inputField = form.find('[name="' + field + '"]');
+                            inputField.addClass('is-invalid');
+                            
+                            // Find or create error message container
+                            let errorContainer = inputField.siblings('.invalid-feedback');
+                            if (errorContainer.length === 0) {
+                                errorContainer = $('<div class="invalid-feedback"></div>');
+                                inputField.after(errorContainer);
+                            }
+                            
+                            // Display the first error message
+                            errorContainer.text(messages[0]).show();
+                        });
+                        
+                        // Show a general error message at the top
+                        resultsContainer.html('<div class="alert alert-danger">Vui lòng kiểm tra lại thông tin tìm kiếm.</div>');
+                    } else {
+                        // Handle other errors
+                        let errorMessage = 'Đã xảy ra lỗi khi tìm kiếm giao dịch.';
+                        
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        
+                        resultsContainer.html('<div class="alert alert-danger">' + errorMessage + '</div>');
+                    }
+                }
+            });
+        });
+        
+        // Handle pagination links
+        $(document).on('click', '#transaction-pagination .pagination a', function(e) {
+            e.preventDefault();
+            
+            const url = $(this).attr('href');
+            const resultsContainer = $('#transaction-results');
+            
+            // Show loading indicator
+            resultsContainer.html('<div class="text-center my-5"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+            
+            // Update browser URL without reloading the page
+            window.history.pushState({}, '', url);
+            
+            // Send AJAX request
+            $.ajax({
+                url: url,
+                type: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        resultsContainer.html(response.html);
+                    } else {
+                        resultsContainer.html('<div class="alert alert-danger">' + (response.message || 'Đã xảy ra lỗi khi tải dữ liệu.') + '</div>');
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = 'Đã xảy ra lỗi khi tải dữ liệu.';
+                    
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    
+                    resultsContainer.html('<div class="alert alert-danger">' + errorMessage + '</div>');
+                }
+            });
+        });
+        // Format amount inputs with thousand separators
+        $('.number-format').on('input', function () {
+            let value = $(this).val();
+            
+            // Remove all non-digit characters except decimal point
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // Limit to 9 digits before decimal point
+            let parts = value.split('.');
+            parts[0] = parts[0].slice(0, 10);
+            
+            // Format with thousand separators
+            let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+            
+            $(this).val(integerPart + decimalPart);
+        });
+        
+        // Format initial values if they exist
+        $('.number-format').each(function() {
+            if ($(this).val()) {
+                let value = $(this).val();
+                // Remove all non-digit characters except decimal point
+                value = value.replace(/[^0-9.]/g, '');
+                
+                // Format with thousand separators
+                let parts = value.split('.');
+                let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+                
+                $(this).val(integerPart + decimalPart);
+            }
+        });
+
+        // Handle edit transaction button click
+        $(document).on('click', '.edit-transaction', function() {
+            const transactionId = $(this).data('id');
+            const amount = $(this).data('amount');
+            const paymentDate = $(this).data('payment-date');
+            const paymentMethod = $(this).data('payment-method');
+            const notes = $(this).data('notes');
+            const customerId = {{ $customer->id }};
+            
+            // Set form action
+            const updateUrl = '{{ url("admin/customers/{$customer->id}/transactions") }}/' + transactionId;
+            $('#editTransactionForm').attr('action', updateUrl);
+            
+            // Fill form fields
+            $('#edit_transaction_id').val(transactionId);
+            $('#edit_amount').val(amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+            $('#edit_payment_date').val(paymentDate);
+            console.log(paymentMethod);
+            $('#edit_payment_method').val(paymentMethod);
+            $('#edit_notes').val(notes);
+        });
+        
+        // Edit transaction form submission
+        $('#editTransactionForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
+            const errorContainer = $('#editTransactionFormErrors');
+            
+            // Disable submit button and show loading state
+            submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
+            errorContainer.hide();
+            
+            // Get form data
+            const formData = new FormData(form[0]);
+            
+            // Send AJAX request
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    // Close modal
+                    $('#editTransactionModal').modal('hide');
+                    
+                    // Show success message
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công',
+                        text: response.message || 'Giao dịch đã được cập nhật thành công.'
+                    }).then(() => {
+                        // Reload the page to show the updated transaction
+                        window.location.reload();
+                    });
+                },
+                error: function(xhr) {
+                    // Show error message
+                    let errorMessage = 'Đã xảy ra lỗi khi cập nhật giao dịch.';
+                    
+                    if (xhr.responseJSON) {
+                        if (xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        
+                        // Handle validation errors
+                        if (xhr.responseJSON.errors) {
+                            errorMessage = '<ul>';
+                            $.each(xhr.responseJSON.errors, function(key, value) {
+                                errorMessage += '<li>' + value + '</li>';
+                            });
+                            errorMessage += '</ul>';
+                        }
+                    }
+                    
+                    errorContainer.html(errorMessage).show();
+                },
+                complete: function() {
+                    // Re-enable submit button
+                    submitBtn.prop('disabled', false).html('Cập nhật');
+                }
+            });
+        });
+        
+        // Handle delete transaction button click
+        $(document).on('click', '.delete-transaction', function() {
+            const transactionId = $(this).data('id');
+            const customerId = $(this).data('customer-id');
+            const token = '{{ csrf_token() }}';
+            
+            Swal.fire({
+                title: 'Xác nhận xóa?',
+                text: 'Bạn có chắc chắn muốn xóa giao dịch này không? Hành động này không thể hoàn tác.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send delete request
+                    $.ajax({
+                        url: `{{ url('admin/customers') }}/${customerId}/transactions/${transactionId}`,
+                        type: 'DELETE',
+                        data: {
+                            _token: token
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': token
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công',
+                                text: response.message || 'Giao dịch đã được xóa thành công.'
+                            }).then(() => {
+                                // Reload the page to update the transaction list
+                                window.location.reload();
+                            });
+                        },
+                        error: function(xhr) {
+                            let errorMessage = 'Đã xảy ra lỗi khi xóa giao dịch.';
+                            
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            }
+                            
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: errorMessage
+                            });
+                        }
+                    });
+                }
+            });
+        });
     });
 </script>
 @endpush

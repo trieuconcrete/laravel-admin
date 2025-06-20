@@ -29,6 +29,10 @@ use App\Repositories\Eloquent\SalaryDetailRepository;
 use App\Repositories\Eloquent\SalaryPeriodRepository;
 use App\Repositories\Interface\SalaryPeriodRepositoryInterface;
 use App\Repositories\Interface\SalaryDetailRepositoryInterface;
+use App\Repositories\Interface\TransactionRepositoryInterface;
+use App\Repositories\Eloquent\TransactionRepository;
+use App\Repositories\Interface\PaymentRepositoryInterface;
+use App\Repositories\Eloquent\PaymentRepository;
 
 /**
  * Summary of RepositoryServiceProvider
@@ -54,6 +58,8 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(CarRentalRepositoryInterface::class, CarRentalRepository::class);
         $this->app->bind(SalaryDetailRepositoryInterface::class, SalaryDetailRepository::class);
         $this->app->bind(SalaryPeriodRepositoryInterface::class, SalaryPeriodRepository::class);
+        $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
+        $this->app->bind(PaymentRepositoryInterface::class, PaymentRepository::class);
     }
 
     /**
