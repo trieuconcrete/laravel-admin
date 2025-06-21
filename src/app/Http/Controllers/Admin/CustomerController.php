@@ -3,16 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Customer\CustomerRequest;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Models\Customer;
 use App\Services\CustomerService;
+use App\Services\TransactionPaymentService;
 use App\Exports\InvoiceExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Repositories\Interface\CustomerRepositoryInterface as CustomerRepository;
+use App\Models\Transaction;
+use App\Models\Payment;
 
 /**
  * Summary of __construct
@@ -28,7 +30,8 @@ class CustomerController extends Controller
      */
     public function __construct(
         protected CustomerService $customerService,
-        protected CustomerRepository $customerRepository
+        protected CustomerRepository $customerRepository,
+        protected TransactionPaymentService $transactionPaymentService
     ) {}
 
     public function index(Request $request)
@@ -92,8 +95,31 @@ class CustomerController extends Controller
         // Get current month in YYYY-MM format for initial data
         $currentMonth = date('Y-m');
         $monthlyShipments = $this->customerService->getMonthlyShipments($customer->id, $currentMonth);
+        $typeTransactions = Transaction::getTypes();
+        $paymentMethods = Payment::getPaymentMethods();
+        $paymentStatuses = Payment::getStatuses();
         
-        return view('admin.customers.show', compact('customer', 'monthlyShipments'));
+        // Load all transactions by default
+        try {
+            $perPage = 10;
+            $transactions = $this->transactionPaymentService->getCustomerTransactions($customer, [], $perPage);
+            $activeTab = $request->input('active_tab', 'transactions');
+            $filters = [];
+            
+            return view('admin.customers.show', compact(
+                'customer', 
+                'monthlyShipments', 
+                'typeTransactions', 
+                'transactions', 
+                'activeTab',
+                'paymentMethods',
+                'paymentStatuses',
+                'filters'
+            ));
+        } catch (\Exception $e) {
+            Log::error('Error loading default transactions', ['error' => $e->getMessage(), 'customer_id' => $customer->id]);
+            return view('admin.customers.show', compact('customer', 'monthlyShipments', 'typeTransactions'));
+        }
     }
 
     public function edit(Customer $customer)
