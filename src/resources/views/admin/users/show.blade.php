@@ -430,6 +430,10 @@
                                                             <i class="ri-currency-fill me-1"></i>
                                                             Yêu Cầu
                                                         </button>
+                                                        <button type="button" class="btn btn-sm btn-info d-inline-flex align-items-center" style="white-space: nowrap;">
+                                                            <i class="ri-currency-fill me-1"></i>
+                                                            Thanh toán
+                                                        </button>
                                                     </form>
                                                 </div>
                                             </div>
