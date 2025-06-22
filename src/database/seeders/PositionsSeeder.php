@@ -13,6 +13,7 @@ class PositionsSeeder extends Seeder
      */
     public function run(): void
     {
+        Position::truncate();
         $positions = [
             [
                 'name' => 'Giám đốc',

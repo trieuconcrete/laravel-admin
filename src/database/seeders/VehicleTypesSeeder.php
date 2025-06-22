@@ -15,6 +15,7 @@ class VehicleTypesSeeder extends Seeder
      */
     public function run(): void
     {
+        DB::table('vehicle_types')->truncate();
         $vehicleTypes = [
             [
                 'name' => 'Xe tải nhỏ',

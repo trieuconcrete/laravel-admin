@@ -13,6 +13,7 @@ class DeductionTypeSeeder extends Seeder
      */
     public function run(): void
     {
+        DeductionType::truncate();
         $deductionTypes = [
             [
                 'type_name' => 'Bảo hiểm xã hội',

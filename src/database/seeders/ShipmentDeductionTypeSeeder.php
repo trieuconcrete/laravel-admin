@@ -8,6 +8,7 @@ class ShipmentDeductionTypeSeeder extends Seeder
 {
     public function run()
     {
+        ShipmentDeductionType::truncate();
         ShipmentDeductionType::whereNotNull('id')->update([
             'status' => 'inactive',
         ]);

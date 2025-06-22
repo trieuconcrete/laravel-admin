@@ -43,7 +43,7 @@ sudo apt install -y nodejs
 ```bash
 cd /var/www/webroot
 sudo git clone git@github.com:trieuconcrete/laravel-admin.git vantai_hoangphulong
-cd vantai_hoangphulong
+cd vantai_hoangphulong/src
 composer install
 cp .env.example .env
 php artisan key:generate
@@ -185,6 +185,7 @@ Phân quyền:
 
 ```bash
 chmod +x /var/www/webroot/vantai_hoangphulong/deploy.sh
+chmod +x /var/www/webroot/vantai_hoangphulong_dev/deploy.sh
 ```
 
 ## ✅ Bước 12: Restart services khi cần

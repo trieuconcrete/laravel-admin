@@ -13,6 +13,7 @@ class AllowanceTypeSeeder extends Seeder
      */
     public function run(): void
     {
+        AllowanceType::truncate();
         $allowanceTypes = [
             [
                 'type_name' => 'Phụ cấp xăng xe',
