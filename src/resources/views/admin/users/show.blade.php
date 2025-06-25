@@ -373,6 +373,23 @@
                         </div>
                         <!--end tab-pane-->
                         <div class="tab-pane" id="salary" role="tabpanel">
+                            @php
+                                // Get the selected month from the request
+                                $selectedMonth = request('month', now()->format('m/Y'));
+                                list($month, $year) = explode('/', $selectedMonth);
+
+                                // Find the salary period for the selected month
+                                $salaryPeriod = \App\Models\SalaryPeriod::where('period_name', 'Kỳ lương tháng '.$selectedMonth)->first();
+                                
+                                // Find the salary detail for this user and period if period exists
+                                $salaryDetail = null;
+                                if ($salaryPeriod) {
+                                    $salaryDetail = \App\Models\SalaryDetail::where('employee_id', $user->id)
+                                        ->where('period_id', $salaryPeriod->period_id)
+                                        ->first();
+                                }
+                            @endphp
+                            
                             <div class="row mb-4">
                                 <div class="col-lg-6">
                                     <div class="card">
@@ -384,40 +401,30 @@
                                                 <div class="flex-shrink-0">
                                                     <form action="{{ route('admin.users.show', $user->id) }}" method="GET" id="salaryMonthForm" class="d-flex align-items-center gap-2">
                                                         <input type="hidden" name="tab" value="salary">
-                                                        <select class="form-select form-select-sm" name="month" id="salaryMonth" onchange="document.getElementById('salaryMonthForm').submit();">
-                                                            @php
-                                                                $joinDate = $user->join_date ? \Carbon\Carbon::parse($user->join_date) : null;
-                                                                $currentDate = now();
-                                                                $monthsList = [];
-                                                                
-                                                                if ($joinDate) {
-                                                                    // Check if join date is in the current month
-                                                                    $isJoinDateCurrentMonth = $joinDate->format('m/Y') === $currentDate->format('m/Y');
-                                                                    
-                                                                    if ($isJoinDateCurrentMonth) {
-                                                                        // If join date is in current month, just use the current month
-                                                                        $monthsList = [$currentDate->format('m/Y')];
-                                                                    } else {
-                                                                        // Calculate months between join date and current date
-                                                                        $diffInMonths = $currentDate->diffInMonths($joinDate);
-                                                                        // Get months list from join date to current date
-                                                                        $monthsList = months_list($diffInMonths + 1);
-                                                                        
-                                                                        // Filter months to only include those >= join date
-                                                                        $filteredMonths = [];
-                                                                        foreach ($monthsList as $month) {
-                                                                            $monthDate = \Carbon\Carbon::createFromFormat('m/Y', $month)->startOfMonth();
-                                                                            if ($monthDate->greaterThanOrEqualTo($joinDate->startOfMonth())) {
-                                                                                $filteredMonths[] = $month;
-                                                                            }
-                                                                        }
-                                                                        $monthsList = array_reverse($filteredMonths); // Show newest months first
-                                                                    }
+                                                        @php
+                                                            $joinDate = $user->join_date ? \Carbon\Carbon::parse($user->join_date)->startOfMonth() : null;
+                                                            $currentDate = now()->startOfMonth(); // Quan trọng: để đảm bảo so sánh đầu tháng
+                                                            $monthsList = [];
+
+                                                            if ($joinDate) {
+                                                                // Nếu joinDate > currentDate thì không cần hiển thị gì
+                                                                if ($joinDate->greaterThan($currentDate)) {
+                                                                    $monthsList = [];
                                                                 } else {
-                                                                    $monthsList = months_list();
+                                                                    $period = \Carbon\CarbonPeriod::create($joinDate, '1 month', $currentDate);
+
+                                                                    foreach ($period as $date) {
+                                                                        $monthsList[] = $date->format('m/Y');
+                                                                    }
+
+                                                                    // Optional: đảo ngược để tháng mới lên trước
+                                                                    $monthsList = array_reverse($monthsList);
                                                                 }
-                                                            @endphp
-                                                            
+                                                            } else {
+                                                                $monthsList = months_list(); // fallback mặc định 12 tháng gần nhất
+                                                            }
+                                                        @endphp
+                                                        <select class="form-select form-select-sm" name="month" id="salaryMonth" onchange="document.getElementById('salaryMonthForm').submit();">                                                            
                                                             @foreach($monthsList as $month)
                                                                 <option value="{{ $month }}" {{ $selectedMonth == $month ? 'selected' : '' }}>{{ $month }}</option>
                                                             @endforeach
@@ -430,10 +437,22 @@
                                                             <i class="ri-currency-fill me-1"></i>
                                                             Yêu Cầu
                                                         </button>
-                                                        <button type="button" class="btn btn-sm btn-info d-inline-flex align-items-center" style="white-space: nowrap;">
-                                                            <i class="ri-currency-fill me-1"></i>
-                                                            Thanh toán
-                                                        </button>
+                                                        @if($salaryDetail)
+                                                            <button type="button" class="btn btn-sm btn-info d-inline-flex align-items-center process-payment" 
+                                                                data-salary-id="{{ $salaryDetail->salary_id }}"
+                                                                style="white-space: nowrap;"
+                                                                {{ $salaryDetail->status === 'paid' ? 'disabled' : '' }}>
+                                                                <i class="ri-currency-fill me-1"></i>
+                                                                {{ $salaryDetail->status === 'paid' ? 'Đã thanh toán' : 'Thanh toán' }}
+                                                            </button>
+                                                        @else
+                                                            <button type="button" class="btn btn-sm btn-secondary d-inline-flex align-items-center" 
+                                                                style="white-space: nowrap;"
+                                                                disabled>
+                                                                <i class="ri-information-line me-1"></i>
+                                                                Chưa có dữ liệu lương
+                                                            </button>
+                                                        @endif
                                                     </form>
                                                 </div>
                                             </div>
@@ -1036,6 +1055,82 @@
             // Load salary advance requests
             refreshSalaryAdvanceRequests();
         }
+    });
+
+    // Handle salary payment
+    $(document).on('click', '.process-payment', function() {
+        const button = $(this);
+        const salaryId = button.data('salary-id');
+        
+        Swal.fire({
+            title: 'Xác nhận thanh toán',
+            text: 'Bạn có chắc chắn muốn thanh toán lương này?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            customClass: {
+                confirmButton: 'btn btn-primary',
+                cancelButton: 'btn btn-outline-danger ms-2'
+            },
+            buttonsStyling: false
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading state
+                button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Đang xử lý...');
+                
+                // Make AJAX request
+                $.ajax({
+                    url: '{{ url("admin/salary") }}/' + salaryId + '/pay',
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công!',
+                                text: response.message,
+                                showConfirmButton: false,
+                                timer: 2000,
+                                timerProgressBar: true
+                            }).then(() => {
+                                // Update button state
+                                button.html('<i class="ri-check-line me-1"></i>Đã thanh toán');
+                                button.removeClass('btn-info').addClass('btn-success');
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi!',
+                                text: response.message,
+                                confirmButtonText: 'Đóng'
+                            });
+                            // Re-enable button
+                            button.prop('disabled', false).html('<i class="ri-currency-fill me-1"></i>Thanh toán');
+                        }
+                    },
+                    error: function(xhr) {
+                        const response = xhr.responseJSON;
+                        const errorMessage = response && response.message ? response.message : 'Đã xảy ra lỗi khi xử lý yêu cầu.';
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi!',
+                            text: errorMessage,
+                            confirmButtonText: 'Đóng'
+                        });
+                        
+                        // Re-enable button
+                        button.prop('disabled', false).html('<i class="ri-currency-fill me-1"></i>Thanh toán');
+                    }
+                });
+            }
+        });
     });
 </script>
 @endpush

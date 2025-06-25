@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User;
 
 class SalaryDetail extends Model
 {
@@ -70,7 +71,7 @@ class SalaryDetail extends Model
      */
     public function employee()
     {
-        return $this->belongsTo(Employee::class, 'employee_id', 'employee_id');
+        return $this->belongsTo(User::class, 'employee_id', 'id');
     }
 
     /**
