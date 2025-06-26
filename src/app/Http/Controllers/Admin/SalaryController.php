@@ -11,14 +11,19 @@ use App\Models\User;
 use App\Models\Shipment;
 use App\Http\Requests\Salary\SyncSalaryRequest;
 use App\Services\SalaryService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use App\Models\Transaction;
+use Carbon\Carbon;
 
 class SalaryController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display salary index page with salary data, statistics and charts
      *
@@ -302,5 +307,124 @@ class SalaryController extends Controller
                 ->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage())
                 ->withInput();
         }
+    }
+
+    /**
+     * Process salary payment
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    /**
+     * Process salary payment
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
+     */
+    public function processPayment($id)
+    {
+        // try {
+            DB::beginTransaction();
+
+            // Find the salary detail with related data
+            $salaryDetail = SalaryDetail::with(['employee', 'salaryPeriod'])->findOrFail($id);
+            
+            // Check if the authenticated user has permission to process this payment
+            // $this->authorize('process', $salaryDetail);
+            
+            // Validate salary status
+            if ($salaryDetail->status === 'paid') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lương đã được thanh toán trước đó.'
+                ], 400);
+            }
+
+            // Validate salary period
+            if (!$salaryDetail->salaryPeriod) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy kỳ lương tương ứng.'
+                ], 400);
+            }
+
+            $now = now();
+            $adminId = auth('admin')->id();
+
+            // Update salary status to paid
+            $salaryDetail->update([
+                'status' => 'paid',
+                'payment_date' => $now,
+                'updated_by' => $adminId,
+                'payment_method' => 'bank_transfer' // You can make this dynamic if needed
+            ]);
+
+            // Create transaction record
+            $transaction = Transaction::create([
+                'type' => 'expense',
+                'category' => 'salary',
+                'amount' => $salaryDetail->net_salary,
+                'description' => sprintf(
+                    'Thanh toán lương tháng %d/%d cho %s (Mã NV: %s)',
+                    $salaryDetail->salaryPeriod->month,
+                    $salaryDetail->salaryPeriod->year,
+                    $salaryDetail->employee->full_name,
+                    $salaryDetail->employee->employee_code
+                ),
+                'transaction_date' => $now,
+                'created_by' => $adminId,
+                'reference_id' => $salaryDetail->salary_id,
+                'reference_type' => get_class($salaryDetail),
+                'metadata' => [
+                    'employee_id' => $salaryDetail->employee_id,
+                    'employee_name' => $salaryDetail->employee->full_name,
+                    'period' => $salaryDetail->salaryPeriod->month . '/' . $salaryDetail->salaryPeriod->year,
+                    'base_salary' => $salaryDetail->base_salary,
+                    'total_allowances' => $salaryDetail->total_allowances ?? 0,
+                    'total_deductions' => $salaryDetail->total_deductions ?? 0,
+                    'net_salary' => $salaryDetail->net_salary
+                ]
+            ]);
+
+            // Log the payment
+            Log::info('Salary payment processed', [
+                'salary_id' => $salaryDetail->salary_id,
+                'employee_id' => $salaryDetail->employee_id,
+                'amount' => $salaryDetail->net_salary,
+                'processed_by' => $adminId,
+                'transaction_id' => $transaction->id
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Thanh toán lương thành công.',
+                'data' => [
+                    'payment_date' => $now->format('d/m/Y H:i:s'),
+                    'transaction_id' => $transaction->id,
+                    'amount' => number_format($salaryDetail->net_salary) . ' VNĐ'
+                ]
+            ]);
+
+        // } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        //     DB::rollBack();
+        //     Log::error('Salary record not found: ' . $e->getMessage());
+            
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Không tìm thấy bản ghi lương.'
+        //     ], 404);
+            
+        // } catch (\Exception $e) {
+        //     DB::rollBack();
+        //     Log::error('Error processing salary payment: ' . $e->getMessage());
+            
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Đã xảy ra lỗi khi xử lý thanh toán. Vui lòng thử lại sau.'
+        //     ], 500);
+        // }
     }
 }
