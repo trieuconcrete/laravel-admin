@@ -79,19 +79,21 @@
                                                         <div class="btn-group">
                                                             <a href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
                                                             
-                                                            <button type="button"
-                                                                    class="btn btn-sm btn-outline-danger delete-user-btn"
-                                                                    data-user-id="{{ $user->id }}">
-                                                                Xóa
-                                                            </button>
-                                                            
-                                                            <form action="{{ route('admin.users.destroy', $user->id) }}"
-                                                                method="POST"
-                                                                class="delete-user-form"
-                                                                id="delete-form-{{ $user->id }}">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                            </form>
+                                                            @if ($user->role !== \App\Models\User::ROLE_ADMIN)
+                                                                <button type="button"
+                                                                        class="btn btn-sm btn-outline-danger delete-user-btn"
+                                                                        data-user-id="{{ $user->id }}">
+                                                                    Xóa
+                                                                </button>
+                                                                
+                                                                <form action="{{ route('admin.users.destroy', $user->id) }}"
+                                                                    method="POST"
+                                                                    class="delete-user-form"
+                                                                    id="delete-form-{{ $user->id }}">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                </form>
+                                                            @endif
                                                         </div>
                                                     </td>
                                                     <td class="py-2 px-4">{{ $user->employee_code }}</td>
