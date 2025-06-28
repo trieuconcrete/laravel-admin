@@ -19,14 +19,27 @@ class ShipmentService
         $this->shipmentRepository = $shipmentRepository;
     }
 
-    public function list($filters = [], $perPage = 20)
+    /**
+     * Get a paginated list of shipments with optional filters
+     *
+     * @param array $filters
+     * @param int $perPage
+     * @return \Illuminate\Pagination\LengthAwarePaginator<\App\Models\Shipment>
+     */
+    public function getList(array $filters = [], int $perPage = 20): \Illuminate\Pagination\LengthAwarePaginator
     {
         return $this->shipmentRepository->getShipmentsWithFilters($filters, $perPage);
     }
 
-    public function find($id)
+    /**
+     * Find a shipment by ID with relationships
+     *
+     * @param int $id
+     * @return \App\Models\Shipment|null
+     */
+    public function find(int $id): ?\App\Models\Shipment
     {
-        return $this->shipmentRepository->find($id)->with(['driver', 'vehicle', 'goods', 'shipmentDeductions.shipmentDeductionType']);
+        return $this->shipmentRepository->find($id)->with(['driver', 'vehicle', 'goods', 'shipmentDeductions.shipmentDeductionType'])->first();
     }
 
     public function createShipment($data)
@@ -86,15 +99,61 @@ class ShipmentService
                         $user_id = (int)$person['user_id'];
                         
                         if (!empty($person['deductions'])) {
+                            // Extract notes from deductions array if it exists
+                            $notes = null;
+                            if (isset($person['deductions']['notes'])) {
+                                $notes = $person['deductions']['notes'];
+                                unset($person['deductions']['notes']); // Remove notes from deductions array
+                            }
+
+                            $isMainDriver = false;
+                            if (isset($person['deductions']['is_main_driver'])) {
+                                $isMainDriver = (bool) $person['deductions']['is_main_driver'];
+                                unset($person['deductions']['is_main_driver']); // Remove notes from deductions array
+                            }
+                            
                             foreach ($person['deductions'] as $deduction_type_id => $amount) {
                                 // Kiểm tra deduction_type_id và amount có hợp lệ
-                                if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0 && 
-                                    $amount !== null && $amount !== '' && is_numeric($amount)) {
+                                if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0) {
                                     ShipmentDeduction::create([
                                         'user_id' => $user_id,
                                         'shipment_id' => $shipment->id,
                                         'shipment_deduction_type_id' => (int)$deduction_type_id ?? null,
                                         'amount' => (float)$amount ?? null,
+                                        'notes' => $notes, // Add notes field
+                                        'is_main_driver' => $isMainDriver
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!empty($data['driverPXs'])) {
+                foreach ($data['driverPXs'] as $driverPX) {
+                    // Kiểm tra user_id có tồn tại và là số nguyên dương
+                    if (isset($driverPX['user_id']) && is_numeric($driverPX['user_id']) && (int)$driverPX['user_id'] > 0) {
+                        $user_id = (int)$driverPX['user_id'];
+                        
+                        if (!empty($driverPX['deductions'])) {
+                            // Extract notes from deductions array if it exists
+                            $notes = null;
+                            if (isset($driverPX['deductions']['notes'])) {
+                                $notes = $driverPX['deductions']['notes'];
+                                unset($driverPX['deductions']['notes']); // Remove notes from deductions array
+                            }
+                            
+                            foreach ($driverPX['deductions'] as $deduction_type_id => $amount) {
+                                // Kiểm tra deduction_type_id và amount có hợp lệ
+                                if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0) {
+                                    ShipmentDeduction::create([
+                                        'user_id' => $user_id,
+                                        'shipment_id' => $shipment->id,
+                                        'shipment_deduction_type_id' => (int)$deduction_type_id ?? null,
+                                        'amount' => (float)$amount ?? null,
+                                        'is_main_driver' => false,
+                                        'notes' => $notes, // Add notes field
                                     ]);
                                 }
                             }
@@ -173,6 +232,38 @@ class ShipmentService
                                         'shipment_id' => $shipment->id,
                                         'shipment_deduction_type_id' => (int)$deduction_type_id ?? null,
                                         'amount' => (float)$amount ?? null,
+                                        'notes' => $notes, // Add notes field
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!empty($data['driverPXs'])) {
+                foreach ($data['driverPXs'] as $driverPX) {
+                    // Kiểm tra user_id có tồn tại và là số nguyên dương
+                    if (isset($driverPX['user_id']) && is_numeric($driverPX['user_id']) && (int)$driverPX['user_id'] > 0) {
+                        $user_id = (int)$driverPX['user_id'];
+                        
+                        if (!empty($driverPX['deductions'])) {
+                            // Extract notes from deductions array if it exists
+                            $notes = null;
+                            if (isset($driverPX['deductions']['notes'])) {
+                                $notes = $driverPX['deductions']['notes'];
+                                unset($driverPX['deductions']['notes']); // Remove notes from deductions array
+                            }
+                            
+                            foreach ($driverPX['deductions'] as $deduction_type_id => $amount) {
+                                // Kiểm tra deduction_type_id và amount có hợp lệ
+                                if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0) {
+                                    ShipmentDeduction::create([
+                                        'user_id' => $user_id,
+                                        'shipment_id' => $shipment->id,
+                                        'shipment_deduction_type_id' => (int)$deduction_type_id ?? null,
+                                        'amount' => (float)$amount ?? null,
+                                        'is_main_driver' => false,
                                         'notes' => $notes, // Add notes field
                                     ]);
                                 }

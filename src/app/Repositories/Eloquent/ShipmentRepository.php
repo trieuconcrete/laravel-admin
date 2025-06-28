@@ -5,6 +5,9 @@ namespace App\Repositories\Eloquent;
 use App\Models\Shipment;
 use App\Repositories\Interface\ShipmentRepositoryInterface;
 use App\Models\User;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
+use Carbon\Carbon;
 
 class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInterface
 {
@@ -14,12 +17,13 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
     }
 
     /**
-     * Summary of getShipmentsWithFilters
-     * @param mixed $filters
-     * @param mixed $perPage
+     * Get shipments with filters
+     *
+     * @param array $filters
+     * @param int|null $perPage
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function getShipmentsWithFilters($filters = [], $perPage = null)
+    public function getShipmentsWithFilters(array $filters = [], ?int $perPage = null): LengthAwarePaginator
     {
         $query = Shipment::query();
         if (!empty($filters['status'])) {
@@ -57,9 +61,9 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
      * @param User $user
      * @param int $month
      * @param int $year
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection<\App\Models\Shipment>
      */
-    public function getUserShipments(User $user, int $month, int $year)
+    public function getUserShipments(User $user, int $month, int $year): Collection
     {
         return Shipment::whereHas('shipmentDeductions', function($query) use ($user) {
                 $query->where('user_id', $user->id);
@@ -75,11 +79,11 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
      * Get shipments for a user between specific dates
      * 
      * @param User $user
-     * @param \Carbon\Carbon $startDate
-     * @param \Carbon\Carbon $endDate
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @param Carbon $startDate
+     * @param Carbon $endDate
+     * @return \Illuminate\Database\Eloquent\Collection<\App\Models\Shipment>
      */
-    public function getUserShipmentsByDateRange(User $user, $startDate, $endDate)
+    public function getUserShipmentsByDateRange(User $user, Carbon $startDate, Carbon $endDate): Collection
     {
         return Shipment::whereHas('shipmentDeductions', function($query) use ($user) {
                 $query->where('user_id', $user->id);
