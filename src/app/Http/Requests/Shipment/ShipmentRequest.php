@@ -79,6 +79,22 @@ class ShipmentRequest extends FormRequest
             ]);
         }
 
+        if ($this->has('driverPXs')) {
+            $driverPXs = $this->input('driverPXs', []);
+            foreach ($driverPXs as $driverIndex => $driver) {
+                if (isset($driver['deductions']) && is_array($driver['deductions'])) {
+                    foreach ($driver['deductions'] as $deductionKey => $value) {
+                        if (!empty($value)) {
+                            $driverPXs[$driverIndex]['deductions'][$deductionKey] = str_replace(',', '', $value);
+                        }
+                    }
+                }
+            }
+            $this->merge([
+                'driverPXs' => $driverPXs
+            ]);
+        }
+
         // Remove commas from unit price
         if ($this->unit_price) {
             $this->merge([
@@ -116,7 +132,12 @@ class ShipmentRequest extends FormRequest
             'drivers' => 'array',
             'drivers.*.user_id' => 'required|exists:users,id',
             'drivers.*.deductions' => 'array',
-            'drivers.*.deductions.*' => 'nullable'
+            'drivers.*.deductions.*' => 'nullable',
+            // Tài xế phụ cấp
+            'driverPXs' => 'array',
+            'driverPXs.*.user_id' => 'required|exists:users,id',
+            'driverPXs.*.deductions' => 'array',
+            'driverPXs.*.deductions.*' => 'nullable'
         ];
     }
 
@@ -140,6 +161,10 @@ class ShipmentRequest extends FormRequest
             'drivers' => 'Danh sách tài xế/lơ xe',
             'drivers.*.user_id' => 'Nhân sự',
             'drivers.*.deductions.*' => 'Số tiền phụ cấp',
+            // Tài xế phụ cấp
+            'driverPXs' => 'Danh sách tài xế phụ cấp',
+            'driverPXs.*.user_id' => 'Nhân sự',
+            'driverPXs.*.deductions.*' => 'Số tiền phụ cấp',
         ];
     }
 }

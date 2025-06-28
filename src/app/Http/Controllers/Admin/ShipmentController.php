@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use App\Models\ShipmentDeductionType;
 use App\Enum\UserStatus;
+use App\Models\Position;
+use Illuminate\Support\Facades\DB;
 
 class ShipmentController extends Controller
 {
@@ -40,10 +42,11 @@ class ShipmentController extends Controller
             'estimated_arrival_time' => $request->input('estimated_arrival_time'),
             'keyword' => $request->input('keyword'),
         ];
-        $shipments = $this->shipmentService->list($filters, 20);
+        // Use getList instead of list to avoid PHP reserved keyword conflict
+        $shipments = $this->shipmentService->getList($filters, 20);
         $shipmentStatus = Shipment::$statuses;
 
-        return view('admin.shipments.index', compact('shipments','shipmentStatus'));
+        return view('admin.shipments.index', compact('shipments', 'shipmentStatus'));
     }
 
     /**
@@ -54,10 +57,50 @@ class ShipmentController extends Controller
     {
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
         $vehicles = Vehicle::where('status', Vehicle::STATUS_ACTIVE)->pluck('plate_number', 'vehicle_id');
-        $users = User::whereIn('role', ['driver', 'assistant', 'helper'])->where('status', UserStatus::ACTIVE)->pluck('full_name', 'id');
-        $deductionTypes = ShipmentDeductionType::where('type', 'expense')->where('status', 'active')->get();
-        $personDeductionTypes =ShipmentDeductionType::where('type','driver_and_busboy')->where('status', 'active')->get();
-        return view('admin.shipments.create', compact('customers', 'vehicles', 'users', 'deductionTypes', 'personDeductionTypes'));
+        
+        // Get drivers (tài xế)
+        $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
+            ->where('status', UserStatus::ACTIVE)
+            ->whereHas('position', function ($query) {
+                $query->where('code', Position::POSITION_TX);
+            })
+            ->pluck('full_name', 'id')
+            ->toArray();
+            
+        $deductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_EXPENSE)
+            ->where('status', 'active')
+            ->get();
+            
+        $personDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_DRIVER)
+            ->where('status', 'active')
+            ->get();
+            
+        $subPersonDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_BUS_DRIVER)
+            ->where('status', 'active')
+            ->get();
+            
+        $userPXs = User::whereIn('role', ['driver', 'assistant', 'helper', 'staff'])
+            ->where('status', UserStatus::ACTIVE)
+            ->whereHas('position', function ($query) {
+                $query->where('code', Position::POSITION_PX);
+            })
+            ->pluck('full_name', 'id')
+            ->toArray();
+            
+        // Debug log to check users
+        if (app()->environment('local')) {
+            logger('Users loaded in create method:', ['count' => count($users), 'users' => $users]);
+        }
+            
+        return view('admin.shipments.create', compact(
+            'customers', 
+            'vehicles', 
+            'users', 
+            'deductionTypes', 
+            'personDeductionTypes', 
+            'subPersonDeductionTypes', 
+            'userPXs'
+        ));
     }
 
     /**
@@ -86,19 +129,57 @@ class ShipmentController extends Controller
         $shipment->load(['goods', 'shipmentDeductions']);
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
         $vehicles = Vehicle::where('status', Vehicle::STATUS_ACTIVE)->pluck('plate_number', 'vehicle_id');
-        $users = User::whereIn('role', ['driver', 'assistant', 'helper'])->where('status', UserStatus::ACTIVE)->pluck('full_name', 'id');
+        $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
+            ->where('status', UserStatus::ACTIVE)
+            ->whereHas('position', function ($query) {
+                $query->where('code', Position::POSITION_TX);
+            })
+            ->pluck('full_name', 'id');
         $deductionTypes = ShipmentDeductionType::where('type', 'expense')->where('status', 'active')->get();
-        $personDeductionTypes = ShipmentDeductionType::where('type','driver_and_busboy')->where('status', 'active')->get();
+        $personDeductionTypes =ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_DRIVER)
+            ->where('status', 'active')
+            ->get();
+        
+        $subPersonDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_BUS_DRIVER)
+            ->where('status', 'active')
+            ->get();
+
+        
+        $userPXs = User::whereIn('role', ['driver', 'assistant', 'helper', 'staff'])
+            ->where('status', UserStatus::ACTIVE)
+            ->whereHas('position', function ($query) {
+                $query->where('code', Position::POSITION_PX);
+            })
+            ->pluck('full_name', 'id')
+            ->toArray();
+            
         $shipmentStatus = Shipment::$statuses;
         
         // Chuẩn bị dữ liệu cho form edit
         $shipmentDeductions = $shipment->shipmentDeductions()->whereNull('user_id')->get()->keyBy('shipment_deduction_type_id');
-        $driverDeductions = $shipment->shipmentDeductions()->whereNotNull('user_id')->get()->groupBy('user_id');
+        $driverDeductions = $shipment->shipmentDeductions()
+            ->whereHas('shipmentDeductionType', function ($query) {
+                $query->where('type', ShipmentDeductionType::TYPE_DRIVER);
+            })
+            ->whereNotNull('user_id')
+            ->get()
+            ->groupBy('user_id');
+        
+        $driverPXDeductions = $shipment->shipmentDeductions()
+            ->whereHas('shipmentDeductionType', function ($query) {
+                $query->where('type', ShipmentDeductionType::TYPE_BUS_DRIVER);
+            })
+            ->whereNotNull('user_id')
+            ->get()
+            ->groupBy('user_id');
+
+        // dd($driverDeductions);
+
 
         return view('admin.shipments.edit', compact(
             'shipment', 'customers', 'vehicles', 'users', 
             'deductionTypes', 'personDeductionTypes', 
-            'shipmentDeductions', 'driverDeductions', 'shipmentStatus'
+            'subPersonDeductionTypes', 'shipmentDeductions', 'driverDeductions', 'shipmentStatus', 'userPXs', 'driverPXDeductions'
         ));
     }
 

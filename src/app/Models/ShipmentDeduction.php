@@ -11,7 +11,8 @@ class ShipmentDeduction extends Model
         'shipment_deduction_type_id',
         'user_id',
         'amount',
-        'notes'
+        'notes',
+        'is_main_driver'
     ];
 
     public function shipment()
