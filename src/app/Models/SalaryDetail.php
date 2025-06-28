@@ -24,6 +24,9 @@ class SalaryDetail extends Model
      */
     protected $primaryKey = 'salary_id';
 
+    const STATUS_PAID = 'paid';
+    const STATUS_PENDING = 'pending';
+
     /**
      * Các thuộc tính có thể gán giá trị hàng loạt.
      *
