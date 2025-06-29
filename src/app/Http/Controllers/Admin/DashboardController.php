@@ -83,7 +83,7 @@ class DashboardController extends Controller
     {
         $months = collect();
         for ($i = 5; $i >= 0; $i--) {
-            $months->push(Carbon::now()->subMonths($i)->startOfMonth());
+            $months->push(Carbon::now()->startOfMonth()->subMonths($i)->startOfMonth());
         }
         return $months;
     }
