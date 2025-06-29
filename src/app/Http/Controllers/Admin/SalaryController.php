@@ -368,8 +368,8 @@ class SalaryController extends Controller
                 'amount' => $netSalary,
                 'description' => sprintf(
                     'Thanh toán lương tháng %d/%d cho %s (Mã NV: %s)',
-                    $salaryDetail->salaryPeriod->month,
-                    $salaryDetail->salaryPeriod->year,
+                    Carbon::parse($salaryDetail->salaryPeriod->start_date)->month,
+                    Carbon::parse($salaryDetail->salaryPeriod->start_date)->year,
                     $salaryDetail->employee->full_name,
                     $salaryDetail->employee->employee_code
                 ),
@@ -380,7 +380,7 @@ class SalaryController extends Controller
                 'metadata' => [
                     'employee_id' => $salaryDetail->employee_id,
                     'employee_name' => $salaryDetail->employee->full_name,
-                    'period' => $salaryDetail->salaryPeriod->month . '/' . $salaryDetail->salaryPeriod->year,
+                    'period' => Carbon::parse($salaryDetail->salaryPeriod->start_date)->format('m/Y'),
                     'base_salary' => $salaryDetail->base_salary,
                     'total_allowances' => $salaryDetail->total_allowances ?? 0,
                     'total_deductions' => $salaryDetail->total_deductions ?? 0,
