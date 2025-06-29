@@ -661,7 +661,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <hr>
-            <form id="salaryAdvanceRequestForm" enctype="multipart/form-data" action="{{ route('admin.users.salary-advance-request', $user->id) }}" method="POST">
+            <form id="salaryAdvanceRequestForm" enctype="multipart/form-data" action="{{ route('admin.users.salary-advance-requests.store', $user->id) }}" method="POST">
                 @csrf
                 <input type="hidden" name="user_id" value="{{ $user->id }}">
                 <div class="modal-body">
@@ -703,6 +703,64 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                     <button type="submit" class="btn btn-primary" id="submitSalaryAdvanceRequest">Tạo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add this modal edit salary advance request-->
+<div class="modal fade" id="editSalaryAdvanceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa yêu cầu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <hr>
+            <form id="editSalaryAdvanceRequestForm" enctype="multipart/form-data" method="POST" action="#">
+                @csrf
+                @method('PUT')
+                <input type="hidden" name="user_id" value="{{ $user->id }}">
+                <input type="hidden" name="request_id" value="">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Số tiền <span class="text-danger">*</span></label>
+                            <input class="form-control number-format" type="text" placeholder="Số tiền" name="amount" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ngày yêu cầu <span class="text-danger">*</span></label>
+                            <input class="form-control" type="date" name="advance_month" required />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Loại <span class="text-danger">*</span></label>
+                            <select class="form-select" name="type" required>
+                                @foreach(\App\Models\SalaryAdvanceRequest::getTypes() as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                            <select class="form-select" name="status" required>
+                                @foreach(\App\Models\SalaryAdvanceRequest::getStatuses() as $value => $label)
+                                    <option value="{{ $value }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Lý do</label>
+                        <textarea class="form-control" rows="3" placeholder="Nhập lý do" name="reason"></textarea>
+                    </div>
+                    <div id="editSalaryAdvanceRequestError" class="alert alert-danger mt-2" style="display: none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary" id="updateSalaryAdvanceRequest">Cập nhật</button>
                 </div>
             </form>
         </div>
