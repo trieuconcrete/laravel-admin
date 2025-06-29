@@ -82,7 +82,7 @@ class ShipmentController extends Controller
         $userPXs = User::whereIn('role', ['driver', 'assistant', 'helper', 'staff'])
             ->where('status', UserStatus::ACTIVE)
             ->whereHas('position', function ($query) {
-                $query->where('code', Position::POSITION_PX);
+                $query->whereIn('code', [Position::POSITION_PX, Position::POSITION_TX]);
             })
             ->pluck('full_name', 'id')
             ->toArray();
@@ -144,11 +144,10 @@ class ShipmentController extends Controller
             ->where('status', 'active')
             ->get();
 
-        
         $userPXs = User::whereIn('role', ['driver', 'assistant', 'helper', 'staff'])
             ->where('status', UserStatus::ACTIVE)
             ->whereHas('position', function ($query) {
-                $query->where('code', Position::POSITION_PX);
+                $query->whereIn('code', [Position::POSITION_PX, Position::POSITION_TX]);
             })
             ->pluck('full_name', 'id')
             ->toArray();
