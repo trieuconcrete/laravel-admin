@@ -123,7 +123,7 @@ class DashboardController extends Controller
         foreach ($months as $month) {
             $startDate = $month->copy()->startOfMonth()->format('Y-m-d H:i:s');
             $endDate = $month->copy()->endOfMonth()->format('Y-m-d H:i:s');
-            
+
             // Tính tổng thu nhập (income)
             $monthlyIncome = Transaction::where('type', Transaction::TYPE_INCOME)
                 ->whereBetween('transaction_date', [$startDate, $endDate])
