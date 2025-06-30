@@ -396,6 +396,21 @@ class SalaryController extends Controller
                 'processed_by' => $adminId,
                 'transaction_id' => $transaction->id
             ]);
+            
+            /** process sync salary */
+            $monthRequest = Carbon::parse($salaryDetail->salaryPeriod->start_date)->format('m/Y');
+            // Prepare sync data
+            $dataSync = [
+                'month' => $monthRequest,
+                'period_name' => 'Kỳ lương tháng ' . $monthRequest
+            ];
+            // Sync salary
+            $salaryService = app(SalaryService::class);
+            $result = $salaryService->syncSalary($dataSync);
+
+            if (!$result['success']) {
+                throw new \Exception($result['message']);   
+            }
 
             DB::commit();
 

@@ -26,6 +26,9 @@ use App\Http\Requests\User\UpdateUserRequest;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Traits\UsesSystemDateFormat;
+use App\Http\Requests\SalaryAdvanceRequest\UpdateSalaryAdvanceRequestRequest;
+use App\Services\SalaryService;
 
 /**
  * Summary of UserController
@@ -33,6 +36,7 @@ use Illuminate\Support\Facades\Auth;
 class UserController extends Controller
 {
     use AuthorizesRequests;
+    use UsesSystemDateFormat;
 
     /**
      * Summary of __construct
@@ -244,6 +248,21 @@ class UserController extends Controller
             // Use service to create salary advance request
             $salaryAdvanceRequest = $this->userService->createSalaryAdvanceRequest($data);
             
+            /** process sync salary */
+            $monthRequest = Carbon::parse($request->advance_month)->format('m/Y');
+            // Prepare sync data
+            $dataSync = [
+                'month' => $monthRequest,
+                'period_name' => 'Kỳ lương tháng ' . $monthRequest
+            ];
+            // Sync salary
+            $salaryService = app(SalaryService::class);
+            $result = $salaryService->syncSalary($dataSync);
+
+            if (!$result['success']) {
+                throw new \Exception($result['message']);   
+            }
+            
             DB::commit();
             
             return response()->json([
@@ -287,5 +306,49 @@ class UserController extends Controller
         $data = $this->userService->getSalaryAdvanceRequests($user, $selectedMonth);
         
         return response()->json($data);
+    }
+
+    /**
+     * Summary of updateSalaryAdvanceRequest
+     * @param \Illuminate\Http\Request $request
+     * @param mixed $requestId
+     * @return JsonResponse|mixed
+     */
+    public function updateSalaryAdvanceRequest(UpdateSalaryAdvanceRequestRequest $request, User $user, $requestId)
+    {
+        try {
+            // Get salary advance request
+            $salaryAdvanceRequest = SalaryAdvanceRequest::where('id', $requestId)
+                ->where('user_id', $user->id)
+                ->firstOrFail();
+
+            // Update salary advance request
+            $salaryAdvanceRequest->update($request->validated());
+
+            /** process sync salary */
+            $monthRequest = Carbon::parse($request->advance_month)->format('m/Y');
+            // Prepare sync data
+            $dataSync = [
+                'month' => $monthRequest,
+                'period_name' => 'Kỳ lương tháng ' . $monthRequest
+            ];
+            // Sync salary
+            $salaryService = app(SalaryService::class);
+            $result = $salaryService->syncSalary($dataSync);
+
+            if (!$result['success']) {
+                throw new \Exception($result['message']);   
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật yêu cầu thành công'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

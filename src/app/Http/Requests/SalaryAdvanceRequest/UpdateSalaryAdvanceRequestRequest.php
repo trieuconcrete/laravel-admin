@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use App\Models\SalaryAdvanceRequest;
 use App\Http\Requests\Traits\UsesSystemDateFormat;
 
-class StoreSalaryAdvanceRequestRequest extends FormRequest
+class UpdateSalaryAdvanceRequestRequest extends FormRequest
 {
     use UsesSystemDateFormat;
 
@@ -26,10 +26,21 @@ class StoreSalaryAdvanceRequestRequest extends FormRequest
      */
     public function prepareForValidation()
     {
+        // Format amount by removing thousand separators
         if ($this->amount) {
             $this->merge([
                 'amount' => str_replace('.', '', $this->amount),
             ]);
+        }
+
+        // Convert date format from d/m/Y to Y-m-d
+        if ($this->advance_month) {
+            $date = \DateTime::createFromFormat('d/m/Y', $this->advance_month);
+            if ($date) {
+                $this->merge([
+                    'advance_month' => $date->format('Y-m-d')
+                ]);
+            }
         }
     }
 
@@ -44,9 +55,18 @@ class StoreSalaryAdvanceRequestRequest extends FormRequest
             'amount' => 'required|numeric|min:1|max:999999999',
             'type' => 'required|string|in:' . implode(',', array_keys(SalaryAdvanceRequest::getTypes())),
             'status' => 'required|string|in:' . implode(',', array_keys(SalaryAdvanceRequest::getStatuses())),
-            'advance_month' => ['required', $this->getSystemDateFormatRule()],
-            'reason' => 'required|string|max:500',
-            'user_id' => 'required|exists:users,id',
+            'advance_month' => [
+                'required',
+                // 'date_format:d/m/Y',
+                // function ($attribute, $value, $fail) {
+                //     $date = \DateTime::createFromFormat('d/m/Y', $value);
+                //     if (!$date || $date->format('d/m/Y') !== $value) {
+                //         $fail('Định dạng ngày tháng không hợp lệ. Vui lòng sử dụng định dạng dd/mm/yyyy.');
+                //     }
+                // },
+            ],
+            'reason' => 'nullable|string|max:500',
+            // 'user_id' => 'required|exists:users,id',
         ];
     }
 
@@ -68,7 +88,6 @@ class StoreSalaryAdvanceRequestRequest extends FormRequest
             'user_id.exists' => 'Người dùng không tồn tại',
             'type.required' => 'Vui lòng chọn loại yêu cầu',
             'type.in' => 'Loại yêu cầu không hợp lệ',
-            'reason.required' => 'Vui lòng nhập lý do',
         ];
     }
 }
