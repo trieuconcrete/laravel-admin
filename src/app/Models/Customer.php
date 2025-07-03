@@ -81,6 +81,22 @@ class Customer extends Model
     }
 
     /**
+     * Quan hệ với shipments
+     */
+    public function shipments()
+    {
+        return $this->hasMany(Shipment::class);
+    }
+
+    /**
+     * Quan hệ với báo cáo shipments
+     */
+    public function shipmentReports()
+    {
+        return $this->hasMany(ShipmentReport::class);
+    }
+
+    /**
      * Scope để lọc khách hàng theo loại
      */
     public function scopeOfType($query, $type)
@@ -311,33 +327,43 @@ class Customer extends Model
     }
 
     /**
-     * Lấy tổng số đơn hàng
+     * Lấy tổng số chuyến hàng
      *
      * @return int
      */
-    public function getTotalOrdersAttribute()
+    public function getTotalShipmentsAttribute()
     {
-        return $this->orders()->count();
+        return $this->shipments()->count();
     }
 
     /**
-     * Lấy tổng giá trị đơn hàng
+     * Lấy tổng giá trị chuyến hàng
      *
      * @return float
      */
-    public function getTotalOrderValueAttribute()
+    public function getTotalShipmentValueAttribute()
     {
-        return $this->orders()->sum('total_amount') ?? 0;
+        return $this->shipments()->sum('total_amount') ?? 0;
     }
 
     /**
-     * Lấy đơn hàng gần nhất
+     * Lấy chuyến hàng gần nhất
      *
-     * @return Order|null
+     * @return Shipment|null
      */
-    public function getLatestOrderAttribute()
+    public function getLatestShipmentAttribute()
     {
-        return $this->orders()->latest()->first();
+        return $this->shipments()->latest()->first();
+    }
+
+    /**
+     * Lấy thông tin công nợ khách hàng
+     *
+     * @return array
+     */
+    public function getDebtSummaryAttribute()
+    {
+        return ShipmentReport::getCustomerDebtSummary($this->id);
     }
 
     /**
@@ -348,11 +374,12 @@ class Customer extends Model
     public function getSummaryStats()
     {
         return [
-            'total_orders' => $this->total_orders,
-            'total_value' => $this->total_order_value,
-            'latest_order_date' => $this->latest_order?->created_at,
+            'total_shipments' => $this->total_shipments,
+            'total_value' => $this->total_shipment_value,
+            'latest_shipment_date' => $this->latest_shipment?->created_at,
             'is_active' => $this->is_active,
-            'type' => $this->type_label
+            'type' => $this->type_label,
+            'debt_summary' => $this->debt_summary
         ];
     }
 }

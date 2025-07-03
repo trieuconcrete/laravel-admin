@@ -25,7 +25,44 @@
                             <p><i class="fas fa-calendar-alt me-2 text-primary"></i> Ngày đăng ký: @formatDate($customer->establishment_date)</p>
                         </div>
                     </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">
+                                <i class="fas fa-balance-scale me-2"></i>Tổng kết công nợ khách hàng
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3" id="debtSummaryContainer">
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="fs-4 fw-bold text-primary" id="totalReported">-</div>
+                                        <div class="text-muted">Tổng bảng kê</div>
+                                        <small class="text-info d-none" id="refundNote">(*) Có điều chỉnh</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="fs-4 fw-bold text-success" id="totalPaid">-</div>
+                                        <div class="text-muted">Đã thanh toán</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="fs-4 fw-bold text-danger" id="remainingDebt">-</div>
+                                        <div class="text-muted" id="debtLabel">Còn nợ</div>
+                                        <small class="text-info d-block" id="debtNote"></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Transactions Tab -->
+                {{--  <div class="tab-pane fade show active" id="transactions">  --}}
+                    <!-- Debt Summary Card -->
+                {{--  </div>  --}}
                 <hr>
                 <!-- Nav Tabs -->
                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -144,6 +181,9 @@
                                 <input type="month" id="monthSelector" class="form-control" value="{{ date('Y-m') }}">
                             </div>
                             <div>
+                                <button type="button" id="summarizeReport" class="btn btn-secondary me-2">
+                                    <i class="las la-calculator align-middle me-1"></i> Tổng kết bảng kê
+                                </button>
                                 <button type="button" id="exportInvoice" class="btn btn-outline-primary">
                                     <i class="las la-file-invoice align-middle me-1"></i> Xuất bảng kê
                                 </button>
@@ -204,6 +244,7 @@
 
                     <!-- Transactions Tab -->
                     <div class="tab-pane fade show active" id="transactions">
+                        
                         <div class="d-flex justify-content-between mb-3">
                             <h6>Lịch sử giao dịch</h6>
                             <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#transactionModal"><i class="fas fa-plus me-1"></i>Thêm giao dịch</button>
@@ -556,6 +597,202 @@
             return new Intl.NumberFormat('vi-VN').format(number);
         }
         
+        // Handle summarize report button click
+        const summarizeButton = document.getElementById('summarizeReport');
+        if (summarizeButton) {
+            summarizeButton.addEventListener('click', function() {
+                const month = monthSelector.value;
+                const customerId = {{ $customer->id }};
+                
+                if (!month) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Vui lòng chọn tháng để tổng kết.'
+                    });
+                    return;
+                }
+                
+                // Show confirmation dialog
+                Swal.fire({
+                    title: 'Xác nhận tổng kết bảng kê?',
+                    text: `Bạn có chắc chắn muốn tổng kết bảng kê cho tháng ${month} không?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Tổng kết',
+                    cancelButtonText: 'Hủy',
+                    customClass: {
+                        confirmButton: 'btn btn-secondary',
+                        cancelButton: 'btn btn-light'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Disable button and show loading state
+                        summarizeButton.disabled = true;
+                        const originalText = summarizeButton.innerHTML;
+                        summarizeButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+                        
+                        // Send request to summarize
+                        fetch(`{{ route('admin.customers.summarize-monthly-report', $customer) }}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({
+                                month: month
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Thành công',
+                                    html: `
+                                        <div class="text-start">
+                                            <p><strong>Tháng:</strong> ${data.data.month}</p>
+                                            <p><strong>Số chuyến:</strong> ${data.data.shipment_count}</p>
+                                            <p><strong>Tổng tiền:</strong> ${data.data.formatted_amount} VND</p>
+                                            <p><strong>Thời gian:</strong> ${data.data.updated_at}</p>
+                                        </div>
+                                    `,
+                                    showConfirmButton: true,
+                                    confirmButtonText: 'Đóng'
+                                }).then(() => {
+                                    // Refresh debt summary
+                                    loadDebtSummary();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi',
+                                    text: data.message || 'Đã xảy ra lỗi khi tổng kết bảng kê.'
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: 'Đã xảy ra lỗi khi tổng kết bảng kê.'
+                            });
+                        })
+                        .finally(() => {
+                            // Re-enable button
+                            summarizeButton.disabled = false;
+                            summarizeButton.innerHTML = originalText;
+                        });
+                    }
+                });
+            });
+        }
+        
+        // Function to load debt summary
+        function loadDebtSummary() {
+            const customerId = {{ $customer->id }};
+            
+            fetch(`{{ route('admin.customers.show', $customer) }}?debt_summary=1`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.debt_summary) {
+                    const debtSummary = data.debt_summary;
+                    
+                    // Hiển thị tổng bảng kê
+                    const totalReportedElement = document.getElementById('totalReported');
+                    if (debtSummary.is_refund_case) {
+                        totalReportedElement.textContent = '(' + numberFormat(debtSummary.total_reported) + ') VND';
+                        totalReportedElement.className = 'fs-4 fw-bold text-warning';
+                    } else {
+                        totalReportedElement.textContent = numberFormat(debtSummary.total_reported) + ' VND';
+                        totalReportedElement.className = 'fs-4 fw-bold text-primary';
+                    }
+                    
+                    // Hiển thị đã thanh toán
+                    document.getElementById('totalPaid').textContent = numberFormat(debtSummary.total_paid) + ' VND';
+                    
+                    // Hiển thị còn nợ với logic phức tạp
+                    const remainingDebt = debtSummary.remaining_debt;
+                    const remainingElement = document.getElementById('remainingDebt');
+                    
+                    // Xác định văn bản hiển thị dựa trên debt_type
+                    let displayText = '';
+                    let cssClass = '';
+                    
+                    switch(debtSummary.debt_type) {
+                        case 'customer_owes':
+                            displayText = numberFormat(Math.abs(remainingDebt)) + ' VND';
+                            cssClass = 'fs-4 fw-bold text-danger';
+                            break;
+                        case 'company_owes':
+                            displayText = '(' + numberFormat(Math.abs(remainingDebt)) + ') VND';
+                            cssClass = 'fs-4 fw-bold text-success';
+                            break;
+                        case 'balanced':
+                            displayText = '0 VND';
+                            cssClass = 'fs-4 fw-bold text-muted';
+                            break;
+                        default:
+                            displayText = numberFormat(remainingDebt) + ' VND';
+                            cssClass = 'fs-4 fw-bold text-muted';
+                    }
+                    
+                    remainingElement.textContent = displayText;
+                    remainingElement.className = cssClass;
+                    
+                    // Cập nhật các element phụ
+                    const refundNote = document.getElementById('refundNote');
+                    const debtLabel = document.getElementById('debtLabel');
+                    const debtNote = document.getElementById('debtNote');
+                    
+                    // Reset các element
+                    refundNote.classList.add('d-none');
+                    debtNote.textContent = '';
+                    
+                    // Hiển thị note cho trường hợp hoàn tiền
+                    if (debtSummary.is_refund_case) {
+                        refundNote.classList.remove('d-none');
+                    }
+                    
+                    // Cập nhật label và note cho phần còn nợ
+                    switch(debtSummary.debt_type) {
+                        case 'customer_owes':
+                            debtLabel.textContent = 'Khách hàng nợ';
+                            debtNote.textContent = 'Khách hàng cần thanh toán thêm';
+                            debtNote.className = 'text-danger small';
+                            break;
+                        case 'company_owes':
+                            debtLabel.textContent = 'Công ty nợ';
+                            debtNote.textContent = 'Công ty cần hoàn trả khách hàng';
+                            debtNote.className = 'text-success small';
+                            break;
+                        case 'balanced':
+                            debtLabel.textContent = 'Đã cân bằng';
+                            debtNote.textContent = 'Không còn công nợ';
+                            debtNote.className = 'text-muted small';
+                            break;
+                        default:
+                            debtLabel.textContent = 'Còn nợ';
+                            debtNote.textContent = '';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading debt summary:', error);
+            });
+        }
+        
+        // Load debt summary on page load
+        loadDebtSummary();
+
         // Handle invoice export button click
         const invoiceButton = document.getElementById('exportInvoice');
         if (invoiceButton) {
