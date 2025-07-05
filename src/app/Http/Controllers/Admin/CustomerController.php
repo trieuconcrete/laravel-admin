@@ -12,9 +12,11 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Repositories\Interface\CustomerRepositoryInterface as CustomerRepository;
 use App\Models\Transaction;
 use App\Models\Payment;
+use App\Models\ShipmentReport;
 
 /**
  * Summary of __construct
@@ -88,6 +90,23 @@ class CustomerController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Error fetching monthly report: ' . $e->getMessage()
+                ], 500);
+            }
+        }
+        
+        // Handle AJAX request for debt summary
+        if ($request->ajax() && $request->has('debt_summary')) {
+            try {
+                $debtSummary = ShipmentReport::getCustomerDebtSummary($customer->id);
+                
+                return response()->json([
+                    'success' => true,
+                    'debt_summary' => $debtSummary
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error fetching debt summary: ' . $e->getMessage()
                 ], 500);
             }
         }
@@ -191,6 +210,67 @@ class CustomerController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error exporting invoice: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Tổng kết bảng kê theo tháng
+     *
+     * @param Customer $customer
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function summarizeMonthlyReport(Customer $customer, Request $request)
+    {
+        try {
+            $month = $request->input('month', date('Y-m'));
+            $userId = Auth::id();
+            
+            // Lấy dữ liệu shipments theo tháng
+            $monthlyShipments = $this->customerService->getMonthlyShipments($customer->id, $month);
+            
+            if ($monthlyShipments->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có dữ liệu chuyến hàng trong tháng này để tổng kết'
+                ], 400);
+            }
+            
+            // Tính tổng số tiền
+            $totalAmount = $monthlyShipments->sum('total_amount');
+            
+            // Tạo hoặc cập nhật báo cáo
+            $report = ShipmentReport::createOrUpdateMonthlyReport(
+                $customer->id,
+                $month,
+                $totalAmount,
+                $userId
+            );
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Tổng kết bảng kê thành công',
+                'data' => [
+                    'month' => $month,
+                    'total_amount' => $totalAmount,
+                    'formatted_amount' => number_format($totalAmount, 0, ',', '.'),
+                    'shipment_count' => $monthlyShipments->count(),
+                    'report_id' => $report->id,
+                    'created_at' => $report->created_at->format('d/m/Y H:i'),
+                    'updated_at' => $report->updated_at->format('d/m/Y H:i')
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error summarizing monthly report', [
+                'customer_id' => $customer->id,
+                'month' => $request->input('month'),
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi khi tổng kết bảng kê: ' . $e->getMessage()
             ], 500);
         }
     }

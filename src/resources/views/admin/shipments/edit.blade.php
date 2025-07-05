@@ -268,9 +268,9 @@
                                             </div>
                                             <div class="mb-3">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <label class="form-label mb-0">Tài xế/Lơ xe</label>
+                                                    <label class="form-label mb-0">Tài xế</label>
                                                     <button type="button" class="btn btn-sm btn-outline-primary" id="addPersonBtn">
-                                                        <i class="fas fa-plus me-1"></i>Thêm tài xế/lơ xe
+                                                        <i class="fas fa-plus me-1"></i>Thêm tài xế
                                                     </button>
                                                 </div>
                                                 <div class="table-responsive">
@@ -298,6 +298,7 @@
                                                         
                                                         @if(count($driversArray) > 0)
                                                             @foreach($driversArray as $i => $driver)
+                                                                
                                                                 <tr>
                                                                     <td>
                                                                         <select name="drivers[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
@@ -307,6 +308,14 @@
                                                                             @endforeach
                                                                         </select>
                                                                         @error('drivers.'.$i.'.user_id')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        <div class="form-check form-switch d-inline-block">
+                                                                            <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input" 
+                                                                                value="1" 
+                                                                                {{ old('drivers.'.$i.'.deductions.is_main_driver', isset($driver['deductions'][$type->id]['is_main_driver']) ? $driver['deductions'][$type->id]['is_main_driver'] : false) ? 'checked' : '' }}>
+                                                                        </div>
+                                                                        @error('drivers.{{ $i }}.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     @foreach($personDeductionTypes as $type)
                                                                         <td>
@@ -335,10 +344,105 @@
                                                                     </select>
                                                                     @error('drivers.0.user_id')<div class="text-danger">{{ $message }}</div>@enderror
                                                                 </td>
+                                                                <td class="text-center">
+                                                                    <div class="form-check form-switch d-inline-block">
+                                                                        <input type="checkbox" name="drivers[0][deductions][is_main_driver]" class="form-check-input deduction-input" 
+                                                                            value="1" 
+                                                                            {{ old('drivers.0.deductions.is_main_driver', isset($driver['deductions'][$type->id]['is_main_driver']) ? $driver['deductions'][$type->id]['is_main_driver'] : false) ? 'checked' : '' }}>
+                                                                    </div>
+                                                                    @error('drivers.0.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                </td>
                                                                 @foreach($personDeductionTypes as $type)
                                                                     <td>
                                                                         <input type="text" name="drivers[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
                                                                         @error('drivers.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    </td>
+                                                                @endforeach
+                                                                <td>
+                                                                    <input type="text" name="drivers[0][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.notes', isset($driver['deductions'][$type->id]['notes']) ? $driver['deductions'][$type->id]['notes'] : '') }}">
+                                                                    @error('drivers.0.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                </td>
+                                                                <td></td>
+                                                            </tr>
+                                                        @endif
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                    <label class="form-label mb-0">Lơ xe</label>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" id="addPersonPxBtn">
+                                                        <i class="fas fa-plus me-1"></i>Thêm lơ xe
+                                                    </button>
+                                                </div>
+                                                <div class="table-responsive">
+                                                    <table class="table table-sm" id="personPxTable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Nhân sự <span class="text-danger">*</span></th>
+                                                                @foreach($subPersonDeductionTypes as $type)
+                                                                    <th>{{ $type->name }}</th>
+                                                                @endforeach
+                                                                <th>Notes</th>
+                                                                <th></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        @php
+                                                            $driverPXsArray = [];
+                                                            foreach($driverPXDeductions as $userId => $deductions) {
+                                                                $driverPXsArray[] = [
+                                                                    'user_id' => $userId,
+                                                                    'deductions' => $deductions->keyBy('shipment_deduction_type_id')
+                                                                ];
+                                                            }
+                                                        @endphp
+                                                        
+                                                        @if(count($driverPXsArray) > 0)
+                                                            @foreach($driverPXsArray as $i => $driver)
+                                                                <tr id="driver-row-{{ $i }}">
+                                                                    <td>
+                                                                        <select name="driverPXs[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
+                                                                            <option value="">Chọn nhân sự</option>
+                                                                            @foreach($userPXs as $id => $name)
+                                                                                <option value="{{ $id }}" {{ old('driverPXs.'.$i.'.user_id', $driver['user_id']) == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                        @error('driverPXs.'.$i.'.user_id')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    </td>
+                                                                    @foreach($subPersonDeductionTypes as $type)
+                                                                        <td>
+                                                                            <input type="text" name="driverPXs[{{ $i }}][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0" value="{{ old('driverPXs.'.$i.'.deductions.'.$type->id, isset($driver['deductions'][$type->id]) ? $driver['deductions'][$type->id]->amount : '') }}">
+                                                                            @error('driverPXs.'.$i.'.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        </td>
+                                                                    @endforeach
+                                                                    <td>
+                                                                        <input type="text" name="driverPXs[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('driverPXs.'.$i.'.deductions.notes', isset($driver['deductions'][$type->id]['notes']) ? $driver['deductions'][$type->id]['notes'] : '') }}">
+                                                                        @error('driverPXs.{{ $i }}.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    </td>
+                                                                    <td>
+                                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
+                                                                        <input type="hidden" name="driver_rows[]" value="{{ $i }}">
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        @else
+                                                            <tr>
+                                                                <td>
+                                                                    <select name="driverPXs[0][user_id]" class="form-select form-select-sm" required>
+                                                                        <option value="">Chọn nhân sự</option>
+                                                                        @foreach($userPXs as $id => $name)
+                                                                            <option value="{{ $id }}">{{ $name }}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                    @error('driverPXs.0.user_id')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                </td>
+                                                                @foreach($subPersonDeductionTypes as $type)
+                                                                    <td>
+                                                                        <input type="text" name="driverPXs[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
+                                                                        @error('driverPXs.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                 @endforeach
                                                                 <td></td>
@@ -348,9 +452,6 @@
                                                     </table>
                                                 </div>
                                             </div>
-                                            <script>
-                                                
-                                            </script>
                                         </div>
                                     </div>
                                 </div>
@@ -426,6 +527,11 @@
     const goodsTable = document.querySelector('#goodsTable tbody');
     let goodsCount = {{ count(old('goods', $shipment->goods ?? [])) ?: 1 }};
     const personTable = document.querySelector('#personTable tbody');
+
+    const personPxTable = document.querySelector('#personPxTable tbody');
+    
+    // Lưu trữ dữ liệu cũ từ validation errors
+    window.laravelOld = @json(session()->getOldInput());
     
     // Khai báo các loại khấu trừ cho tài xế
     const personDeductionTypes = [
@@ -433,13 +539,27 @@
             { id: "{{ $type->id }}", name: "{{ $type->name }}" },
         @endforeach
     ];
+
+    const personPxDeductionTypes = [
+        @foreach($subPersonDeductionTypes as $type)
+            { id: "{{ $type->id }}", name: "{{ $type->name }}" },
+        @endforeach
+    ];
     
     // Gán danh sách người dùng vào biến toàn cục
-    users = {
+ window.users = {};
+    @if(!empty($users) && is_array($users))
         @foreach($users as $id => $name)
-            "{{ $id }}": "{{ $name }}",
+            window.users[{{ $id }}] = '{{ addslashes($name) }}';
         @endforeach
-    };
+    @endif
+
+    window.userPXs = {};
+    @if(!empty($userPXs) && is_array($userPXs))
+        @foreach($userPXs as $id => $name)
+            window.userPXs[{{ $id }}] = '{{ addslashes($name) }}';
+        @endforeach
+    @endif
     
     // Khởi tạo các sự kiện khi trang đã tải xong
     document.addEventListener('DOMContentLoaded', function() {
@@ -454,8 +574,8 @@
         // Thêm event listener cho nút thêm người
         document.getElementById('addPersonBtn').onclick = function() {
             // Kiểm tra số lượng user trước khi thêm
-            const selectedIds = getSelectedUserIds();
-            const totalUsers = Object.keys(users).length;
+            const selectedIds = getSelectedUserIds(personTable, 'driver');
+            const totalUsers = Object.keys(window.users).length;
             const currentRows = personTable.querySelectorAll('tr').length;
             
             console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUsers, 'Current Rows:', currentRows);
@@ -465,6 +585,16 @@
                 Swal.fire({
                     title: 'Không thể thêm',
                     text: 'Đã sử dụng hết tất cả nhân sự có sẵn. Số lượng nhân sự: ' + totalUsers,
+                    icon: 'warning',
+                    confirmButtonText: 'Đóng'
+                });
+                return false;
+            }
+
+            if (currentRows > 3) {
+                Swal.fire({
+                    title: 'Không thể thêm',
+                    text: 'Chỉ thêm được tối đa 3 tài xế',
                     icon: 'warning',
                     confirmButtonText: 'Đóng'
                 });
@@ -483,9 +613,56 @@
             }
             
             // Log users object for debugging
-            console.log('Users object:', users);
+            console.log('Users object:', window.users);
             // Nếu còn người dùng khả dụng, thêm hàng mới
-            addDriverRow(personTable, personDeductionTypes, users);
+            addDriverRow(personTable, personDeductionTypes, window.users);
+        };
+        
+        // Thêm event listener cho nút thêm lơ xe
+        document.getElementById('addPersonPxBtn').onclick = function() {
+            // Kiểm tra số lượng user trước khi thêm
+            const selectedIds = getSelectedUserIds(personPxTable, 'driverPXs');
+            const totalUserPXs = Object.keys(window.userPXs).length;
+            const currentRows = Array.from(personPxTable.querySelectorAll('tbody tr')).length;
+            
+            console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUserPXs, 'Current Rows:', currentRows);
+            
+            // Kiểm tra số lượng hàng hiện tại với tổng số users
+            if (currentRows >= totalUserPXs) {
+                Swal.fire({
+                    title: 'Không thể thêm',
+                    text: 'Đã sử dụng hết tất cả nhân sự có sẵn. Số lượng nhân sự: ' + totalUserPXs,
+                    icon: 'warning',
+                    confirmButtonText: 'Đóng'
+                });
+                return false;
+            }
+
+            if (currentRows > 3) {
+                Swal.fire({
+                    title: 'Không thể thêm',
+                    text: 'Chỉ thêm được tối đa 3 lơ xe',
+                    icon: 'warning',
+                    confirmButtonText: 'Đóng'
+                });
+                return false;
+            }
+            
+            // Kiểm tra nếu đã sử dụng hết tất cả người dùng
+            if (selectedIds.length >= totalUserPXs) {
+                Swal.fire({
+                    title: 'Không thể thêm',
+                    text: 'Đã sử dụng hết tất cả nhân sự có sẵn',
+                    icon: 'warning',
+                    confirmButtonText: 'Đóng'
+                });
+                return false;
+            }
+            
+            // Log users object for debugging
+            console.log('Users object:', window.userPXs);
+            // Nếu còn người dùng khả dụng, thêm hàng mới
+            addDriverPXRow(personPxTable, personPxDeductionTypes, window.userPXs);
         };
         
         // Kiểm tra và cập nhật trạng thái nút thêm nhân sự dựa trên số lượng người dùng khả dụng

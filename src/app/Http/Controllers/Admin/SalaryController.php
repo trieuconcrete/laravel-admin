@@ -324,11 +324,12 @@ class SalaryController extends Controller
      */
     public function processPayment($id)
     {
-        // try {
+        try {
             DB::beginTransaction();
 
             // Find the salary detail with related data
             $salaryDetail = SalaryDetail::with(['employee', 'salaryPeriod'])->findOrFail($id);
+            $netSalary = $salaryDetail->net_salary;
             
             // Check if the authenticated user has permission to process this payment
             // $this->authorize('process', $salaryDetail);
@@ -364,26 +365,26 @@ class SalaryController extends Controller
             $transaction = Transaction::create([
                 'type' => 'expense',
                 'category' => 'salary',
-                'amount' => $salaryDetail->net_salary,
+                'amount' => $netSalary,
                 'description' => sprintf(
                     'Thanh toán lương tháng %d/%d cho %s (Mã NV: %s)',
-                    $salaryDetail->salaryPeriod->month,
-                    $salaryDetail->salaryPeriod->year,
+                    Carbon::parse($salaryDetail->salaryPeriod->start_date)->month,
+                    Carbon::parse($salaryDetail->salaryPeriod->start_date)->year,
                     $salaryDetail->employee->full_name,
                     $salaryDetail->employee->employee_code
                 ),
-                'transaction_date' => $now,
+                'transaction_date' => Carbon::parse($salaryDetail->salaryPeriod->start_date)->addDays(1),
                 'created_by' => $adminId,
                 'reference_id' => $salaryDetail->salary_id,
                 'reference_type' => get_class($salaryDetail),
                 'metadata' => [
                     'employee_id' => $salaryDetail->employee_id,
                     'employee_name' => $salaryDetail->employee->full_name,
-                    'period' => $salaryDetail->salaryPeriod->month . '/' . $salaryDetail->salaryPeriod->year,
+                    'period' => Carbon::parse($salaryDetail->salaryPeriod->start_date)->format('m/Y'),
                     'base_salary' => $salaryDetail->base_salary,
                     'total_allowances' => $salaryDetail->total_allowances ?? 0,
                     'total_deductions' => $salaryDetail->total_deductions ?? 0,
-                    'net_salary' => $salaryDetail->net_salary
+                    'net_salary' => $netSalary
                 ]
             ]);
 
@@ -391,10 +392,25 @@ class SalaryController extends Controller
             Log::info('Salary payment processed', [
                 'salary_id' => $salaryDetail->salary_id,
                 'employee_id' => $salaryDetail->employee_id,
-                'amount' => $salaryDetail->net_salary,
+                'net_salary' => $netSalary,
                 'processed_by' => $adminId,
                 'transaction_id' => $transaction->id
             ]);
+            
+            /** process sync salary */
+            $monthRequest = Carbon::parse($salaryDetail->salaryPeriod->start_date)->format('m/Y');
+            // Prepare sync data
+            $dataSync = [
+                'month' => $monthRequest,
+                'period_name' => 'Kỳ lương tháng ' . $monthRequest
+            ];
+            // Sync salary
+            $salaryService = app(SalaryService::class);
+            $result = $salaryService->syncSalary($dataSync);
+
+            if (!$result['success']) {
+                throw new \Exception($result['message']);   
+            }
 
             DB::commit();
 
@@ -408,23 +424,23 @@ class SalaryController extends Controller
                 ]
             ]);
 
-        // } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-        //     DB::rollBack();
-        //     Log::error('Salary record not found: ' . $e->getMessage());
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            DB::rollBack();
+            Log::error('Salary record not found: ' . $e->getMessage());
             
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Không tìm thấy bản ghi lương.'
-        //     ], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy bản ghi lương.'
+            ], 404);
             
-        // } catch (\Exception $e) {
-        //     DB::rollBack();
-        //     Log::error('Error processing salary payment: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error processing salary payment: ' . $e->getMessage());
             
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Đã xảy ra lỗi khi xử lý thanh toán. Vui lòng thử lại sau.'
-        //     ], 500);
-        // }
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi khi xử lý thanh toán. Vui lòng thử lại sau.'
+            ], 500);
+        }
     }
 }

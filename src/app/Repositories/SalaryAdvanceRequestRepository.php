@@ -44,11 +44,11 @@ class SalaryAdvanceRequestRepository implements SalaryAdvanceRequestRepositoryIn
     public function getByUserAndMonth($user, string $month): Collection
     {
         $userId = $user instanceof User ? $user->id : $user;
-        $date = Carbon::parse($month);
+        $startDate = Carbon::parse($month)->startOfMonth();
+        $endDate = Carbon::parse($month)->endOfMonth();
         
         return SalaryAdvanceRequest::where('user_id', $userId)
-            ->whereMonth('advance_month', $date->month)
-            ->whereYear('advance_month', $date->year)
+            ->whereBetween('advance_month', [$startDate, $endDate])
             ->orderBy('created_at', 'desc')
             ->get();
     }

@@ -40,8 +40,11 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('users', UserController::class);
     Route::get('users-export', [UserController::class, 'export'])->name('users.export');
     Route::get('users/{user}/export-salary', [UserController::class, 'exportSalary'])->name('users.export-salary');
-    Route::post('users/{user}/salary-advance-request', [UserController::class, 'createSalaryAdvanceRequest'])->name('users.salary-advance-request');
-    Route::get('users/{user}/salary-advance-requests', [UserController::class, 'getSalaryAdvanceRequests'])->name('users.get-salary-advance-requests');
+    Route::prefix('users/{user}')->group(function () {
+        Route::post('salary-advance-requests', [UserController::class, 'createSalaryAdvanceRequest'])->name('users.salary-advance-requests.store');
+        Route::get('salary-advance-requests', [UserController::class, 'getSalaryAdvanceRequests'])->name('users.salary-advance-requests.index');
+        Route::put('salary-advance-requests/{request}', [UserController::class, 'updateSalaryAdvanceRequest'])->name('users.salary-advance-requests.update');
+    });
 
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::post('profile/update', [ProfileController::class, 'update'])->name('profile.update');
@@ -50,6 +53,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('vehicles', VehicleController::class);
     Route::resource('customers', CustomerController::class);
     Route::get('customers/{customer}/export-invoice', [CustomerController::class, 'exportInvoice'])->name('customers.export-invoice');
+    Route::post('customers/{customer}/summarize-monthly-report', [CustomerController::class, 'summarizeMonthlyReport'])->name('customers.summarize-monthly-report');
     Route::post('customers/{customer}/store-transaction', [PaymentTransactionController::class, 'storeTransaction'])->name('customers.store-transaction');
     Route::get('customers/{customer}/transactions', [PaymentTransactionController::class, 'getTransactions'])->name('customers.transactions');
     Route::get('customers/{customer}/transactions/{transaction}/edit', [PaymentTransactionController::class, 'editTransaction'])->name('customers.edit-transaction');

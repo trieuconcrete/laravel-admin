@@ -330,7 +330,7 @@ class UserService
         } else {
             $requests = $this->salaryAdvanceRequestRepository->getByUser($user);
         }
-        
+
         $formattedRequests = $requests->map(function ($request) {
             return [
                 'id' => $request->id,
@@ -341,13 +341,14 @@ class UserService
                 'status_label' => $request->status_label,
                 'status_color' => $request->status_color,
                 'reason' => $request->reason,
-                'advance_month' => $request->advance_month ? $request->advance_month->format('m/Y') : null,
+                'advance_month' => $request->advance_month ? $request->advance_month->format(config('app.date_format', 'd/m/Y')) : null,
                 'request_date' => $request->request_date,
                 'formatted_request_date' => $request->request_date ? $request->request_date->format(config('app.date_format', 'd/m/Y')) : null,
                 'created_at' => $request->created_at,
                 'formatted_created_at' => $request->created_at ? $request->created_at->format(config('app.date_format', 'd/m/Y')) : null,
                 'type_color' => $request->type_color,
-                'type_label' => $request->type_label
+                'type_label' => $request->type_label,
+                'type' => $request->type
             ];
         });
         

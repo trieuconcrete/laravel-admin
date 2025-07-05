@@ -2,33 +2,39 @@
 
 namespace App\Repositories\Interface;
 
+use App\Models\User;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+
 interface ShipmentRepositoryInterface extends BaseRepositoryInterface
 {
     /**
-     * Summary of getShipmentsWithFilters
-     * @param mixed $filters
-     * @param mixed $perPage
-     * @return void
+     * Get shipments with filters
+     *
+     * @param array $filters
+     * @param int|null $perPage
+     * @return \Illuminate\Pagination\LengthAwarePaginator
      */
-    public function getShipmentsWithFilters($filters = [], $perPage = 20);
+    public function getShipmentsWithFilters(array $filters = [], ?int $perPage = 20): LengthAwarePaginator;
 
     /**
      * Get shipments for a user in a specific month and year
      * 
-     * @param \App\Models\User $user
+     * @param User $user
      * @param int $month
      * @param int $year
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection<\App\Models\Shipment>
      */
-    public function getUserShipments(\App\Models\User $user, int $month, int $year);
+    public function getUserShipments(User $user, int $month, int $year): Collection;
     
     /**
      * Get shipments for a user between specific dates
      * 
-     * @param \App\Models\User $user
-     * @param \Carbon\Carbon $startDate
-     * @param \Carbon\Carbon $endDate
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @param User $user
+     * @param Carbon $startDate
+     * @param Carbon $endDate
+     * @return \Illuminate\Database\Eloquent\Collection<\App\Models\Shipment>
      */
-    public function getUserShipmentsByDateRange(\App\Models\User $user, $startDate, $endDate);
+    public function getUserShipmentsByDateRange(User $user, Carbon $startDate, Carbon $endDate): Collection;
 }
