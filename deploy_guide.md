@@ -185,7 +185,7 @@ Phân quyền:
 
 ```bash
 chmod +x /var/www/webroot/vantai_hoangphulong/deploy.sh
-chmod +x /var/www/webroot/vantai_hoangphulong_dev/deploy.sh
+chmod +x /var/www/webroot/vantai_hoangphulong_dev/deploy_dev.sh
 ```
 
 ## ✅ Bước 12: Restart services khi cần
