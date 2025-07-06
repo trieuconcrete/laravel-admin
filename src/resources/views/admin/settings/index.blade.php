@@ -55,11 +55,11 @@
                             <i class="fas fa-truck mr-1"></i> Vận chuyển
                         </a>
                     </li>
-                    <li class="nav-item" role="presentation">
+                    {{-- <li class="nav-item" role="presentation">
                         <a class="nav-link {{ $activeTab == 'notifications' ? 'active' : '' }}" id="notifications-tab" data-bs-toggle="tab" href="#notifications" role="tab" aria-controls="notifications" aria-selected="{{ $activeTab == 'notifications' ? 'true' : 'false' }}">
                             <i class="fas fa-bell mr-1"></i> Thông báo
                         </a>
-                    </li>
+                    </li> --}}
                 </ul>
 
                 <input type="hidden" name="group" id="settingGroup" value="{{ $activeTab ?? 'company' }}">
@@ -83,11 +83,11 @@
                         </div>
                     </div>
                     
-                    <div class="tab-pane fade {{ $activeTab == 'notifications' ? 'show active' : '' }}" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
+                    {{-- <div class="tab-pane fade {{ $activeTab == 'notifications' ? 'show active' : '' }}" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
                         <div class="row">
                             @include('admin.settings.partials.notifications')
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
 
                 <div class="mt-4">

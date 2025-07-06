@@ -267,7 +267,7 @@
                     <!-- End Income vs Expenses Chart -->
 
                     <!-- Shipments Count Chart -->
-                    <div class="col-xl-6">
+                    {{-- <div class="col-xl-6">
                         <div class="card">
                             <div class="card-header">
                                 <h4 class="card-title mb-0">Số lượng chuyến xe 6 tháng gần đây</h4>
@@ -276,7 +276,7 @@
                                 <div id="shipments-count-chart" class="apex-charts" dir="ltr" style="height: 350px;"></div>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                     <!-- End Shipments Count Chart -->
                 </div>
                 <!-- End Charts Section -->
