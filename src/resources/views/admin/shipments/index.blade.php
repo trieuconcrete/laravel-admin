@@ -190,9 +190,11 @@
                                     </td>
                                     <td><strong>{{ $shipment->shipment_code }}</strong></td>
                                     <td>
-                                        <a href="{{ route('admin.customers.show', $shipment->customer->id) }}" class="text-primary" target="_blank">
+                                        @if($shipment->customer)
+                                        <a href="{{ route('admin.customers.show', optional($shipment->customer)->id) }}" class="text-primary" target="_blank">
                                             {{ $shipment->customer->name ?? '' }}
                                         </a>
+                                        @endif
                                     </td>
                                     <td>{{ $shipment->origin }} - {{ $shipment->destination }}</td>
                                     <td>{{ $shipment->getDriverFromShipmentDeductions()->full_name ?? '' }}</td>

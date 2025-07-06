@@ -346,9 +346,11 @@
                                                         </a>
                                                     </td>
                                                     <td>
-                                                        <a href="{{ route('admin.customers.show', $shipment->customer->id) }}" class="text-primary">
+                                                        @if($shipment->customer)
+                                                        <a href="{{ route('admin.customers.show', optional($shipment->customer)->id) }}" class="text-primary">
                                                             {{ $shipment->customer->name ?? null }}
                                                         </a>
+                                                        @endif
                                                     </td>
                                                     <td>{{ $shipment?->vehicle?->plate_number ?? null}}</td>
                                                     <td>@formatDate($shipment->departure_time)</td>
