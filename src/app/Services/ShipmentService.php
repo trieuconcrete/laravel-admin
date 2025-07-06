@@ -169,6 +169,11 @@ class ShipmentService
     public function update(Shipment $shipment, array $data)
     {
         Log::info('Dữ liệu cập nhật shipment: ' . json_encode($data));
+        
+        // Debug log cho drivers data
+        if (!empty($data['drivers'])) {
+            Log::info('Drivers data trong update:', $data['drivers']);
+        }
         return DB::transaction(function () use ($shipment, $data) {
             // 1. Cập nhật thông tin cơ bản của shipment
             $shipmentData = $data;
@@ -223,6 +228,12 @@ class ShipmentService
                                 $notes = $person['deductions']['notes'];
                                 unset($person['deductions']['notes']); // Remove notes from deductions array
                             }
+
+                            $isMainDriver = false;
+                            if (isset($person['deductions']['is_main_driver'])) {
+                                $isMainDriver = (bool) $person['deductions']['is_main_driver'];
+                                unset($person['deductions']['is_main_driver']); // Remove is_main_driver from deductions array
+                            }
                             
                             foreach ($person['deductions'] as $deduction_type_id => $amount) {
                                 // Kiểm tra deduction_type_id và amount có hợp lệ
@@ -233,6 +244,7 @@ class ShipmentService
                                         'shipment_deduction_type_id' => (int)$deduction_type_id ?? null,
                                         'amount' => (float)$amount ?? null,
                                         'notes' => $notes, // Add notes field
+                                        'is_main_driver' => $isMainDriver
                                     ]);
                                 }
                             }
@@ -282,6 +294,6 @@ class ShipmentService
         $shipment->shipmentDeductions()->delete();
         $shipment->goods()->delete();
         
-        return $this->shipmentRepository->delete($shipment);
+        return $this->shipmentRepository->delete($shipment->id);
     }
 }

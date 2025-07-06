@@ -64,11 +64,11 @@
         var incomeExpensesChart = new ApexCharts(document.querySelector("#income-expenses-chart"), incomeExpensesOptions);
         incomeExpensesChart.render();
 
-        // Shipments Count Chart
-        var shipmentsCountOptions = {
+        // Debt Chart
+        var debtOptions = {
             series: [{
-                name: 'Số lượng chuyến',
-                data: {!! json_encode($chartData['shipmentCounts']) !!}
+                name: 'Số tiền còn nợ',
+                data: {!! json_encode($chartData['debt']) !!}
             }],
             chart: {
                 type: 'area',
@@ -92,15 +92,15 @@
             },
             yaxis: {
                 title: {
-                    text: 'Số lượng'
+                    text: 'VNĐ'
                 },
                 labels: {
                     formatter: function (value) {
-                        return Math.round(value);
+                        return new Intl.NumberFormat('vi-VN').format(value);
                     }
                 }
             },
-            colors: ['#405189'],
+            colors: ['#f06548'],
             fill: {
                 type: 'gradient',
                 gradient: {
@@ -114,14 +114,14 @@
             tooltip: {
                 y: {
                     formatter: function (val) {
-                        return val + ' chuyến';
+                        return new Intl.NumberFormat('vi-VN').format(val) + ' VNĐ';
                     }
                 }
             }
         };
 
-        var shipmentsCountChart = new ApexCharts(document.querySelector("#shipments-count-chart"), shipmentsCountOptions);
-        shipmentsCountChart.render();
+        var debtChart = new ApexCharts(document.querySelector("#shipments-count-chart"), debtOptions);
+        debtChart.render();
     });
 </script>
 @endpush
@@ -233,16 +233,56 @@
                             <div class="card-body">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-grow-1 overflow-hidden">
-                                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Công nợ</p>
+                                        <p class="text-uppercase fw-medium text-muted text-truncate mb-0">Tổng công nợ</p>
                                     </div>
                                 </div>
-                                <div class="d-flex align-items-end justify-content-between mt-4">
+                                <div class="d-flex align-items-end justify-content-between">
                                     <div>
-                                        <h4 class="fs-25 fw-semibold ff-secondary mb-4 text-danger"><span class="counter-value" data-target="2500000000">250.0000.000</span> <small>VNĐ</small></h4>
+                                        @if($totalDebt > 0)
+                                            <h4 class="fs-22 fw-semibold ff-secondary mb-2 text-danger">
+                                                <span class="counter-value" data-target="{{ abs($totalDebt) }}">0</span>
+                                                <small>VNĐ</small>
+                                            </h4>
+                                            <small class="text-danger">
+                                                <i class="ri-arrow-up-circle-fill me-1"></i>
+                                                Khách hàng còn nợ
+                                            </small>
+                                            <div class="mt-1">
+                                                <small class="text-muted">
+                                                    Cần thu thêm từ khách hàng
+                                                </small>
+                                            </div>
+                                        @elseif($totalDebt < 0)
+                                            <h4 class="fs-22 fw-semibold ff-secondary mb-2 text-success">
+                                                <span class="counter-value" data-target="{{ abs($totalDebt) }}">0</span>
+                                                <small>VNĐ</small>
+                                            </h4>
+                                            <small class="text-success">
+                                                <i class="ri-arrow-down-circle-fill me-1"></i>
+                                                Công ty cần hoàn trả
+                                            </small>
+                                            <div class="mt-1">
+                                                <small class="text-muted">
+                                                    Khách hàng đã trả thừa
+                                                    <a href="/debug/debt" target="_blank" class="text-info ms-1">
+                                                        <i class="ri-information-line"></i>
+                                                    </a>
+                                                </small>
+                                            </div>
+                                        @else
+                                            <h4 class="fs-22 fw-semibold ff-secondary mb-2 text-muted">
+                                                <span class="counter-value" data-target="0">0</span>
+                                                <small>VNĐ</small>
+                                            </h4>
+                                            <small class="text-muted">
+                                                <i class="ri-checkbox-circle-fill me-1"></i>
+                                                Đã cân bằng
+                                            </small>
+                                        @endif
                                     </div>
                                     <div class="avatar-sm flex-shrink-0">
                                         <span class="avatar-title bg-primary-subtle rounded fs-3">
-                                            <i class="bx bx-dollar-circle text-success"></i>
+                                            <i class="bx bx-dollar-circle {{ $totalDebt > 0 ? 'text-danger' : ($totalDebt < 0 ? 'text-success' : 'text-muted') }}"></i>
                                         </span>
                                     </div>
                                 </div>
@@ -266,18 +306,18 @@
                     </div>
                     <!-- End Income vs Expenses Chart -->
 
-                    <!-- Shipments Count Chart -->
-                    {{-- <div class="col-xl-6">
+                    <!-- Debt Chart -->
+                    <div class="col-xl-6">
                         <div class="card">
                             <div class="card-header">
-                                <h4 class="card-title mb-0">Số lượng chuyến xe 6 tháng gần đây</h4>
+                                <h4 class="card-title mb-0">Số tiền khách hàng còn nợ theo tháng</h4>
                             </div>
                             <div class="card-body">
                                 <div id="shipments-count-chart" class="apex-charts" dir="ltr" style="height: 350px;"></div>
                             </div>
                         </div>
-                    </div> --}}
-                    <!-- End Shipments Count Chart -->
+                    </div>
+                    <!-- End Debt Chart -->
                 </div>
                 <!-- End Charts Section -->
 

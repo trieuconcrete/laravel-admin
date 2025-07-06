@@ -4,6 +4,7 @@ namespace App\Http\Requests\Shipment;
 
 use App\Http\Requests\Traits\UsesSystemDateFormat;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Log;
 
 class ShipmentRequest extends FormRequest
 {
@@ -19,18 +20,40 @@ class ShipmentRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
+        // TEMPORARY: Disable filtering to test if this is the issue
         // Filter drivers array based on submitted rows
         if ($this->has('driver_row_indexes')) {
             $indexes = explode(',', $this->input('driver_row_indexes'));
             $drivers = $this->input('drivers', []);
             $filteredDrivers = [];
             
+            // Debug logging
+            if (app()->environment('local')) {
+                Log::info('ShipmentRequest - prepareForValidation:', [
+                    'driver_row_indexes' => $this->input('driver_row_indexes'),
+                    'indexes_array' => $indexes,
+                    'original_drivers' => $drivers,
+                    'drivers_keys' => array_keys($drivers)
+                ]);
+            }
+            
             foreach ($indexes as $index) {
-                if (isset($drivers[$index])) {
-                    $filteredDrivers[$index] = $drivers[$index];
+                $cleanIndex = trim($index);
+                if (isset($drivers[$cleanIndex])) {
+                    $filteredDrivers[$cleanIndex] = $drivers[$cleanIndex];
                 }
             }
             
+            // Debug logging
+            if (app()->environment('local')) {
+                Log::info('ShipmentRequest - after filtering:', [
+                    'filtered_drivers' => $filteredDrivers,
+                    'original_count' => count($drivers),
+                    'filtered_count' => count($filteredDrivers)
+                ]);
+            }
+            
+            // Re-enable filtering for proper testing
             $this->merge([
                 'drivers' => $filteredDrivers
             ]);
