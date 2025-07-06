@@ -274,32 +274,6 @@
                                             @enderror
                                         </div>
                                         <div class="col-md-6 col-lg-3">
-                                            <label class="form-label">Số tiền từ</label>
-                                            <input type="text" name="amount_min" class="form-control number-format" value="{{ request('amount_min') ?? '' }}" placeholder="Số tiền từ">
-                                            @error('amount_min')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-md-6 col-lg-3">
-                                            <label class="form-label">Số tiền đến</label>
-                                            <input type="text" name="amount_max" class="form-control number-format" value="{{ request('amount_max') ?? '' }}" placeholder="Số tiền đến">
-                                            @error('amount_max')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-md-6 col-lg-3">
-                                            <label class="form-label">Loại giao dịch</label>
-                                            <select name="transaction_type" class="form-select">
-                                                <option value="">Tất cả</option>
-                                                @foreach(\App\Models\Transaction::getTypes() as $key => $type)
-                                                    <option value="{{ $key }}" {{ request('transaction_type') == $key ? 'selected' : '' }}>{{ $type }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('transaction_type')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                        <div class="col-md-6 col-lg-3">
                                             <label class="form-label">Phương thức thanh toán</label>
                                             <select name="payment_method" class="form-select">
                                                 <option value="">Tất cả</option>
