@@ -8,7 +8,7 @@
         <!--end col-->
         <div class="col-xxl-12">
             <div class="card mt-xxl-n5">
-                <div class="customer-info-header p-3 mb-3">
+                <div class="customer-info-header p-3">
                     <div class="row">
                         <div class="col-md-8">
                             <h4>{{ $customer->name }}</h4>
@@ -26,7 +26,7 @@
                         </div>
                     </div>
 
-                    <div class="card mb-3">
+                    <div class="card mb-0">
                         <div class="card-header bg-light">
                             <h6 class="mb-0">
                                 <i class="fas fa-balance-scale me-2"></i>Tổng kết công nợ khách hàng

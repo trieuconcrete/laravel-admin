@@ -13,6 +13,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Transaction;
+use App\Models\ShipmentReport;
 
 class DashboardController extends Controller
 {
@@ -36,6 +37,9 @@ class DashboardController extends Controller
         // Count customers
         $totalCustomers = Customer::count();
 
+        // Calculate total debt across all customers
+        $totalDebt = $this->calculateTotalDebt();
+
         // Calculate total salary for the current month
         $totalSalaryThisMonth = User::sum('salary_base');
 
@@ -54,6 +58,9 @@ class DashboardController extends Controller
         // Get income vs expenses data
         $financialData = $this->getIncomeVsExpensesByMonth($lastSixMonths);
         
+        // Get debt data by month
+        $debtData = $this->getDebtByMonth($lastSixMonths);
+        
         // Format chart data for JavaScript
         $chartData = [
             'months' => $lastSixMonths->map(function($date) {
@@ -61,13 +68,15 @@ class DashboardController extends Controller
             })->toArray(),
             'shipmentCounts' => array_values($shipmentCounts),
             'income' => array_values($financialData['income']),
-            'expenses' => array_values($financialData['expenses'])
+            'expenses' => array_values($financialData['expenses']),
+            'debt' => array_values($debtData)
         ];
 
         return view('admin.dashboard', compact(
             'totalVehicles',
             'totalDrivers',
             'totalCustomers',
+            'totalDebt',
             'totalSalaryThisMonth',
             'usersToday',
             'chartData'
@@ -142,5 +151,91 @@ class DashboardController extends Controller
             'income' => $income,
             'expenses' => $expenses
         ];
+    }
+    
+    /**
+     * Calculate total debt across all customers
+     *
+     * @return float
+     */
+    private function calculateTotalDebt()
+    {
+        // Method 1: Use shipment reports (tổng kết)
+        $totalReported = ShipmentReport::sum('total_amount');
+        
+        // Method 2: Calculate directly from shipments if no reports available
+        if ($totalReported == 0) {
+            $totalReported = DB::table('shipments')
+                ->selectRaw('SUM(
+                    (COALESCE(trip_count, 1) * COALESCE(unit_price, 0)) - 
+                    (SELECT COALESCE(SUM(amount), 0) FROM shipment_deductions WHERE shipment_id = shipments.id)
+                ) as total_value')
+                ->value('total_value') ?: 0;
+        }
+        
+        // Get total paid from all transactions with type income
+        $totalPaid = DB::table('transactions')
+            ->join('payments', 'transactions.payment_id', '=', 'payments.id')
+            ->where('transactions.type', Transaction::TYPE_INCOME)
+            ->sum('transactions.amount');
+        
+        // Calculate remaining debt with correct logic for negative reports
+        // If total_amount is negative (refund/adjustment case):
+        // Debt = |total_amount| - total_paid
+        // If total_amount is positive (normal case):
+        // Debt = total_amount - total_paid
+        
+        if ($totalReported < 0) {
+            // Trường hợp hóa đơn âm (điều chỉnh, hoàn trả)
+            // Công nợ = |tổng hóa đơn| - đã thanh toán
+            $remainingDebt = abs($totalReported) - $totalPaid;
+        } else {
+            // Trường hợp bình thường
+            // Công nợ = tổng hóa đơn - đã thanh toán  
+            $remainingDebt = $totalReported - $totalPaid;
+        }
+        
+        return $remainingDebt;
+    }
+    
+    /**
+     * Get debt data for each month
+     *
+     * @param \Illuminate\Support\Collection $months
+     * @return array
+     */
+    private function getDebtByMonth($months)
+    {
+        $debtData = [];
+        
+        foreach ($months as $month) {
+            $monthStr = $month->format('Y-m');
+            $endDate = $month->copy()->endOfMonth()->format('Y-m-d H:i:s');
+            
+            // Get total reported up to this month
+            $totalReported = ShipmentReport::where('monthly', '<=', $monthStr)
+                ->sum('total_amount');
+            
+            // Get total paid up to this month
+            $totalPaid = DB::table('transactions')
+                ->join('payments', 'transactions.payment_id', '=', 'payments.id')
+                ->where('transactions.type', Transaction::TYPE_INCOME)
+                ->where('payments.payment_date', '<=', $endDate)
+                ->sum('transactions.amount');
+            
+            // Calculate remaining debt for this month with correct logic
+            if ($totalReported < 0) {
+                // Trường hợp hóa đơn âm: Công nợ = |tổng hóa đơn| - đã thanh toán
+                $remainingDebt = abs($totalReported) - $totalPaid;
+            } else {
+                // Trường hợp bình thường: Công nợ = tổng hóa đơn - đã thanh toán
+                $remainingDebt = $totalReported - $totalPaid;
+            }
+            
+            // Always show positive values in chart (debt amount)
+            $debtData[$month->format('m/Y')] = max(0, $remainingDebt);
+        }
+        
+        return $debtData;
     }
 }

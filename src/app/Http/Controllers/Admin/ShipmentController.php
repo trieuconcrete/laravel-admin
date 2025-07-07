@@ -58,7 +58,7 @@ class ShipmentController extends Controller
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
         $vehicles = Vehicle::where('status', Vehicle::STATUS_ACTIVE)->pluck('plate_number', 'vehicle_id');
         
-        // Get drivers (tài xế)
+        // Get drivers (tài xế)  
         $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
             ->where('status', UserStatus::ACTIVE)
             ->whereHas('position', function ($query) {
@@ -134,7 +134,18 @@ class ShipmentController extends Controller
             ->whereHas('position', function ($query) {
                 $query->where('code', Position::POSITION_TX);
             })
-            ->pluck('full_name', 'id');
+            ->pluck('full_name', 'id')
+            ->toArray(); // Chuyển Collection thành array
+            
+        // Debug log để kiểm tra
+        if (app()->environment('local')) {
+            logger('Users in edit method:', [
+                'type' => gettype($users),
+                'is_array' => is_array($users),
+                'count' => count($users),
+                'data' => $users
+            ]);
+        }
         $deductionTypes = ShipmentDeductionType::where('type', 'expense')->where('status', 'active')->get();
         $personDeductionTypes =ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_DRIVER)
             ->where('status', 'active')
@@ -191,6 +202,21 @@ class ShipmentController extends Controller
     public function update(ShipmentRequest $request, Shipment $shipment)
     {
         try {
+            // Debug: Log received data
+            if (app()->environment('local')) {
+                Log::info('Shipment update - Raw request data:', [
+                    'all_data' => $request->all(),
+                    'drivers' => $request->input('drivers', []),
+                    'driver_row_indexes' => $request->input('driver_row_indexes'),
+                    'shipment_id' => $shipment->id
+                ]);
+                
+                Log::info('Shipment update - Validated data:', [
+                    'validated_data' => $request->validated(),
+                    'drivers_validated' => $request->validated()['drivers'] ?? [],
+                ]);
+            }
+            
             $this->shipmentService->update($shipment, $request->validated());
             return redirect()->route('admin.shipments.index')->with('success', 'Cập nhật chuyến hàng thành công.');
         } catch (\Exception $e) {

@@ -82,3 +82,68 @@ Route::post('admin/forgot-password', [ForgotPasswordController::class, 'sendRese
 Route::get('admin/reset-password/{token}', [ResetPasswordController::class, 'showResetForm'])->name('admin.password.reset');
 
 Route::post('admin/reset-password', [ResetPasswordController::class, 'reset'])->name('admin.password.update');
+
+// Debug route (remove in production)
+Route::get('/debug/debt', function () {
+    $totalReported = \App\Models\ShipmentReport::sum('total_amount');
+    $reportCount = \App\Models\ShipmentReport::count();
+    
+    $totalPaid = \Illuminate\Support\Facades\DB::table('transactions')
+        ->join('payments', 'transactions.payment_id', '=', 'payments.id')
+        ->where('transactions.type', \App\Models\Transaction::TYPE_INCOME)
+        ->sum('transactions.amount');
+    
+    $transactionCount = \Illuminate\Support\Facades\DB::table('transactions')
+        ->join('payments', 'transactions.payment_id', '=', 'payments.id')
+        ->where('transactions.type', \App\Models\Transaction::TYPE_INCOME)
+        ->count();
+    
+    // Calculate debt with correct logic
+    if ($totalReported < 0) {
+        // Trường hợp hóa đơn âm: Công nợ = |tổng hóa đơn| - đã thanh toán
+        $debt = abs($totalReported) - $totalPaid;
+        $debtExplanation = "Hóa đơn âm: |{$totalReported}| - {$totalPaid} = " . number_format($debt);
+    } else {
+        // Trường hợp bình thường: Công nợ = tổng hóa đơn - đã thanh toán
+        $debt = $totalReported - $totalPaid;
+        $debtExplanation = "Hóa đơn dương: {$totalReported} - {$totalPaid} = " . number_format($debt);
+    }
+    
+    // Calculate directly from shipments
+    $totalFromShipments = \Illuminate\Support\Facades\DB::table('shipments')
+        ->selectRaw('SUM(
+            (COALESCE(trip_count, 1) * COALESCE(unit_price, 0)) - 
+            (SELECT COALESCE(SUM(amount), 0) FROM shipment_deductions WHERE shipment_id = shipments.id)
+        ) as total_value')
+        ->value('total_value') ?: 0;
+    
+    $shipmentCount = \App\Models\Shipment::count();
+    
+    return [
+        'shipment_reports' => [
+            'total_amount' => number_format($totalReported),
+            'count' => $reportCount,
+        ],
+        'transactions' => [
+            'total_paid' => number_format($totalPaid),
+            'count' => $transactionCount,
+        ],
+        'debt_calculation' => [
+            'debt' => number_format($debt),
+            'explanation' => $debtExplanation,
+            'status' => $debt > 0 ? 'Khách hàng nợ công ty' : ($debt < 0 ? 'Công ty nợ khách hàng' : 'Đã cân bằng'),
+        ],
+        'alternative_calculation' => [
+            'total_from_shipments' => number_format($totalFromShipments),
+            'shipment_count' => $shipmentCount,
+            'debt_from_shipments' => number_format($totalFromShipments - $totalPaid),
+        ],
+        'explanation' => [
+            'shipment_reports_vs_shipments' => 'Nếu ShipmentReport = 0 nhưng có nhiều Shipment, có nghĩa là chưa tổng kết bảng kê',
+            'debt_logic_positive' => 'Hóa đơn dương: Công nợ = Tổng bảng kê - Tổng thanh toán',
+            'debt_logic_negative' => 'Hóa đơn âm: Công nợ = |Tổng bảng kê| - Tổng thanh toán (hóa đơn âm có thể do điều chỉnh/hoàn trả)',
+            'current_case' => $totalReported < 0 ? 'Đang áp dụng logic hóa đơn âm' : 'Đang áp dụng logic hóa đơn dương',
+            'example' => 'VD: Nếu bảng kê = -6,264,499,977 và thanh toán = 4,020,000,000 thì nợ = 6,264,499,977 - 4,020,000,000 = 2,244,499,977',
+        ]
+    ];
+});

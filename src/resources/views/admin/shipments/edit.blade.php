@@ -278,6 +278,7 @@
                                                         <thead>
                                                             <tr>
                                                                 <th>Nhân sự <span class="text-danger">*</span></th>
+                                                                <th>Lái chính </th>
                                                                 @foreach($personDeductionTypes as $type)
                                                                     <th>{{ $type->name }}</th>
                                                                 @endforeach
@@ -289,9 +290,12 @@
                                                         @php
                                                             $driversArray = [];
                                                             foreach($driverDeductions as $userId => $deductions) {
+                                                                // Lấy is_main_driver từ bất kỳ deduction record nào của driver này
+                                                                $isMainDriver = $deductions->first() ? $deductions->first()->is_main_driver : false;
                                                                 $driversArray[] = [
                                                                     'user_id' => $userId,
-                                                                    'deductions' => $deductions->keyBy('shipment_deduction_type_id')
+                                                                    'deductions' => $deductions->keyBy('shipment_deduction_type_id'),
+                                                                    'is_main_driver' => $isMainDriver
                                                                 ];
                                                             }
                                                         @endphp
@@ -313,7 +317,7 @@
                                                                         <div class="form-check form-switch d-inline-block">
                                                                             <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input" 
                                                                                 value="1" 
-                                                                                {{ old('drivers.'.$i.'.deductions.is_main_driver', isset($driver['deductions'][$type->id]['is_main_driver']) ? $driver['deductions'][$type->id]['is_main_driver'] : false) ? 'checked' : '' }}>
+                                                                                {{ old('drivers.'.$i.'.deductions.is_main_driver', $driver['is_main_driver']) ? 'checked' : '' }}>
                                                                         </div>
                                                                         @error('drivers.{{ $i }}.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
@@ -324,7 +328,7 @@
                                                                         </td>
                                                                     @endforeach
                                                                     <td>
-                                                                        <input type="text" name="drivers[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.notes', isset($driver['deductions'][$type->id]['notes']) ? $driver['deductions'][$type->id]['notes'] : '') }}">
+                                                                        <input type="text" name="drivers[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.notes', $driver['deductions']->first() ? $driver['deductions']->first()->notes : '') }}">
                                                                         @error('drivers.{{ $i }}.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     <td>
@@ -348,7 +352,7 @@
                                                                     <div class="form-check form-switch d-inline-block">
                                                                         <input type="checkbox" name="drivers[0][deductions][is_main_driver]" class="form-check-input deduction-input" 
                                                                             value="1" 
-                                                                            {{ old('drivers.0.deductions.is_main_driver', isset($driver['deductions'][$type->id]['is_main_driver']) ? $driver['deductions'][$type->id]['is_main_driver'] : false) ? 'checked' : '' }}>
+                                                                            {{ old('drivers.0.deductions.is_main_driver', false) ? 'checked' : '' }}>
                                                                     </div>
                                                                     @error('drivers.0.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
                                                                 </td>
@@ -359,10 +363,12 @@
                                                                     </td>
                                                                 @endforeach
                                                                 <td>
-                                                                    <input type="text" name="drivers[0][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.notes', isset($driver['deductions'][$type->id]['notes']) ? $driver['deductions'][$type->id]['notes'] : '') }}">
+                                                                    <input type="text" name="drivers[0][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.notes', '') }}">
                                                                     @error('drivers.0.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
                                                                 </td>
-                                                                <td></td>
+                                                                <td>
+                                                                    <input type="hidden" name="driver_rows[]" value="0">
+                                                                </td>
                                                             </tr>
                                                         @endif
                                                         </tbody>
@@ -424,7 +430,7 @@
                                                                     </td>
                                                                     <td>
                                                                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
-                                                                        <input type="hidden" name="driver_rows[]" value="{{ $i }}">
+                                                                        <input type="hidden" name="driverPX_rows[]" value="{{ $i }}">
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
@@ -445,7 +451,9 @@
                                                                         @error('driverPXs.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                 @endforeach
-                                                                <td></td>
+                                                                <td>
+                                                                    <input type="hidden" name="driverPX_rows[]" value="0">
+                                                                </td>
                                                             </tr>
                                                         @endif
                                                         </tbody>
@@ -547,8 +555,8 @@
     ];
     
     // Gán danh sách người dùng vào biến toàn cục
- window.users = {};
-    @if(!empty($users) && is_array($users))
+    window.users = {};
+    @if(!empty($users) && (is_array($users) || $users instanceof \Illuminate\Support\Collection))
         @foreach($users as $id => $name)
             window.users[{{ $id }}] = '{{ addslashes($name) }}';
         @endforeach
@@ -560,6 +568,79 @@
             window.userPXs[{{ $id }}] = '{{ addslashes($name) }}';
         @endforeach
     @endif
+    // Debug users data
+    console.log('Users type:', '{{ gettype($users) }}');
+    console.log('Users count:', {{ count($users) }});
+    console.log('Users is_array:', {{ is_array($users) ? 'true' : 'false' }});
+    console.log('Users is Collection:', {{ $users instanceof \Illuminate\Support\Collection ? 'true' : 'false' }});
+    console.log('Available users:', window.users);
+    @if(!empty($users))
+        console.log('Users data from PHP:', @json($users));
+    @endif
+    
+    // Khởi tạo driverRowCount từ số driver hiện có
+    const existingDriverRows = document.querySelectorAll('input[name="driver_rows[]"]');
+    if (existingDriverRows.length > 0) {
+        // Lấy index lớn nhất từ các driver hiện có
+        let maxIndex = 0;
+        existingDriverRows.forEach(input => {
+            const index = parseInt(input.value);
+            if (index > maxIndex) maxIndex = index;
+        });
+        window.driverRowCount = maxIndex;
+        console.log('Set driverRowCount to:', window.driverRowCount);
+    } else {
+        window.driverRowCount = 0;
+    }
+
+    // Form submission debug
+    document.querySelector('form').addEventListener('submit', function(e) {
+        console.log('Form data being submitted:');
+        
+        // Debug drivers data
+        const drivers = document.querySelectorAll('select[name*="drivers"][name*="user_id"]');
+        const driverRowInputs = document.querySelectorAll('input[name="driver_rows[]"]');
+        
+        console.log('Driver rows found:', driverRowInputs.length);
+        
+        drivers.forEach((select, index) => {
+            const userId = select.value;
+            const name = select.getAttribute('name');
+            const match = name.match(/drivers\[(\d+)\]/);
+            const rowIndex = match ? match[1] : index;
+            
+            const isMainDriverCheckbox = document.querySelector(`input[name="drivers[${rowIndex}][deductions][is_main_driver]"]`);
+            const isMainDriver = isMainDriverCheckbox ? isMainDriverCheckbox.checked : false;
+            
+            console.log(`Driver ${rowIndex}:`, {
+                user_id: userId,
+                is_main_driver: isMainDriver,
+                checkbox_element: isMainDriverCheckbox,
+                select_name: name
+            });
+        });
+        
+        // Debug driver_rows inputs
+        driverRowInputs.forEach((input, index) => {
+            console.log(`Driver row input ${index}:`, input.value);
+        });
+        
+        // Debug FormData được gửi
+        const formData = new FormData(this);
+        console.log('=== FormData Contents ===');
+        for (let [key, value] of formData.entries()) {
+            if (key.includes('driver')) {
+                console.log(`${key}: ${value}`);
+            }
+        }
+        
+        // Debug driver_row_indexes
+        const driverRowIndexes = Array.from(driverRowInputs).map(input => input.value).join(',');
+        console.log('driver_row_indexes:', driverRowIndexes);
+        
+        const hiddenDriverRowIndexes = document.querySelector('input[name="driver_row_indexes"]');
+        console.log('hidden driver_row_indexes:', hiddenDriverRowIndexes ? hiddenDriverRowIndexes.value : 'Not found');
+    });
     
     // Khởi tạo các sự kiện khi trang đã tải xong
     document.addEventListener('DOMContentLoaded', function() {

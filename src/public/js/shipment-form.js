@@ -70,29 +70,29 @@ function removeGoodRow(button, rowIndex) {
 
 /**
  * Hàm để cập nhật các dropdown user_id
- * Ẩn/vô hiệu hóa các option đã được chọn ở các dropdown khác
+ * TEMPORARILY DISABLED for testing
  */
 function updateUserDropdowns() {
+    const personTable = document.querySelector('#personTable tbody');
     const selectedIds = getSelectedUserIds(personTable, 'driver');
     
-    // Cập nhật tất cả các dropdown
+    // Debug logging
+    console.log('updateUserDropdowns - selectedIds:', selectedIds);
+    
+    // TEMPORARILY DISABLE ALL LOGIC - just reset all dropdowns to normal state
     document.querySelectorAll('select[name$="[user_id]"]').forEach(select => {
-        const currentValue = select.value;
-        
-        // Lưu lại giá trị hiện tại
         Array.from(select.options).forEach(option => {
-            // Bỏ qua option rỗng (placeholder)
-            if (!option.value) return;
-            
-            // Nếu option này đã được chọn ở dropdown khác, ẩn nó đi
-            if (selectedIds.includes(option.value) && option.value !== currentValue) {
-                option.disabled = true;
-                option.style.display = 'none';
-            } else {
-                option.disabled = false;
-                option.style.display = '';
-            }
+            // Reset all options to normal state
+            option.disabled = false;
+            option.style.display = '';
+            option.style.backgroundColor = '';
+            option.style.color = '';
+            option.text = option.text.replace(' (đã chọn)', '');
         });
+        
+        // Reset dropdown style
+        select.style.borderColor = '';
+        select.style.backgroundColor = '';
     });
 }
 
@@ -121,19 +121,25 @@ function addDriverRow(personTable, personDeductionTypes, users) {
     
     console.log('Selected IDs:', selectedIds.length, 'Total Users:', totalUsers);
     
+    // TEMPORARILY DISABLE: Allow adding more drivers even if all users are selected
     // Nếu đã chọn hết tất cả người dùng, không cho thêm nữa
-    if (selectedIds.length >= totalUsers) {
-        Swal.fire({
-            title: 'Không thể thêm',
-            text: 'Đã sử dụng hết tất cả nhân sự có sẵn',
-            icon: 'warning',
-            confirmButtonText: 'Đóng'
-        });
-        return false;
-    }
+    // if (selectedIds.length >= totalUsers) {
+    //     Swal.fire({
+    //         title: 'Không thể thêm',
+    //         text: 'Đã sử dụng hết tất cả nhân sự có sẵn',
+    //         icon: 'warning',
+    //         confirmButtonText: 'Đóng'
+    //     });
+    //     return false;
+    // }
     
-    // Tăng số lượng hàng
-    driverRowCount++;
+    // Tăng số lượng hàng - sử dụng global driverRowCount nếu có
+    if (window.driverRowCount !== undefined) {
+        window.driverRowCount++;
+        driverRowCount = window.driverRowCount;
+    } else {
+        driverRowCount++;
+    }
     
     let deductionInputs = '';
     personDeductionTypes.forEach(type => {
@@ -365,30 +371,32 @@ function updateAddPersonButtonState() {
             existingAlert.remove();
         }
 
-        const selectedIds = getSelectedUserIds();
+        const personTable = document.querySelector('#personTable tbody');
+        const selectedIds = getSelectedUserIds(personTable, 'driver');
         const totalUsers = Object.keys(window.users).length;
         
         console.log('updateAddPersonButtonState - Selected IDs:', selectedIds, 'Total Users:', totalUsers);
         
-        if (selectedIds.length >= totalUsers) {
-            addPersonBtn.disabled = true;
-            addPersonBtn.classList.remove('btn-outline-primary');
-            addPersonBtn.classList.add('btn-outline-secondary');
+        // TEMPORARILY DISABLE: Always allow adding more drivers
+        // if (selectedIds.length >= totalUsers) {
+        //     addPersonBtn.disabled = true;
+        //     addPersonBtn.classList.remove('btn-outline-primary');
+        //     addPersonBtn.classList.add('btn-outline-secondary');
             
-            // Hiển thị thông báo nếu đã chọn tất cả tài xế
-            const existingAllSelectedAlert = document.getElementById('all-drivers-selected-alert');
-            if (!existingAllSelectedAlert) {
-                const alertDiv = document.createElement('div');
-                alertDiv.id = 'all-drivers-selected-alert';
-                alertDiv.className = 'alert alert-info mt-3';
-                alertDiv.textContent = 'Đã chọn tất cả tài xế có sẵn.';
+        //     // Hiển thị thông báo nếu đã chọn tất cả tài xế
+        //     const existingAllSelectedAlert = document.getElementById('all-drivers-selected-alert');
+        //     if (!existingAllSelectedAlert) {
+        //         const alertDiv = document.createElement('div');
+        //         alertDiv.id = 'all-drivers-selected-alert';
+        //         alertDiv.className = 'alert alert-info mt-3';
+        //         alertDiv.textContent = 'Đã chọn tất cả tài xế có sẵn.';
                 
-                const table = document.querySelector('#personTable');
-                if (table) {
-                    table.parentNode.insertBefore(alertDiv, table.nextSibling);
-                }
-            }
-        } else {
+        //         const table = document.querySelector('#personTable');
+        //         if (table) {
+        //             table.parentNode.insertBefore(alertDiv, table.nextSibling);
+        //         }
+        //     }
+        // } else {
             addPersonBtn.disabled = false;
             addPersonBtn.classList.remove('btn-outline-secondary');
             addPersonBtn.classList.add('btn-outline-primary');
@@ -398,7 +406,7 @@ function updateAddPersonButtonState() {
             if (existingAllSelectedAlert) {
                 existingAllSelectedAlert.remove();
             }
-        }
+        // }
         
     } catch (error) {
         console.error('Error in updateAddPersonButtonState:', error);
@@ -423,12 +431,18 @@ function prepareFormBeforeSubmit(form) {
         driverRows.push(input.value);
     });
     
+    // Debug logging
+    console.log('prepareFormBeforeSubmit - driverRows:', driverRows);
+    
     // Tạo một input hidden để lưu trữ các chỉ số hàng driver
     const driverRowsInput = document.createElement('input');
     driverRowsInput.type = 'hidden';
     driverRowsInput.name = 'driver_row_indexes';
     driverRowsInput.value = driverRows.join(',');
     form.appendChild(driverRowsInput);
+    
+    // Debug logging
+    console.log('prepareFormBeforeSubmit - driver_row_indexes:', driverRowsInput.value);
     
     // Tạo một mảng để lưu trữ các chỉ số hàng hàng hóa đã được thêm vào
     const goodsRows = [];
@@ -690,8 +704,12 @@ function initShipmentForm(initialDriverCount = 1) {
         }
     }
 
-    // Khởi tạo giá trị ban đầu cho driverRowCount
-    driverRowCount = initialDriverCount - 1;
+    // Khởi tạo giá trị ban đầu cho driverRowCount - sử dụng global nếu có
+    if (window.driverRowCount !== undefined) {
+        driverRowCount = window.driverRowCount;
+    } else {
+        driverRowCount = initialDriverCount - 1;
+    }
     
     // Khởi tạo các dropdown user_id
     updateUserDropdowns();
@@ -883,19 +901,25 @@ function addDriverPXRow(personTable, personDeductionTypes, users) {
     
     console.log('Selected IDs:', selectedIds.length, 'Total Users:', totalUsers);
     
+    // TEMPORARILY DISABLE: Allow adding more drivers even if all users are selected
     // Nếu đã chọn hết tất cả người dùng, không cho thêm nữa
-    if (selectedIds.length >= totalUsers) {
-        Swal.fire({
-            title: 'Không thể thêm',
-            text: 'Đã sử dụng hết tất cả nhân sự có sẵn',
-            icon: 'warning',
-            confirmButtonText: 'Đóng'
-        });
-        return false;
-    }
+    // if (selectedIds.length >= totalUsers) {
+    //     Swal.fire({
+    //         title: 'Không thể thêm',
+    //         text: 'Đã sử dụng hết tất cả nhân sự có sẵn',
+    //         icon: 'warning',
+    //         confirmButtonText: 'Đóng'
+    //     });
+    //     return false;
+    // }
     
-    // Tăng số lượng hàng
-    driverRowCount++;
+    // Tăng số lượng hàng - sử dụng global driverRowCount nếu có
+    if (window.driverRowCount !== undefined) {
+        window.driverRowCount++;
+        driverRowCount = window.driverRowCount;
+    } else {
+        driverRowCount++;
+    }
     
     let deductionInputs = '';
     personDeductionTypes.forEach(type => {
