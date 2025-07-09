@@ -88,6 +88,7 @@ class VehicleController extends Controller
      */
     public function show($id)
     {
+        // return redirect()->route('admin.vehicles.index')->with('error', 'Trang không hợp lệ.');
         $vehicle = Vehicle::with(['vehicleType', 'maintenanceRecords'])->findOrFail($id);
     
         if (request()->ajax()) {

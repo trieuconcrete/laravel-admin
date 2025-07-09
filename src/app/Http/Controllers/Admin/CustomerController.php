@@ -141,10 +141,14 @@ class CustomerController extends Controller
         }
     }
 
+    /**
+     * Summary of edit
+     * @param \App\Models\Customer $customer
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function edit(Customer $customer)
     {
-        $customer = Customer::first();
-        return view('admin.customers.edit', compact('customer'));
+        return redirect()->route('admin.customers.index')->with('error', 'Trang không hợp lệ.');
     }
 
     /**

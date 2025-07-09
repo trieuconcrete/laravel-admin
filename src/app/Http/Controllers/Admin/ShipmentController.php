@@ -235,4 +235,14 @@ class ShipmentController extends Controller
         $this->shipmentService->delete($shipment);
         return back()->with('success', 'Xóa chuyến hàng thành công.');
     }
+
+    /**
+     * Summary of show
+     * @param \App\Models\Shipment $shipment
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function show(Shipment $shipment)
+    {
+        return redirect()->back()->with('error', 'Trang không hợp lệ.');
+    }
 }
