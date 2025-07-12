@@ -31,7 +31,7 @@
                             <h6 class="mb-0">
                                 <i class="fas fa-balance-scale me-2"></i>Tổng kết công nợ khách hàng
                             </h6>
-                        </div>
+                </div>
                         <div class="card-body">
                             <div class="row g-3" id="debtSummaryContainer">
                                 <div class="col-md-4">
@@ -766,7 +766,7 @@
         
         // Load debt summary on page load
         loadDebtSummary();
-
+        
         // Handle invoice export button click
         const invoiceButton = document.getElementById('exportInvoice');
         if (invoiceButton) {

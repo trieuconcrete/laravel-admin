@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\PriceQuoteController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
 use App\Http\Controllers\Admin\PaymentTransactionController;
+use App\Http\Controllers\Admin\CarRentalVehicleLogController;
 
 Route::get('/', [HomepageController::class, 'index'])->name('homepage');
 Route::get('/trangchu', [HomepageController::class, 'index1'])->name('homepage1');
@@ -62,6 +63,10 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('contracts', ContractController::class);
     Route::resource('quotes', PriceQuoteController::class);
     Route::resource('car-rental', CarRentalController::class);
+    Route::post('car-rental/store-vehicle-log', [CarRentalController::class, 'storeCarRentalVehicleLog'])->name('car-rental.store-vehicle-log');
+    Route::get('car-rental/vehicle-log/{logId}/edit', [CarRentalController::class, 'editCarRentalVehicleLog'])->name('car-rental.edit-vehicle-log');
+    Route::put('car-rental/vehicle-log/{logId}', [CarRentalController::class, 'updateCarRentalVehicleLog'])->name('car-rental.update-vehicle-log');
+    Route::delete('car-rental/vehicle-log/{logId}', [CarRentalController::class, 'destroyCarRentalVehicleLog'])->name('car-rental.destroy-vehicle-log');
     Route::resource('shipments', ShipmentController::class);
     Route::resource('salary', SalaryController::class);
     Route::post('salary/sync', [SalaryController::class, 'sync'])->name('salary.sync');
