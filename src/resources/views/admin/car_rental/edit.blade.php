@@ -26,7 +26,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" data-bs-toggle="tab" href="#vehicle-logs" role="tab">
-                                        Nhật ký xe
+                                        Nhật ký lộ trình xe
                                     </a>
                                 </li>
                             </ul>
@@ -38,6 +38,18 @@
                             <form action="{{ route('admin.car-rental.update', $carRental->id) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
+                                <script>
+                                $(document).ready(function() {
+                                    $('form[action*="car-rental.update"]').on('submit', function(e) {
+                                        // Loại bỏ dấu phẩy trong monthly_rental_fee trước khi submit
+                                        let monthlyRentalFeeInput = $('input[name="monthly_rental_fee"]', this);
+                                        let monthlyRentalFeeValue = monthlyRentalFeeInput.val();
+                                        if (monthlyRentalFeeValue) {
+                                            monthlyRentalFeeInput.val(monthlyRentalFeeValue.replace(/,/g, ''));
+                                        }
+                                    });
+                                });
+                                </script>
 
                                 <div class="row mb-4">
                                     <div class="col-md-6">
@@ -63,6 +75,15 @@
                                         </select>
                                         <div class="text-danger error" data-field="status"></div>
                                     </div>
+                                </div>
+
+
+                                <div class="mb-4">
+                                    <label class="form-label">Phí thuê xe theo tháng</label>
+                                    <input type="text" class="form-control" name="monthly_rental_fee" value="{{ old('monthly_rental_fee', number_format($carRental->monthly_rental_fee)) }}">
+                                    @error('monthly_rental_fee')
+                                    <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                    @enderror
                                 </div>
 
                                 <div class="mb-4">
@@ -290,7 +311,7 @@
                                 <!-- Vehicle Logs Tab -->
                                 <div class="tab-pane" id="vehicle-logs" role="tabpanel">
                                     <div class="d-flex justify-content-between align-items-center mb-4">
-                                        <h5 class="card-title mb-0">Danh sách nhật ký xe</h5>
+                                        <h5 class="card-title mb-0">Danh sách Nhật ký lộ trình xe</h5>
                                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCarRentalVehicleLogModal">
                                             <i class="ri-add-line align-bottom me-1"></i> Thêm nhật ký
                                         </button>
@@ -300,8 +321,10 @@
                                         <table class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
-                                                    <th>Thời gian bắt đầu</th>
-                                                    <th>Thời gian kết thúc</th>
+                                                    <th class="text-center">Ngày chạy</th>
+                                                    <th class="text-center">Giờ làm việc</th>
+                                                    <th class="text-center">Vị trí đi</th>
+                                                    <th class="text-center">Vị trí đến</th>
                                                     <th>Thời gian tăng ca</th>
                                                     <th>Km bắt đầu</th>
                                                     <th>Km kết thúc</th>
@@ -315,14 +338,23 @@
                                             <tbody>
                                                 @foreach($carRentalVehicleLogs as $log)
                                                 <tr>
-                                                    <td>{{ $log->start_time->format('Y-m-d H:i') }}</td>
-                                                    <td>{{ $log->end_time->format('Y-m-d H:i') }}</td>
-                                                    <td>{{ number_format($log->overtime_hours) }}</td>
+                                                    <td class="text-center">{{ $log->run_date ? \Carbon\Carbon::parse($log->run_date)->format('Y-m-d') : '' }}</td>
+                                                    <td class="text-center">{{ \Carbon\Carbon::parse($log->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($log->end_time)->format('H:i') }}</td>
+                                                    <td>{{ $log->start_location }}</td>
+                                                    <td>{{ $log->end_location }}</td>
+                                                    <td>{{ number_format($log->overtime_hours, 1) }} giờ</td>
                                                     <td>{{ number_format($log->start_odometer) }}</td>
                                                     <td>{{ number_format($log->end_odometer) }}</td>
                                                     <td>{{ number_format($log->total_distance) }}</td>
                                                     <td>{{ number_format($log->total_overtime_cost) }}</td>
-                                                    <td>{{ number_format($log->toll_fee) }}</td>
+                                                    <td>
+                                                        @if($log->tollFees->count() > 0)
+                                                            <span class="badge bg-info">{{ number_format($log->total_toll_fee) }}</span>
+                                                            <small class="d-block text-muted">{{ $log->tollFees->count() }} trạm</small>
+                                                        @else
+                                                            <span class="text-muted">0</span>
+                                                        @endif
+                                                    </td>
                                                     <td>{{ number_format($log->parking_fee) }}</td>
                                                     <td>
                                                         <div class="d-flex gap-2">
@@ -378,42 +410,74 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Thời gian bắt đầu <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="start_time" required>
+                        <div class="col-md-4">
+                            <label class="form-label">Ngày chạy <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="run_date" id="run_date" required>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Thời gian kết thúc <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="end_time" required>
+                        <div class="col-md-4">
+                            <label class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control" name="start_time" id="start_time" required inputmode="numeric" style="cursor:pointer;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Giờ kết thúc <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control" name="end_time" id="end_time" required inputmode="numeric" style="cursor:pointer;">
                         </div>
                     </div>
-
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Vị trí đi <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="start_location" required id="start_location">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Vị trí đến <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="end_location" required id="end_location">
+                        </div>
+                    </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Km bắt đầu <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="start_odometer" required>
+                            <input type="text" class="form-control" name="start_odometer" id="start_odometer" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Km kết thúc <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="end_odometer" required>
+                            <input type="text" class="form-control" name="end_odometer" id="end_odometer" required>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Đơn giá tăng ca (VNĐ/giờ)</label>
-                            <input type="text" class="form-control" name="overtime_rate">
+                            <input type="text" class="form-control" value="50,000" readonly style="background-color: #f8f9fa;">
+                            <small class="text-muted">Đơn giá cố định: 50,000 VNĐ/giờ</small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Phí cầu đường</label>
-                            <input type="text" class="form-control" name="toll_fee">
+                            <label class="form-label">Phí đậu xe</label>
+                            <input type="text" class="form-control" name="parking_fee">
                         </div>
                     </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label class="form-label">Phí đậu xe</label>
-                            <input type="text" class="form-control" name="parking_fee">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Phí cầu đường</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addTollFeeRow()">
+                                <i class="fas fa-plus me-1"></i>Thêm trạm
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="tollFeesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Tên trạm</th>
+                                        <th>Mã giao dịch</th>
+                                        <th>Số tiền</th>
+                                        <th>Ghi chú</th>
+                                        <th width="80"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Toll fee rows will be added here -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -463,16 +527,29 @@
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Thời gian bắt đầu <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="start_time" id="edit_start_time" required>
+                        <div class="col-md-4">
+                            <label class="form-label">Ngày chạy <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="run_date" id="edit_run_date" required>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Thời gian kết thúc <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="end_time" id="edit_end_time" required>
+                        <div class="col-md-4">
+                            <label class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control" name="start_time" id="edit_start_time" required inputmode="numeric" style="cursor:pointer;">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Giờ kết thúc <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control" name="end_time" id="edit_end_time" required inputmode="numeric" style="cursor:pointer;">
                         </div>
                     </div>
-
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Vị trí đi <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="start_location" required id="edit_start_location">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Vị trí đến <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="end_location" required id="edit_end_location">
+                        </div>
+                    </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Km bắt đầu <span class="text-danger">*</span></label>
@@ -487,18 +564,37 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Đơn giá tăng ca</label>
-                            <input type="text" class="form-control" name="overtime_rate" id="edit_overtime_rate">
+                            <input type="text" class="form-control" value="50,000" readonly style="background-color: #f8f9fa;">
+                            <small class="text-muted">Đơn giá cố định: 50,000 VNĐ/giờ</small>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Phí cầu đường</label>
-                            <input type="text" class="form-control" name="toll_fee" id="edit_toll_fee">
+                            <label class="form-label">Phí đậu xe</label>
+                            <input type="text" class="form-control" name="parking_fee" id="edit_parking_fee">
                         </div>
                     </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label class="form-label">Phí đậu xe</label>
-                            <input type="text" class="form-control" name="parking_fee" id="edit_parking_fee">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Phí cầu đường</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addEditTollFeeRow()">
+                                <i class="fas fa-plus me-1"></i>Thêm trạm
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="editTollFeesTable">
+                                <thead>
+                                    <tr>
+                                        <th>Tên trạm <span class="text-danger">*</span></th>
+                                        <th>Mã giao dịch <span class="text-danger">*</span></th>
+                                        <th>Số tiền <span class="text-danger">*</span></th>
+                                        <th>Ghi chú</th>
+                                        <th width="80"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Edit toll fee rows will be added here -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -530,15 +626,74 @@ $(document).ready(function() {
     $('#addCarRentalVehicleLogForm').on('submit', function(e) {
         e.preventDefault();
         
+        // Chuẩn hóa start_time, end_time về H:i
+        let startTimeInput = $('[name="start_time"]', this);
+        let endTimeInput = $('[name="end_time"]', this);
+        let startTime = startTimeInput.val();
+        let endTime = endTimeInput.val();
+        if (startTime && startTime.length > 5) startTimeInput.val(startTime.substring(0,5));
+        if (endTime && endTime.length > 5) endTimeInput.val(endTime.substring(0,5));
+        
+        // Loại bỏ dấu phẩy trong các input fee_amount (toll_fees)
+        $(this).find('input[name^="toll_fees"][name$="[fee_amount]"]').each(function() {
+            let val = $(this).val();
+            if (val) $(this).val(val.replace(/,/g, ''));
+        });
         // Clear previous error messages
         $('.text-danger').remove();
+        
+        // Validate required fields
+        let hasErrors = false;
+        
+        // Check start_time and end_time
+        startTime = $('[name="start_time"]').val();
+        endTime = $('[name="end_time"]').val();
+        
+        if (!startTime) {
+            showFieldError('[name="start_time"]', 'Thời gian bắt đầu là bắt buộc');
+            hasErrors = true;
+        }
+        
+        if (!endTime) {
+            showFieldError('[name="end_time"]', 'Thời gian kết thúc là bắt buộc');
+            hasErrors = true;
+        }
+        
+        // Check toll fees required fields
+        $('#tollFeesTable tbody tr').each(function(index) {
+            const stationName = $(this).find('[name*="[station_name]"]').val();
+            const transactionCode = $(this).find('[name*="[transaction_code]"]').val();
+            const feeAmount = $(this).find('[name*="[fee_amount]"]').val();
+            
+            if (!stationName) {
+                showFieldError($(this).find('[name*="[station_name]"]'), 'Tên trạm là bắt buộc');
+                hasErrors = true;
+            }
+            
+            if (!transactionCode) {
+                showFieldError($(this).find('[name*="[transaction_code]"]'), 'Mã giao dịch là bắt buộc');
+                hasErrors = true;
+            }
+            
+            if (!feeAmount) {
+                showFieldError($(this).find('[name*="[fee_amount]"]'), 'Số tiền là bắt buộc');
+                hasErrors = true;
+            }
+        });
+        
+        if (hasErrors) {
+            Swal.fire({
+                title: "Lỗi!",
+                text: "Vui lòng điền đầy đủ thông tin bắt buộc",
+                icon: "error"
+            });
+            return;
+        }
         
         // Get form data
         const formData = new FormData(this);
         
         // Basic validation
-        const startTime = $('[name="start_time"]').val();
-        const endTime = $('[name="end_time"]').val();
         const startOdo = parseFloat($('[name="start_odometer"]').val().replace(/,/g, ''));
         const endOdo = parseFloat($('[name="end_odometer"]').val().replace(/,/g, ''));
 
@@ -639,22 +794,47 @@ $(document).ready(function() {
     });
 
     // Format number inputs for vehicle log form
-    $('input[name="start_odometer"], input[name="end_odometer"], input[name="overtime_rate"], input[name="toll_fee"], input[name="parking_fee"]').on('input', function () {
+    $('input[name="start_odometer"], input[name="end_odometer"], input[name="parking_fee"], .toll-fee-amount, input[name="monthly_rental_fee"]').on('input', function () {
         let value = $(this).val();
-
         // Remove all non-numeric characters except dots
         value = value.replace(/[^0-9.]/g, '');
-
-        // Handle decimal formatting
+        // Giới hạn tối đa 9 chữ số (không tính dấu chấm thập phân)
         let parts = value.split('.');
+        if (parts[0].length > 9) {
+            parts[0] = parts[0].substring(0, 9);
+            value = parts.join('.');
+        }
+        // Handle decimal formatting
         let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
-
         $(this).val(integerPart + decimalPart);
     });
 
+    // Format number inputs on change (when user leaves the input)
+    $('input[name="start_odometer"], input[name="end_odometer"], input[name="parking_fee"], .toll-fee-amount, input[name="monthly_rental_fee"]').on('change', function () {
+        let value = $(this).val();
+        if (value) {
+            // Remove all non-numeric characters except dots
+            value = value.replace(/[^0-9.]/g, '');
+            // Giới hạn tối đa 9 chữ số (không tính dấu chấm thập phân)
+            let parts = value.split('.');
+            if (parts[0].length > 9) {
+                parts[0] = parts[0].substring(0, 9);
+                value = parts.join('.');
+            }
+            if (value && !isNaN(value)) {
+                let numericValue = parseFloat(value);
+                let formatted = numericValue.toLocaleString('en-US', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                });
+                $(this).val(formatted);
+            }
+        }
+    });
+
     // Initialize formatting for existing values
-    $('input[name="start_odometer"], input[name="end_odometer"], input[name="overtime_rate"], input[name="toll_fee"], input[name="parking_fee"]').each(function() {
+    $('input[name="start_odometer"], input[name="end_odometer"], input[name="parking_fee"], .toll-fee-amount, input[name="monthly_rental_fee"]').each(function() {
         let initial = $(this).val().replace(/[^0-9.]/g, '');
         if (initial) {
             let parts = initial.split('.');
@@ -667,24 +847,47 @@ $(document).ready(function() {
     });
 
     // Format number inputs for edit form (only numeric fields)
-    $('input[id="edit_start_odometer"], input[id="edit_end_odometer"], input[id="edit_overtime_rate"], input[id="edit_toll_fee"], input[id="edit_parking_fee"]').on('input', function () {
+    $('input[id="edit_start_odometer"], input[id="edit_end_odometer"], input[id="edit_parking_fee"], .edit-toll-fee-amount').on('input', function () {
         let value = $(this).val();
-
-        // Remove all non-numeric characters except dots
         value = value.replace(/[^0-9.]/g, '');
-
-        // Handle decimal formatting
+        // Giới hạn tối đa 9 chữ số (không tính dấu chấm thập phân)
         let parts = value.split('.');
+        if (parts[0].length > 9) {
+            parts[0] = parts[0].substring(0, 9);
+            value = parts.join('.');
+        }
         let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
-
         $(this).val(integerPart + decimalPart);
+    });
+
+    // Format number inputs on change for edit form
+    $('input[id="edit_start_odometer"], input[id="edit_end_odometer"], input[id="edit_parking_fee"], .edit-toll-fee-amount').on('change', function () {
+        let value = $(this).val();
+        if (value) {
+            // Remove all non-numeric characters except dots
+            value = value.replace(/[^0-9.]/g, '');
+            // Giới hạn tối đa 9 chữ số (không tính dấu chấm thập phân)
+            let parts = value.split('.');
+            if (parts[0].length > 9) {
+                parts[0] = parts[0].substring(0, 9);
+                value = parts.join('.');
+            }
+            if (value && !isNaN(value)) {
+                let numericValue = parseFloat(value);
+                let formatted = numericValue.toLocaleString('en-US', {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 2
+                });
+                $(this).val(formatted);
+            }
+        }
     });
 
     // Initialize formatting for edit form inputs when modal is shown
     $('#editCarRentalVehicleLogModal').on('shown.bs.modal', function() {
         // Format only numeric inputs in edit form
-        $('input[id="edit_start_odometer"], input[id="edit_end_odometer"], input[id="edit_overtime_rate"], input[id="edit_toll_fee"], input[id="edit_parking_fee"]').each(function() {
+        $('input[id="edit_start_odometer"], input[id="edit_end_odometer"], input[id="edit_parking_fee"], .edit-toll-fee-amount').each(function() {
             let value = $(this).val();
             if (value && !isNaN(value.replace(/,/g, ''))) {
                 let numericValue = parseFloat(value.replace(/,/g, ''));
@@ -696,31 +899,10 @@ $(document).ready(function() {
             }
         });
     });
-
-    flatpickr("#edit_start_time", {
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        time_24hr: true
-    });
-    flatpickr("#edit_end_time", {
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        time_24hr: true
-    });
-    flatpickr("input[name='start_time']:not(#edit_start_time)", {
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        time_24hr: true
-    });
-    flatpickr("input[name='end_time']:not(#edit_end_time)", {
-        enableTime: true,
-        dateFormat: "Y-m-d H:i",
-        time_24hr: true
-    });
 });
 
 // Function to edit vehicle log
-function editVehicleLog(logId) {
+window.editVehicleLog = function(logId) {
     // Show loading
     Swal.fire({
         title: 'Đang tải dữ liệu...',
@@ -761,10 +943,14 @@ function editVehicleLog(logId) {
             }
             $('#edit_start_odometer').val(response.log.start_odometer);
             $('#edit_end_odometer').val(response.log.end_odometer);
-            $('#edit_overtime_rate').val(response.log.overtime_rate);
-            $('#edit_toll_fee').val(response.log.toll_fee);
             $('#edit_parking_fee').val(response.log.parking_fee);
             $('#edit_notes').val(response.log.notes);
+            $('#edit_start_location').val(response.log.start_location ? String(response.log.start_location) : '');
+            $('#edit_end_location').val(response.log.end_location ? String(response.log.end_location) : '');
+            $('#edit_run_date').val(response.log.run_date ? String(response.log.run_date).substring(0, 10) : '');
+            
+            // Load toll fees for edit
+            loadEditTollFees(response.log.toll_fees || []);
             
             // Set form action
             $('#editCarRentalVehicleLogForm').attr('action', `/admin/car-rental/vehicle-log/${response.log.id}`);
@@ -795,15 +981,74 @@ function formatNumber(number) {
 $('#editCarRentalVehicleLogForm').on('submit', function(e) {
     e.preventDefault();
     
+    // Chuẩn hóa start_time, end_time về H:i
+    let startTimeInput = $('[name="start_time"]', this);
+    let endTimeInput = $('[name="end_time"]', this);
+    let startTime = startTimeInput.val();
+    let endTime = endTimeInput.val();
+    if (startTime && startTime.length > 5) startTimeInput.val(startTime.substring(0,5));
+    if (endTime && endTime.length > 5) endTimeInput.val(endTime.substring(0,5));
+    
+    // Loại bỏ dấu phẩy trong các input fee_amount (toll_fees)
+    $(this).find('input[name^="toll_fees"][name$="[fee_amount]"]').each(function() {
+        let val = $(this).val();
+        if (val) $(this).val(val.replace(/,/g, ''));
+    });
     // Clear previous error messages
     $('.text-danger').remove();
+    
+    // Validate required fields
+    let hasErrors = false;
+    
+    // Check start_time and end_time
+    startTime = $('[name="start_time"]', this).val();
+    endTime = $('[name="end_time"]', this).val();
+    
+    if (!startTime) {
+        showFieldError($('[name="start_time"]', this), 'Thời gian bắt đầu là bắt buộc');
+        hasErrors = true;
+    }
+    
+    if (!endTime) {
+        showFieldError($('[name="end_time"]', this), 'Thời gian kết thúc là bắt buộc');
+        hasErrors = true;
+    }
+    
+    // Check toll fees required fields
+    $('#editTollFeesTable tbody tr').each(function(index) {
+        const stationName = $(this).find('[name*="[station_name]"]').val();
+        const transactionCode = $(this).find('[name*="[transaction_code]"]').val();
+        const feeAmount = $(this).find('[name*="[fee_amount]"]').val();
+        
+        if (!stationName) {
+            showFieldError($(this).find('[name*="[station_name]"]'), 'Tên trạm là bắt buộc');
+            hasErrors = true;
+        }
+        
+        if (!transactionCode) {
+            showFieldError($(this).find('[name*="[transaction_code]"]'), 'Mã giao dịch là bắt buộc');
+            hasErrors = true;
+        }
+        
+        if (!feeAmount) {
+            showFieldError($(this).find('[name*="[fee_amount]"]'), 'Số tiền là bắt buộc');
+            hasErrors = true;
+        }
+    });
+    
+    if (hasErrors) {
+        Swal.fire({
+            title: "Lỗi!",
+            text: "Vui lòng điền đầy đủ thông tin bắt buộc",
+            icon: "error"
+        });
+        return;
+    }
     
     // Get form data
     const formData = new FormData(this);
     
     // Basic validation
-    const startTime = $('[name="start_time"]', this).val();
-    const endTime = $('[name="end_time"]', this).val();
     const startOdo = parseFloat($('[name="start_odometer"]', this).val().replace(/,/g, ''));
     const endOdo = parseFloat($('[name="end_odometer"]', this).val().replace(/,/g, ''));
 
@@ -945,5 +1190,170 @@ function deleteVehicleLog(logId) {
         }
     });
 }
+
+// Toll Fee Management Functions
+let tollFeeRowIndex = 0;
+let editTollFeeRowIndex = 0;
+
+// Add toll fee row to create form
+function addTollFeeRow() {
+    const tbody = $('#tollFeesTable tbody');
+    const row = `
+        <tr data-index="${tollFeeRowIndex}">
+            <td>
+                <input type="text" class="form-control form-control-sm" name="toll_fees[${tollFeeRowIndex}][station_name]" placeholder="Tên trạm" required>
+            </td>
+            <td>
+                <input type="text" class="form-control form-control-sm" name="toll_fees[${tollFeeRowIndex}][transaction_code]" placeholder="Mã giao dịch" required>
+            </td>
+            <td>
+                <input type="text" class="form-control form-control-sm toll-fee-amount" name="toll_fees[${tollFeeRowIndex}][fee_amount]" placeholder="Số tiền" required>
+            </td>
+            <td>
+                <input type="text" class="form-control form-control-sm" name="toll_fees[${tollFeeRowIndex}][notes]" placeholder="Ghi chú">
+            </td>
+            <td>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTollFeeRow(${tollFeeRowIndex})">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </td>
+        </tr>
+    `;
+    tbody.append(row);
+    tollFeeRowIndex++;
+    
+    // Initialize number formatting for new row
+    initializeTollFeeFormatting();
+}
+
+// Add toll fee row to edit form
+function addEditTollFeeRow() {
+    const tbody = $('#editTollFeesTable tbody');
+    const row = `
+        <tr data-index="${editTollFeeRowIndex}">
+            <td>
+                <input type="text" class="form-control form-control-sm" name="toll_fees[${editTollFeeRowIndex}][station_name]" placeholder="Tên trạm" required>
+            </td>
+            <td>
+                <input type="text" class="form-control form-control-sm" name="toll_fees[${editTollFeeRowIndex}][transaction_code]" placeholder="Mã giao dịch" required>
+            </td>
+            <td>
+                <input type="text" class="form-control form-control-sm edit-toll-fee-amount" name="toll_fees[${editTollFeeRowIndex}][fee_amount]" placeholder="Số tiền" required>
+            </td>
+            <td>
+                <input type="text" class="form-control form-control-sm" name="toll_fees[${editTollFeeRowIndex}][notes]" placeholder="Ghi chú">
+            </td>
+            <td>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeEditTollFeeRow(${editTollFeeRowIndex})">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </td>
+        </tr>
+    `;
+    tbody.append(row);
+    editTollFeeRowIndex++;
+    
+    // Initialize number formatting for new row
+    initializeEditTollFeeFormatting();
+}
+
+// Remove toll fee row from create form
+function removeTollFeeRow(index) {
+    $(`#tollFeesTable tbody tr[data-index="${index}"]`).remove();
+}
+
+// Remove toll fee row from edit form
+function removeEditTollFeeRow(index) {
+    $(`#editTollFeesTable tbody tr[data-index="${index}"]`).remove();
+}
+
+// Load toll fees for edit form
+function loadEditTollFees(tollFees) {
+    const tbody = $('#editTollFeesTable tbody');
+    tbody.empty();
+    editTollFeeRowIndex = 0;
+    
+    tollFees.forEach((tollFee, index) => {
+        const row = `
+            <tr data-index="${editTollFeeRowIndex}">
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="toll_fees[${editTollFeeRowIndex}][station_name]" value="${tollFee.station_name}" required>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="toll_fees[${editTollFeeRowIndex}][transaction_code]" value="${tollFee.transaction_code || ''}" required>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm edit-toll-fee-amount" name="toll_fees[${editTollFeeRowIndex}][fee_amount]" value="${formatNumber(tollFee.fee_amount)}" required>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="toll_fees[${editTollFeeRowIndex}][notes]" value="${tollFee.notes || ''}">
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeEditTollFeeRow(${editTollFeeRowIndex})">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.append(row);
+        editTollFeeRowIndex++;
+    });
+    
+    // Initialize number formatting for loaded rows
+    initializeEditTollFeeFormatting();
+}
+
+// Initialize number formatting for toll fee amounts in create form
+function initializeTollFeeFormatting() {
+    $('.toll-fee-amount').off('input').on('input', function() {
+        let value = $(this).val();
+        value = value.replace(/[^0-9.]/g, '');
+        
+        let parts = value.split('.');
+        let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+        
+        $(this).val(integerPart + decimalPart);
+    });
+}
+
+// Initialize number formatting for toll fee amounts in edit form
+function initializeEditTollFeeFormatting() {
+    $('.edit-toll-fee-amount').off('input').on('input', function() {
+        let value = $(this).val();
+        value = value.replace(/[^0-9.]/g, '');
+        
+        let parts = value.split('.');
+        let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+        
+        $(this).val(integerPart + decimalPart);
+    });
+}
+
+// Initialize toll fee formatting when modals are shown
+$('#addCarRentalVehicleLogModal').on('shown.bs.modal', function() {
+    initializeTollFeeFormatting();
+});
+
+$('#editCarRentalVehicleLogModal').on('shown.bs.modal', function() {
+    initializeEditTollFeeFormatting();
+});
+
+// Function to show field error
+function showFieldError(selector, message) {
+    const input = $(selector);
+    const errorDiv = $('<div>')
+        .addClass('text-danger mt-1')
+        .text(message);
+    input.parent().append(errorDiv);
+    input.addClass('is-invalid');
+}
+
+// Remove error styling when user starts typing
+$(document).on('input', 'input, textarea', function() {
+    $(this).removeClass('is-invalid');
+    $(this).parent().find('.text-danger').remove();
+});
 </script>
 @endpush

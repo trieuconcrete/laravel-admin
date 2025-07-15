@@ -14,6 +14,19 @@ class UpdateCarRentalRequest extends FormRequest
     }
 
     /**
+     * Summary of prepareForValidation
+     * @return void
+     */
+    public function prepareForValidation()
+    {
+        if ($this->monthly_rental_fee) {
+            $this->merge([
+                'monthly_rental_fee' => str_replace(',', '', $this->monthly_rental_fee),
+            ]);
+        }
+    }
+
+    /**
      * Summary of rules
      * @return array{cargo_description: string, customer_id: string, document_file: string, notes: string, pickup_datetime: string, valid_until: string}
      */
@@ -24,7 +37,8 @@ class UpdateCarRentalRequest extends FormRequest
             'status' => 'required',
             'description' => 'nullable|string',
             'notes' => 'nullable|string',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240'
+            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
+            'monthly_rental_fee' => 'nullable|numeric|min:0|max:1000000000'
         ];
     }
 

@@ -17,28 +17,30 @@ class CarRentalVehicleLog extends Model
         'shipment_id',
         'start_time',
         'end_time',
+        'run_date',
+        'start_location',
+        'end_location',
         'overtime_hours',
         'start_odometer',
         'end_odometer',
         'total_distance',
         'overtime_rate',
         'total_overtime_cost',
-        'toll_fee',
         'parking_fee',
         'notes',
         'status'
     ];
 
     protected $casts = [
-        'start_time' => 'datetime',
-        'end_time' => 'datetime',
+        'start_time' => 'string', // time
+        'end_time' => 'string',   // time
+        'run_date' => 'date',
         'overtime_hours' => 'decimal:2',
         'start_odometer' => 'decimal:2',
         'end_odometer' => 'decimal:2',
         'total_distance' => 'decimal:2',
         'overtime_rate' => 'decimal:2',
         'total_overtime_cost' => 'decimal:2',
-        'toll_fee' => 'decimal:2',
         'parking_fee' => 'decimal:2',
     ];
 
@@ -81,11 +83,27 @@ class CarRentalVehicleLog extends Model
     }
 
     /**
+     * Lấy danh sách phí cầu đường
+     */
+    public function tollFees()
+    {
+        return $this->hasMany(TollFee::class, 'vehicle_log_id');
+    }
+
+    /**
      * Tính tổng chi phí phát sinh
      */
     public function getTotalExtraCostAttribute()
     {
-        return $this->total_overtime_cost + $this->toll_fee + $this->parking_fee;
+        return $this->total_overtime_cost + $this->total_toll_fee + $this->parking_fee;
+    }
+
+    /**
+     * Tính tổng phí cầu đường
+     */
+    public function getTotalTollFeeAttribute()
+    {
+        return $this->tollFees()->sum('fee_amount');
     }
 
     /**

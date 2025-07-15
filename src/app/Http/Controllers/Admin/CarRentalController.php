@@ -14,6 +14,8 @@ use App\Models\VehicleType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\CarRentalVehicleLog;
+use App\Models\TollStation;
+use App\Models\TollFee;
 
 class CarRentalController extends Controller
 {
@@ -107,7 +109,6 @@ class CarRentalController extends Controller
         ));
     }
 
-
     /**
      * Summary of update
      * @param \App\Http\Requests\CarRental\UpdateCarRentalRequest $request
@@ -125,7 +126,7 @@ class CarRentalController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('CarRental update failed', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+            return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
 
@@ -162,69 +163,98 @@ class CarRentalController extends Controller
             $data = $request->all();
             $data['start_odometer'] = str_replace(',', '', $data['start_odometer']);
             $data['end_odometer'] = str_replace(',', '', $data['end_odometer']);
-            $data['overtime_rate'] = str_replace(',', '', $data['overtime_rate']);
-            $data['toll_fee'] = str_replace(',', '', $data['toll_fee']);
             $data['parking_fee'] = str_replace(',', '', $data['parking_fee']);
+            // Clean toll fee amounts
+            if (!empty($data['toll_fees'])) {
+                foreach ($data['toll_fees'] as &$tollFee) {
+                    if (!empty($tollFee['fee_amount'])) {
+                        $tollFee['fee_amount'] = str_replace(',', '', $tollFee['fee_amount']);
+                    }
+                }
+            }
 
             // Validate request data
             $validated = validator($data, [
                 'car_rental_id' => 'required|exists:car_rentals,id',
                 'vehicle_id' => 'required|exists:vehicles,vehicle_id',
-                'start_time' => 'required|date',
-                'end_time' => 'required|date|after:start_time',
+                'run_date' => 'required|date',
+                'start_time' => 'required|date_format:H:i',
+                'end_time' => 'required|date_format:H:i|after:start_time',
+                'start_location' => 'nullable|string|max:255',
+                'end_location' => 'nullable|string|max:255',
                 'start_odometer' => 'required|numeric|min:0',
                 'end_odometer' => 'required|numeric|gt:start_odometer',
                 'overtime_rate' => 'nullable|numeric|min:0',
-                'toll_fee' => 'nullable|numeric|min:0',
                 'parking_fee' => 'nullable|numeric|min:0',
-                'notes' => 'nullable|string'
+                'notes' => 'nullable|string',
+                'toll_fees' => 'nullable|array',
+                'toll_fees.*.station_name' => 'nullable|string|max:255',
+                'toll_fees.*.transaction_code' => 'nullable|string|max:255',
+                'toll_fees.*.fee_amount' => 'nullable|numeric|min:0',
+                'toll_fees.*.notes' => 'nullable|string'
             ])->validate();
 
-            // Ensure all numeric values are positive
-            $validated['overtime_rate'] = abs($validated['overtime_rate'] ?? 0);
-            $validated['toll_fee'] = abs($validated['toll_fee'] ?? 0);
-            $validated['parking_fee'] = abs($validated['parking_fee'] ?? 0);
+            $validated['overtime_rate'] = 50000;
+            $validated['parking_fee'] = isset($validated['parking_fee']) ? abs((float)$validated['parking_fee']) : 0;
 
-            // Calculate additional fields
             $totalDistance = abs($validated['end_odometer'] - $validated['start_odometer']);
-            
-            // Calculate overtime hours (total time used) - ensure positive values
-            $startTime = \Carbon\Carbon::parse($validated['start_time']);
-            $endTime = \Carbon\Carbon::parse($validated['end_time']);
-            $overtimeHours = abs($endTime->diffInHours($startTime));
-            $totalOvertimeCost = abs(($validated['overtime_rate'] ?? 0) * $overtimeHours);
+            // Ghép run_date + start_time, end_time thành datetime cho tính toán
+            $startDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['start_time']);
+            $endDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['end_time']);
 
-            // Ensure all calculated values are positive
+            // Tính overtime_hours (chỉ tính sau 17:30)
+            $overtimeHours = 0;
+            $overtimeRate = $validated['overtime_rate'] ?? 0;
+            if ($overtimeRate > 0) {
+                $overtimeStart = \Carbon\Carbon::parse($validated['run_date'] . ' 17:30');
+                if ($endDateTime->greaterThan($overtimeStart)) {
+                    $effectiveStart = $startDateTime->greaterThan($overtimeStart) ? $startDateTime : $overtimeStart;
+                    $overtimeHours = abs($endDateTime->floatDiffInRealHours($effectiveStart));
+                }
+            }
+            $totalOvertimeCost = abs($overtimeRate * $overtimeHours);
+
             $logData = [
                 'car_rental_id' => $validated['car_rental_id'],
                 'vehicle_id' => $validated['vehicle_id'],
+                'run_date' => $validated['run_date'],
                 'start_time' => $validated['start_time'],
                 'end_time' => $validated['end_time'],
+                'start_location' => $validated['start_location'] ?? null,
+                'end_location' => $validated['end_location'] ?? null,
                 'start_odometer' => abs($validated['start_odometer']),
                 'end_odometer' => abs($validated['end_odometer']),
                 'total_distance' => $totalDistance,
                 'overtime_hours' => $overtimeHours,
                 'overtime_rate' => $validated['overtime_rate'],
                 'total_overtime_cost' => $totalOvertimeCost,
-                'toll_fee' => $validated['toll_fee'],
                 'parking_fee' => $validated['parking_fee'],
                 'notes' => $validated['notes'],
                 'status' => CarRentalVehicleLog::STATUS_COMPLETED
             ];
 
-            // Log the data for debugging
-            Log::info('Creating vehicle log with data:', $logData);
-
-            // Create vehicle log
             $CarRentalVehicleLog = CarRentalVehicleLog::create($logData);
 
-            // Return success response with created log
+            // Create toll fees if provided
+            if (!empty($validated['toll_fees'])) {
+                foreach ($validated['toll_fees'] as $tollFeeData) {
+                    if (!empty($tollFeeData['station_name']) && !empty($tollFeeData['fee_amount'])) {
+                        \App\Models\TollFee::create([
+                            'vehicle_log_id' => $CarRentalVehicleLog->id,
+                            'station_name' => $tollFeeData['station_name'],
+                            'transaction_code' => $tollFeeData['transaction_code'] ?? null,
+                            'fee_amount' => abs((float)$tollFeeData['fee_amount']),
+                            'notes' => $tollFeeData['notes'] ?? null
+                        ]);
+                    }
+                }
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Tạo nhật ký xe thành công',
                 'log' => $CarRentalVehicleLog
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -248,21 +278,30 @@ class CarRentalController extends Controller
     public function editCarRentalVehicleLog($logId)
     {
         try {
-            $log = CarRentalVehicleLog::findOrFail($logId);
-            
+            $log = CarRentalVehicleLog::with('tollFees')->findOrFail($logId);
             return response()->json([
                 'success' => true,
                 'log' => [
                     'id' => $log->id,
                     'vehicle_id' => $log->vehicle_id,
-                    'start_time' => $log->start_time->format('Y-m-d H:i'),
-                    'end_time' => $log->end_time->format('Y-m-d H:i'),
+                    'run_date' => $log->run_date,
+                    'start_time' => $log->start_time,
+                    'end_time' => $log->end_time,
+                    'start_location' => $log->start_location,
+                    'end_location' => $log->end_location,
                     'start_odometer' => number_format($log->start_odometer),
                     'end_odometer' => number_format($log->end_odometer),
                     'overtime_rate' => number_format($log->overtime_rate),
-                    'toll_fee' => number_format($log->toll_fee),
                     'parking_fee' => number_format($log->parking_fee),
-                    'notes' => $log->notes
+                    'notes' => $log->notes,
+                    'toll_fees' => $log->tollFees->map(function($fee) {
+                        return [
+                            'station_name' => $fee->station_name,
+                            'transaction_code' => $fee->transaction_code,
+                            'fee_amount' => $fee->fee_amount,
+                            'notes' => $fee->notes
+                        ];
+                    })->toArray()
                 ]
             ]);
         } catch (\Exception $e) {
@@ -284,76 +323,90 @@ class CarRentalController extends Controller
     public function updateCarRentalVehicleLog(Request $request, $logId)
     {
         try {
-            // Find the log
             $log = CarRentalVehicleLog::findOrFail($logId);
-            
-            // Clean formatted numbers before validation
             $data = $request->all();
             $data['start_odometer'] = str_replace(',', '', $data['start_odometer']);
             $data['end_odometer'] = str_replace(',', '', $data['end_odometer']);
-            $data['overtime_rate'] = str_replace(',', '', $data['overtime_rate']);
-            $data['toll_fee'] = str_replace(',', '', $data['toll_fee']);
             $data['parking_fee'] = str_replace(',', '', $data['parking_fee']);
-
-            // Validate request data
+            if (!empty($data['toll_fees'])) {
+                foreach ($data['toll_fees'] as &$tollFee) {
+                    if (!empty($tollFee['fee_amount'])) {
+                        $tollFee['fee_amount'] = str_replace(',', '', $tollFee['fee_amount']);
+                    }
+                }
+            }
             $validated = validator($data, [
                 'car_rental_id' => 'required|exists:car_rentals,id',
                 'vehicle_id' => 'required|exists:vehicles,vehicle_id',
-                'start_time' => 'required|date',
-                'end_time' => 'required|date|after:start_time',
+                'run_date' => 'required|date',
+                'start_time' => 'required|date_format:H:i',
+                'end_time' => 'required|date_format:H:i|after:start_time',
+                'start_location' => 'nullable|string|max:255',
+                'end_location' => 'nullable|string|max:255',
                 'start_odometer' => 'required|numeric|min:0',
                 'end_odometer' => 'required|numeric|gt:start_odometer',
-                'overtime_rate' => 'nullable|numeric|min:0',
-                'toll_fee' => 'nullable|numeric|min:0',
                 'parking_fee' => 'nullable|numeric|min:0',
-                'notes' => 'nullable|string'
+                'notes' => 'nullable|string',
+                'toll_fees' => 'nullable|array',
+                'toll_fees.*.station_name' => 'nullable|string|max:255',
+                'toll_fees.*.transaction_code' => 'nullable|string|max:255',
+                'toll_fees.*.fee_amount' => 'nullable|numeric|min:0',
+                'toll_fees.*.notes' => 'nullable|string'
             ])->validate();
-
-            // Ensure all numeric values are positive
-            $validated['overtime_rate'] = abs($validated['overtime_rate'] ?? 0);
-            $validated['toll_fee'] = abs($validated['toll_fee'] ?? 0);
-            $validated['parking_fee'] = abs($validated['parking_fee'] ?? 0);
-
-            // Calculate additional fields
+            $validated['overtime_rate'] = 50000;
+            $validated['parking_fee'] = isset($validated['parking_fee']) ? abs((float)$validated['parking_fee']) : 0;
             $totalDistance = abs($validated['end_odometer'] - $validated['start_odometer']);
-            
-            // Calculate overtime hours (total time used) - ensure positive values
-            $startTime = \Carbon\Carbon::parse($validated['start_time']);
-            $endTime = \Carbon\Carbon::parse($validated['end_time']);
-            $overtimeHours = abs($endTime->diffInHours($startTime));
-            $totalOvertimeCost = abs(($validated['overtime_rate'] ?? 0) * $overtimeHours);
-
-            // Ensure all calculated values are positive
+            $startDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['start_time']);
+            $endDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['end_time']);
+            $overtimeHours = 0;
+            $overtimeRate = $validated['overtime_rate'] ?? 0;
+            if ($overtimeRate > 0) {
+                $overtimeStart = \Carbon\Carbon::parse($validated['run_date'] . ' 17:30');
+                if ($endDateTime->greaterThan($overtimeStart)) {
+                    $effectiveStart = $startDateTime->greaterThan($overtimeStart) ? $startDateTime : $overtimeStart;
+                    $overtimeHours = abs($endDateTime->floatDiffInRealHours($effectiveStart));
+                }
+            }
+            $totalOvertimeCost = abs($overtimeRate * $overtimeHours);
             $logData = [
                 'car_rental_id' => $validated['car_rental_id'],
                 'vehicle_id' => $validated['vehicle_id'],
+                'run_date' => $validated['run_date'],
                 'start_time' => $validated['start_time'],
                 'end_time' => $validated['end_time'],
+                'start_location' => $validated['start_location'] ?? null,
+                'end_location' => $validated['end_location'] ?? null,
                 'start_odometer' => abs($validated['start_odometer']),
                 'end_odometer' => abs($validated['end_odometer']),
                 'total_distance' => $totalDistance,
                 'overtime_hours' => $overtimeHours,
                 'overtime_rate' => $validated['overtime_rate'],
                 'total_overtime_cost' => $totalOvertimeCost,
-                'toll_fee' => $validated['toll_fee'],
                 'parking_fee' => $validated['parking_fee'],
                 'notes' => $validated['notes'],
                 'status' => CarRentalVehicleLog::STATUS_COMPLETED
             ];
-
-            // Log the data for debugging
-            Log::info('Updating vehicle log with data:', $logData);
-
-            // Update vehicle log
             $log->update($logData);
-
-            // Return success response with updated log
+            // Xóa toàn bộ toll_fees cũ và lưu lại danh sách mới
+            $log->tollFees()->delete();
+            if (!empty($validated['toll_fees'])) {
+                foreach ($validated['toll_fees'] as $tollFeeData) {
+                    if (!empty($tollFeeData['station_name']) && !empty($tollFeeData['fee_amount'])) {
+                        \App\Models\TollFee::create([
+                            'vehicle_log_id' => $log->id,
+                            'station_name' => $tollFeeData['station_name'],
+                            'transaction_code' => $tollFeeData['transaction_code'] ?? null,
+                            'fee_amount' => abs((float)$tollFeeData['fee_amount']),
+                            'notes' => $tollFeeData['notes'] ?? null
+                        ]);
+                    }
+                }
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'Cập nhật nhật ký xe thành công',
                 'log' => $log
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -382,7 +435,7 @@ class CarRentalController extends Controller
                 'message' => 'Xóa nhật ký xe thành công!'
             ]);
         } catch (\Exception $e) {
-            \Log::error('Delete vehicle log failed', ['error' => $e->getMessage()]);
+            Log::error('Delete vehicle log failed', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi xóa nhật ký xe!'
