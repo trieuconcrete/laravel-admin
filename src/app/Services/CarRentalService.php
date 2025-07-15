@@ -61,6 +61,11 @@ class CarRentalService
             $vehicleData = $data['vehicles'] ?? null;
             unset($data['vehicles']);
 
+            // Xử lý monthly_rental_fee để loại bỏ dấu phẩy
+            if (isset($data['monthly_rental_fee']) && is_string($data['monthly_rental_fee'])) {
+                $data['monthly_rental_fee'] = str_replace(',', '', $data['monthly_rental_fee']);
+            }
+
             if (isset($data['file']) && $data['file'] instanceof \Illuminate\Http\UploadedFile) {
                 $filePath = "uploads/car_rentals/" . $carRental->file;
 

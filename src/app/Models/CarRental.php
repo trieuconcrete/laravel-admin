@@ -24,6 +24,7 @@ class CarRental extends Model
         'notes',
         'total_money',
         'file',
+        'monthly_rental_fee',
     ];
 
     /**
@@ -33,6 +34,7 @@ class CarRental extends Model
      */
     protected $casts = [
         'total_money' => 'decimal:2',
+        'monthly_rental_fee' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
