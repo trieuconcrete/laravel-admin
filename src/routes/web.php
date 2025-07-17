@@ -67,6 +67,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::get('car-rental/vehicle-log/{logId}/edit', [CarRentalController::class, 'editCarRentalVehicleLog'])->name('car-rental.edit-vehicle-log');
     Route::put('car-rental/vehicle-log/{logId}', [CarRentalController::class, 'updateCarRentalVehicleLog'])->name('car-rental.update-vehicle-log');
     Route::delete('car-rental/vehicle-log/{logId}', [CarRentalController::class, 'destroyCarRentalVehicleLog'])->name('car-rental.destroy-vehicle-log');
+    Route::get('car-rental/{car_rental_id}/download-vehicle-log', [CarRentalController::class, 'downloadVehicleLog'])->name('car-rental.download-vehicle-log');
     Route::resource('shipments', ShipmentController::class);
     Route::resource('salary', SalaryController::class);
     Route::post('salary/sync', [SalaryController::class, 'sync'])->name('salary.sync');

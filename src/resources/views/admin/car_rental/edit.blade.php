@@ -312,9 +312,14 @@
                                 <div class="tab-pane" id="vehicle-logs" role="tabpanel">
                                     <div class="d-flex justify-content-between align-items-center mb-4">
                                         <h5 class="card-title mb-0">Danh sách Nhật ký lộ trình xe</h5>
-                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCarRentalVehicleLogModal">
-                                            <i class="ri-add-line align-bottom me-1"></i> Thêm nhật ký
-                                        </button>
+                                        <div>
+                                            <a href="{{ route('admin.car-rental.download-vehicle-log', ['car_rental_id' => $carRental->id]) }}" class="btn btn-success me-2">
+                                                <i class="ri-download-2-line align-bottom me-1"></i> Download nhật ký
+                                            </a>
+                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCarRentalVehicleLogModal">
+                                                <i class="ri-add-line align-bottom me-1"></i> Thêm nhật ký
+                                            </button>
+                                        </div>
                                     </div>
 
                                     <div class="table-responsive">
@@ -323,8 +328,7 @@
                                                 <tr>
                                                     <th class="text-center">Ngày chạy</th>
                                                     <th class="text-center">Giờ làm việc</th>
-                                                    <th class="text-center">Vị trí đi</th>
-                                                    <th class="text-center">Vị trí đến</th>
+                                                    <th class="text-center">Vị trí</th>
                                                     <th>Thời gian tăng ca</th>
                                                     <th>Km bắt đầu</th>
                                                     <th>Km kết thúc</th>
@@ -340,8 +344,7 @@
                                                 <tr>
                                                     <td class="text-center">{{ $log->run_date ? \Carbon\Carbon::parse($log->run_date)->format('Y-m-d') : '' }}</td>
                                                     <td class="text-center">{{ \Carbon\Carbon::parse($log->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($log->end_time)->format('H:i') }}</td>
-                                                    <td>{{ $log->start_location }}</td>
-                                                    <td>{{ $log->end_location }}</td>
+                                                    <td>{{ $log->start_location }} -> {{ $log->end_location }}</td>
                                                     <td>{{ number_format($log->overtime_hours, 1) }} giờ</td>
                                                     <td>{{ number_format($log->start_odometer) }}</td>
                                                     <td>{{ number_format($log->end_odometer) }}</td>
