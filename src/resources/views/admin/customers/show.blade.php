@@ -10,48 +10,45 @@
             <div class="card mt-xxl-n5">
                 <div class="customer-info-header p-3">
                     <div class="row">
-                        <div class="col-md-8">
+                        <div class="col-md-3">
                             <h4>{{ $customer->name }}</h4>
                             <p class="text-muted">Mã khách hàng: {{ $customer->customer_code }}</p>
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <p><i class="fas fa-building me-2 text-primary"></i> {{ $customer->getTypeLabelAttribute() }}</p>
                                     <p><i class="fas fa-map-marker-alt me-2 text-{{ $customer->getStatusBadgeClassAttribute() }}"></i>{{ $customer->address }}</p>
+                                    <p><i class="fas fa-phone me-2 text-primary"></i> Trạng thái: <span class="badge bg-{{ $customer->getStatusBadgeClassAttribute() }} mb-2">{{ $customer->getStatusLabelAttribute() }}</span></p>
+                                    <p><i class="fas fa-calendar-alt me-2 text-primary"></i> Ngày đăng ký: @formatDate($customer->establishment_date)</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4 text-md-end">
-                            <span class="badge bg-{{ $customer->getStatusBadgeClassAttribute() }} mb-2">{{ $customer->getStatusLabelAttribute() }}</span>
-                            <p><i class="fas fa-calendar-alt me-2 text-primary"></i> Ngày đăng ký: @formatDate($customer->establishment_date)</p>
-                        </div>
-                    </div>
-
-                    <div class="card mb-0">
-                        <div class="card-header bg-light">
-                            <h6 class="mb-0">
-                                <i class="fas fa-balance-scale me-2"></i>Tổng kết công nợ khách hàng
-                            </h6>
-                </div>
-                        <div class="card-body">
-                            <div class="row g-3" id="debtSummaryContainer">
-                                <div class="col-md-4">
-                                    <div class="text-center">
-                                        <div class="fs-4 fw-bold text-primary" id="totalReported">-</div>
-                                        <div class="text-muted">Tổng bảng kê</div>
-                                        <small class="text-info d-none" id="refundNote">(*) Có điều chỉnh</small>
+                        <div class="col-md-9">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0 text-center">
+                                    <i class="fas fa-balance-scale me-2"></i>Tổng kết công nợ khách hàng
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3" id="debtSummaryContainer">
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <div class="fs-4 fw-bold text-primary" id="totalReported">-</div>
+                                            <div class="text-muted">Tổng bảng kê</div>
+                                            <small class="text-info d-none" id="refundNote">(*) Có điều chỉnh</small>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="text-center">
-                                        <div class="fs-4 fw-bold text-success" id="totalPaid">-</div>
-                                        <div class="text-muted">Đã thanh toán</div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <div class="fs-4 fw-bold text-success" id="totalPaid">-</div>
+                                            <div class="text-muted">Đã thanh toán</div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="text-center">
-                                        <div class="fs-4 fw-bold text-danger" id="remainingDebt">-</div>
-                                        <div class="text-muted" id="debtLabel">Còn nợ</div>
-                                        <small class="text-info d-block" id="debtNote"></small>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <div class="fs-4 fw-bold text-danger" id="remainingDebt">-</div>
+                                            <div class="text-muted" id="debtLabel">Còn nợ</div>
+                                            <small class="text-info d-block" id="debtNote"></small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

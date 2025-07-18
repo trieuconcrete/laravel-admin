@@ -116,7 +116,7 @@
                                 </div>
 
                                 <hr>
-
+{{--  
                                 <div class="mb-3">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         <label class="form-label mb-0">Danh sách xe thuê</label>
@@ -300,7 +300,7 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
+                                </div>  --}}
 
                                 <div>
                                     <button type="submit" class="btn rounded-pill btn-secondary waves-effect">Save</button>
@@ -344,7 +344,7 @@
                                                 <tr>
                                                     <td class="text-center">{{ $log->run_date ? \Carbon\Carbon::parse($log->run_date)->format('Y-m-d') : '' }}</td>
                                                     <td class="text-center">{{ \Carbon\Carbon::parse($log->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($log->end_time)->format('H:i') }}</td>
-                                                    <td>{{ $log->start_location }} -> {{ $log->end_location }}</td>
+                                                    <td class="text-center">{{ $log->start_location }} -> {{ $log->end_location }}</td>
                                                     <td>{{ number_format($log->overtime_hours, 1) }} giờ</td>
                                                     <td>{{ number_format($log->start_odometer) }}</td>
                                                     <td>{{ number_format($log->end_odometer) }}</td>
