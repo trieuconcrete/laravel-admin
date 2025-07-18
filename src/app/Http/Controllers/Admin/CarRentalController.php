@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\CarRentalVehicleLog;
 use App\Models\TollStation;
 use App\Models\TollFee;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CarRentalController extends Controller
 {
@@ -441,5 +442,25 @@ class CarRentalController extends Controller
                 'message' => 'Có lỗi xảy ra khi xóa nhật ký xe!'
             ], 500);
         }
+    }
+
+    /**
+     * Download all vehicle logs for a car rental as an Excel file
+     *
+     * @param int $car_rental_id
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function downloadVehicleLog($car_rental_id)
+    {
+        $carRental = CarRental::with('customer')->findOrFail($car_rental_id);
+        $logs = CarRentalVehicleLog::where('car_rental_id', $car_rental_id)
+            ->with('tollFees')
+            ->orderBy('run_date', 'asc')
+            ->get();
+
+        $month = now()->format('m/Y');
+        $fileName = 'bien_ban_nhat_ky_lo_trinh_xe_' . $carRental->id . '_' . str_replace('/', '', $month) . '.xlsx';
+
+        return Excel::download(new \App\Exports\VehicleLogExport($carRental, $logs, $month), $fileName);
     }
 }
