@@ -461,6 +461,6 @@ class CarRentalController extends Controller
         $month = now()->format('m/Y');
         $fileName = 'bien_ban_nhat_ky_lo_trinh_xe_' . $carRental->id . '_' . str_replace('/', '', $month) . '.xlsx';
 
-        return Excel::download(new \App\Exports\VehicleLogExport($carRental, $logs, $month), $fileName);
+        return Excel::download(new \App\Exports\VehicleLogWithTollFeeExport($carRental, $logs, $month), $fileName);
     }
 }
