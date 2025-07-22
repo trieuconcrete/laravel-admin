@@ -157,8 +157,8 @@ class ShipmentRequest extends FormRequest
             'drivers.*.deductions' => 'array',
             'drivers.*.deductions.*' => 'nullable',
             // Tài xế phụ cấp
-            'driverPXs' => 'array',
-            'driverPXs.*.user_id' => 'required|exists:users,id',
+            'driverPXs' => 'array|nullable',
+            'driverPXs.*.user_id' => 'nullable|exists:users,id',
             'driverPXs.*.deductions' => 'array',
             'driverPXs.*.deductions.*' => 'nullable'
         ];

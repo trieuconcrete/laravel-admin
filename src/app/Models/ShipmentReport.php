@@ -15,13 +15,15 @@ class ShipmentReport extends Model
         'customer_id',
         'total_amount',
         'created_by',
-        'updated_by'
+        'updated_by',
+        'is_finalized'
     ];
 
     protected $casts = [
         'total_amount' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'is_finalized' => 'boolean',
     ];
 
     /**
@@ -116,7 +118,8 @@ class ShipmentReport extends Model
             ],
             [
                 'total_amount' => $totalAmount,
-                'updated_by' => $userId
+                'updated_by' => $userId,
+                'is_finalized' => true
             ]
         );
     }

@@ -162,6 +162,9 @@ class ShipmentService
                 }
             }
 
+            $this->resetMonthlyReportFinalized($shipment->customer_id, $shipment->departure_time);
+            
+
             return $shipment;
         });
     }
@@ -284,6 +287,8 @@ class ShipmentService
                     }
                 }
             }
+
+            $this->resetMonthlyReportFinalized($shipment->customer_id, $shipment->departure_time);
             
             return $shipment->refresh();
         });
@@ -291,9 +296,22 @@ class ShipmentService
 
     public function delete(Shipment $shipment)
     {
+        $customerId = $shipment->customer_id;
+        $departureTime = $shipment->departure_time;
         $shipment->shipmentDeductions()->delete();
         $shipment->goods()->delete();
-        
-        return $this->shipmentRepository->delete($shipment->id);
+        $shipment->delete();
+        $this->resetMonthlyReportFinalized($customerId, $departureTime);
+    }
+
+    /**
+     * Reset trạng thái finalized của báo cáo tháng khi có thay đổi shipment
+     */
+    protected function resetMonthlyReportFinalized($customerId, $departureTime)
+    {
+        $month = date('Y-m', strtotime($departureTime));
+        \App\Models\ShipmentReport::where('customer_id', $customerId)
+            ->where('monthly', $month)
+            ->update(['is_finalized' => false]);
     }
 }

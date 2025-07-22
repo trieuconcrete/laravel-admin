@@ -53,7 +53,7 @@ class CustomerService
             $combinedFees = $shipment->shipmentDeductions->sum('amount');
             
             // Calculate total amount
-            $totalAmount = (($shipment->trip_count ?? 1) * $shipment->unit_price) - $combinedFees;
+            $totalAmount = (($shipment->trip_count ?? 1) * $shipment->unit_price) + $combinedFees;
             
             // Format the departure time using application's standardized date formatting
             $departureDate = $shipment->departure_time ? DateHelper::format($shipment->departure_time) : '';
