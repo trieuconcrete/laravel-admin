@@ -27,7 +27,7 @@
                                 <h6 class="mb-0 text-center">
                                     <i class="fas fa-balance-scale me-2"></i>Tổng kết công nợ khách hàng
                                 </h6>
-                            </div>
+                        </div>
                             <div class="card-body">
                                 <div class="row g-3" id="debtSummaryContainer">
                                     <div class="col-md-4">
@@ -35,8 +35,8 @@
                                             <div class="fs-4 fw-bold text-primary" id="totalReported">-</div>
                                             <div class="text-muted">Tổng bảng kê</div>
                                             <small class="text-info d-none" id="refundNote">(*) Có điều chỉnh</small>
-                                        </div>
-                                    </div>
+                    </div>
+                </div>
                                     <div class="col-md-4">
                                         <div class="text-center">
                                             <div class="fs-4 fw-bold text-success" id="totalPaid">-</div>
@@ -178,7 +178,7 @@
                                 <input type="month" id="monthSelector" class="form-control" value="{{ date('Y-m') }}">
                             </div>
                             <div>
-                                <button type="button" id="summarizeReport" class="btn btn-secondary me-2">
+                                <button type="button" id="summarizeReport" class="btn btn-secondary me-2" @if($isFinalized) disabled @endif>
                                     <i class="las la-calculator align-middle me-1"></i> Tổng kết bảng kê
                                 </button>
                                 <button type="button" id="exportInvoice" class="btn btn-outline-primary">
@@ -632,8 +632,7 @@
                                     showConfirmButton: true,
                                     confirmButtonText: 'Đóng'
                                 }).then(() => {
-                                    // Refresh debt summary
-                                    loadDebtSummary();
+                                    window.location.reload();
                                 });
                             } else {
                                 Swal.fire({
