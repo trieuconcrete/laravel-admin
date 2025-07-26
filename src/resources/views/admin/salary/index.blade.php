@@ -365,7 +365,7 @@
                                     <th>Tổng trước BHXH</th>
                                     <th>BHXH (10%)</th>
                                     <th>Tổng lương</th>
-                                    {{--  <th>Trạng thái</th>  --}}
+                                    <th>Trạng thái</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -390,15 +390,15 @@
                                     <td>{{ number_format($salary['total_salary']) }} ₫</td>
                                     <td>{{ number_format($salary['insurance']) }} ₫</td>
                                     <td>{{ number_format($salary['total']) }} ₫</td>
-                                    {{--  <td>
+                                    <td>
                                         @if($salary['status'] == 'paid')
                                             <span class="status-indicator status-paid text-success badge bg-success-subtle">Đã thanh toán</span>
                                         @elseif($salary['status'] == 'pending')
                                             <span class="status-indicator status-pending text-warning badge bg-warning-subtle">Chờ duyệt</span>
-                                        @else
+                                        @elseif($salary['status'] == 'unpaid')
                                             <span class="status-indicator status-unpaid text-danger badge bg-danger-subtle">Chưa thanh toán</span>
                                         @endif
-                                    </td>  --}}
+                                    </td>
                                 </tr>
                                 @empty
                                 <tr>
