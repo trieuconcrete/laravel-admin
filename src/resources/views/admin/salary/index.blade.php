@@ -178,6 +178,131 @@
                 </div>
             </div>
 
+            <div class="row mb-4">
+            </div>
+
+            <!-- Pending Salary Advance Requests Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning bg-opacity-10">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-warning">
+                            <i class="ri-time-line me-2"></i>
+                            Yêu cầu ứng lương chờ duyệt
+                        </h5>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-warning fs-6">{{ $pendingAdvanceRequests->total() }} yêu cầu</span>
+                            @if($pendingAdvanceRequests->hasPages())
+                            <small class="text-muted">
+                                Trang {{ $pendingAdvanceRequests->currentPage() }} / {{ $pendingAdvanceRequests->lastPage() }}
+                            </small>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã yêu cầu</th>
+                                    <th>Tên nhân viên</th>
+                                    <th>Số tiền ứng</th>
+                                    <th>Ngày ứng</th>
+                                    <th>Thời gian tạo</th>
+                                    <th>Lý do</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if($pendingAdvanceRequests->count() > 0)
+                                    @foreach($pendingAdvanceRequests as $request)
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ $request->request_code }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div>
+                                                    <h6 class="mb-0">{{ $request->user->full_name }}</h6>
+                                                    <small class="text-muted">{{ $request->user->employee_code ?? 'NV' . str_pad($request->user->id, 3, '0', STR_PAD_LEFT) }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold text-primary">{{ number_format($request->amount, 0, ',', '.') }} ₫</span>
+                                        </td>
+                                        <td>
+                                            <span title="{{ $request->request_date ? $request->request_date->format('d/m/Y H:i:s') : 'N/A' }}">
+                                                {{ $request->request_date ? $request->request_date->format('d/m/Y') : 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span title="{{ $request->created_at ? $request->created_at->format('d/m/Y H:i:s') : 'N/A' }}">
+                                                {{ $request->created_at ? $request->created_at->format('d/m/Y H:i') : 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="text-truncate d-inline-block" style="max-width: 200px;" title="{{ $request->reason }}">
+                                                {{ $request->reason ?: 'Không có lý do' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning">Chờ duyệt</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-sm btn-success" 
+                                                        onclick="processAdvanceRequest({{ $request->id }}, 'approve')"
+                                                        title="Duyệt yêu cầu"
+                                                        data-request-id="{{ $request->id }}">
+                                                    <i class="ri-check-line"></i> Duyệt
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-danger" 
+                                                        onclick="processAdvanceRequest({{ $request->id }}, 'reject')"
+                                                        title="Từ chối yêu cầu"
+                                                        data-request-id="{{ $request->id }}">
+                                                    <i class="ri-close-line"></i> Từ chối
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                @else
+                                    <tr>
+                                        <td colspan="8" class="text-center">Không có yêu cầu ứng lương chờ duyệt</td>
+                                    </tr>
+                                @endif
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    @if($pendingAdvanceRequests->hasPages())
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="text-muted">
+                                Hiển thị {{ $pendingAdvanceRequests->firstItem() ?? 0 }} - {{ $pendingAdvanceRequests->lastItem() ?? 0 }} 
+                                trong tổng số {{ $pendingAdvanceRequests->total() }} yêu cầu
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="form-label mb-0">Hiển thị:</label>
+                                <select class="form-select form-select-sm" style="width: auto;" onchange="changePerPage(this.value)">
+                                    <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10</option>
+                                    <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                                    <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                                    <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            {{ $pendingAdvanceRequests->appends(request()->query())->links() }}
+                        </div>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
             <!-- Filter Section -->
             <div class="card mb-4">
                 <div class="card-body">
@@ -494,6 +619,126 @@
         colors: chartPieGradientColors
     }, (chart = new ApexCharts(document.querySelector("#gradient_chart"), options)).render());
 </script>
+
+<script>
+    // Function to change items per page
+    function changePerPage(perPage) {
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('per_page', perPage);
+        // Reset to page 1 when changing per_page
+        currentUrl.searchParams.delete('page');
+        window.location.href = currentUrl.toString();
+    }
+    
+    // Function to process salary advance request (approve/reject)
+    function processAdvanceRequest(requestId, action) {
+        const actionText = action === 'approve' ? 'duyệt' : 'từ chối';
+        const confirmText = action === 'approve' ? 'Bạn có chắc chắn muốn duyệt yêu cầu này?' : 'Bạn có chắc chắn muốn từ chối yêu cầu này?';
+        
+        Swal.fire({
+            title: 'Xác nhận',
+            text: confirmText,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: action === 'approve' ? '#28a745' : '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: action === 'approve' ? 'Duyệt' : 'Từ chối',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Disable buttons for this request
+                const buttons = document.querySelectorAll(`[data-request-id="${requestId}"]`);
+                buttons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...';
+                });
+                
+                // Show loading
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    text: 'Vui lòng chờ trong giây lát',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Send request
+                const url = `{{ url('admin/salary/process-advance-request') }}/${requestId}`;
+                console.log('Sending request to:', url);
+                
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                console.log('CSRF Token:', csrfToken);
+                
+                const requestData = {
+                    action: action,
+                    notes: ''
+                };
+                console.log('Request data:', requestData);
+                
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công',
+                            text: data.message,
+                            confirmButtonText: 'Đóng'
+                        }).then(() => {
+                            // Reload page to refresh the list with current query parameters
+                            const currentUrl = new URL(window.location);
+                            window.location.href = currentUrl.toString();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: data.message || 'Đã xảy ra lỗi không xác định',
+                            confirmButtonText: 'Đóng'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    
+                    // Re-enable buttons
+                    const buttons = document.querySelectorAll(`[data-request-id="${requestId}"]`);
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        if (btn.classList.contains('btn-success')) {
+                            btn.innerHTML = '<i class="ri-check-line"></i> Duyệt';
+                        } else {
+                            btn.innerHTML = '<i class="ri-close-line"></i> Từ chối';
+                        }
+                    });
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại sau.',
+                        confirmButtonText: 'Đóng'
+                    });
+                });
+            }
+        });
+    }
+</script>
+
 <!-- Sync Salary Modal -->
 <div class="modal fade sync-salary-model" tabindex="-1" role="dialog" aria-labelledby="syncSalaryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
