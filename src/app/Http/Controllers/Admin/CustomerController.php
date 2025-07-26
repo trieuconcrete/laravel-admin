@@ -82,9 +82,17 @@ class CustomerController extends Controller
                 $month = $request->input('month');
                 $monthlyShipments = $this->customerService->getMonthlyShipments($customer->id, $month);
                 
+                // Check if report is finalized for this month
+                $shipmentReport = \App\Models\ShipmentReport::where('customer_id', $customer->id)
+                    ->where('monthly', $month)
+                    ->first();
+                
+                $isFinalized = $shipmentReport ? $shipmentReport->is_finalized : false;
+                
                 return response()->json([
                     'success' => true,
-                    'data' => $monthlyShipments
+                    'data' => $monthlyShipments,
+                    'isFinalized' => $isFinalized
                 ]);
             } catch (\Exception $e) {
                 return response()->json([
