@@ -64,8 +64,9 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         if (!empty($filters['search'])) {
             $query->where(function($q) use ($filters) {
                 $q->where('full_name', 'like', '%' . $filters['search'] . '%')
-                  ->orWhere('email', 'like', '%' . $filters['search'] . '%')
-                  ->orWhere('employee_code', 'like', '%' . $filters['search'] . '%');
+                    ->orWhere('email', 'like', '%' . $filters['search'] . '%')
+                    ->orWhere('employee_code', 'like', '%' . $filters['search'] . '%')
+                    ->orWhere('phone', 'like', '%' . $filters['search'] . '%');
             });
         }
 

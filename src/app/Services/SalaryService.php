@@ -143,30 +143,39 @@ class SalaryService
         // Calculate salary details
         $salaryDetails = $this->calculateSalaryDetails($user, $shipments, $salaryPeriod);
 
+        // Check if salary detail already exists and is paid
+        $existingSalaryDetail = \App\Models\SalaryDetail::where('employee_id', $user->id)
+            ->where('period_id', $salaryPeriod->period_id)
+            ->first();
+
+        $updateData = [
+            'base_salary' => $baseSalary, // lương cơ bản
+            'working_days' => 0,
+            'total_expenses' => $salaryDetails['totalExpenses'], // chi phí
+            'total_allowance' => $salaryDetails['totalAllowance'], // phụ cấp
+            'social_insurance' => $salaryDetails['insuranceDeduction'], // thuế
+            'health_insurance' => 0, // Not used in current calculation
+            'income_tax' => Constants::TAX_IN_VAT, // Not used in current calculation
+            'total_salary' => $salaryDetails['totalBeforeInsurance'], // lương trước thuế
+            'net_salary' => $salaryDetails['totalSalary'], // lương thực tế
+            'bonus' => $salaryDetails['totalTypeBonus'], // No bonus calculation
+            'penalty' => $salaryDetails['totalTypePenalty'], // No penalty calculation
+            'other_deduction' => $salaryDetails['totalTypeSalary'], // Not used in current calculation
+        ];
+
+        // Only update status if not already paid
+        if (!$existingSalaryDetail || $existingSalaryDetail->status !== 'paid') {
+            $updateData['status'] = 'pending';
+            $updateData['payment_date'] = null;
+            $updateData['payment_method'] = null;
+        }
+
         $this->salaryDetailRepository->updateOrCreate(
             [
                 'employee_id' => $user->id,
                 'period_id' => $salaryPeriod->period_id
             ],
-            [
-                'base_salary' => $baseSalary, // lương cơ bản
-                'working_days' => 0,
-                'total_expenses' => $salaryDetails['totalExpenses'], // chi phí
-                'total_allowance' => $salaryDetails['totalAllowance'], // phụ cấp
-                'social_insurance' => $salaryDetails['insuranceDeduction'], // thuế
-                'health_insurance' => 0, // Not used in current calculation
-                'income_tax' => Constants::TAX_IN_VAT, // Not used in current calculation
-                'total_salary' => $salaryDetails['totalBeforeInsurance'], // lương trước thuế
-                'net_salary' => $salaryDetails['totalSalary'], // lương thực tế
-                'status' => 'pending',
-                'payment_date' => null,
-                'payment_method' => null,
-                'notes' => null,
-                'created_by' => Auth::id(), // This will only be set on creation
-                'bonus' => $salaryDetails['totalTypeBonus'], // No bonus calculation
-                'penalty' => $salaryDetails['totalTypePenalty'], // No penalty calculation
-                'other_deduction' => $salaryDetails['totalTypeSalary'], // Not used in current calculation
-            ]
+            $updateData
         );
     }
 

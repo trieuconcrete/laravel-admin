@@ -9,6 +9,7 @@ use App\Models\SalaryPeriod;
 use App\Models\ShipmentDeductionType;
 use App\Models\User;
 use App\Models\Shipment;
+use App\Models\SalaryAdvanceRequest;
 use App\Http\Requests\Salary\SyncSalaryRequest;
 use App\Services\SalaryService;
 use Illuminate\Http\Request;
@@ -57,6 +58,9 @@ class SalaryController extends Controller
         // Generate chart data for the last 6 months
         $chartData = $this->generateChartData($selectedMonth);
         
+        // Get pending salary advance requests for approval
+        $pendingAdvanceRequests = $this->getPendingAdvanceRequests();
+        
         return view('admin.salary.index', [
             'salaries' => $salaries, 
             'selectedMonth' => $selectedMonth, 
@@ -66,7 +70,8 @@ class SalaryController extends Controller
             'totalPendingSalary' => $dashboardStats['totalPendingSalary'], 
             'averageSalary' => $dashboardStats['averageSalary'],
             'departmentStats' => $departmentStats,
-            'chartData' => $chartData
+            'chartData' => $chartData,
+            'pendingAdvanceRequests' => $pendingAdvanceRequests
         ]);
     }
     
@@ -282,6 +287,21 @@ class SalaryController extends Controller
     }
     
     /**
+     * Get pending salary advance requests for approval
+     *
+     * @return \Illuminate\Pagination\LengthAwarePaginator
+     */
+    private function getPendingAdvanceRequests()
+    {
+        $perPage = request('per_page', 10);
+        
+        return SalaryAdvanceRequest::with(['user'])
+            ->where('status', SalaryAdvanceRequest::STATUS_PENDING)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+    }
+    
+    /**
      * Synchronize salary data to SalaryPeriod and SalaryDetail tables
      *
      * @param Request $request
@@ -440,6 +460,92 @@ class SalaryController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Đã xảy ra lỗi khi xử lý thanh toán. Vui lòng thử lại sau.'
+            ], 500);
+        }
+    }
+    
+    /**
+     * Approve or reject salary advance request
+     *
+     * @param Request $request
+     * @param int $requestId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function processAdvanceRequest(Request $request, $requestId)
+    {
+        try {
+            Log::info('processAdvanceRequest called', [
+                'requestId' => $requestId,
+                'requestData' => $request->all(),
+                'jsonData' => $request->json()->all()
+            ]);
+            
+            DB::beginTransaction();
+            
+            $advanceRequest = SalaryAdvanceRequest::with(['user'])->findOrFail($requestId);
+            $action = $request->input('action'); // 'approve' or 'reject'
+            $notes = $request->input('notes', '');
+            
+            // If action is not in request body, try to get from JSON
+            if (!$action) {
+                $jsonData = $request->json()->all();
+                $action = $jsonData['action'] ?? null;
+                $notes = $jsonData['notes'] ?? '';
+            }
+            
+            if (!in_array($action, ['approve', 'reject'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hành động không hợp lệ'
+                ], 400);
+            }
+            
+            $adminId = auth('admin')->id();
+            
+            if ($action === 'approve') {
+                $advanceRequest->update([
+                    'status' => SalaryAdvanceRequest::STATUS_APPROVED,
+                    'updated_by' => $adminId
+                ]);
+                
+                $message = 'Đã duyệt yêu cầu ứng lương thành công';
+            } else {
+                $advanceRequest->update([
+                    'status' => SalaryAdvanceRequest::STATUS_REJECTED,
+                    'updated_by' => $adminId
+                ]);
+                
+                $message = 'Đã từ chối yêu cầu ứng lương';
+            }
+            
+            // Log the action
+            Log::info('Salary advance request processed', [
+                'request_id' => $advanceRequest->id,
+                'action' => $action,
+                'processed_by' => $adminId,
+                'notes' => $notes
+            ]);
+            
+            DB::commit();
+            
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'data' => [
+                    'id' => $advanceRequest->id,
+                    'status' => $advanceRequest->status,
+                    'status_label' => $advanceRequest->status_label,
+                    'status_color' => $advanceRequest->status_color
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error processing salary advance request: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại sau.'
             ], 500);
         }
     }

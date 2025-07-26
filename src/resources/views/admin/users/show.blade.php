@@ -1072,6 +1072,7 @@
                         $('#salaryAdvanceModal').modal('hide');
                         // Reload page to show new data
                         refreshSalaryAdvanceRequests();
+                        refreshSalaryDetails(); // Refresh salary details after creating a new request
                     });
                 },
                 error: function(xhr) {
@@ -1161,7 +1162,8 @@
                                 // Update button state
                                 button.html('<i class="ri-check-line me-1"></i>Đã thanh toán');
                                 button.removeClass('btn-info').addClass('btn-success');
-                                window.location.reload();
+                                button.prop('disabled', true);
+                                refreshSalaryDetails(); // Refresh salary details after paying
                             });
                         } else {
                             Swal.fire({
@@ -1192,5 +1194,28 @@
             }
         });
     });
+
+    // Function to refresh salary details
+    function refreshSalaryDetails() {
+        const selectedMonth = document.getElementById('salaryMonth')?.value || '{{ $selectedMonth }}';
+        const userId = {{ $user->id }};
+        
+        // Reload the page with the current month to refresh salary data
+        const currentUrl = new URL(window.location);
+        currentUrl.searchParams.set('month', selectedMonth);
+        currentUrl.searchParams.set('tab', 'salary');
+        window.history.replaceState({}, '', currentUrl);
+        
+        // Optionally, you can make an AJAX call to refresh salary data
+        // For now, we'll just reload the salary tab content
+        const salaryTab = document.getElementById('salary');
+        if (salaryTab) {
+            // Trigger a custom event to refresh salary data
+            const event = new CustomEvent('refreshSalaryData', { 
+                detail: { month: selectedMonth, userId: userId } 
+            });
+            document.dispatchEvent(event);
+        }
+    }
 </script>
 @endpush

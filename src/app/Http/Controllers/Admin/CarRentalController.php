@@ -96,7 +96,7 @@ class CarRentalController extends Controller
 
         // Thêm danh sách nhật ký xe
         $carRentalVehicleLogs = CarRentalVehicleLog::where('car_rental_id', $id)
-            ->with(['vehicle', 'driver'])
+            ->with(['vehicle', 'driver', 'tollFees'])
             ->latest()
             ->get();
 

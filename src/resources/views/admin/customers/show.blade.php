@@ -178,8 +178,9 @@
                                 <input type="month" id="monthSelector" class="form-control" value="{{ date('Y-m') }}">
                             </div>
                             <div>
-                                <button type="button" id="summarizeReport" class="btn btn-secondary me-2" @if($isFinalized) disabled @endif>
-                                    <i class="las la-calculator align-middle me-1"></i> Tổng kết bảng kê
+                                <button type="button" id="summarizeReport" class="btn {{ $isFinalized ? 'btn-success' : 'btn-secondary' }} me-2" @if($isFinalized) disabled @endif>
+                                    <i class="las {{ $isFinalized ? 'la-check-circle' : 'la-calculator' }} align-middle me-1"></i> 
+                                    {{ $isFinalized ? 'Đã tổng kết' : 'Tổng kết bảng kê' }}
                                 </button>
                                 <button type="button" id="exportInvoice" class="btn btn-outline-primary">
                                     <i class="las la-file-invoice align-middle me-1"></i> Xuất bảng kê
@@ -547,6 +548,20 @@
                     document.getElementById('grandTotal').textContent = '0';
                 }
                 
+                // Update summarize button state based on isFinalized
+                const summarizeButton = document.getElementById('summarizeReport');
+                if (summarizeButton) {
+                    if (data.isFinalized) {
+                        summarizeButton.disabled = true;
+                        summarizeButton.innerHTML = '<i class="las la-check-circle align-middle me-1"></i> Đã tổng kết';
+                        summarizeButton.className = 'btn btn-success me-2';
+                    } else {
+                        summarizeButton.disabled = false;
+                        summarizeButton.innerHTML = '<i class="las la-calculator align-middle me-1"></i> Tổng kết bảng kê';
+                        summarizeButton.className = 'btn btn-secondary me-2';
+                    }
+                }
+                
                 // Re-enable controls
                 if (monthSelector) monthSelector.disabled = false;
                 const exportBtn = document.getElementById('exportMonthlyReport');
@@ -632,7 +647,13 @@
                                     showConfirmButton: true,
                                     confirmButtonText: 'Đóng'
                                 }).then(() => {
-                                    window.location.reload();
+                                    // Update button state to finalized
+                                    summarizeButton.disabled = true;
+                                    summarizeButton.innerHTML = '<i class="las la-check-circle align-middle me-1"></i> Đã tổng kết';
+                                    summarizeButton.className = 'btn btn-success me-2';
+                                    
+                                    // Reload debt summary to reflect changes
+                                    loadDebtSummary();
                                 });
                             } else {
                                 Swal.fire({

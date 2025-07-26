@@ -91,6 +91,16 @@ async function handleUpdateRequest(e) {
             
             // Refresh the requests list
             refreshSalaryAdvanceRequests();
+            
+            // Also refresh debt summary if it exists
+            if (typeof loadDebtSummary === 'function') {
+                loadDebtSummary();
+            }
+            
+            // Refresh salary details if the function exists
+            if (typeof refreshSalaryDetails === 'function') {
+                refreshSalaryDetails();
+            }
         });
     } catch (error) {
         console.error('Error updating request:', error);

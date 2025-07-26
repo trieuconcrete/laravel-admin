@@ -10,7 +10,7 @@
                         <div class="flex-grow-1">
                             <h4 class="fs-16 mb-1">Chi tiết thuê xe</h4>
                         </div>
-                    </div>
+                </div>
                 </div>
             </div>
             <div class="row mb-3 pb-1">
@@ -306,7 +306,7 @@
                                     <button type="submit" class="btn rounded-pill btn-secondary waves-effect">Save</button>
                                 </div>
                             </form>
-                                </div>
+                        </div>
 
                                 <!-- Vehicle Logs Tab -->
                                 <div class="tab-pane" id="vehicle-logs" role="tabpanel">
@@ -319,8 +319,8 @@
                                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCarRentalVehicleLogModal">
                                                 <i class="ri-add-line align-bottom me-1"></i> Thêm nhật ký
                                             </button>
-                                        </div>
-                                    </div>
+                    </div>
+                </div>
 
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-striped">
@@ -340,7 +340,15 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                @php
+                                                    $totalOvertimeCost = 0;
+                                                    $totalOvertimeHours = 0;
+                                                @endphp
                                                 @foreach($carRentalVehicleLogs as $log)
+                                                @php
+                                                    $totalOvertimeCost += $log->total_overtime_cost;
+                                                    $totalOvertimeHours += $log->overtime_hours;
+                                                @endphp
                                                 <tr>
                                                     <td class="text-center">{{ $log->run_date ? \Carbon\Carbon::parse($log->run_date)->format('Y-m-d') : '' }}</td>
                                                     <td class="text-center">{{ \Carbon\Carbon::parse($log->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($log->end_time)->format('H:i') }}</td>
@@ -367,7 +375,7 @@
                                                             <button type="button" class="btn btn-sm btn-danger" onclick="deleteVehicleLog({{ $log->id }})">
                                                                 <i class="ri-delete-bin-line"></i>
                                                             </button>
-                                                        </div>
+            </div>
                                                     </td>
                                                 </tr>
                                                 @endforeach
@@ -377,6 +385,108 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+            </div>
+
+            <!-- Chi tiết phí thuê xe -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary bg-opacity-10">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-primary">
+                            <i class="ri-calculator-line me-2"></i>
+                            Chi tiết phí thuê xe
+                        </h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @php
+                        // Tính toán các khoản phí
+                        $monthlyRentalFee = $carRental->monthly_rental_fee ?? 0;
+                    
+                        // Tính tổng phí cầu đường từ vehicle logs
+                        $totalTollFees = 0;
+                        foreach($carRentalVehicleLogs as $log) {
+                            if($log->tollFees) {
+                                foreach($log->tollFees as $tollFee) {
+                                    $totalTollFees += $tollFee->fee_amount ?? 0;
+                                }
+                            }
+                        }
+                        
+                        // Tính tổng phí bãi xe
+                        $totalParkingFees = $carRentalVehicleLogs->sum('parking_fee') ?? 0;
+                        
+                        // Tính tổng km (bỏ phần tính phí vượt giới hạn)
+                        $totalDistance = 0;
+                        foreach($carRentalVehicleLogs as $log) {
+                            $distance = ($log->end_odometer ?? 0) - ($log->start_odometer ?? 0);
+                            $totalDistance += $distance;
+                        }
+                        
+                        // Tính tổng cộng (bỏ excessDistanceCost)
+                        $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFees + $totalParkingFees;
+                        $vatRate = 0.08; // 8%
+                        $vatAmount = $subtotal * $vatRate;
+                        $totalWithVat = $subtotal + $vatAmount;
+                    @endphp
+                    
+                    <div class="row">
+                        {{--  <div class="col-md-8">  --}}
+                            <table class="table table-borderless table-sm" style="margin-bottom: 0;">
+                                <tbody>
+                                    <tr class="py-1">
+                                        <td class="text-start py-1" style="width: 60%; padding: 0.25rem 0.5rem;">
+                                            - Phí thuê xe tháng:
+                                            <span class="fw-bold text-primary">{{ number_format($monthlyRentalFee, 0, ',', '.') }} VNĐ</span>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="py-1">
+                                        <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
+                                            - Phát sinh phí tăng ca ({{ number_format($totalOvertimeHours, 2) }} giờ x 50.000 VND):
+                                            <span class="fw-bold text-warning">{{ number_format($totalOvertimeCost, 0, ',', '.') }} VNĐ</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="py-1">
+                                        <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
+                                            - Phát sinh phụ phí cầu đường:
+                                            <span class="fw-bold text-info">{{ number_format($totalTollFees, 0, ',', '.') }} VNĐ</span>
+                                        </td>
+                                    </tr>
+                                    <tr class="py-1">
+                                        <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
+                                            - Phí bãi xe:
+                                            <span class="fw-bold text-secondary">{{ number_format($totalParkingFees, 0, ',', '.') }} VNĐ</span>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="border-top py-1">
+                                        <td class="text-start fw-bold py-1" style="padding: 0.25rem 0.5rem;">
+                                            <i class="ri-calculator-line text-dark me-2"></i>Tổng cộng (chưa thuế VAT):
+                                            <span class="fw-bold text-danger">{{ number_format($subtotal, 0, ',', '.') }} VNĐ</span>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="py-1">
+                                        <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
+                                            <i class="ri-percent-line text-muted me-2"></i>Thuế VAT 8%:
+                                            <span class="fw-bold text-muted">{{ number_format($vatAmount, 0, ',', '.') }} VNĐ</span>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="border-top py-1">
+                                        <td class="text-start fw-bold fs-5 py-1" style="padding: 0.25rem 0.5rem;">
+                                            <i class="ri-money-dollar-circle-line text-success me-2"></i>Tổng cộng bao gồm thuế VAT:
+                                            <span class="fw-bold text-success">{{ number_format($totalWithVat, 0, ',', '.') }} VNĐ</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        {{--  </div>  --}}
                     </div>
                 </div>
             </div>
