@@ -148,7 +148,7 @@ class ShipmentRequest extends FormRequest
             'goods' => 'array',
             'goods.*.name' => 'required|string|max:255',
             'goods.*.quantity' => 'nullable|integer|min:0',
-            'goods.*.unit' => 'required|numeric|min:0',
+            'goods.*.unit' => 'nullable|numeric|min:0',
             'goods.*.notes' => 'nullable|string|max:255',
             'goods.*.weight' => 'nullable|numeric|min:0',
             // Tài xế/lơ xe và phụ cấp

@@ -434,27 +434,6 @@
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
-                                                        @else
-                                                            <tr>
-                                                                <td>
-                                                                    <select name="driverPXs[0][user_id]" class="form-select form-select-sm" required>
-                                                                        <option value="">Chọn nhân sự</option>
-                                                                        @foreach($userPXs as $id => $name)
-                                                                            <option value="{{ $id }}">{{ $name }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                    @error('driverPXs.0.user_id')<div class="text-danger">{{ $message }}</div>@enderror
-                                                                </td>
-                                                                @foreach($subPersonDeductionTypes as $type)
-                                                                    <td>
-                                                                        <input type="text" name="driverPXs[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
-                                                                        @error('driverPXs.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
-                                                                    </td>
-                                                                @endforeach
-                                                                <td>
-                                                                    <input type="hidden" name="driverPX_rows[]" value="0">
-                                                                </td>
-                                                            </tr>
                                                         @endif
                                                         </tbody>
                                                     </table>

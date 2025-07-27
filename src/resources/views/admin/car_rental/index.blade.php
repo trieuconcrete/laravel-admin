@@ -85,7 +85,7 @@
                                             </form>
                                         </div>
                                     </td>
-                                    <td>{{ optional($carRental->customer)->full_name }}</td>
+                                    <td>{{ optional($carRental->customer)->name }}</td>
                                     <td>{{ number_format($carRental->calculateTotalMoney()) }}</td>
                                     <td><span class="badge bg-{{ $carRental->getStatusColorAttribute() }}">{{ $carRental->getStatusLabelAttribute() }}</span>
                                     </td>

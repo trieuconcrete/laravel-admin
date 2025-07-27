@@ -52,6 +52,7 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
         }
         return $query->with(['driver', 'vehicle', 'goods', 'shipmentDeductions.shipmentDeductionType'])
             ->orderByDesc('created_at')
+            ->orderByDesc('updated_at')
             ->paginate($perPage ?? $this->getPaginationLimit());
     }
 
