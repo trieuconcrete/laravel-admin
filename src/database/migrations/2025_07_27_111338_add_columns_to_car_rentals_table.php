@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('car_rentals', function (Blueprint $table) {
-            $table->integer('overtime_fee_per_hour')->default(0)->after('monthly_rental_fee');
-            $table->integer('max_distance')->default(0)->after('overtime_fee_per_hour');
-            $table->integer('over_distance_fee_per_km')->default(0)->after('max_distance');
+            $table->decimal('overtime_fee_per_hour')->nullable()->default(0)->after('monthly_rental_fee');
+            $table->decimal('max_distance')->nullable()->default(0)->after('overtime_fee_per_hour');
+            $table->decimal('over_distance_fee_per_km')->nullable()->default(0)->after('max_distance');
             $table->string('invoice_number', 50)->nullable()->after('over_distance_fee_per_km')->comment('Số hóa đơn');
             $table->string('statement_number', 50)->nullable()->after('invoice_number')->comment('Số bảng kê');
             $table->string('currency', 10)->default('VNĐ')->after('statement_number')->comment('Đơn vị tiền tệ');
