@@ -182,6 +182,28 @@
                         <textarea class="form-control" rows="3" placeholder="Nhập ghi chú" name="notes"></textarea>
                         <div class="text-danger error" data-field="notes"></div>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-4">
+                                <label class="form-label">Số hóa đơn</label>
+                                <input type="text" class="form-control" name="invoice_number" value="{{ old('invoice_number', $carRental->invoice_number) }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-4">
+                                <label class="form-label">Số bảng kê</label>
+                                <input type="text" class="form-control" name="statement_number" value="{{ old('statement_number', $carRental->statement_number) }}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-4">
+                                <label class="form-label">Đơn vị tiền tệ</label>
+                                <input type="text" class="form-control" name="currency" value="{{ old('currency', $carRental->currency) }}">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Upload File thuê xe</label>
                         <input type="file" class="form-control" name="file">
