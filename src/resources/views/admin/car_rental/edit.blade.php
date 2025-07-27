@@ -403,37 +403,6 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    @php
-                        // Tính toán các khoản phí
-                        $monthlyRentalFee = $carRental->monthly_rental_fee ?? 0;
-                    
-                        // Tính tổng phí cầu đường từ vehicle logs
-                        $totalTollFees = 0;
-                        foreach($carRentalVehicleLogs as $log) {
-                            if($log->tollFees) {
-                                foreach($log->tollFees as $tollFee) {
-                                    $totalTollFees += $tollFee->fee_amount ?? 0;
-                                }
-                            }
-                        }
-                        
-                        // Tính tổng phí bãi xe
-                        $totalParkingFees = $carRentalVehicleLogs->sum('parking_fee') ?? 0;
-                        
-                        // Tính tổng km (bỏ phần tính phí vượt giới hạn)
-                        $totalDistance = 0;
-                        foreach($carRentalVehicleLogs as $log) {
-                            $distance = ($log->end_odometer ?? 0) - ($log->start_odometer ?? 0);
-                            $totalDistance += $distance;
-                        }
-                        
-                        // Tính tổng cộng (bỏ excessDistanceCost)
-                        $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFees + $totalParkingFees;
-                        $vatRate = 0.08; // 8%
-                        $vatAmount = $subtotal * $vatRate;
-                        $totalWithVat = $subtotal + $vatAmount;
-                    @endphp
-                    
                     <div class="row">
                         {{--  <div class="col-md-8">  --}}
                             <table class="table table-borderless table-sm" style="margin-bottom: 0;">
@@ -441,47 +410,54 @@
                                     <tr class="py-1">
                                         <td class="text-start py-1" style="width: 60%; padding: 0.25rem 0.5rem;">
                                             - Phí thuê xe tháng:
-                                            <span class="fw-bold text-primary">{{ number_format($monthlyRentalFee, 0, ',', '.') }} VNĐ</span>
+                                            <span class="fw-bold text-primary">{{ number_format($carRental->monthly_rental_fee ?? 0, 0, ',', '.') }} VNĐ</span>
                                         </td>
                                     </tr>
                                     
                                     <tr class="py-1">
                                         <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                             - Phát sinh phí tăng ca ({{ number_format($totalOvertimeHours, 2) }} giờ x 50.000 VND):
-                                            <span class="fw-bold text-warning">{{ number_format($totalOvertimeCost, 0, ',', '.') }} VNĐ</span>
+                                            <span class="fw-bold text-warning">{{ number_format($carRental->total_overtime_cost, 0, ',', '.') }} VNĐ</span>
                                         </td>
                                     </tr>
                                     <tr class="py-1">
                                         <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                             - Phát sinh phụ phí cầu đường:
-                                            <span class="fw-bold text-info">{{ number_format($totalTollFees, 0, ',', '.') }} VNĐ</span>
+                                            <span class="fw-bold text-info">{{ number_format($carRental->total_toll_fee, 0, ',', '.') }} VNĐ</span>
                                         </td>
                                     </tr>
                                     <tr class="py-1">
                                         <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                             - Phí bãi xe:
-                                            <span class="fw-bold text-secondary">{{ number_format($totalParkingFees, 0, ',', '.') }} VNĐ</span>
+                                            <span class="fw-bold text-secondary">{{ number_format($carRental->total_parking_fees, 0, ',', '.') }} VNĐ</span>
+                                        </td>
+                                    </tr>
+
+                                    <tr class="py-1">
+                                        <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
+                                            - Phát sinh phí vượt giới hạn km:
+                                            <span class="fw-bold text-info"> VNĐ</span>
                                         </td>
                                     </tr>
                                     
                                     <tr class="border-top py-1">
                                         <td class="text-start fw-bold py-1" style="padding: 0.25rem 0.5rem;">
                                             <i class="ri-calculator-line text-dark me-2"></i>Tổng cộng (chưa thuế VAT):
-                                            <span class="fw-bold text-danger">{{ number_format($subtotal, 0, ',', '.') }} VNĐ</span>
+                                            <span class="fw-bold text-danger">{{ number_format($carRental->subtotal, 0, ',', '.') }} VNĐ</span>
                                         </td>
                                     </tr>
                                     
                                     <tr class="py-1">
                                         <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                             <i class="ri-percent-line text-muted me-2"></i>Thuế VAT 8%:
-                                            <span class="fw-bold text-muted">{{ number_format($vatAmount, 0, ',', '.') }} VNĐ</span>
+                                            <span class="fw-bold text-muted">{{ number_format($carRental->vat_amount, 0, ',', '.') }} VNĐ</span>
                                         </td>
                                     </tr>
                                     
                                     <tr class="border-top py-1">
                                         <td class="text-start fw-bold fs-5 py-1" style="padding: 0.25rem 0.5rem;">
                                             <i class="ri-money-dollar-circle-line text-success me-2"></i>Tổng cộng bao gồm thuế VAT:
-                                            <span class="fw-bold text-success">{{ number_format($totalWithVat, 0, ',', '.') }} VNĐ</span>
+                                            <span class="fw-bold text-success">{{ number_format($carRental->total_amount_with_vat, 0, ',', '.') }} VNĐ</span>
                                         </td>
                                     </tr>
                                 </tbody>

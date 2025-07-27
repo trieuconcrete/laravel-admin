@@ -162,4 +162,133 @@ class CarRental extends Model
             'total_money' => $this->calculateTotalMoney()
         ]);
     }
+
+    /**
+     * Calculate total amount with all fees and VAT
+     *
+     * @param float $vatRate VAT rate (default 8%)
+     * @return array Contains subtotal, vatAmount, and totalWithVat
+     */
+    public function calculateTotalAmountWithTax($vatRate = 0.08): array
+    {
+        // Lấy phí thuê xe hàng tháng
+        $monthlyRentalFee = $this->monthly_rental_fee ?? 0;
+        
+        // Tính tổng phí làm thêm giờ từ tất cả vehicle logs
+        $totalOvertimeCost = 0;
+        $vehicleLogs = CarRentalVehicleLog::where('car_rental_id', $this->id)->get();
+        
+        foreach ($vehicleLogs as $log) {
+            $totalOvertimeCost += $log->total_overtime_cost ?? 0;
+        }
+        
+        // Tính tổng phí cầu đường
+        $totalTollFees = 0;
+        foreach ($vehicleLogs as $log) {
+            // Sử dụng relationship để lấy toll fees
+            $tollFees = $log->tollFees;
+            if ($tollFees) {
+                foreach ($tollFees as $tollFee) {
+                    $totalTollFees += $tollFee->fee_amount ?? 0;
+                }
+            }
+        }
+        
+        // Tính tổng phí bãi xe
+        $totalParkingFees = $vehicleLogs->sum('parking_fee') ?? 0;
+        
+        // Tính tổng km đã chạy (thông tin tham khảo)
+        $totalDistance = 0;
+        foreach ($vehicleLogs as $log) {
+            $distance = ($log->end_odometer ?? 0) - ($log->start_odometer ?? 0);
+            $totalDistance += $distance;
+        }
+        
+        // Tính subtotal (tổng trước thuế)
+        $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFees + $totalParkingFees;
+        
+        // Tính thuế VAT
+        $vatAmount = $subtotal * $vatRate;
+        
+        // Tính tổng cộng sau thuế
+        $totalWithVat = $subtotal + $vatAmount;
+        
+        return [
+            'monthly_rental_fee' => $monthlyRentalFee,
+            'total_overtime_cost' => $totalOvertimeCost,
+            'total_toll_fees' => $totalTollFees,
+            'total_parking_fees' => $totalParkingFees,
+            'total_distance' => $totalDistance,
+            'subtotal' => $subtotal,
+            'vat_rate' => $vatRate,
+            'vat_amount' => $vatAmount,
+            'total_with_vat' => $totalWithVat,
+        ];
+    }
+
+    /**
+     * Get total overtime cost attribute
+     *
+     * @return float
+     */
+    public function getTotalOvertimeCostAttribute(): float
+    {
+        $calculation = $this->calculateTotalAmountWithTax();
+        return $calculation['total_overtime_cost'];
+    }
+
+    /**
+     * Get total toll fees attribute
+     *
+     * @return float
+     */
+    public function getTotalTollFeesAttribute(): float
+    {
+        $calculation = $this->calculateTotalAmountWithTax();
+        return $calculation['total_toll_fees'];
+    }
+
+    /**
+     * Get total parking fees attribute
+     *
+     * @return float
+     */
+    public function getTotalParkingFeesAttribute(): float
+    {
+        $calculation = $this->calculateTotalAmountWithTax();
+        return $calculation['total_parking_fees'];
+    }
+
+    /**
+     * Get total amount with VAT attribute
+     *
+     * @return float
+     */
+    public function getTotalAmountWithVatAttribute(): float
+    {
+        $calculation = $this->calculateTotalAmountWithTax();
+        return $calculation['total_with_vat'];
+    }
+
+    /**
+     * Get VAT amount attribute
+     *
+     * @return float
+     */
+    public function getVatAmountAttribute(): float
+    {
+        $calculation = $this->calculateTotalAmountWithTax();
+        return $calculation['vat_amount'];
+    }
+
+    /**
+     * Get subtotal attribute (before VAT)
+     *
+     * @return float
+     */
+    public function getSubtotalAttribute(): float
+    {
+        $calculation = $this->calculateTotalAmountWithTax();
+        return $calculation['subtotal'];
+    }
 }
