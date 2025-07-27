@@ -198,22 +198,19 @@
                             <div class="col-md-4">
                                 <div class="mb-4">
                                     <label class="form-label">Số hóa đơn</label>
-                                    <input type="text" class="form-control" name="invoice_number"
-                                        value="{{ old('invoice_number', $carRental->invoice_number) }}">
+                                    <input type="text" class="form-control" name="invoice_number">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-4">
                                     <label class="form-label">Số bảng kê</label>
-                                    <input type="text" class="form-control" name="statement_number"
-                                        value="{{ old('statement_number', $carRental->statement_number) }}">
+                                    <input type="text" class="form-control" name="statement_number">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="mb-4">
                                     <label class="form-label">Đơn vị tiền tệ</label>
-                                    <input type="text" class="form-control" name="currency"
-                                        value="{{ old('currency', $carRental->currency) }}">
+                                    <input type="text" class="form-control" name="currency">
                                 </div>
                             </div>
                         </div>
