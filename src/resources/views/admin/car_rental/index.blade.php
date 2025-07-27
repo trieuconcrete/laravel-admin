@@ -124,7 +124,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <hr>
-                <form id="add-quote-form" enctype="multipart/form-data" action="{{ route('admin.car-rental.store') }}"
+                <form id="add-car-rental-form" enctype="multipart/form-data" action="{{ route('admin.car-rental.store') }}"
                     method="POST">
                     @csrf
                     <div class="modal-body">
@@ -273,7 +273,7 @@
                 });
             });
 
-            ['#add-quote-form'].forEach(function (formSelector) {
+            ['#add-car-rental-form'].forEach(function (formSelector) {
                 const $form = $(formSelector);
                 if ($form.length) {
                     $form.on('submit', function (e) {
@@ -334,101 +334,6 @@
                         });
                     });
                 }
-            });
-
-            $('.btn-show-quote').on('click', function () {
-                let id = $(this).data('id');
-                let modal = $('#detailModal');
-
-                modal.find('.modal-title').text('Thông tin chi tiết thuê xe');
-
-                $('#detailContentModal').html(
-                    '<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></div>'
-                );
-
-
-                $('#editDetailBtn').data('id', id);
-
-                // show modal
-                modal.modal('show');
-
-                $.ajax({
-                    url: `/admin/quotes/${id}`
-                    , type: 'GET'
-                    , success: function (response) {
-                        $('#detailContentModal').html(response);
-
-                        const dateFormatPlaceholder =
-                            '{{ \App\Helpers\DateHelper::getDateFormatPlaceholder() }}';
-                        const systemDateFormat =
-                            '{{ \App\Helpers\DateHelper::getSystemDateFormat() }}';
-
-                        $('#detailContentModal').find('input[type="date"]').each(function () {
-                            this.type = 'text';
-                            this.placeholder = dateFormatPlaceholder;
-                            flatpickr(this, {
-                                dateFormat: systemDateFormat
-                                , allowInput: true
-                                , defaultDate: this.value || null
-                            });
-                        });
-                    }
-                    , error: function (xhr) {
-                        $('#detailContentModal').html(
-                            '<div class="alert alert-danger">Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</div>'
-                        );
-                        console.error(xhr);
-                    }
-                });
-            });
-
-            $('#editDetailBtn').on('click', function () {
-                var quoteId = $(this).data('id');
-                var $form = $('#editQuoteForm');
-                var formData = $form.serialize();
-
-                $.ajax({
-                    url: '/admin/quotes/' + quoteId
-                    , method: 'PUT'
-                    , data: formData
-                    , headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                        , 'Accept': 'application/json'
-                        ,
-                    }
-                    , success: function (data) {
-                        // close modal
-                        const modalElement = $form.closest('.modal');
-                        const modal = bootstrap.Modal.getInstance(modalElement[0]);
-                        if (modal) modal.hide();
-
-                        // Reset form
-                        $form[0].reset();
-
-                        //
-                        Swal.fire({
-                            title: "Cập nhật thành công!"
-                            , icon: "success"
-                            , draggable: true
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Reload table
-                                location.reload();
-                            }
-                        });
-                    }
-                    , error: function (xhr) {
-                        if (xhr.status === 422) {
-                            const errors = xhr.responseJSON.errors;
-                            $.each(errors, function (field, messages) {
-                                $form.find(`.error[data-field="${field}"]`).text(
-                                    messages[0]);
-                            });
-                        } else {
-                            console.error('Có lỗi xảy ra:', xhr);
-                        }
-                    }
-                });
             });
         });
 
