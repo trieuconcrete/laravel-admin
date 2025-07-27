@@ -141,6 +141,36 @@
                         </div>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Phí thuê xe theo tháng</label>
+                                <input type="text" class="form-control" name="monthly_rental_fee">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Phí tăng ca/giờ</label>
+                                <input type="text" class="form-control" name="overtime_fee_per_hour">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Số km tối đa</label>
+                                <input type="text" class="form-control" name="max_distance">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Phí theo km chạy vượt</label>
+                                <input type="text" class="form-control" name="over_distance_fee_per_km">
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label">Mô tả dịch vụ</label>
                         <textarea class="form-control" rows="3" placeholder="Nhập Mô tả dịch vụ" name="description"></textarea>
@@ -158,56 +188,6 @@
                         <div class="text-danger error" data-field="file"></div>
                     </div>
 
-                    <hr>
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label mb-0">Danh sách xe thuê</label>
-                            <button type="button" class="btn btn-sm btn-outline-primary" id="add-vehicle-btn">
-                                <i class="fas fa-plus me-1"></i>Thêm phương tiện
-                            </button>
-                        </div>
-                        <div class="table-responsive table-fixed">
-                            <table class="table table-sm table-fixed" id="vehiclesTable">
-                                <thead>
-                                    <tr>
-                                        <th width="200">Phương tiện <span class="text-danger">*</span></th>
-                                        <th width="250">Tên hàng</th>
-                                        <th width="120">Đơn vị</th>
-                                        <th width="100">Số lượng</th>
-                                        <th width="100">Đơn giá</th>
-                                        <th width="100">Thành tiền</th>
-                                        <th width="150">Ngày bắt đầu</th>
-                                        <th width="150">Ngày kết thúc</th>
-                                        <th width="100">Ghi chú</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="vehicle-rows">
-                                    @php
-                                    $vehicles = old('vehicles', []);
-                                    @endphp
-
-                                    @if (count($vehicles))
-                                        @foreach ($vehicles as $i => $vehicle)
-                                        {!! view('admin.car_rental.partials.vehicle-row', [
-                                        'vehicleTypes' => $vehicleTypes,
-                                        'vehicle' => $vehicle,
-                                        'index' => $i
-                                        ])->render() !!}
-                                        @endforeach
-                                    @else
-                                        <template id="vehicle-row-template">
-                                        {!! view('admin.car_rental.partials.vehicle-row', [
-                                        'vehicleTypes' => $vehicleTypes,
-                                        'vehicle' => [],
-                                        'index' => '__INDEX__'
-                                        ])->render() !!}
-                                    </template>
-                                    @endif
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>

@@ -77,13 +77,37 @@
                                     </div>
                                 </div>
 
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="mb-4">
+                                            <label class="form-label">Phí thuê xe theo tháng</label>
+                                            <input type="text" class="form-control" name="monthly_rental_fee" value="{{ old('monthly_rental_fee', number_format($carRental->monthly_rental_fee)) }}">
+                                            @error('monthly_rental_fee')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-4">
+                                            <label class="form-label">Phí tăng ca/giờ</label>
+                                            <input type="text" class="form-control" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', number_format($carRental->overtime_fee_per_hour)) }}">
+                                        </div>
+                                    </div>
+                                </div>
 
-                                <div class="mb-4">
-                                    <label class="form-label">Phí thuê xe theo tháng</label>
-                                    <input type="text" class="form-control" name="monthly_rental_fee" value="{{ old('monthly_rental_fee', number_format($carRental->monthly_rental_fee)) }}">
-                                    @error('monthly_rental_fee')
-                                    <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                    @enderror
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="mb-4">
+                                            <label class="form-label">Số km tối đa</label>
+                                            <input type="text" class="form-control" name="max_distance" value="{{ old('max_distance', number_format($carRental->max_distance)) }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-4">
+                                            <label class="form-label">Phí theo km chạy vượt</label>
+                                            <input type="text" class="form-control" name="over_distance_fee_per_km" value="{{ old('over_distance_fee_per_km', number_format($carRental->over_distance_fee_per_km)) }}">
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="mb-4">
