@@ -30,6 +30,9 @@ class CarRental extends Model
         'over_distance_fee_per_km',
     ];
 
+    const OVERTIME_FEE_PER_HOUR_DEFAULT = 50000; // Default value for overtime fee per hour
+    const OVER_DISTANCE_FEE_PER_KM_DEFAULT = 7000; // Default value for over distance fee per km
+
     /**
      * The attributes that should be cast.
      *
