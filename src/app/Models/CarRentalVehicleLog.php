@@ -28,7 +28,7 @@ class CarRentalVehicleLog extends Model
         'total_overtime_cost',
         'parking_fee',
         'notes',
-        'status'
+        'status',
     ];
 
     protected $casts = [
