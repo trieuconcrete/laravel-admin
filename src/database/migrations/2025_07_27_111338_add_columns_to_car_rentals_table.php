@@ -17,7 +17,7 @@ return new class extends Migration
             $table->decimal('over_distance_fee_per_km')->nullable()->default(0)->after('max_distance');
             $table->string('invoice_number', 50)->nullable()->after('over_distance_fee_per_km')->comment('Số hóa đơn');
             $table->string('statement_number', 50)->nullable()->after('invoice_number')->comment('Số bảng kê');
-            $table->string('currency', 10)->default('VNĐ')->after('statement_number')->comment('Đơn vị tiền tệ');
+            $table->string('currency', 10)->nullable()->default('VNĐ')->after('statement_number')->comment('Đơn vị tiền tệ');
         });
     }
 
