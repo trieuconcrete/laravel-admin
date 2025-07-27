@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Enum\UserStatus;
+use App\Models\ShipmentDeductionType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use App\Enum\UserStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Shipment extends Model
 {
@@ -171,6 +172,13 @@ class Shipment extends Model
     public function shipmentDeductions()
     {
         return $this->hasMany(ShipmentDeduction::class);
+    }
+
+    public function shipmentExtraFee()
+    {
+        return $this->hasMany(ShipmentDeduction::class)->whereHas('shipmentDeductionType', function($query) {
+            $query->where('type', ShipmentDeductionType::TYPE_EXPENSE);
+        });
     }
 
     public function shipmentDeductionTypes()

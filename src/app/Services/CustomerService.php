@@ -50,7 +50,7 @@ class CustomerService
         
         return $shipments->map(function ($shipment) {
             // Calculate total deductions
-            $combinedFees = $shipment->shipmentDeductions->sum('amount');
+            $combinedFees = $shipment->shipmentExtraFee->sum('amount');
             
             // Calculate total amount
             $totalAmount = (($shipment->trip_count ?? 1) * $shipment->unit_price) + $combinedFees;
