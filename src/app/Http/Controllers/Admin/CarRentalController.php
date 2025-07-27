@@ -65,7 +65,6 @@ class CarRentalController extends Controller
     {
         DB::beginTransaction();
         try {
-            // Log the request data for debugging
             $this->carRentalService->create($request->all());
             DB::commit();
             return response()->json(['message' => 'Tạo thông tin thuê xe thành công'], 200);

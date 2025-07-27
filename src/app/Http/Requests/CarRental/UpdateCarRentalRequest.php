@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\CarRental;
 
-use App\Http\Requests\Traits\UsesSystemDateFormat;
+use App\Helpers\NumberHelper;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\Traits\UsesSystemDateFormat;
 
 class UpdateCarRentalRequest extends FormRequest
 {
@@ -19,11 +20,12 @@ class UpdateCarRentalRequest extends FormRequest
      */
     public function prepareForValidation()
     {
-        if ($this->monthly_rental_fee) {
-            $this->merge([
-                'monthly_rental_fee' => str_replace(',', '', $this->monthly_rental_fee),
-            ]);
-        }
+        $this->merge([
+            'monthly_rental_fee' => str_replace(',', '', $this->monthly_rental_fee),
+            'overtime_fee_per_hour' => NumberHelper::parseNumber($this->overtime_fee_per_hour),
+            'max_distance' => NumberHelper::parseNumber($this->max_distance),
+            'over_distance_fee_per_km' => NumberHelper::parseNumber($this->over_distance_fee_per_km),
+        ]);
     }
 
     /**

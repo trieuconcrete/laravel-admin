@@ -81,7 +81,7 @@
                                     <div class="col-md-6">
                                         <div class="mb-4">
                                             <label class="form-label">Phí thuê xe theo tháng</label>
-                                            <input type="text" class="form-control" name="monthly_rental_fee" value="{{ old('monthly_rental_fee', number_format($carRental->monthly_rental_fee)) }}">
+                                            <input type="text" class="form-control number" name="monthly_rental_fee" value="{{ old('monthly_rental_fee', number_format($carRental->monthly_rental_fee)) }}">
                                             @error('monthly_rental_fee')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                             @enderror
@@ -90,7 +90,7 @@
                                     <div class="col-md-6">
                                         <div class="mb-4">
                                             <label class="form-label">Phí tăng ca/giờ</label>
-                                            <input type="text" class="form-control" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', number_format($carRental->overtime_fee_per_hour)) }}">
+                                            <input type="text" class="form-control number" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', number_format($carRental->overtime_fee_per_hour)) }}">
                                         </div>
                                     </div>
                                 </div>
@@ -99,13 +99,13 @@
                                     <div class="col-md-6">
                                         <div class="mb-4">
                                             <label class="form-label">Số km tối đa</label>
-                                            <input type="text" class="form-control" name="max_distance" value="{{ old('max_distance', number_format($carRental->max_distance)) }}">
+                                            <input type="text" class="form-control number" name="max_distance" value="{{ old('max_distance', number_format($carRental->max_distance)) }}">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-4">
                                             <label class="form-label">Phí theo km chạy vượt</label>
-                                            <input type="text" class="form-control" name="over_distance_fee_per_km" value="{{ old('over_distance_fee_per_km', number_format($carRental->over_distance_fee_per_km)) }}">
+                                            <input type="text" class="form-control number" name="over_distance_fee_per_km" value="{{ old('over_distance_fee_per_km', number_format($carRental->over_distance_fee_per_km)) }}">
                                         </div>
                                     </div>
                                 </div>
@@ -944,41 +944,41 @@ $(document).ready(function() {
         $(this).val(integerPart + decimalPart);
     });
 
-    // Format number inputs on change (when user leaves the input)
-    $('input[name="start_odometer"], input[name="end_odometer"], input[name="parking_fee"], .toll-fee-amount, input[name="monthly_rental_fee"]').on('change', function () {
-        let value = $(this).val();
-        if (value) {
-            // Remove all non-numeric characters except dots
-            value = value.replace(/[^0-9.]/g, '');
-            // Giới hạn tối đa 9 chữ số (không tính dấu chấm thập phân)
-            let parts = value.split('.');
-            if (parts[0].length > 9) {
-                parts[0] = parts[0].substring(0, 9);
-                value = parts.join('.');
-            }
-            if (value && !isNaN(value)) {
-                let numericValue = parseFloat(value);
-                let formatted = numericValue.toLocaleString('en-US', {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 2
-                });
-                $(this).val(formatted);
-            }
-        }
-    });
+    // // Format number inputs on change (when user leaves the input)
+    // $('input[name="start_odometer"], input[name="end_odometer"], input[name="parking_fee"], .toll-fee-amount, input[name="monthly_rental_fee"]').on('change', function () {
+    //     let value = $(this).val();
+    //     if (value) {
+    //         // Remove all non-numeric characters except dots
+    //         value = value.replace(/[^0-9.]/g, '');
+    //         // Giới hạn tối đa 9 chữ số (không tính dấu chấm thập phân)
+    //         let parts = value.split('.');
+    //         if (parts[0].length > 9) {
+    //             parts[0] = parts[0].substring(0, 9);
+    //             value = parts.join('.');
+    //         }
+    //         if (value && !isNaN(value)) {
+    //             let numericValue = parseFloat(value);
+    //             let formatted = numericValue.toLocaleString('en-US', {
+    //                 minimumFractionDigits: 0,
+    //                 maximumFractionDigits: 2
+    //             });
+    //             $(this).val(formatted);
+    //         }
+    //     }
+    // });
 
-    // Initialize formatting for existing values
-    $('input[name="start_odometer"], input[name="end_odometer"], input[name="parking_fee"], .toll-fee-amount, input[name="monthly_rental_fee"]').each(function() {
-        let initial = $(this).val().replace(/[^0-9.]/g, '');
-        if (initial) {
-            let parts = initial.split('.');
-            let formatted = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            if (parts[1]) {
-                formatted += '.' + parts[1].slice(0, 2);
-            }
-            $(this).val(formatted);
-        }
-    });
+    // // Initialize formatting for existing values
+    // $('input[name="start_odometer"], input[name="end_odometer"], input[name="parking_fee"], .toll-fee-amount, input[name="monthly_rental_fee"]').each(function() {
+    //     let initial = $(this).val().replace(/[^0-9.]/g, '');
+    //     if (initial) {
+    //         let parts = initial.split('.');
+    //         let formatted = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    //         if (parts[1]) {
+    //             formatted += '.' + parts[1].slice(0, 2);
+    //         }
+    //         $(this).val(formatted);
+    //     }
+    // });
 
     // Format number inputs for edit form (only numeric fields)
     $('input[id="edit_start_odometer"], input[id="edit_end_odometer"], input[id="edit_parking_fee"], .edit-toll-fee-amount').on('input', function () {

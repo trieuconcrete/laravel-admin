@@ -145,6 +145,7 @@
 
         <!-- App js -->
         <script src="{{ asset('assets/js/app.js') }}"></script>
+        <script src="{{ asset('assets/js/common.js') }}"></script>
 
         <!-- Flatpickr JS -->
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>

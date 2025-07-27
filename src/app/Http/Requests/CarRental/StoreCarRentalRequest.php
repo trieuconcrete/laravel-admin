@@ -2,8 +2,9 @@
 
 namespace App\Http\Requests\CarRental;
 
-use App\Http\Requests\Traits\UsesSystemDateFormat;
+use App\Helpers\NumberHelper;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\Traits\UsesSystemDateFormat;
 
 class StoreCarRentalRequest extends FormRequest
 {
@@ -11,6 +12,20 @@ class StoreCarRentalRequest extends FormRequest
     public function authorize()
     {
         return true;
+    }
+
+    /**
+     * Summary of prepareForValidation
+     * @return void
+     */
+    public function prepareForValidation()
+    {
+        $this->merge([
+            'monthly_rental_fee' => NumberHelper::parseNumber($this->monthly_rental_fee),
+            'overtime_fee_per_hour' => NumberHelper::parseNumber($this->overtime_fee_per_hour),
+            'max_distance' => NumberHelper::parseNumber($this->max_distance),
+            'over_distance_fee_per_km' => NumberHelper::parseNumber($this->over_distance_fee_per_km),
+        ]);
     }
 
     /**
@@ -24,17 +39,8 @@ class StoreCarRentalRequest extends FormRequest
             'status' => 'required',
             'description' => 'nullable|string',
             'notes' => 'nullable|string',
-            'file' => 'nullable|file|max:10240',
-            'vehicles' => 'required|array',
-            'vehicles.*.vehicle_id' => 'required',
-            'vehicles.*.product_name' => 'required|string|max:255',
-            'vehicles.*.unit' => 'required|in:tháng,ngày',
-            'vehicles.*.amount' => 'required|integer|min:1',
-            'vehicles.*.price' => 'required|numeric|min:0',
-            'vehicles.*.money' => 'nullable|numeric|min:0',
-            'vehicles.*.start_date' => 'required|date',
-            'vehicles.*.end_date' => 'required|date',
-            'vehicles.*.notes' => 'nullable',
+            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
+            'monthly_rental_fee' => 'nullable|numeric|min:0|max:1000000000'
         ];
     }
 

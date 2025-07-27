@@ -145,13 +145,13 @@
                         <div class="col-md-6">
                             <div class="mb-4">
                                 <label class="form-label">Phí thuê xe theo tháng</label>
-                                <input type="text" class="form-control" name="monthly_rental_fee">
+                                <input type="text" class="form-control number" name="monthly_rental_fee">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-4">
                                 <label class="form-label">Phí tăng ca/giờ</label>
-                                <input type="text" class="form-control" name="overtime_fee_per_hour">
+                                <input type="text" class="form-control number" name="overtime_fee_per_hour">
                             </div>
                         </div>
                     </div>
@@ -160,13 +160,13 @@
                         <div class="col-md-6">
                             <div class="mb-4">
                                 <label class="form-label">Số km tối đa</label>
-                                <input type="text" class="form-control" name="max_distance">
+                                <input type="text" class="form-control number" name="max_distance">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-4">
                                 <label class="form-label">Phí theo km chạy vượt</label>
-                                <input type="text" class="form-control" name="over_distance_fee_per_km">
+                                <input type="text" class="form-control number" name="over_distance_fee_per_km">
                             </div>
                         </div>
                     </div>
