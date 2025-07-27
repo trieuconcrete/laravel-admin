@@ -303,4 +303,14 @@ class CarRental extends Model
         $calculation = $this->calculateTotalAmountWithTax();
         return $calculation['subtotal'];
     }
+
+    /**
+     * Get overtime fee per hour attribute
+     *
+     * @return float
+     */
+    public function getOvertimeFeePerHourUnitAttribute()    
+    {
+        return $this->overtime_fee_per_hour ?? self::OVERTIME_FEE_PER_HOUR_DEFAULT;
+    }
 }

@@ -188,12 +188,13 @@
                                                 <tr>
                                                     <th class="text-center">Ngày chạy</th>
                                                     <th class="text-center">Giờ làm việc</th>
-                                                    <th class="text-center">Vị trí</th>
+                                                    <th class="text-center">Lịch trình</th>
                                                     <th>Thời gian tăng ca</th>
+                                                    <th>Đơn giá tăng ca</th>
+                                                    <th>Chi phí tăng ca</th>
                                                     <th>Km bắt đầu</th>
                                                     <th>Km kết thúc</th>
                                                     <th>Tổng km</th>
-                                                    <th>Chi phí tăng ca</th>
                                                     <th>Phí cầu đường</th>
                                                     <th>Phí đậu xe</th>
                                                     <th>Thao tác</th>
@@ -214,10 +215,11 @@
                                                     <td class="text-center">{{ \Carbon\Carbon::parse($log->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($log->end_time)->format('H:i') }}</td>
                                                     <td class="text-center">{{ $log->start_location }} -> {{ $log->end_location }}</td>
                                                     <td>{{ number_format($log->overtime_hours, 1) }} giờ</td>
+                                                    <td>{{ number_format($carRental->overtime_fee_per_hour_unit ) }}</td>
+                                                    <td>{{ number_format($log->total_overtime_cost) }}</td>
                                                     <td>{{ number_format($log->start_odometer) }}</td>
                                                     <td>{{ number_format($log->end_odometer) }}</td>
                                                     <td>{{ number_format($log->total_distance) }}</td>
-                                                    <td>{{ number_format($log->total_overtime_cost) }}</td>
                                                     <td>
                                                         @if($log->tollFees->count() > 0)
                                                             <span class="badge bg-info">{{ number_format($log->total_toll_fee) }}</span>
@@ -235,7 +237,7 @@
                                                             <button type="button" class="btn btn-sm btn-danger" onclick="deleteVehicleLog({{ $log->id }})">
                                                                 <i class="ri-delete-bin-line"></i>
                                                             </button>
-            </div>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                                 @endforeach
@@ -396,7 +398,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Đơn giá tăng ca (VNĐ/giờ)</label>
-                            <input type="text" class="form-control" value="50,000" readonly style="background-color: #f8f9fa;">
+                            <input type="text" class="form-control" value="50,000">
                             <small class="text-muted">Đơn giá cố định: 50,000 VNĐ/giờ</small>
                         </div>
                         <div class="col-md-6">
