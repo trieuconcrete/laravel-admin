@@ -29,9 +29,6 @@ class CarRentalVehicleLog extends Model
         'parking_fee',
         'notes',
         'status',
-        'overtime_fee_per_hour',
-        'max_distance',
-        'over_distance_fee_per_km',
     ];
 
     protected $casts = [

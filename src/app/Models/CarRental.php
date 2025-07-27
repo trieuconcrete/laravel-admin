@@ -25,6 +25,9 @@ class CarRental extends Model
         'total_money',
         'file',
         'monthly_rental_fee',
+        'overtime_fee_per_hour',
+        'max_distance',
+        'over_distance_fee_per_km',
     ];
 
     /**
