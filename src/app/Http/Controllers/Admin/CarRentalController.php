@@ -67,11 +67,15 @@ class CarRentalController extends Controller
         try {
             $this->carRentalService->create($request->all());
             DB::commit();
-            return response()->json(['message' => 'Tạo thông tin thuê xe thành công'], 200);
+            return redirect()->route('admin.car-rental.index')->with([
+                'success' => 'Tạo thông tin thuê xe thành công'
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Vehicle creation failed', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+            return redirect()->route('admin.car-rental.index')->with([
+                'error' => 'Something went wrong: ' . $e->getMessage()
+            ]);
         }
     }
 
