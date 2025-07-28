@@ -198,7 +198,10 @@ class CarRentalController extends Controller
                 'toll_fees.*.notes' => 'nullable|string'
             ])->validate();
 
-            $validated['overtime_rate'] = 50000;
+            // Lấy car rental để lấy overtime_fee_per_hour
+            $carRental = CarRental::find($validated['car_rental_id']);
+            $overtimeRate = $carRental->overtime_fee_per_hour ?? CarRental::OVERTIME_FEE_PER_HOUR_DEFAULT;
+            $validated['overtime_rate'] = $overtimeRate;
             $validated['parking_fee'] = isset($validated['parking_fee']) ? abs((float)$validated['parking_fee']) : 0;
 
             $totalDistance = abs($validated['end_odometer'] - $validated['start_odometer']);
@@ -332,6 +335,8 @@ class CarRentalController extends Controller
             $data['start_odometer'] = str_replace(',', '', $data['start_odometer']);
             $data['end_odometer'] = str_replace(',', '', $data['end_odometer']);
             $data['parking_fee'] = str_replace(',', '', $data['parking_fee']);
+            $data['max_distance'] = str_replace(',', '', $data['max_distance']);
+            $data['over_distance_fee_per_km'] = str_replace(',', '', $data['over_distance_fee_per_km']);
             if (!empty($data['toll_fees'])) {
                 foreach ($data['toll_fees'] as &$tollFee) {
                     if (!empty($tollFee['fee_amount'])) {
@@ -359,6 +364,11 @@ class CarRentalController extends Controller
             ])->validate();
             $validated['overtime_rate'] = 50000;
             $validated['parking_fee'] = isset($validated['parking_fee']) ? abs((float)$validated['parking_fee']) : 0;
+
+            // Lấy car rental để lấy overtime_fee_per_hour
+            $carRental = CarRental::find($validated['car_rental_id']);
+            $overtimeRate = $carRental->overtime_fee_per_hour ?? CarRental::OVERTIME_FEE_PER_HOUR_DEFAULT;
+            $validated['overtime_rate'] = $overtimeRate;
             $totalDistance = abs($validated['end_odometer'] - $validated['start_odometer']);
             $startDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['start_time']);
             $endDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['end_time']);

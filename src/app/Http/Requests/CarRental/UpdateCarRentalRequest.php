@@ -40,7 +40,13 @@ class UpdateCarRentalRequest extends FormRequest
             'description' => 'nullable|string',
             'notes' => 'nullable|string',
             'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
-            'monthly_rental_fee' => 'nullable|numeric|min:0|max:1000000000'
+            'monthly_rental_fee' => 'nullable|numeric|min:0|max:1000000000',
+            'overtime_fee_per_hour' => 'nullable|numeric|min:0|max:1000000',
+            'max_distance' => 'nullable|numeric|min:0|max:100000',
+            'over_distance_fee_per_km' => 'nullable|numeric|min:0|max:100000',
+            'invoice_number' => 'nullable|string|max:255',
+            'statement_number' => 'nullable|string|max:255',
+            'currency' => 'nullable|string|max:10'
         ];
     }
 
@@ -57,7 +63,19 @@ class UpdateCarRentalRequest extends FormRequest
             'valid_until.date' => 'Ngày hết hạn không đúng định dạng',
             'valid_until.after_or_equal' => 'Ngày hết hạn phải sau hoặc bằng ngày bắt đầu',
             'file.mimes' => 'File đính kèm phải có định dạng: pdf, doc, docx, xls, xlsx',
-            'file.max' => 'File đính kèm không được vượt quá 10MB'
+            'file.max' => 'File đính kèm không được vượt quá 10MB',
+            'monthly_rental_fee.numeric' => 'Phí thuê xe phải là số',
+            'monthly_rental_fee.min' => 'Phí thuê xe không được âm',
+            'monthly_rental_fee.max' => 'Phí thuê xe không được vượt quá 1 tỷ',
+            'overtime_fee_per_hour.numeric' => 'Phí tăng ca/giờ phải là số',
+            'overtime_fee_per_hour.min' => 'Phí tăng ca/giờ không được âm',
+            'overtime_fee_per_hour.max' => 'Phí tăng ca/giờ không được vượt quá 1 triệu',
+            'max_distance.numeric' => 'Số km tối đa phải là số',
+            'max_distance.min' => 'Số km tối đa không được âm',
+            'max_distance.max' => 'Số km tối đa không được vượt quá 100,000',
+            'over_distance_fee_per_km.numeric' => 'Phí theo km chạy vượt phải là số',
+            'over_distance_fee_per_km.min' => 'Phí theo km chạy vượt không được âm',
+            'over_distance_fee_per_km.max' => 'Phí theo km chạy vượt không được vượt quá 100,000'
         ];
     }
 }

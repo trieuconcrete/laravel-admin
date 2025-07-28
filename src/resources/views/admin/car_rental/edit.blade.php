@@ -266,65 +266,68 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        {{--  <div class="col-md-8">  --}}
-                            <table class="table table-borderless table-sm" style="margin-bottom: 0;">
-                                <tbody>
-                                    <tr class="py-1">
-                                        <td class="text-start py-1" style="width: 60%; padding: 0.25rem 0.5rem;">
-                                            - Phí thuê xe tháng:
-                                            <span class="fw-bold text-primary">{{ number_format($carRental->monthly_rental_fee ?? 0, 0, ',', '.') }} VNĐ</span>
-                                        </td>
-                                    </tr>
-                                    
-                                    <tr class="py-1">
-                                        <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
-                                            - Phát sinh phí tăng ca ({{ number_format($totalOvertimeHours, 2) }} giờ x 50.000 VND):
-                                            <span class="fw-bold text-warning">{{ number_format($carRental->total_overtime_cost, 0, ',', '.') }} VNĐ</span>
-                                        </td>
-                                    </tr>
-                                    <tr class="py-1">
-                                        <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
-                                            - Phát sinh phụ phí cầu đường:
-                                            <span class="fw-bold text-info">{{ number_format($carRental->total_toll_fee, 0, ',', '.') }} VNĐ</span>
-                                        </td>
-                                    </tr>
-                                    <tr class="py-1">
-                                        <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
-                                            - Phí bãi xe:
-                                            <span class="fw-bold text-secondary">{{ number_format($carRental->total_parking_fees, 0, ',', '.') }} VNĐ</span>
-                                        </td>
-                                    </tr>
+                        <table class="table table-borderless table-sm" style="margin-bottom: 0;">
+                            <tbody>
+                                <tr class="py-1">
+                                    <td class="text-start py-1" style="width: 60%; padding: 0.25rem 0.5rem;">
+                                        - Phí thuê xe tháng:
+                                        <span class="fw-bold text-primary">{{ number_format($carRental->monthly_rental_fee ?? 0, 0, ',', '.') }} VNĐ</span>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="py-1">
+                                    <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
+                                        - Phát sinh phí tăng ca ({{ number_format($totalOvertimeHours, 2) }} giờ x 50.000 VND):
+                                        <span class="fw-bold text-warning">{{ number_format($carRental->total_overtime_cost, 0, ',', '.') }} VNĐ</span>
+                                    </td>
+                                </tr>
+                                <tr class="py-1">
+                                    <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
+                                        - Phát sinh phụ phí cầu đường:
+                                        <span class="fw-bold text-info">{{ number_format($carRental->total_toll_fee, 0, ',', '.') }} VNĐ</span>
+                                    </td>
+                                </tr>
+                                <tr class="py-1">
+                                    <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
+                                        - Phí bãi xe:
+                                        <span class="fw-bold text-secondary">{{ number_format($carRental->total_parking_fees, 0, ',', '.') }} VNĐ</span>
+                                    </td>
+                                </tr>
 
-                                    <tr class="py-1">
-                                        <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
-                                            - Phát sinh phí vượt giới hạn km:
-                                            <span class="fw-bold text-info"> VNĐ</span>
-                                        </td>
-                                    </tr>
-                                    
-                                    <tr class="border-top py-1">
-                                        <td class="text-start fw-bold py-1" style="padding: 0.25rem 0.5rem;">
-                                            <i class="ri-calculator-line text-dark me-2"></i>Tổng cộng (chưa thuế VAT):
-                                            <span class="fw-bold text-danger">{{ number_format($carRental->subtotal, 0, ',', '.') }} VNĐ</span>
-                                        </td>
-                                    </tr>
-                                    
-                                    <tr class="py-1">
-                                        <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
-                                            <i class="ri-percent-line text-muted me-2"></i>Thuế VAT 8%:
-                                            <span class="fw-bold text-muted">{{ number_format($carRental->vat_amount, 0, ',', '.') }} VNĐ</span>
-                                        </td>
-                                    </tr>
-                                    
-                                    <tr class="border-top py-1">
-                                        <td class="text-start fw-bold fs-5 py-1" style="padding: 0.25rem 0.5rem;">
-                                            <i class="ri-money-dollar-circle-line text-success me-2"></i>Tổng cộng bao gồm thuế VAT:
-                                            <span class="fw-bold text-success">{{ number_format($carRental->total_amount_with_vat, 0, ',', '.') }} VNĐ</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        {{--  </div>  --}}
+                                <tr class="py-1">
+                                    <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
+                                        - Phát sinh phí vượt giới hạn km:
+                                        <span class="fw-bold text-info">{{ number_format($carRental->over_distance_fee, 0, ',', '.') }} VNĐ</span>
+                                        @if($carRental->over_distance_fee > 0)
+                                            <br><small class="text-muted">
+                                                ({{ number_format($carRental->total_distance, 0, ',', '.') }} km - {{ number_format($carRental->max_distance, 0, ',', '.') }} km) × {{ number_format($carRental->over_distance_fee_per_km_unit, 0, ',', '.') }} VNĐ/km
+                                            </small>
+                                        @endif
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-top py-1">
+                                    <td class="text-start fw-bold py-1" style="padding: 0.25rem 0.5rem;">
+                                        <i class="ri-calculator-line text-dark me-2"></i>Tổng cộng (chưa thuế VAT):
+                                        <span class="fw-bold text-danger">{{ number_format($carRental->subtotal, 0, ',', '.') }} VNĐ</span>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="py-1">
+                                    <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
+                                        <i class="ri-percent-line text-muted me-2"></i>Thuế VAT 8%:
+                                        <span class="fw-bold text-muted">{{ number_format($carRental->vat_amount, 0, ',', '.') }} VNĐ</span>
+                                    </td>
+                                </tr>
+                                
+                                <tr class="border-top py-1">
+                                    <td class="text-start fw-bold fs-5 py-1" style="padding: 0.25rem 0.5rem;">
+                                        <i class="ri-money-dollar-circle-line text-success me-2"></i>Tổng cộng bao gồm thuế VAT:
+                                        <span class="fw-bold text-success">{{ number_format($carRental->total_amount_with_vat, 0, ',', '.') }} VNĐ</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -1269,6 +1272,45 @@ function showFieldError(selector, message) {
 $(document).on('input', 'input, textarea', function() {
     $(this).removeClass('is-invalid');
     $(this).parent().find('.text-danger').remove();
+});
+
+// Format number inputs for new fields
+$(document).ready(function() {
+    // Format max_distance input
+    $('input[name="max_distance"]').on('input', function() {
+        let value = $(this).val();
+        value = value.replace(/[^0-9.]/g, '');
+        
+        let parts = value.split('.');
+        let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+        
+        $(this).val(integerPart + decimalPart);
+    });
+
+    // Format over_distance_fee_per_km input
+    $('input[name="over_distance_fee_per_km"]').on('input', function() {
+        let value = $(this).val();
+        value = value.replace(/[^0-9.]/g, '');
+        
+        let parts = value.split('.');
+        let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+        
+        $(this).val(integerPart + decimalPart);
+    });
+
+    // Format overtime_fee_per_hour input
+    $('input[name="overtime_fee_per_hour"]').on('input', function() {
+        let value = $(this).val();
+        value = value.replace(/[^0-9.]/g, '');
+        
+        let parts = value.split('.');
+        let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+        
+        $(this).val(integerPart + decimalPart);
+    });
 });
 </script>
 @endpush

@@ -270,7 +270,8 @@ class VehicleLogExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Overtime fee
         $feesRow++;
-        $sheet->setCellValue('A' . $feesRow, '2/ Phát sinh phí tăng ca: (' . number_format($totalOvertimeHours, 1) . ' giờ x 50.000 đồng)');
+        $overtimeFeePerHour = $this->carRental->overtime_fee_per_hour ?? 50000;
+        $sheet->setCellValue('A' . $feesRow, '2/ Phát sinh phí tăng ca: (' . number_format($totalOvertimeHours, 1) . ' giờ x ' . number_format($overtimeFeePerHour) . ' đồng)');
         $sheet->setCellValue('E' . $feesRow, number_format($totalOvertimeCost));
         
         // Toll fee
@@ -283,13 +284,21 @@ class VehicleLogExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->setCellValue('A' . $feesRow, '4/ Phí bãi xe:');
         $sheet->setCellValue('E' . $feesRow, number_format($totalParkingFee));
         
-        // Distance over limit fee (placeholder)
+        // Distance over limit fee
         $feesRow++;
-        $sheet->setCellValue('A' . $feesRow, '5/ Phát sinh phí vượt giới hạn 2.700km:');
-        $sheet->setCellValue('E' . $feesRow, '');
+        $overDistanceFee = $this->carRental->over_distance_fee;
+        $maxDistance = $this->carRental->max_distance;
+        $overDistanceFeePerKm = $this->carRental->over_distance_fee_per_km ?? 7000;
+        
+        if ($overDistanceFee > 0 && $maxDistance > 0) {
+            $sheet->setCellValue('A' . $feesRow, '5/ Phát sinh phí vượt giới hạn ' . number_format($maxDistance) . 'km:');
+        } else {
+            $sheet->setCellValue('A' . $feesRow, '5/ Phát sinh phí vượt giới hạn km:');
+        }
+        $sheet->setCellValue('E' . $feesRow, number_format($overDistanceFee));
         
         // Calculate totals
-        $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFee + $totalParkingFee;
+        $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFee + $totalParkingFee + $overDistanceFee;
         $vatRate = 8; // 8%
         $vatAmount = $subtotal * ($vatRate / 100);
         $totalWithVat = $subtotal + $vatAmount;

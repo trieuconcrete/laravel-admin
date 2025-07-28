@@ -101,6 +101,14 @@ class CarRental extends Model
     }
 
     /**
+     * Get the car rental vehicle logs for the car rental.
+     */
+    public function carRentalVehicleLogs(): HasMany
+    {
+        return $this->hasMany(CarRentalVehicleLog::class, 'car_rental_id');
+    }
+
+    /**
      * Get status label attribute
      *
      * @return string
@@ -209,15 +217,21 @@ class CarRental extends Model
         // Tính tổng phí bãi xe
         $totalParkingFees = $vehicleLogs->sum('parking_fee') ?? 0;
         
-        // Tính tổng km đã chạy (thông tin tham khảo)
-        $totalDistance = 0;
-        foreach ($vehicleLogs as $log) {
-            $distance = ($log->end_odometer ?? 0) - ($log->start_odometer ?? 0);
-            $totalDistance += $distance;
+        // Tính tổng km đã chạy
+        $totalDistance = $this->carRentalVehicleLogs()->sum('total_distance');
+        
+        // Tính phí vượt giới hạn km
+        $overDistanceFee = 0;
+        $maxDistance = $this->max_distance;
+        $overDistanceFeePerKm = $this->over_distance_fee_per_km ?? self::OVER_DISTANCE_FEE_PER_KM_DEFAULT;
+
+        // Chỉ tính phí vượt giới hạn nếu có max_distance và vượt quá
+        if ($maxDistance && $maxDistance > 0 && $totalDistance > $maxDistance) {
+            $overDistanceFee = ($totalDistance - $maxDistance) * $overDistanceFeePerKm;
         }
         
         // Tính subtotal (tổng trước thuế)
-        $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFees + $totalParkingFees;
+        $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFees + $totalParkingFees + $overDistanceFee;
         
         // Tính thuế VAT
         $vatAmount = $subtotal * $vatRate;
@@ -231,6 +245,7 @@ class CarRental extends Model
             'total_toll_fees' => $totalTollFees,
             'total_parking_fees' => $totalParkingFees,
             'total_distance' => $totalDistance,
+            'over_distance_fee' => $overDistanceFee,
             'subtotal' => $subtotal,
             'vat_rate' => $vatRate,
             'vat_amount' => $vatAmount,
@@ -269,6 +284,25 @@ class CarRental extends Model
     {
         $calculation = $this->calculateTotalAmountWithTax();
         return $calculation['total_parking_fees'];
+    }
+
+    /**
+     * Get over distance fee attribute
+     *
+     * @return float
+     */
+    public function getOverDistanceFeeAttribute(): float
+    {
+        $totalDistance = $this->carRentalVehicleLogs()->sum('total_distance');
+        $maxDistance = $this->max_distance;
+        $overDistanceFeePerKm = $this->over_distance_fee_per_km ?? self::OVER_DISTANCE_FEE_PER_KM_DEFAULT;
+
+        // Chỉ tính phí vượt giới hạn nếu có max_distance và vượt quá
+        if ($maxDistance && $maxDistance > 0 && $totalDistance > $maxDistance) {
+            return ($totalDistance - $maxDistance) * $overDistanceFeePerKm;
+        }
+
+        return 0;
     }
 
     /**
@@ -312,5 +346,35 @@ class CarRental extends Model
     public function getOvertimeFeePerHourUnitAttribute()    
     {
         return $this->overtime_fee_per_hour ?? self::OVERTIME_FEE_PER_HOUR_DEFAULT;
+    }
+
+    /**
+     * Get total distance attribute
+     *
+     * @return float
+     */
+    public function getTotalDistanceAttribute(): float
+    {
+        return $this->carRentalVehicleLogs()->sum('total_distance');
+    }
+
+    /**
+     * Get total overtime hours attribute
+     *
+     * @return float
+     */
+    public function getTotalOvertimeHoursAttribute(): float
+    {
+        return $this->carRentalVehicleLogs()->sum('overtime_hours');
+    }
+
+    /**
+     * Get over distance fee per km attribute
+     *
+     * @return float
+     */
+    public function getOverDistanceFeePerKmUnitAttribute(): float
+    {
+        return $this->over_distance_fee_per_km ?? self::OVER_DISTANCE_FEE_PER_KM_DEFAULT;
     }
 }
