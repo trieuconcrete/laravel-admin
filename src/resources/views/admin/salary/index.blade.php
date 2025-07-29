@@ -369,7 +369,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($salaries as $salary)
+                                @foreach($salaries as $salary)
                                 <tr data-period="{{ $selectedMonth }}" data-status="{{ $salary['status'] }}">
                                     <td>
                                         <div class="btn-group">
@@ -400,11 +400,11 @@
                                         @endif
                                     </td>
                                 </tr>
-                                @empty
+                                {{--  @empty
                                 <tr>
-                                    <td colspan="10" class="text-center">Không có dữ liệu lương</td>
-                                </tr>
-                                @endforelse
+                                    <td colspan="14" class="text-center">Không có dữ liệu lương</td>
+                                </tr>  --}}
+                                @endforeach
                             </tbody>
                         </table>
                     </div>

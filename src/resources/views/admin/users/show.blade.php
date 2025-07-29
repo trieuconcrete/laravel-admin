@@ -394,7 +394,7 @@
                             
                             <div class="row mb-4">
                                 <div class="col-lg-6">
-                                    <div class="card">
+                                    <div class="card salary-section">
                                         <div class="card-header bg-soft-primary">
                                             <div class="d-flex align-items-center">
                                                 <div class="flex-grow-1">
@@ -460,44 +460,48 @@
                                             </div>
                                         </div>
                                         <div class="card-body p-0">
-                                            <div class="table-responsive">
+                                            <div class="table-responsive salary-table">
                                                 <table class="table table-borderless mb-0">
                                                     <tbody>
                                                         <tr class="border-bottom">
                                                             <td class="fw-medium">Lương cơ bản</td>
-                                                            <td class="text-end">{{ number_format($salaryBase) }} đ</td>
+                                                            <td class="text-end" data-salary="base">{{ number_format($salaryBase) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom">
                                                             <td class="fw-medium">Trợ cấp</td>
-                                                            <td class="text-end">{{ number_format($totalAllowance) }} đ</td>
-                                                        </tr>
-                                                        <tr class="border-bottom">
-                                                            <td class="fw-medium">Chi phí chuyến hàng</td>
-                                                            <td class="text-end">{{ number_format($totalExpenses) }} đ</td>
+                                                            <td class="text-end" data-salary="allowance">{{ number_format($totalAllowance) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom">
                                                             <td class="fw-medium">Tiền thưởng</td>
-                                                            <td class="text-end">{{ number_format($totalBonus) }} đ</td>
+                                                            <td class="text-end" data-salary="bonus">{{ number_format($totalBonus) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom">
                                                             <td class="fw-medium">Tiền phạt</td>
-                                                            <td class="text-end text-danger">- {{ number_format($totalPenalty) }} đ</td>
+                                                            <td class="text-end text-danger" data-salary="penalty">- {{ number_format($totalPenalty) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom">
-                                                            <td class="fw-medium">Ứng lương</td>
-                                                            <td class="text-end text-danger">- {{ number_format($totalOtherDeduction) }} đ</td>
+                                                            <td class="fw-medium">Ứng lương <small class="text-muted">(Đã duyệt/Đã chi)</small></td>
+                                                            <td class="text-end text-danger" data-salary="other-deduction">- {{ number_format($totalOtherDeduction) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom bg-soft-light">
                                                             <td class="fw-medium">Tổng trước khấu trừ</td>
-                                                            <td class="text-end fw-semibold">{{ number_format($salaryBase + $totalAllowance + $totalExpenses) }} đ</td>
+                                                            <td class="text-end fw-semibold" data-salary="total-before-deduction">{{ number_format($salaryBase + $totalAllowance) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom">
                                                             <td class="fw-medium">Trừ BHXH (10%)</td>
-                                                            <td class="text-end text-danger">- {{ number_format($insuranceDeduction) }} đ</td>
+                                                            <td class="text-end text-danger" data-salary="insurance">- {{ number_format($insuranceDeduction) }} đ</td>
+                                                        </tr>
+                                                        <tr class="border-bottom">
+                                                            <td class="fw-medium">Trừ tiền phạt</td>
+                                                            <td class="text-end text-danger" data-salary="penalty">- {{ number_format($totalPenalty) }} đ</td>
+                                                        </tr>
+                                                        <tr class="border-bottom">
+                                                            <td class="fw-medium">Trừ ứng lương <small class="text-muted">(Đã duyệt/Đã chi)</small></td>
+                                                            <td class="text-end text-danger" data-salary="other-deduction">- {{ number_format($totalOtherDeduction) }} đ</td>
                                                         </tr>
                                                         <tr>
                                                             <td class="fw-bold fs-5">Tổng lương thực nhận</td>
-                                                            <td class="text-end fw-bold fs-5 text-success">{{ number_format($totalSalary) }} đ</td>
+                                                            <td class="text-end fw-bold fs-5 text-success" data-salary="total">{{ number_format($totalSalary) }} đ</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -537,7 +541,7 @@
                                                             </div>
                                                             <div>
                                                                 <p class="text-muted mb-0">Phụ cấp và thưởng</p>
-                                                                <h6>{{ number_format($totalAllowance + $totalExpenses + $totalBonus) }} đ</h6>
+                                                                <h6>{{ number_format($totalAllowance + $totalBonus) }} đ</h6>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -973,13 +977,13 @@
     document.addEventListener("DOMContentLoaded", function() {
         // ApexCharts options and config
         var options = {
-            series: [{{ $salaryBase }}, {{ $totalAllowance }}, {{ $totalExpenses }}, {{ $insuranceDeduction }}, {{ $totalOtherDeduction }}, {{ $totalPenalty }}, {{ $totalBonus }}],
+            series: [{{ $salaryBase }}, {{ $totalAllowance }}, {{ $insuranceDeduction }}, {{ $totalPenalty }}, {{ $totalOtherDeduction }}, {{ $totalBonus }}],
             chart: {
                 height: 250,
                 type: 'pie',
             },
-            labels: ['Lương cơ bản', 'Trợ cấp', 'Chi phí', 'BHXH', 'Khấu trừ', 'Phạt', 'Thưởng'],
-            colors: ['#0ab39c', '#299cdb', '#f7b84b', '#f06548', '#ff9f43', '#ea5455', '#28c76f'],
+            labels: ['Lương cơ bản', 'Trợ cấp', 'BHXH', 'Phạt', 'Ứng lương', 'Thưởng'],
+            colors: ['#0ab39c', '#299cdb', '#f06548', '#ea5455', '#ff9f43', '#28c76f'],
             legend: {
                 show: true,
                 position: 'bottom',
@@ -1019,6 +1023,9 @@
         
         var chart = new ApexCharts(document.querySelector("#salary_chart"), options);
         chart.render();
+        
+        // Store chart instance globally for updates
+        window.salaryChart = chart;
         
         // Initialize tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
@@ -1200,21 +1207,130 @@
         const selectedMonth = document.getElementById('salaryMonth')?.value || '{{ $selectedMonth }}';
         const userId = {{ $user->id }};
         
-        // Reload the page with the current month to refresh salary data
-        const currentUrl = new URL(window.location);
-        currentUrl.searchParams.set('month', selectedMonth);
-        currentUrl.searchParams.set('tab', 'salary');
-        window.history.replaceState({}, '', currentUrl);
+        // Show loading state
+        const salarySection = document.querySelector('.salary-section');
+        if (salarySection) {
+            salarySection.style.opacity = '0.6';
+            salarySection.style.pointerEvents = 'none';
+        }
         
-        // Optionally, you can make an AJAX call to refresh salary data
-        // For now, we'll just reload the salary tab content
-        const salaryTab = document.getElementById('salary');
-        if (salaryTab) {
-            // Trigger a custom event to refresh salary data
-            const event = new CustomEvent('refreshSalaryData', { 
-                detail: { month: selectedMonth, userId: userId } 
-            });
-            document.dispatchEvent(event);
+        // Make AJAX request to get updated salary data
+        $.ajax({
+            url: '{{ route("admin.users.show", $user->id) }}',
+            type: 'GET',
+            data: {
+                month: selectedMonth,
+                ajax: true
+            },
+            success: function(response) {
+                // Update salary table
+                const salaryTable = document.querySelector('.salary-table tbody');
+                if (salaryTable && response.salaryData) {
+                    salaryTable.innerHTML = response.salaryData;
+                }
+                
+                // Update salary chart
+                if (response.chartData) {
+                    updateSalaryChart(response.chartData);
+                }
+                
+                // Update salary summary
+                if (response.summaryData) {
+                    updateSalarySummary(response.summaryData);
+                }
+                
+                // Re-enable section
+                if (salarySection) {
+                    salarySection.style.opacity = '1';
+                    salarySection.style.pointerEvents = 'auto';
+                }
+                
+                {{--  // Show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Cập nhật thành công!',
+                    text: 'Thông tin lương đã được cập nhật.',
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true
+                });  --}}
+            },
+            error: function(xhr) {
+                // Re-enable section
+                if (salarySection) {
+                    salarySection.style.opacity = '1';
+                    salarySection.style.pointerEvents = 'auto';
+                }
+                
+                // Show error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: 'Không thể cập nhật thông tin lương. Vui lòng thử lại.',
+                    confirmButtonText: 'Đóng'
+                });
+            }
+        });
+    }
+    
+    // Function to update salary chart
+    function updateSalaryChart(chartData) {
+        if (window.salaryChart && chartData && chartData.series) {
+            window.salaryChart.updateSeries(chartData.series);
+            if (chartData.labels) {
+                window.salaryChart.updateOptions({
+                    labels: chartData.labels
+                });
+            }
+        }
+    }
+    
+    // Function to update salary summary
+    function updateSalarySummary(summaryData) {
+        // Update salary base
+        if (summaryData.salaryBase !== undefined) {
+            const salaryBaseElement = document.querySelector('[data-salary="base"]');
+            if (salaryBaseElement) {
+                salaryBaseElement.textContent = new Intl.NumberFormat('vi-VN').format(summaryData.salaryBase) + ' đ';
+            }
+        }
+        
+        // Update total allowance
+        if (summaryData.totalAllowance !== undefined) {
+            const totalAllowanceElement = document.querySelector('[data-salary="allowance"]');
+            if (totalAllowanceElement) {
+                totalAllowanceElement.textContent = new Intl.NumberFormat('vi-VN').format(summaryData.totalAllowance) + ' đ';
+            }
+        }
+        
+        // Update total salary
+        if (summaryData.totalSalary !== undefined) {
+            const totalSalaryElement = document.querySelector('[data-salary="total"]');
+            if (totalSalaryElement) {
+                totalSalaryElement.textContent = new Intl.NumberFormat('vi-VN').format(summaryData.totalSalary) + ' đ';
+            }
+        }
+        
+        // Update other salary components
+        if (summaryData.insuranceDeduction !== undefined) {
+            const insuranceElement = document.querySelector('[data-salary="insurance"]');
+            if (insuranceElement) {
+                insuranceElement.textContent = new Intl.NumberFormat('vi-VN').format(summaryData.insuranceDeduction) + ' đ';
+            }
+        }
+        
+        if (summaryData.totalOtherDeduction !== undefined) {
+            const otherDeductionElement = document.querySelector('[data-salary="other-deduction"]');
+            if (otherDeductionElement) {
+                otherDeductionElement.textContent = new Intl.NumberFormat('vi-VN').format(summaryData.totalOtherDeduction) + ' đ';
+            }
+        }
+        
+        if (summaryData.totalPenalty !== undefined) {
+            const penaltyElement = document.querySelector('[data-salary="penalty"]');
+            if (penaltyElement) {
+                penaltyElement.textContent = new Intl.NumberFormat('vi-VN').format(summaryData.totalPenalty) + ' đ';
+            }
         }
     }
 </script>

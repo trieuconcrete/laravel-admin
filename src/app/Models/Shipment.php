@@ -342,11 +342,101 @@ class Shipment extends Model
      */
     public function getDriverFromShipmentDeductions()
     {
-        return $this->shipmentDeductions()->whereHas('shipmentDeductionType', function($query) {
-            $query->where('type', 'driver_and_busboy');
-        })->whereHas('user', function($subQuery) {
-            $subQuery->where('status', UserStatus::ACTIVE);
-        })->whereNotNull('user_id')->first()->user ?? null;
+        // Ưu tiên lấy tài xế có is_main_driver = true
+        $mainDriver = $this->shipmentDeductions()
+            ->whereHas('shipmentDeductionType', function($query) {
+                $query->whereIn('type', ['driver', 'bus_driver']);
+            })
+            ->whereHas('user', function($subQuery) {
+                $subQuery->where('status', UserStatus::ACTIVE);
+            })
+            ->whereNotNull('user_id')
+            ->where('is_main_driver', true)
+            ->first();
+            
+        if ($mainDriver) {
+            return $mainDriver->user;
+        }
+        
+        // Nếu không có main driver, lấy tài xế đầu tiên
+        $firstDriver = $this->shipmentDeductions()
+            ->whereHas('shipmentDeductionType', function($query) {
+                $query->whereIn('type', ['driver', 'bus_driver']);
+            })
+            ->whereHas('user', function($subQuery) {
+                $subQuery->where('status', UserStatus::ACTIVE);
+            })
+            ->whereNotNull('user_id')
+            ->first();
+            
+        return $firstDriver ? $firstDriver->user : null;
+    }
+
+    /**
+     * Get main driver from shipment deductions
+     */
+    public function getMainDriverFromShipmentDeductions()
+    {
+        $mainDriverDeduction = $this->shipmentDeductions()
+            ->whereHas('shipmentDeductionType', function($query) {
+                $query->whereIn('type', ['driver', 'bus_driver']);
+            })
+            ->whereHas('user', function($subQuery) {
+                $subQuery->where('status', UserStatus::ACTIVE);
+            })
+            ->whereNotNull('user_id')
+            ->where('is_main_driver', true)
+            ->first();
+            
+        return $mainDriverDeduction ? $mainDriverDeduction->user : null;
+    }
+
+    /**
+     * Get all drivers from shipment deductions
+     */
+    public function getAllDriversFromShipmentDeductions()
+    {
+        return $this->shipmentDeductions()
+            ->whereHas('shipmentDeductionType', function($query) {
+                $query->whereIn('type', ['driver', 'bus_driver']);
+            })
+            ->whereHas('user', function($subQuery) {
+                $subQuery->where('status', UserStatus::ACTIVE);
+            })
+            ->whereNotNull('user_id')
+            ->with('user')
+            ->get()
+            ->map(function($deduction) {
+                return [
+                    'user' => $deduction->user,
+                    'is_main_driver' => $deduction->is_main_driver,
+                    'type' => $deduction->shipmentDeductionType->type ?? 'unknown'
+                ];
+            });
+    }
+
+    /**
+     * Get driver with fallback methods
+     */
+    public function getDriverDisplay()
+    {
+        // Try shipment deductions first (with main driver priority)
+        $driver = $this->getDriverFromShipmentDeductions();
+        if ($driver) {
+            return $driver->full_name;
+        }
+        
+        // Fallback to direct driver relationship
+        if ($this->driver) {
+            return $this->driver->full_name;
+        }
+        
+        // Fallback to co-driver
+        if ($this->coDriver) {
+            return $this->coDriver->full_name;
+        }
+        
+        return 'Chưa phân công';
     }
 
     /**

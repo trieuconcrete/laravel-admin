@@ -178,8 +178,8 @@
                                             </a>
                                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCarRentalVehicleLogModal">
                                                 <i class="ri-add-line align-bottom me-1"></i> Thêm nhật ký
-                                            </button>
-                    </div>
+                                        </button>
+                                    </div>
                 </div>
 
                                     <div class="table-responsive">
@@ -245,7 +245,7 @@
                                         </table>
                                     </div>
                                 </div>
-                            </div>
+                                </div>
                         </div>
                     </div>
                 </div>

@@ -141,10 +141,34 @@ class UserController extends Controller
         extract($salaryAdvanceData);
         $statuses = EnumUserStatus::options();
         
+        // Handle AJAX request for salary data refresh
+        if ($request->ajax() && $request->get('ajax') === 'true') {
+            return response()->json([
+                'success' => true,
+                'salaryData' => view('admin.users.partials.salary-table', compact(
+                    'salaryBase', 'totalAllowance', 'totalBonus', 'totalPenalty', 
+                    'totalOtherDeduction', 'insuranceDeduction', 'totalSalary'
+                ))->render(),
+                'chartData' => [
+                    'series' => [$salaryBase, $totalAllowance, $insuranceDeduction, $totalPenalty, $totalOtherDeduction, $totalBonus],
+                    'labels' => ['Lương cơ bản', 'Trợ cấp', 'BHXH', 'Phạt', 'Ứng lương', 'Thưởng']
+                ],
+                'summaryData' => [
+                    'salaryBase' => $salaryBase,
+                    'totalAllowance' => $totalAllowance,
+                    'totalBonus' => $totalBonus,
+                    'totalPenalty' => $totalPenalty,
+                    'totalOtherDeduction' => $totalOtherDeduction,
+                    'insuranceDeduction' => $insuranceDeduction,
+                    'totalSalary' => $totalSalary
+                ]
+            ]);
+        }
+        
         return view('admin.users.show', compact(
             'user', 'positions', 'licenses', 'statuses', 'licenseStatuses',
             'shipments', 'selectedMonth', 'salaryBase', 'totalAllowance', 
-            'totalExpenses', 'insuranceDeduction', 'totalSalary', 'salaryDetails',
+            'insuranceDeduction', 'totalSalary', 'salaryDetails',
             'requests', 'totalOtherDeduction', 'totalBonus', 'totalPenalty'
         ));
     }

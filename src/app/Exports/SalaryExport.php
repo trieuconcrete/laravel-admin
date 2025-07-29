@@ -246,7 +246,7 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Calculate sum of all deduction columns and store total expenses
         $totalDeductions = 0;
-        $totalExpenses = 0;
+        $totalExpenses = 0; // Không tính chi phí chuyến hàng
         foreach ($deductionColumns as $deductionName => $column) {
             // Sum the column
             $columnSum = 0;
@@ -255,11 +255,12 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
                 if (is_numeric($cellValue)) {
                     $columnSum += $cellValue;
                     
+                    // Không tính chi phí chuyến hàng vào lương nhân viên
                     // Check if this is an expense type deduction
-                    $deductionType = $this->deductionTypes->firstWhere('name', $deductionName);
-                    if ($deductionType && $deductionType->type === 'expense') {
-                        $totalExpenses += $cellValue;
-                    }
+                    // $deductionType = $this->deductionTypes->firstWhere('name', $deductionName);
+                    // if ($deductionType && $deductionType->type === 'expense') {
+                    //     $totalExpenses += $cellValue;
+                    // }
                 }
             }
             $totalDeductions += $columnSum;

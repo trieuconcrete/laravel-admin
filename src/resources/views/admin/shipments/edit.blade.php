@@ -161,7 +161,11 @@
                                                                 @foreach($deductionTypes as $type)
                                                                     <td>
                                                                         <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
-                                                                        <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->amount : '') }}">
+                                                                        @if($type->name === 'Ghi chú')
+                                                                            <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->notes : '') }}</textarea>
+                                                                        @else
+                                                                            <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->amount : '') }}">
+                                                                        @endif
                                                                         @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
                                                                     </td>
                                                                 @endforeach

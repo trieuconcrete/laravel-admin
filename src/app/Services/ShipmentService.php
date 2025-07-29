@@ -67,12 +67,27 @@ class ShipmentService
             if (!empty($data['deductions'])) {
                 foreach ($data['deductions'] as $deduction_type_id => $amount) {
                     // Kiểm tra xem deduction_type_id có phải là số nguyên dương và amount có giá trị
-                    if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0 && $amount !== null && $amount !== '' && is_numeric($amount)) {
-                        ShipmentDeduction::create([
-                            'shipment_id' => $shipment->id,
-                            'shipment_deduction_type_id' => (int)$deduction_type_id,
-                            'amount' => (float)$amount,
-                        ]);
+                    if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0 && $amount !== null && $amount !== '') {
+                        $deductionType = \App\Models\ShipmentDeductionType::find($deduction_type_id);
+                        
+                        // Nếu là "Ghi chú", lưu vào column notes
+                        if ($deductionType && $deductionType->name === 'Ghi chú') {
+                            ShipmentDeduction::create([
+                                'shipment_id' => $shipment->id,
+                                'shipment_deduction_type_id' => (int)$deduction_type_id,
+                                'amount' => 0, // Không lưu số tiền cho ghi chú
+                                'notes' => (string)$amount, // Lưu ghi chú vào column notes
+                            ]);
+                        } else {
+                            // Nếu là numeric, kiểm tra và lưu dưới dạng float
+                            if (is_numeric($amount)) {
+                                ShipmentDeduction::create([
+                                    'shipment_id' => $shipment->id,
+                                    'shipment_deduction_type_id' => (int)$deduction_type_id,
+                                    'amount' => (float)$amount,
+                                ]);
+                            }
+                        }
                     }
                 }
             }
@@ -189,12 +204,27 @@ class ShipmentService
             if (!empty($data['deductions'])) {
                 foreach ($data['deductions'] as $deduction_type_id => $amount) {
                     // Kiểm tra xem deduction_type_id có phải là số nguyên dương và amount có giá trị
-                    if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0 && $amount !== null && $amount !== '' && is_numeric($amount)) {
-                        ShipmentDeduction::create([
-                            'shipment_id' => $shipment->id,
-                            'shipment_deduction_type_id' => (int)$deduction_type_id,
-                            'amount' => (float)$amount,
-                        ]);
+                    if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0 && $amount !== null && $amount !== '') {
+                        $deductionType = \App\Models\ShipmentDeductionType::find($deduction_type_id);
+                        
+                        // Nếu là "Ghi chú", lưu vào column notes
+                        if ($deductionType && $deductionType->name === 'Ghi chú') {
+                            ShipmentDeduction::create([
+                                'shipment_id' => $shipment->id,
+                                'shipment_deduction_type_id' => (int)$deduction_type_id,
+                                'amount' => 0, // Không lưu số tiền cho ghi chú
+                                'notes' => (string)$amount, // Lưu ghi chú vào column notes
+                            ]);
+                        } else {
+                            // Nếu là numeric, kiểm tra và lưu dưới dạng float
+                            if (is_numeric($amount)) {
+                                ShipmentDeduction::create([
+                                    'shipment_id' => $shipment->id,
+                                    'shipment_deduction_type_id' => (int)$deduction_type_id,
+                                    'amount' => (float)$amount,
+                                ]);
+                            }
+                        }
                     }
                 }
             }
