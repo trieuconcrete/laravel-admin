@@ -211,8 +211,8 @@ class SalaryService
         // Calculate salary components
         $baseSalary = $user->salary_base ?? 0;
         
-        // Get shipments for the user (as driver or co-driver) for the selected month
-        $shipments = $this->shipmentRepository->getUserShipments($user, $month, $year);
+        // Get completed shipments for the user (as driver or co-driver) for the selected month
+        $shipments = $this->shipmentRepository->getUserCompletedShipments($user, $month, $year);
             
         // Calculate salary details
         $salaryDetails = $this->calculateSalaryDetails($user, $shipments, $salaryPeriod);
@@ -263,7 +263,7 @@ class SalaryService
         $totalTypeBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $salaryPeriod->start_date, $salaryPeriod->end_date);
         $totalTypePenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $salaryPeriod->start_date, $salaryPeriod->end_date);
         
-        // Process shipment deductions for salary calculation
+        // Process shipment deductions for salary calculation - chỉ tính cho shipment đã hoàn thành
         foreach ($shipments as $shipment) {
             $totalAllowance += $shipment->shipmentDeductionTypeDriverAndBusboy($user->id)->sum('amount') ?? 0; // tổng phụ cấp
             // Không tính chi phí chuyến hàng vào lương nhân viên

@@ -116,8 +116,9 @@ Route::get('/debug/debt', function () {
         $debtExplanation = "Hóa đơn dương: {$totalReported} - {$totalPaid} = " . number_format($debt);
     }
     
-    // Calculate directly from shipments
+    // Calculate directly from completed shipments
     $totalFromShipments = \Illuminate\Support\Facades\DB::table('shipments')
+        ->where('status', 'completed') // Chỉ tính cho shipment đã hoàn thành
         ->selectRaw('SUM(
             (COALESCE(trip_count, 1) * COALESCE(unit_price, 0)) - 
             (SELECT COALESCE(SUM(amount), 0) FROM shipment_deductions WHERE shipment_id = shipments.id)

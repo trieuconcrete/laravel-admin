@@ -4,19 +4,20 @@ namespace App\Models;
 
 use App\Enum\UserStatus;
 use App\Models\ShipmentDeductionType;
+use App\Traits\HasCompletedStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Shipment extends Model
 {
+    use HasFactory, SoftDeletes, HasCompletedStatus;
+
     // ...
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');
     }
-
-    use HasFactory, SoftDeletes;
 
     /**
      * Các thuộc tính có thể gán hàng loạt.
@@ -291,13 +292,7 @@ class Shipment extends Model
         return $this->status === 'in_transit';
     }
 
-    /**
-     * Kiểm tra xem shipment có đã hoàn thành hay không
-     */
-    public function isCompleted()
-    {
-        return $this->status === 'completed';
-    }
+
 
     /**
      * Kiểm tra xem shipment có đang chậm trễ hay không

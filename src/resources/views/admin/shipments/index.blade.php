@@ -35,8 +35,8 @@
                 // Đếm số chuyến hàng đang vận chuyển
                 $inTransitCount = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_IN_TRANSIT)->count();
                 
-                // Đếm số chuyến hàng sắp khởi hành (đã xác nhận nhưng chưa vận chuyển)
-                $confirmedCount = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_CONFIRMED)->count();
+                // Đếm số chuyến hàng chờ xác nhận
+                $pendingCount = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_PENDING)->count();
                 
                 // Đếm số chuyến hàng hoàn thành trong tháng hiện tại
                 $startOfMonth = now()->startOfMonth();
@@ -82,8 +82,8 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <div class="text-muted">Sắp khởi hành</div>
-                                    <h4 class="mt-2">{{ $confirmedCount }}</h4>
+                                    <div class="text-muted">Chờ xác nhận</div>
+                                    <h4 class="mt-2">{{ $pendingCount }}</h4>
                                 </div>
                                 <div>
                                     <i class="ri-time-fill fs-1 text-warning"></i>

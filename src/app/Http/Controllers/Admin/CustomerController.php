@@ -256,7 +256,7 @@ class CustomerController extends Controller
                 ], 400);
             }
             
-            // Tính tổng số tiền
+            // Tính tổng số tiền chỉ từ shipment đã hoàn thành
             $totalAmount = $monthlyShipments->sum('total_amount');
             
             // Tạo hoặc cập nhật báo cáo

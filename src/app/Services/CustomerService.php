@@ -52,8 +52,11 @@ class CustomerService
             // Calculate total deductions
             $combinedFees = $shipment->shipmentExtraFee->sum('amount');
             
-            // Calculate total amount
-            $totalAmount = (($shipment->trip_count ?? 1) * $shipment->unit_price) + $combinedFees;
+            // Calculate total amount - chỉ tính cho shipment đã hoàn thành
+            $totalAmount = 0;
+            if ($shipment->isCompleted()) {
+                $totalAmount = (($shipment->trip_count ?? 1) * $shipment->unit_price) + $combinedFees;
+            }
             
             // Format the departure time using application's standardized date formatting
             $departureDate = $shipment->departure_time ? DateHelper::format($shipment->departure_time) : '';
@@ -70,7 +73,8 @@ class CustomerService
                 'combined_fees' => $combinedFees,
                 'total_amount' => $totalAmount,
                 'notes' => $shipment->notes,
-                'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : 'N/A'
+                'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : 'N/A',
+                'status' => $shipment->status
             ];
         });
     }

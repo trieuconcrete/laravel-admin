@@ -211,15 +211,16 @@ class UserService
         // Parse month and year from selectedMonth
         list($month, $year) = explode('/', $selectedMonth);
         
-        // Get shipments for the user for the selected month
-        $shipments = $this->shipmentRepository->getUserShipments($user, $month, $year);
+        // Get completed shipments for the user for the selected month
+        $shipments = $this->shipmentRepository->getUserCompletedShipments($user, $month, $year);
         
         // Calculate salary details
         $salaryDetails = [];
         
-        // Process shipment deductions for salary calculation
+        // Process shipment deductions for salary calculation - chỉ tính cho shipment đã hoàn thành
         foreach ($shipments as $shipment) {
             $shipmentAllowance = $shipment->shipmentDeductionTypeDriverAndBusboy($user->id)->sum('amount') ?? 0;
+            
             // Không tính chi phí chuyến hàng vào lương nhân viên
             // $shipmentAmount = $shipment->shipmentDeductionTypeExpense()->sum('amount') ?? 0;
             

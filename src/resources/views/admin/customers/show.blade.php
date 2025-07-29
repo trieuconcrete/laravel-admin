@@ -201,6 +201,7 @@
                                         <th>Phụ thu</th>
                                         <th>Thành tiền</th>
                                         <th>Ghi chú</th>
+                                        <th>Trạng thái</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -221,7 +222,7 @@
                                         @endforeach
                                     @else
                                         <tr>
-                                            <td colspan="11" class="text-center">Không có dữ liệu chuyến hàng trong tháng này</td>
+                                            <td colspan="12" class="text-center">Không có dữ liệu chuyến hàng trong tháng này</td>
                                         </tr>
                                     @endif  --}}
                                 </tbody>
@@ -233,6 +234,8 @@
                                         <td></td>
                                         <td id="totalCombinedFees">{{ isset($monthlyShipments) ? number_format($monthlyShipments->sum('combined_fees')) : 0 }}</td>
                                         <td id="grandTotal">{{ isset($monthlyShipments) ? number_format($monthlyShipments->sum('total_amount')) : 0 }}</td>
+                                        <td></td>
+                                        <td></td>
                                         <td></td>
                                     </tr>
                                 </tfoot>
@@ -476,7 +479,7 @@
         function loadMonthlyReport(customerId, month) {
             // Show loading indicator
             const tableBody = document.querySelector('#monthlyReportTable tbody');
-            const loadingRow = '<tr><td colspan="11" class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</td></tr>';
+            const loadingRow = '<tr><td colspan="12" class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</td></tr>';
             tableBody.innerHTML = loadingRow;
             
             // Disable month selector and export button during loading
@@ -517,7 +520,7 @@
                         
                         // Format the row HTML
                         row.innerHTML = `
-                            <td>${shipment.shipment_code}</td>
+                            <td><a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a></td>
                             <td>${shipment.departure_time}</td>
                             <td>${shipment.origin}</td>
                             <td>${shipment.destination}</td>
@@ -527,6 +530,7 @@
                             <td>${shipment.combined_fees > 0 ? numberFormat(shipment.combined_fees) : ''}</td>
                             <td>${numberFormat(shipment.total_amount)}</td>
                             <td>${shipment.notes || ''}</td>
+                            <td><span class="badge bg-${getStatusBadgeClass(shipment.status)}">${getStatusLabel(shipment.status)}</span></td>
                         `;
                         
                         tableBody.appendChild(row);
@@ -539,7 +543,7 @@
                     document.getElementById('grandTotal').textContent = numberFormat(grandTotal);
                 } else {
                     // No data found
-                    tableBody.innerHTML = '<tr><td colspan="11" class="text-center">Không có dữ liệu chuyến hàng trong tháng này</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="12" class="text-center">Không có dữ liệu chuyến hàng trong tháng này</td></tr>';
                     
                     // Reset footer totals
                     document.getElementById('totalTrips').textContent = '0';
@@ -569,7 +573,7 @@
             })
             .catch(error => {
                 console.error('Error fetching monthly report:', error);
-                tableBody.innerHTML = '<tr><td colspan="11" class="text-center text-danger">Lỗi khi tải dữ liệu. Vui lòng thử lại.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="12" class="text-center text-danger">Lỗi khi tải dữ liệu. Vui lòng thử lại.</td></tr>';
                 
                 // Re-enable controls in case of error
                 if (monthSelector) monthSelector.disabled = false;
@@ -581,6 +585,34 @@
         // Helper function to format numbers with commas
         function numberFormat(number) {
             return new Intl.NumberFormat('vi-VN').format(number);
+        }
+
+        // Helper function to get status badge class
+        function getStatusBadgeClass(status) {
+            const statusClasses = {
+                'pending': 'warning',
+                'confirmed': 'info',
+                'in_transit': 'primary',
+                'delivered': 'success',
+                'cancelled': 'danger',
+                'delayed': 'danger',
+                'completed': 'success'
+            };
+            return statusClasses[status] || 'secondary';
+        }
+
+        // Helper function to get status label
+        function getStatusLabel(status) {
+            const statusLabels = {
+                'pending': 'Chờ xác nhận',
+                'confirmed': 'Đã xác nhận',
+                'in_transit': 'Đang vận chuyển',
+                'delivered': 'Đã giao hàng',
+                'cancelled': 'Đã hủy',
+                'delayed': 'Bị trễ',
+                'completed': 'Hoàn thành'
+            };
+            return statusLabels[status] || status;
         }
         
         // Handle summarize report button click
