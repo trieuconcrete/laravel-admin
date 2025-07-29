@@ -27,6 +27,7 @@ use App\Repositories\Interface\ShipmentRepositoryInterface as ShipmentRepository
 use App\Repositories\Interface\SalaryAdvanceRequestRepositoryInterface as SalaryAdvanceRequestRepository;
 use App\Enum\UserStatus as EnumUserStatus;
 use Illuminate\Http\JsonResponse;
+use App\Services\SalaryService;
 
 class UserService
 {
@@ -36,6 +37,8 @@ class UserService
      * @param \App\Repositories\Interface\DriverLicenseRepositoryInterface $driverLicenseRepository
      * @param \App\Repositories\Interface\PositionRepositoryInterface $positionRepository
      * @param \App\Repositories\Interface\ShipmentRepositoryInterface $shipmentRepository
+     * @param \App\Repositories\Interface\SalaryAdvanceRequestRepositoryInterface $salaryAdvanceRequestRepository
+     * @param \App\Services\SalaryService $salaryService
      */
     public function __construct(
         protected UserRepository $userRepository,
@@ -43,6 +46,7 @@ class UserService
         protected PositionRepository $positionRepository,
         protected ShipmentRepository $shipmentRepository,
         protected SalaryAdvanceRequestRepository $salaryAdvanceRequestRepository,
+        protected SalaryService $salaryService,
     ) {}
 
     /**
@@ -98,6 +102,18 @@ class UserService
             // Assign position
             $user->assignPosition((int) $user->position_id);
 
+            // Sync salary for the new user for current month
+            $currentMonth = now()->format('m/Y');
+            $result = $this->salaryService->syncSalaryForUser($user, $currentMonth);
+            
+            // Log the result for debugging
+            Log::info('Salary sync result for new user', [
+                'user_id' => $user->id,
+                'user_name' => $user->full_name,
+                'month' => $currentMonth,
+                'result' => $result
+            ]);
+
             return $user;
         } catch (\Throwable $e) {
             Log::error('User creation failed', ['error' => $e->getMessage()]);
@@ -140,6 +156,20 @@ class UserService
         // Handle Driver License
         if ($request->user_action == Constants::USER_ACTION_CHANGE_LICENSE) {
             $this->updateDriverLicense($user, $request);
+        }
+
+        // Sync salary if salary information was changed
+        if ($request->user_action == Constants::USER_ACTION_CHANGE_INFORMATION) {
+            $currentMonth = now()->format('m/Y');
+            $result = $this->salaryService->syncSalaryForUser($user, $currentMonth);
+            
+            // Log the result for debugging
+            Log::info('Salary sync result for updated user', [
+                'user_id' => $user->id,
+                'user_name' => $user->full_name,
+                'month' => $currentMonth,
+                'result' => $result
+            ]);
         }
 
         return $user;
@@ -190,14 +220,15 @@ class UserService
         // Process shipment deductions for salary calculation
         foreach ($shipments as $shipment) {
             $shipmentAllowance = $shipment->shipmentDeductionTypeDriverAndBusboy($user->id)->sum('amount') ?? 0;
-            $shipmentAmount = $shipment->shipmentDeductionTypeExpense()->sum('amount') ?? 0;
+            // Không tính chi phí chuyến hàng vào lương nhân viên
+            // $shipmentAmount = $shipment->shipmentDeductionTypeExpense()->sum('amount') ?? 0;
             
             // Add to salary details
             $salaryDetails[] = [
                 'shipment_id' => $shipment->id,
                 'shipment_code' => $shipment->shipment_code,
                 'date' => $shipment->departure_time,
-                'amount' => $shipmentAmount,
+                'amount' => 0, // Không tính chi phí chuyến hàng
                 'allowance' => $shipmentAllowance,
                 'allowance_note' => $shipment->notes,
                 'status' => $shipment->status_label,
@@ -206,10 +237,20 @@ class UserService
         }
 
         $totalAllowance = array_sum(array_column($salaryDetails, 'allowance')) ?? 0;
-        $totalExpenses = array_sum(array_column($salaryDetails, 'amount')) ?? 0;
+        $totalExpenses = 0; // Không tính chi phí chuyến hàng vào lương
         
-        // Calculate insurance deduction (10% of total: salary base + allowances + expenses)
-        $totalBeforeInsurance = ($user->salary_base ?? 0) + $totalAllowance + $totalExpenses;
+        
+        // Get salary advance data for the month
+        $parsedMonth = Carbon::createFromFormat('m/Y', $selectedMonth);
+        $startDate = $parsedMonth->copy()->startOfMonth();
+        $endDate = $parsedMonth->copy()->endOfMonth();
+        
+        $totalOtherDeduction = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
+        $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
+        $totalPenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
+        
+        // Calculate insurance deduction (10% of total: salary base + allowances)
+        $totalBeforeInsurance = ($user->salary_base+ $totalAllowance + $totalBonus) - ($totalOtherDeduction + $totalPenalty);
         $insuranceDeduction = $totalBeforeInsurance * (Constants::TAX_IN_VAT/100); // 10% of total
         
         // Calculate total salary - updated formula
@@ -220,7 +261,7 @@ class UserService
             'selectedMonth' => $selectedMonth,
             'salaryBase' => $user->salary_base ?? 0, // lương cơ bản
             'totalAllowance' => $totalAllowance, // tổng phụ cấp
-            'totalExpenses' => $totalExpenses, // tổng chi phí
+            'totalExpenses' => $totalExpenses, // tổng chi phí (không tính)
             'insuranceDeduction' => $insuranceDeduction, // khấu trừ bảo hiểm
             'totalSalary' => $totalSalary, // tổng lương
             'salaryDetails' => $salaryDetails

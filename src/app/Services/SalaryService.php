@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Collection;
 use App\Constants;
+use Illuminate\Support\Facades\Log;
 
 class SalaryService
 {
@@ -91,6 +92,79 @@ class SalaryService
     }
     
     /**
+     * Sync salary for a specific user
+     * 
+     * @param User $user
+     * @param string $month Format: m/Y (e.g., 06/2025)
+     * @return array
+     */
+    public function syncSalaryForUser(User $user, string $month)
+    {
+        // Parse month/year
+        list($monthNum, $year) = explode('/', $month);
+        
+        // Log the start of sync process
+        Log::info('Starting salary sync for user', [
+            'user_id' => $user->id,
+            'user_name' => $user->full_name,
+            'month' => $month,
+            'month_num' => $monthNum,
+            'year' => $year
+        ]);
+        
+        // Start a database transaction
+        DB::beginTransaction();
+        
+        try {
+            // Create or update salary period
+            $periodName = 'Kỳ lương tháng ' . $month;
+            $salaryPeriod = $this->createOrUpdateSalaryPeriod([
+                'period_name' => $periodName,
+                // 'notes' => 'Tự động đồng bộ cho nhân viên mới'
+            ], $monthNum, $year);
+            
+            Log::info('Salary period created/updated', [
+                'period_id' => $salaryPeriod->period_id ?? 'unknown',
+                'period_name' => $periodName
+            ]);
+            
+            // Process salary data for the specific user
+            $this->processSalaryForUser($user, $salaryPeriod, $monthNum, $year);
+            
+            // Commit transaction
+            DB::commit();
+            
+            Log::info('Salary sync completed successfully', [
+                'user_id' => $user->id,
+                'month' => $month
+            ]);
+            
+            return [
+                'success' => true,
+                'message' => 'Đã đồng bộ dữ liệu lương cho nhân viên thành công!',
+                'month' => $month,
+                'user_id' => $user->id
+            ];
+                
+        } catch (\Exception $e) {
+            // Rollback transaction on error
+            DB::rollBack();
+            
+            Log::error('Salary sync failed', [
+                'user_id' => $user->id,
+                'month' => $month,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return [
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi: ' . $e->getMessage()
+            ];
+        }
+    }
+    
+    /**
      * Create or update salary period
      * 
      * @param array $data
@@ -151,7 +225,7 @@ class SalaryService
         $updateData = [
             'base_salary' => $baseSalary, // lương cơ bản
             'working_days' => 0,
-            'total_expenses' => $salaryDetails['totalExpenses'], // chi phí
+            'total_expenses' => 0, // Không tính chi phí chuyến hàng
             'total_allowance' => $salaryDetails['totalAllowance'], // phụ cấp
             'social_insurance' => $salaryDetails['insuranceDeduction'], // thuế
             'health_insurance' => 0, // Not used in current calculation
@@ -183,7 +257,7 @@ class SalaryService
     protected function calculateSalaryDetails(User $user, Collection $shipments, $salaryPeriod)
     {
         $totalAllowance = 0;
-        $totalExpenses = 0;
+        $totalExpenses = 0; // Không tính chi phí chuyến hàng
 
         $totalTypeSalary = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $salaryPeriod->start_date, $salaryPeriod->end_date);
         $totalTypeBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $salaryPeriod->start_date, $salaryPeriod->end_date);
@@ -192,15 +266,16 @@ class SalaryService
         // Process shipment deductions for salary calculation
         foreach ($shipments as $shipment) {
             $totalAllowance += $shipment->shipmentDeductionTypeDriverAndBusboy($user->id)->sum('amount') ?? 0; // tổng phụ cấp
-            $totalExpenses += $shipment->shipmentDeductionTypeExpense()->sum('amount') ?? 0; // tổng chi phí
+            // Không tính chi phí chuyến hàng vào lương nhân viên
+            // $totalExpenses += $shipment->shipmentDeductionTypeExpense()->sum('amount') ?? 0; // tổng chi phí
         }
         
-        // Calculate insurance deduction (10% of total: salary base + allowances + expenses)
+        // Calculate insurance deduction (10% of total: salary base + allowances)
         $baseSalary = $user->salary_base ?? 0;
-        $totalBeforeInsurance = ($baseSalary + $totalAllowance + $totalExpenses + $totalTypeBonus) - ($totalTypeSalary + $totalTypePenalty);
+        $totalBeforeInsurance = ($baseSalary + $totalAllowance + $totalTypeBonus) - ($totalTypeSalary + $totalTypePenalty);
         $insuranceDeduction = $totalBeforeInsurance * (Constants::TAX_IN_VAT/100); // 10% of total
         
-        // Calculate total salary
+        // Calculate total salary - updated formula
         $totalSalary = $totalBeforeInsurance - $insuranceDeduction;
         
         return [

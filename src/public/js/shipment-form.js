@@ -193,8 +193,8 @@ function addDriverRow(personTable, personDeductionTypes, users) {
     // Thêm event listener cho các trường số mới thêm vào
     addNumericInputListeners(row.querySelectorAll('input[type="number"]'));
     
-    // Apply VND formatting cho các input deduction mới thêm vào
-    const newDeductionInputs = row.querySelectorAll('.deduction-input');
+    // Apply VND formatting cho các input deduction mới thêm vào (không bao gồm textarea)
+    const newDeductionInputs = row.querySelectorAll('.deduction-input:not(textarea)');
     newDeductionInputs.forEach(input => {
         input.addEventListener('input', function() {
             let value = this.value;
@@ -966,8 +966,8 @@ function addDriverPXRow(personTable, personDeductionTypes, users) {
     // Thêm event listener cho các trường số mới thêm vào
     addNumericInputListeners(row.querySelectorAll('input[type="number"]'));
     
-    // Apply VND formatting cho các input deduction mới thêm vào
-    const newDeductionInputs = row.querySelectorAll('.deduction-input');
+    // Apply VND formatting cho các input deduction mới thêm vào (không bao gồm textarea)
+    const newDeductionInputs = row.querySelectorAll('.deduction-input:not(textarea)');
     newDeductionInputs.forEach(input => {
         input.addEventListener('input', function() {
             let value = this.value;

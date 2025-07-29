@@ -197,7 +197,9 @@
                                         @endif
                                     </td>
                                     <td>{{ $shipment->origin }} - {{ $shipment->destination }}</td>
-                                    <td>{{ $shipment->getDriverFromShipmentDeductions()->full_name ?? '' }}</td>
+                                    <td>
+                                        {{ $shipment->getDriverDisplay() ?? null }}
+                                    </td>
                                     <td>{{ $shipment->vehicle ? $shipment->vehicle->plate_number : '' }}</td>
                                     <td>
                                         <div>KH: @formatDate($shipment->departure_time)</div>

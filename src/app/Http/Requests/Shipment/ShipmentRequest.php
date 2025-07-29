@@ -59,12 +59,18 @@ class ShipmentRequest extends FormRequest
             ]);
         }
         
-        // Remove commas from deduction values
+        // Remove commas from deduction values (except for "Ghi chú")
         if ($this->has('deductions')) {
             $deductions = $this->input('deductions', []);
+            $deductionTypes = \App\Models\ShipmentDeductionType::where('status', 'active')->get()->keyBy('id');
+            
             foreach ($deductions as $key => $value) {
                 if (!empty($value)) {
-                    $deductions[$key] = str_replace(',', '', $value);
+                    $deductionType = $deductionTypes->get($key);
+                    // Chỉ xóa dấu phẩy nếu không phải là "Ghi chú"
+                    if ($deductionType && $deductionType->name !== 'Ghi chú') {
+                        $deductions[$key] = str_replace(',', '', $value);
+                    }
                 }
             }
             $this->merge([
@@ -143,7 +149,7 @@ class ShipmentRequest extends FormRequest
             'unit_price' => 'required|numeric|min:0',
             // Chi phí chuyến hàng
             'deductions' => 'array',
-            'deductions.*' => 'nullable|numeric|min:0',
+            'deductions.*' => 'nullable', // Cho phép cả numeric và string cho "Ghi chú"
             // Hàng hóa
             'goods' => 'array',
             'goods.*.name' => 'required|string|max:255',

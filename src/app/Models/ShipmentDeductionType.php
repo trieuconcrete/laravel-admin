@@ -17,6 +17,7 @@ class ShipmentDeductionType extends Model
         'name', 
         'type', 
         'status',
-        'is_main_driver'
+        'is_main_driver',
+        'notes'
     ];
 }

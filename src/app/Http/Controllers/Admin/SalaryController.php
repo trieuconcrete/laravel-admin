@@ -124,7 +124,7 @@ class SalaryController extends Controller
             });
         }
         
-        return $query->paginate(10);
+        return $query->paginate(15);
     }
     
     /**
@@ -141,7 +141,6 @@ class SalaryController extends Controller
         if (!$salaryPeriod) {
             return $salaries;
         }
-        
         foreach ($users as $user) {
             $departmentName = $user->position ? $user->position->name : 'Chưa phân công';
             

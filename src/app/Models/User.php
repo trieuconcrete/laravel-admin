@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Position;
+use App\Models\SalaryAdvanceRequest;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -182,8 +183,10 @@ class User extends Authenticatable
      */
     public function getTotalSalaryAdvancesRequest($type, $startDate, $endDate)
     {
-        return $this->salaryAdvanceRequests()->where('type', $type)
+        return $this->salaryAdvanceRequests()
+            ->where('type', $type)
             ->whereBetween('advance_month', [$startDate, $endDate])
+            ->whereIn('status', ['approved', SalaryAdvanceRequest::STATUS_PAID])
             ->sum('amount');
     }
 }
