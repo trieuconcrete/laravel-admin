@@ -117,6 +117,7 @@ class CustomerService
     public function update(Request $request, Customer $customer)
     {
         $data = $request->all();
+        $data['is_active'] = $data['is_active'] == Customer::STATUS_ACTIVE ? true : false;
         
         // Handle document file upload
         if ($request->hasFile('document_file')) {
