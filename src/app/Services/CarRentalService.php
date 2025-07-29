@@ -66,6 +66,21 @@ class CarRentalService
                 $data['monthly_rental_fee'] = str_replace(',', '', $data['monthly_rental_fee']);
             }
 
+            // Xử lý overtime_fee_per_hour để loại bỏ dấu phẩy
+            if (isset($data['overtime_fee_per_hour']) && is_string($data['overtime_fee_per_hour'])) {
+                $data['overtime_fee_per_hour'] = str_replace(',', '', $data['overtime_fee_per_hour']);
+            }
+
+            // Xử lý max_distance để loại bỏ dấu phẩy
+            if (isset($data['max_distance']) && is_string($data['max_distance'])) {
+                $data['max_distance'] = str_replace(',', '', $data['max_distance']);
+            }
+
+            // Xử lý over_distance_fee_per_km để loại bỏ dấu phẩy
+            if (isset($data['over_distance_fee_per_km']) && is_string($data['over_distance_fee_per_km'])) {
+                $data['over_distance_fee_per_km'] = str_replace(',', '', $data['over_distance_fee_per_km']);
+            }
+
             if (isset($data['file']) && $data['file'] instanceof \Illuminate\Http\UploadedFile) {
                 $filePath = "uploads/car_rentals/" . $carRental->file;
 
