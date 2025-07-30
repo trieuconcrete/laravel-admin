@@ -10,28 +10,15 @@
                 <div class="card mt-xxl-n5">
                     <div class="customer-info-header p-3">
                         <div class="row">
-                            {{-- <div class="col-md-3">
+                            <div class="col-md-5">
                                 <h4>{{ $customer->name }}</h4>
-                                <p class="text-muted">Mã khách hàng: {{ $customer->customer_code }}</p>
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <p><i class="fas fa-building me-2 text-primary"></i> {{
-                                            $customer->getTypeLabelAttribute() }}</p>
-                                        <p><i
-                                                class="fas fa-map-marker-alt me-2 text-{{ $customer->getStatusBadgeClassAttribute() }}"></i>{{
-                                            $customer->address }}</p>
-                                        <p><i class="fas fa-phone me-2 text-primary"></i> Trạng thái: <span
-                                                class="badge bg-{{ $customer->getStatusBadgeClassAttribute() }} mb-2">{{
-                                                $customer->getStatusLabelAttribute() }}</span></p>
-                                        <p><i class="fas fa-calendar-alt me-2 text-primary"></i> Ngày đăng ký:
-                                            @formatDate($customer->establishment_date)</p>
-                                    </div>
-                                </div>
-                            </div> --}}
-                            <div class="col-md-12">
-                                <h3 class="mb-0 text-center mb-5">
+                                <span class="text-muted">Mã khách hàng: </span><b>{{ $customer->customer_code }}</b><br>
+                                <span class="text-muted">Loại khách hàng: </span><b>{{ $customer->getTypeLabelAttribute() }}</b>
+                            </div>
+                            <div class="col-md-7">
+                                <h4 class="mb-0 text-center">
                                     <i class="fas fa-balance-scale me-2"></i>Tổng kết công nợ khách hàng
-                                </h3>
+                                </h4>
                                 <div class="card-body">
                                     <div class="row g-3" id="debtSummaryContainer">
                                         <div class="col-md-4">
@@ -68,51 +55,51 @@
                     <hr>
                     <!-- Nav Tabs -->
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <button class="nav-link" id="nav-overview-tab" data-bs-toggle="tab" data-bs-target="#generalInfo"
+                        <button class="nav-link active" id="nav-overview-tab" data-bs-toggle="tab" data-bs-target="#generalInfo"
                             type="button" role="tab" aria-controls="generalInfo" aria-selected="false">Tổng quan</button>
                         <button class="nav-link" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#monthlyReport"
                             type="button" role="tab" aria-controls="monthlyReport" aria-selected="false">Bảng kê theo
                             tháng</button>
-                        <button class="nav-link active" id="nav-transactions-tab" data-bs-toggle="tab"
+                        <button class="nav-link" id="nav-transactions-tab" data-bs-toggle="tab"
                             data-bs-target="#transactions" type="button" role="tab" aria-controls="transactions"
                             aria-selected="true">Giao dịch</button>
                     </div>
                     <!-- Tab Content -->
                     <div class="tab-content p-3 border border-top-0 rounded-bottom">
                         <!-- General Info Tab -->
-                        <div class="tab-pane fade" id="generalInfo">
+                        <div class="tab-pane fade show active" id="generalInfo">
                             <form action="{{ route('admin.customers.update', $customer) }}" method="POST"
                                 enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Loại khách hàng: <span
-                                                        class="text-danger">*</span></label>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="type" id="individualType"
-                                                    value="individual" {{ $customer->type == \App\Models\Customer::TYPE_INDIVIDUAL ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="individualType">Cá nhân</label>
-                                            </div>
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="type" id="businessType"
-                                                    value="business" {{ $customer->type == \App\Models\Customer::TYPE_BUSINESS ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="businessType">Doanh nghiệp</label>
+                                <div class="row">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label class="form-label">Loại khách hàng: <span
+                                                            class="text-danger">*</span></label>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="type" id="individualType"
+                                                        value="individual" {{ $customer->type == \App\Models\Customer::TYPE_INDIVIDUAL ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="individualType">Cá nhân</label>
+                                                </div>
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="type" id="businessType"
+                                                        value="business" {{ $customer->type == \App\Models\Customer::TYPE_BUSINESS ? 'checked' : '' }}>
+                                                    <label class="form-check-label" for="businessType">Doanh nghiệp</label>
+                                                </div>
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Trạng thái</label>
+                                            <select name="is_active" class="form-select">
+                                                @foreach ($customerStatusActives as $key => $val)
+                                                    <option value="{{ $key }}" {{ request('is_active') == $customer->is_active ? 'selected' : '' }}>{{ $val }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div class="text-danger error" data-field="is_active"></div>
+                                        </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Trạng thái</label>
-                                        <select name="is_active" class="form-select">
-                                            @foreach ($customerStatusActives as $key => $val)
-                                                <option value="{{ $key }}" {{ request('is_active') == $customer->is_active ? 'selected' : '' }}>{{ $val }}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="text-danger error" data-field="is_active"></div>
-                                    </div>
-                                </div>
-                                <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="fullnameInput" class="form-label">Tên khách hàng <span
@@ -252,6 +239,7 @@
                                             <th>Phụ thu</th>
                                             <th>Thành tiền</th>
                                             <th>Ghi chú</th>
+                                            <th>Trạng thái</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -273,7 +261,7 @@
                                         @endforeach
                                         @else
                                         <tr>
-                                            <td colspan="11" class="text-center">Không có dữ liệu chuyến hàng trong tháng
+                                            <td colspan="12" class="text-center">Không có dữ liệu chuyến hàng trong tháng
                                                 này</td>
                                         </tr>
                                         @endif --}}
@@ -295,6 +283,8 @@
                                                 {{ isset($monthlyShipments) ? number_format($monthlyShipments->sum('total_amount')) : 0 }}
                                             </td>
                                             <td></td>
+                                            <td></td>
+                                            <td></td>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -302,7 +292,7 @@
                         </div>
 
                         <!-- Transactions Tab -->
-                        <div class="tab-pane fade show active" id="transactions">
+                        <div class="tab-pane fade" id="transactions">
 
                             <div class="d-flex justify-content-between mb-3">
                                 <h6>Lịch sử giao dịch</h6>
@@ -549,7 +539,7 @@
             function loadMonthlyReport(customerId, month) {
                 // Show loading indicator
                 const tableBody = document.querySelector('#monthlyReportTable tbody');
-                const loadingRow = '<tr><td colspan="11" class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</td></tr>';
+                const loadingRow = '<tr><td colspan="12" class="text-center"><i class="fas fa-spinner fa-spin me-2"></i>Đang tải dữ liệu...</td></tr>';
                 tableBody.innerHTML = loadingRow;
 
                 // Disable month selector and export button during loading
@@ -590,7 +580,7 @@
 
                                 // Format the row HTML
                                 row.innerHTML = `
-                                <td>${shipment.shipment_code}</td>
+                                <td><a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a></td>
                                 <td>${shipment.departure_time}</td>
                                 <td>${shipment.origin}</td>
                                 <td>${shipment.destination}</td>
@@ -600,6 +590,7 @@
                                 <td>${shipment.combined_fees > 0 ? numberFormat(shipment.combined_fees) : ''}</td>
                                 <td>${numberFormat(shipment.total_amount)}</td>
                                 <td>${shipment.notes || ''}</td>
+                                <td><span class="badge bg-${getStatusBadgeClass(shipment.status)}">${getStatusLabel(shipment.status)}</span></td>
                             `;
 
                                 tableBody.appendChild(row);
@@ -612,7 +603,7 @@
                             document.getElementById('grandTotal').textContent = numberFormat(grandTotal);
                         } else {
                             // No data found
-                            tableBody.innerHTML = '<tr><td colspan="11" class="text-center">Không có dữ liệu chuyến hàng trong tháng này</td></tr>';
+                            tableBody.innerHTML = '<tr><td colspan="12" class="text-center">Không có dữ liệu chuyến hàng trong tháng này</td></tr>';
 
                             // Reset footer totals
                             document.getElementById('totalTrips').textContent = '0';
@@ -642,7 +633,7 @@
                     })
                     .catch(error => {
                         console.error('Error fetching monthly report:', error);
-                        tableBody.innerHTML = '<tr><td colspan="11" class="text-center text-danger">Lỗi khi tải dữ liệu. Vui lòng thử lại.</td></tr>';
+                        tableBody.innerHTML = '<tr><td colspan="12" class="text-center text-danger">Lỗi khi tải dữ liệu. Vui lòng thử lại.</td></tr>';
 
                         // Re-enable controls in case of error
                         if (monthSelector) monthSelector.disabled = false;
@@ -654,6 +645,34 @@
             // Helper function to format numbers with commas
             function numberFormat(number) {
                 return new Intl.NumberFormat('vi-VN').format(number);
+            }
+
+            // Helper function to get status badge class
+            function getStatusBadgeClass(status) {
+                const statusClasses = {
+                    'pending': 'warning',
+                    'confirmed': 'info',
+                    'in_transit': 'primary',
+                    'delivered': 'success',
+                    'cancelled': 'danger',
+                    'delayed': 'danger',
+                    'completed': 'success'
+                };
+                return statusClasses[status] || 'secondary';
+            }
+
+            // Helper function to get status label
+            function getStatusLabel(status) {
+                const statusLabels = {
+                    'pending': 'Chờ xác nhận',
+                    'confirmed': 'Đã xác nhận',
+                    'in_transit': 'Đang vận chuyển',
+                    'delivered': 'Đã giao hàng',
+                    'cancelled': 'Đã hủy',
+                    'delayed': 'Bị trễ',
+                    'completed': 'Hoàn thành'
+                };
+                return statusLabels[status] || status;
             }
 
             // Handle summarize report button click

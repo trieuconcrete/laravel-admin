@@ -179,13 +179,14 @@
                                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCarRentalVehicleLogModal">
                                                 <i class="ri-add-line align-bottom me-1"></i> Thêm nhật ký
                                         </button>
+                                        </div>
                                     </div>
-                </div>
 
                                     <div class="table-responsive">
                                         <table class="table table-bordered table-striped">
                                             <thead>
                                                 <tr>
+                                                    <th>Xe</th>
                                                     <th class="text-center">Ngày chạy</th>
                                                     <th class="text-center">Giờ làm việc</th>
                                                     <th class="text-center">Lịch trình</th>
@@ -211,6 +212,7 @@
                                                     $totalOvertimeHours += $log->overtime_hours;
                                                 @endphp
                                                 <tr>
+                                                    <td>{{ $log->vehicle->vehicleType->name ?? 'N/A' }} - {{ $log->vehicle->plate_number ?? 'N/A' }}</td>
                                                     <td class="text-center">{{ $log->run_date ? \Carbon\Carbon::parse($log->run_date)->format('Y-m-d') : '' }}</td>
                                                     <td class="text-center">{{ \Carbon\Carbon::parse($log->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($log->end_time)->format('H:i') }}</td>
                                                     <td class="text-center">{{ $log->start_location }} -> {{ $log->end_location }}</td>
@@ -353,10 +355,10 @@
                             <label class="form-label">Chọn xe <span class="text-danger">*</span></label>
                             <select class="form-select" name="vehicle_id" required>
                                 <option value="">Chọn xe</option>
-                                @foreach($carRental->carRentalVehicles as $carRentalVehicle)
-                                    <option value="{{ $carRentalVehicle->vehicle_id }}">
-                                        {{ $carRentalVehicle->vehicle->plate_number ?? 'N/A' }} - 
-                                        {{ $carRentalVehicle->vehicle->name ?? $carRentalVehicle->vehicle->product_name }}
+                                @foreach($vehicles as $vehicle)
+                                    <option value="{{ $vehicle->vehicle_id }}">
+                                        {{ $vehicle->plate_number ?? 'N/A' }} - 
+                                        {{ $vehicle->vehicleType->name ?? 'N/A' }}
                                     </option>
                                 @endforeach
                             </select>
@@ -470,10 +472,10 @@
                             <label class="form-label">Chọn xe <span class="text-danger">*</span></label>
                             <select class="form-select" name="vehicle_id" id="edit_vehicle_id" required>
                                 <option value="">Chọn xe</option>
-                                @foreach($carRental->carRentalVehicles as $carRentalVehicle)
-                                    <option value="{{ $carRentalVehicle->vehicle_id }}">
-                                        {{ $carRentalVehicle->vehicle->plate_number ?? 'N/A' }} - 
-                                        {{ $carRentalVehicle->vehicle->name ?? $carRentalVehicle->vehicle->product_name }}
+                                @foreach($vehicles as $vehicle)
+                                    <option value="{{ $vehicle->id }}">
+                                        {{ $vehicle->plate_number ?? 'N/A' }} - 
+                                        {{ $vehicle->vehicleType->name ?? 'N/A' }}
                                     </option>
                                 @endforeach
                             </select>

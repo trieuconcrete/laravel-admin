@@ -17,6 +17,7 @@ use App\Models\CarRentalVehicleLog;
 use App\Models\TollStation;
 use App\Models\TollFee;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\Vehicle;
 
 class CarRentalController extends Controller
 {
@@ -92,7 +93,7 @@ class CarRentalController extends Controller
     {
         $carRental = CarRental::findOrFail($id);
         $customers = $this->customerRepository->all()->pluck('name', 'id');
-        $vehicles = $this->vehicleRepository->all()->pluck('name', 'id');
+        $vehicles = Vehicle::with('vehicleType')->where('status', Vehicle::STATUS_ACTIVE)->get();
         $carRentalstatuses = CarRental::getStatuses();
         $carRentalVehicles = $carRental->carRentalVehicles;
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
@@ -109,7 +110,8 @@ class CarRentalController extends Controller
             'carRentalVehicles',
             'vehicleTypes',
             'carRentalstatuses',
-            'carRentalVehicleLogs'
+            'carRentalVehicleLogs',
+            'vehicles'
         ));
     }
 

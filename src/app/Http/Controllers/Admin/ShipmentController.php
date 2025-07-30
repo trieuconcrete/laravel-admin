@@ -43,7 +43,7 @@ class ShipmentController extends Controller
             'keyword' => $request->input('keyword'),
         ];
         // Use getList instead of list to avoid PHP reserved keyword conflict
-        $shipments = $this->shipmentService->getList($filters, 20);
+        $shipments = $this->shipmentService->getList($filters, perPage: 15);
         $shipmentStatus = Shipment::$statuses;
 
         return view('admin.shipments.index', compact('shipments', 'shipmentStatus'));

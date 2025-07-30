@@ -163,9 +163,10 @@ class DashboardController extends Controller
         // Method 1: Use shipment reports (tổng kết)
         $totalReported = ShipmentReport::sum('total_amount');
         
-        // Method 2: Calculate directly from shipments if no reports available
+        // Method 2: Calculate directly from completed shipments if no reports available
         if ($totalReported == 0) {
             $totalReported = DB::table('shipments')
+                ->where('status', 'completed') // Chỉ tính cho shipment đã hoàn thành
                 ->selectRaw('SUM(
                     (COALESCE(trip_count, 1) * COALESCE(unit_price, 0)) - 
                     (SELECT COALESCE(SUM(amount), 0) FROM shipment_deductions WHERE shipment_id = shipments.id)
