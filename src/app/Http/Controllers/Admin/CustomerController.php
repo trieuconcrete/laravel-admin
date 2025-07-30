@@ -125,6 +125,7 @@ class CustomerController extends Controller
         $typeTransactions = Transaction::getTypes();
         $paymentMethods = Payment::getPaymentMethods();
         $paymentStatuses = Payment::getStatuses();
+        $customerStatusActives = Customer::getStatusActives();
         
         // Lấy trạng thái finalized của báo cáo tháng hiện tại
         $shipmentReport = \App\Models\ShipmentReport::where('customer_id', $customer->id)
@@ -148,7 +149,8 @@ class CustomerController extends Controller
                 'paymentMethods',
                 'paymentStatuses',
                 'filters',
-                'isFinalized'
+                'isFinalized',
+                'customerStatusActives'
             ));
         } catch (\Exception $e) {
             Log::error('Error loading default transactions', ['error' => $e->getMessage(), 'customer_id' => $customer->id]);
