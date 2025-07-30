@@ -167,7 +167,7 @@ class UserController extends Controller
         
         return view('admin.users.show', compact(
             'user', 'positions', 'licenses', 'statuses', 'licenseStatuses',
-            'shipments', 'selectedMonth', 'salaryBase', 'totalAllowance', 
+            'shipments', 'shipmentsInMonth', 'selectedMonth', 'salaryBase', 'totalAllowance', 
             'insuranceDeduction', 'totalSalary', 'salaryDetails',
             'requests', 'totalOtherDeduction', 'totalBonus', 'totalPenalty'
         ));

@@ -313,7 +313,7 @@
                                 <div class="col-xxl-2 mb-5">
                                     <label for="month" class="form-label">Tháng</label>
                                     <select class="form-select" name="month" id="month" onchange="document.getElementById('shipmentMonthForm').submit();">
-                                        @foreach(months_list() as $month)
+                                        @foreach(months_list(12, 12) as $month)
                                             <option value="{{ $month }}" {{ $selectedMonth == $month ? 'selected' : '' }}>{{ $month }}</option>
                                         @endforeach
                                     </select>
@@ -337,8 +337,8 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @if($shipments->count() > 0)
-                                            @foreach($shipments as $shipment)
+                                        @if($shipmentsInMonth->count() > 0)
+                                            @foreach($shipmentsInMonth as $shipment)
                                                 <tr>
                                                     <td>
                                                         <a href="{{ route('admin.shipments.edit', $shipment->id) }}" class="text-primary">
@@ -573,7 +573,6 @@
                                         <tr>
                                             <th>Mã chuyến hàng</th>
                                             <th>Ngày</th>
-                                            <th>Chi phí chuyến hàng</th>
                                             <th>Trợ cấp</th>
                                             <th>Ghi chú</th>
                                         </tr>
@@ -588,7 +587,6 @@
                                                         </a>
                                                     </td>
                                                     <td>@formatDate($detail['date'])</td>
-                                                    <td>{{ number_format($detail['amount']) }}</td>
                                                     <td>
                                                         @if($detail['allowance'] > 0)
                                                             {{ number_format($detail['allowance']) }}
