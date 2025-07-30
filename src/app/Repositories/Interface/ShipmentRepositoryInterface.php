@@ -37,6 +37,16 @@ interface ShipmentRepositoryInterface extends BaseRepositoryInterface
      * @return \Illuminate\Database\Eloquent\Collection<\App\Models\Shipment>
      */
     public function getUserCompletedShipments(User $user, int $month, int $year): Collection;
+
+    /**
+     * Get completed shipments in month for a user in a specific month and year
+     * 
+     * @param User $user
+     * @param int $month
+     * @param int $year
+     * @return \Illuminate\Database\Eloquent\Collection<\App\Models\Shipment>
+     */
+    public function getUserShipmentsInMonth(User $user, int $month, int $year): Collection;
     
     /**
      * Get shipments for a user between specific dates

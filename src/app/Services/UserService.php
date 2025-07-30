@@ -213,7 +213,8 @@ class UserService
         
         // Get completed shipments for the user for the selected month
         $shipments = $this->shipmentRepository->getUserCompletedShipments($user, $month, $year);
-        
+        $shipmentsInMonth = $this->shipmentRepository->getUserShipmentsInMonth($user, $month, $year);
+
         // Calculate salary details
         $salaryDetails = [];
         
@@ -259,6 +260,7 @@ class UserService
         
         return [
             'shipments' => $shipments,
+            'shipmentsInMonth' => $shipmentsInMonth,
             'selectedMonth' => $selectedMonth,
             'salaryBase' => $user->salary_base ?? 0, // lương cơ bản
             'totalAllowance' => $totalAllowance, // tổng phụ cấp

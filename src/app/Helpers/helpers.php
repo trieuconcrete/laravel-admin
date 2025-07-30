@@ -58,14 +58,28 @@ if (!function_exists('months_list')) {
      * @param bool $includeKeys Có bao gồm key là timestamp hay không
      * @return array Mảng danh sách các tháng
      */
-    function months_list(int $monthsBack = 12, string $format = 'm/Y', bool $includeKeys = false): array
+    function months_list(int $monthsBack = 12, int $monthBefore = 0, string $format = 'm/Y', bool $includeKeys = false): array
     {
         $months = [];
         $currentDate = now();
+        if ($monthBefore > 0) {
+            for ($j = $monthBefore; $j > 0; $j--) {
+                // Tính toán ngày đầu tiên của tháng
+                $date = (clone $currentDate)->addMonthsNoOverflow($j);
+                
+                if ($includeKeys) {
+                    // Sử dụng timestamp làm key
+                    $months[$date->timestamp] = $date->format($format);
+                } else {
+                    // Mảng tuần tự không có key
+                    $months[] = $date->format($format);
+                }
+            }
+        }
         
         for ($i = 0; $i < $monthsBack; $i++) {
             // Tính toán ngày đầu tiên của tháng
-            $date = (clone $currentDate)->subMonths($i)->startOfMonth();
+            $date = (clone $currentDate)->subMonthsNoOverflow($i);
             
             if ($includeKeys) {
                 // Sử dụng timestamp làm key
@@ -75,7 +89,6 @@ if (!function_exists('months_list')) {
                 $months[] = $date->format($format);
             }
         }
-        
         return $months;
     }
 }
