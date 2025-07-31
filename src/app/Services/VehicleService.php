@@ -27,10 +27,14 @@ class VehicleService
     {
         $data = $request->all();
         $documents = [];
-
-        foreach ($request->documents as $doc) {
-            if (isset($doc['document_file'])) {
-                $doc['document_file'] = ImageHelper::upload($doc['document_file']);
+        // Handle documents array if it exists
+        if ($request->has('documents')) {
+            foreach ($request->documents as $index => $doc) {
+                // Only process document_file if it's an actual uploaded file
+                if (isset($doc['document_file']) && $request->hasFile('documents.' . $index . '.document_file')) {
+                    $doc['document_file'] = ImageHelper::upload($doc['document_file']);
+                }
+                
                 $documents[] = $doc;
             }
         }
