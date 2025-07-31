@@ -1,5 +1,5 @@
 @extends('admin.layout')
-
+@section('title', 'Tạo chuyến hàng')
 @section('content')
 
 <div class="container-fluid">
@@ -141,7 +141,7 @@
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Ghi chú</label>
-                                                <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="notes" value="{{ old('notes') }}"></textarea>
+                                                <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="Ghi chú" value="{{ old('Ghi chú') }}"></textarea>
                                                 @error('note')<span class="text-danger">{{ $message }}</span>@enderror
                                             </div>
                                             <hr>
@@ -207,8 +207,8 @@
                                                                             @error('goods.'.$i.'.name')<span class="text-danger">{{ $message }}</span>@enderror
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][notes]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.notes', $good['notes'] ?? '') }}">
-                                                                            @error('goods.'.$i.'.notes')<span class="text-danger">{{ $message }}</span>@enderror
+                                                                            <input type="text" name="goods[{{ $i }}][Ghi chú]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.Ghi chú', $good['Ghi chú'] ?? '') }}">
+                                                                            @error('goods.'.$i.'.Ghi chú')<span class="text-danger">{{ $message }}</span>@enderror
                                                                         </td>
                                                                         <td>
                                                                             <input type="number" name="goods[{{ $i }}][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.'.$i.'.quantity', $good['quantity'] ?? '') }}">
@@ -234,8 +234,8 @@
                                                                         <div class="text-danger" id="error-goods-0-name">@error('goods.0.name'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][notes]" class="form-control form-control-sm" value="{{ old('goods.0.notes') }}">
-                                                                        <div class="text-danger" id="error-goods-0-notes">@error('goods.0.notes'){{ $message }}@enderror</div>
+                                                                        <input type="text" name="goods[0][Ghi chú]" class="form-control form-control-sm" value="{{ old('goods.0.Ghi chú') }}">
+                                                                        <div class="text-danger" id="error-goods-0-Ghi chú">@error('goods.0.Ghi chú'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
                                                                         <input type="number" name="goods[0][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.0.quantity') }}">
@@ -273,6 +273,7 @@
                                                     @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
+                                            <hr>
                                             <div class="mb-3">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <label class="form-label mb-0">Tài xế</label>
@@ -289,7 +290,7 @@
                                                                 @foreach($personDeductionTypes as $type)
                                                                     <th>{{ $type->name }}</th>
                                                                 @endforeach
-                                                                <th>Notes</th>
+                                                                <th>Ghi chú</th>
                                                                 <th></th>
                                                             </tr>
                                                         </thead>
@@ -324,8 +325,8 @@
                                                                         </td>
                                                                     @endforeach
                                                                     <td>
-                                                                        <input type="text" name="drivers[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.notes', $driver['deductions'][$type->id]['notes'] ?? '') }}">
-                                                                        @error('drivers.{{ $i }}.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        <input type="text" name="drivers[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.Ghi chú', $driver['deductions'][$type->id]['Ghi chú'] ?? '') }}">
+                                                                        @error('drivers.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     <td>
                                                                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
@@ -358,8 +359,8 @@
                                                                     </td>
                                                                 @endforeach
                                                                 <td>
-                                                                    <input type="text" name="drivers[0][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.notes', $driver['deductions'][$type->id]['notes'] ?? '') }}">
-                                                                    @error('drivers.0.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    <input type="text" name="drivers[0][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.Ghi chú', $driver['deductions'][$type->id]['Ghi chú'] ?? '') }}">
+                                                                    @error('drivers.0.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                 </td>
                                                                 <td>
                                                                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, 0)"><i class="ri-delete-bin-fill"></i></button>
@@ -371,6 +372,7 @@
                                                     </table>
                                                 </div>
                                             </div>
+                                            <hr>
                                             <div class="mb-3">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <label class="form-label mb-0">Lơ xe</label>
@@ -386,7 +388,7 @@
                                                                 @foreach($subPersonDeductionTypes as $type)
                                                                     <th>{{ $type->name }}</th>
                                                                 @endforeach
-                                                                <th>Notes</th>
+                                                                <th>Ghi chú</th>
                                                                 <th></th>
                                                             </tr>
                                                         </thead>
@@ -414,8 +416,8 @@
                                                                         </td>
                                                                     @endforeach
                                                                     <td>
-                                                                        <input type="text" name="driverPXs[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('driverPXs.'.$i.'.deductions.notes', $driver['deductions'][$type->id]['notes'] ?? '') }}">
-                                                                        @error('driverPXs.'.$i.'.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        <input type="text" name="driverPXs[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('driverPXs.'.$i.'.deductions.Ghi chú', $driver['deductions'][$type->id]['Ghi chú'] ?? '') }}">
+                                                                        @error('driverPXs.'.$i.'.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     <td>
                                                                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>

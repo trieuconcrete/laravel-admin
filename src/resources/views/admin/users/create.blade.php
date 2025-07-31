@@ -1,5 +1,5 @@
 @extends('admin.layout')
-
+@section('title', 'Tạo tài xế và nhân viên')
 @section('content')
 
 <div class="container-fluid">
@@ -9,7 +9,7 @@
                 <div class="col-12">
                     <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                         <div class="flex-grow-1">
-                            <h4 class="fs-16 mb-1">Create User</h4>
+                            <h4 class="fs-16 mb-1">Tạo tài xế và nhân viên</h4>
                         </div>
                     </div><!-- end card header -->
                 </div>

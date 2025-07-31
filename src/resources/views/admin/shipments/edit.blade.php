@@ -1,5 +1,5 @@
 @extends('admin.layout')
-
+@section('title', 'Sửa chuyến')
 @section('content')
 
 <div class="container-fluid">
@@ -141,8 +141,8 @@
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Ghi chú</label>
-                                                <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="notes">{!! old('notes', $shipment->notes) !!}</textarea>
-                                                @error('notes')<span class="text-danger">{{ $message }}</span>@enderror
+                                                <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="Ghi chú">{!! old('Ghi chú', $shipment->Ghi chú) !!}</textarea>
+                                                @error('Ghi chú')<span class="text-danger">{{ $message }}</span>@enderror
                                             </div>
                                             <hr>
                                             <div class="mb-3">
@@ -162,7 +162,7 @@
                                                                     <td>
                                                                         <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
                                                                         @if($type->name === 'Ghi chú')
-                                                                            <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->notes : '') }}</textarea>
+                                                                            <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->Ghi chú : '') }}</textarea>
                                                                         @else
                                                                             <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->amount : '') }}">
                                                                         @endif
@@ -203,8 +203,8 @@
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-name">@error('goods.'.$i.'.name'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][notes]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.notes', $good->notes) }}">
-                                                                            <div class="text-danger" id="error-goods-{{ $i }}-notes">@error('goods.'.$i.'.notes'){{ $message }}@enderror</div>
+                                                                            <input type="text" name="goods[{{ $i }}][Ghi chú]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.Ghi chú', $good->Ghi chú) }}">
+                                                                            <div class="text-danger" id="error-goods-{{ $i }}-Ghi chú">@error('goods.'.$i.'.Ghi chú'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
                                                                             <input type="text" name="goods[{{ $i }}][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.'.$i.'.quantity', $good->quantity) }}">
@@ -231,8 +231,8 @@
                                                                         <div class="text-danger" id="error-goods-0-name">@error('goods.0.name'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][notes]" class="form-control form-control-sm" value="{{ old('goods.0.notes') }}">
-                                                                        <div class="text-danger" id="error-goods-0-notes">@error('goods.0.notes'){{ $message }}@enderror</div>
+                                                                        <input type="text" name="goods[0][Ghi chú]" class="form-control form-control-sm" value="{{ old('goods.0.Ghi chú') }}">
+                                                                        <div class="text-danger" id="error-goods-0-Ghi chú">@error('goods.0.Ghi chú'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
                                                                         <input type="text" name="goods[0][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.0.quantity') }}">
@@ -270,6 +270,7 @@
                                                     @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
+                                            <hr>
                                             <div class="mb-3">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <label class="form-label mb-0">Tài xế</label>
@@ -286,7 +287,7 @@
                                                                 @foreach($personDeductionTypes as $type)
                                                                     <th>{{ $type->name }}</th>
                                                                 @endforeach
-                                                                <th>Notes</th>
+                                                                <th>Ghi chú</th>
                                                                 <th></th>
                                                             </tr>
                                                         </thead>
@@ -332,8 +333,8 @@
                                                                         </td>
                                                                     @endforeach
                                                                     <td>
-                                                                        <input type="text" name="drivers[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.notes', $driver['deductions']->first() ? $driver['deductions']->first()->notes : '') }}">
-                                                                        @error('drivers.{{ $i }}.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        <input type="text" name="drivers[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.Ghi chú', $driver['deductions']->first() ? $driver['deductions']->first()->Ghi chú : '') }}">
+                                                                        @error('drivers.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     <td>
                                                                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
@@ -367,8 +368,8 @@
                                                                     </td>
                                                                 @endforeach
                                                                 <td>
-                                                                    <input type="text" name="drivers[0][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.notes', '') }}">
-                                                                    @error('drivers.0.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    <input type="text" name="drivers[0][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.Ghi chú', '') }}">
+                                                                    @error('drivers.0.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                 </td>
                                                                 <td>
                                                                     <input type="hidden" name="driver_rows[]" value="0">
@@ -379,7 +380,7 @@
                                                     </table>
                                                 </div>
                                             </div>
-
+                                            <hr>
                                             <div class="mb-3">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                                     <label class="form-label mb-0">Lơ xe</label>
@@ -395,7 +396,7 @@
                                                                 @foreach($subPersonDeductionTypes as $type)
                                                                     <th>{{ $type->name }}</th>
                                                                 @endforeach
-                                                                <th>Notes</th>
+                                                                <th>Ghi chú</th>
                                                                 <th></th>
                                                             </tr>
                                                         </thead>
@@ -429,8 +430,8 @@
                                                                         </td>
                                                                     @endforeach
                                                                     <td>
-                                                                        <input type="text" name="driverPXs[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('driverPXs.'.$i.'.deductions.notes', isset($driver['deductions'][$type->id]['notes']) ? $driver['deductions'][$type->id]['notes'] : '') }}">
-                                                                        @error('driverPXs.{{ $i }}.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        <input type="text" name="driverPXs[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('driverPXs.'.$i.'.deductions.Ghi chú', isset($driver['deductions'][$type->id]['Ghi chú']) ? $driver['deductions'][$type->id]['Ghi chú'] : '') }}">
+                                                                        @error('driverPXs.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     <td>
                                                                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>

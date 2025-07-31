@@ -4,7 +4,7 @@
     <head>
 
         <meta charset="utf-8" />
-        <title>Dashboard</title>
+        <title>@yield('title', 'Vận Tải Hoàng Phú Long')</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta content="Vận Tải Hoàng Phú Long - An Tâm Trên Vạn Dặm" name="description" />
         <meta name="csrf-token" content="{{ csrf_token() }}">
