@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Transaction\StoreTransactionRequest;
 use App\Http\Requests\Transaction\SearchTransactionRequest;
 use App\Models\Customer;
+use App\Models\ShipmentReport;
 use App\Services\CustomerService;
 use App\Services\TransactionPaymentService;
 use Illuminate\Support\Facades\Log;
@@ -111,6 +112,13 @@ class PaymentTransactionController extends Controller
             $typeTransactions = Transaction::getTypes();
             $paymentMethods = Payment::getPaymentMethods();
             $paymentStatuses = Payment::getStatuses();
+            $customerStatusActives = Customer::getStatusActives();
+            
+            // Lấy trạng thái finalized của báo cáo tháng hiện tại
+            $shipmentReport = ShipmentReport::where('customer_id', $customer->id)
+                ->where('monthly', $currentMonth)
+                ->first();
+            $isFinalized = $shipmentReport ? $shipmentReport->is_finalized : false;
             
             return view('admin.customers.show', compact(
                 'customer', 
@@ -120,7 +128,9 @@ class PaymentTransactionController extends Controller
                 'activeTab',
                 'paymentMethods',
                 'paymentStatuses',
-                'filters'
+                'filters',
+                'isFinalized',
+                'customerStatusActives'
             ));
         } catch (\Exception $e) {
             Log::error('Error retrieving transactions', ['error' => $e->getMessage(), 'customer_id' => $customer->id]);

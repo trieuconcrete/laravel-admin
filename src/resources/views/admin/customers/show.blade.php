@@ -55,19 +55,19 @@
                     <hr>
                     <!-- Nav Tabs -->
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <button class="nav-link active" id="nav-overview-tab" data-bs-toggle="tab" data-bs-target="#generalInfo"
-                            type="button" role="tab" aria-controls="generalInfo" aria-selected="false">Tổng quan</button>
-                        <button class="nav-link" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#monthlyReport"
-                            type="button" role="tab" aria-controls="monthlyReport" aria-selected="false">Bảng kê theo
+                        <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'generalInfo' ? 'active' : '' }}" id="nav-overview-tab" data-bs-toggle="tab" data-bs-target="#generalInfo"
+                            type="button" role="tab" aria-controls="generalInfo" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'generalInfo' ? 'true' : 'false' }}">Tổng quan</button>
+                        <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'active' : '' }}" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#monthlyReport"
+                            type="button" role="tab" aria-controls="monthlyReport" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'true' : 'false' }}">Bảng kê theo
                             tháng</button>
-                        <button class="nav-link" id="nav-transactions-tab" data-bs-toggle="tab"
+                        <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'active' : '' }}" id="nav-transactions-tab" data-bs-toggle="tab"
                             data-bs-target="#transactions" type="button" role="tab" aria-controls="transactions"
-                            aria-selected="true">Giao dịch</button>
+                            aria-selected="{{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'true' : 'false' }}">Giao dịch</button>
                     </div>
                     <!-- Tab Content -->
                     <div class="tab-content p-3 border border-top-0 rounded-bottom">
                         <!-- General Info Tab -->
-                        <div class="tab-pane fade show active" id="generalInfo">
+                        <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'generalInfo' ? 'show active' : '' }}" id="generalInfo">
                             <form action="{{ route('admin.customers.update', $customer) }}" method="POST"
                                 enctype="multipart/form-data">
                                 @csrf
@@ -206,7 +206,7 @@
                         </div>
 
                         <!-- monthly report -->
-                        <div class="tab-pane fade" id="monthlyReport">
+                        <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'show active' : '' }}" id="monthlyReport">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div class="flex-shrink-0 text-start">
                                     <h6 class="mb-1">Tháng</h6>
@@ -292,7 +292,7 @@
                         </div>
 
                         <!-- Transactions Tab -->
-                        <div class="tab-pane fade" id="transactions">
+                        <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'show active' : '' }}" id="transactions">
 
                             <div class="d-flex justify-content-between mb-3">
                                 <h6>Lịch sử giao dịch</h6>
@@ -309,7 +309,7 @@
                                 <div class="card-body">
                                     <form id="transactionSearchForm" method="GET"
                                         action="{{ route('admin.customers.transactions', $customer) }}">
-                                        <input type="hidden" name="active_tab" value="transactions">
+                                        <input type="hidden" name="active_tab" value="{{ $activeTab ?? 'transactions' }}">
                                         <div class="row g-3">
                                             <div class="col-md-6 col-lg-3">
                                                 <label class="form-label">Từ ngày</label>
@@ -358,7 +358,7 @@
                                                     <button type="submit" class="btn btn-primary px-4">
                                                         <i class="fas fa-search me-2"></i>Tìm kiếm
                                                     </button>
-                                                    <a href="{{ route('admin.customers.transactions', $customer) }}?active_tab=transactions"
+                                                    <a href="{{ route('admin.customers.transactions', $customer) }}?active_tab={{ $activeTab ?? 'transactions' }}"
                                                         class="btn btn-outline-secondary px-4">
                                                         <i class="fas fa-undo me-2"></i>Đặt lại
                                                     </a>
@@ -498,6 +498,27 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Handle active tab from URL parameter or controller variable
+            const urlParams = new URLSearchParams(window.location.search);
+            const activeTabParam = urlParams.get('active_tab');
+            const activeTab = activeTabParam || '{{ $activeTab ?? "generalInfo" }}';
+            
+            // Activate the correct tab
+            if (activeTab) {
+                // Remove active class from all tabs and panes
+                document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(pane => {
+                    pane.classList.remove('show', 'active');
+                });
+                
+                // Add active class to the correct tab and pane
+                const targetTab = document.querySelector(`[data-bs-target="#${activeTab}"]`);
+                const targetPane = document.getElementById(activeTab);
+                
+                if (targetTab) targetTab.classList.add('active');
+                if (targetPane) targetPane.classList.add('show', 'active');
+            }
+            
             // Handle tab activation to ensure data is loaded when monthly report tab is clicked
             const tabLinks = document.querySelectorAll('.nav-link');
             if (tabLinks) {
