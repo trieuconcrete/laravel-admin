@@ -162,7 +162,7 @@
                                                                     <td>
                                                                         <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
                                                                         @if($type->name === 'Ghi chú')
-                                                                            <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->Ghi chú : '') }}</textarea>
+                                                                            <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->notes : '') }}</textarea>
                                                                         @else
                                                                             <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->amount : '') }}">
                                                                         @endif
@@ -203,7 +203,7 @@
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-name">@error('goods.'.$i.'.name'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][Ghi chú]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.Ghi chú', $good->Ghi chú) }}">
+                                                                            <input type="text" name="goods[{{ $i }}][Ghi chú]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.Ghi chú', $good->notes) }}">
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-Ghi chú">@error('goods.'.$i.'.Ghi chú'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
@@ -333,7 +333,7 @@
                                                                         </td>
                                                                     @endforeach
                                                                     <td>
-                                                                        <input type="text" name="drivers[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.Ghi chú', $driver['deductions']->first() ? $driver['deductions']->first()->Ghi chú : '') }}">
+                                                                        <input type="text" name="drivers[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.Ghi chú', $driver['deductions']->first() ? $driver['deductions']->first()->notes : '') }}">
                                                                         @error('drivers.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     <td>
