@@ -34,6 +34,10 @@
     <td class="fw-medium">Trừ ứng lương <small class="text-muted">(Đã duyệt/Đã chi)</small></td>
     <td class="text-end text-danger" data-salary="other-deduction">- {{ number_format($totalOtherDeduction) }} đ</td>
 </tr>
+{{--  <tr class="border-bottom">
+    <td class="fw-medium">Trừ số tiền đã thanh toán <small class="text-muted">(Đã duyệt/Đã chi)</small></td>
+    <td class="text-end text-danger" data-salary="paid-deduction">- {{ number_format($totalPaid) }} đ</td>
+</tr>  --}}
 <tr>
     <td class="fw-bold fs-5">Tổng lương thực nhận</td>
     <td class="text-end fw-bold fs-5 text-success" data-salary="total">{{ number_format($totalSalary) }} đ</td>

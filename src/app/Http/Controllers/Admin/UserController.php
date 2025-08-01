@@ -134,6 +134,10 @@ class UserController extends Controller
         $totalOtherDeduction = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
         $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
         $totalPenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
+        $totalPaid = $user->getTotalSalaryPayments($startDate, $endDate);
+        
+        // Get salary payment status
+        $paymentStatusData = $this->userService->getSalaryPaymentStatus($user, $selectedMonth);
         
         
         // Extract data from service responses
@@ -143,25 +147,37 @@ class UserController extends Controller
         
         // Handle AJAX request for salary data refresh
         if ($request->ajax() && $request->get('ajax') === 'true') {
+            // Ensure all values are properly formatted as numbers
+            $chartSeries = [
+                (float) $salaryBase,
+                (float) $totalAllowance,
+                (float) $insuranceDeduction,
+                (float) $totalPenalty,
+                (float) $totalOtherDeduction,
+                (float) $totalBonus
+            ];
+            
             return response()->json([
                 'success' => true,
                 'salaryData' => view('admin.users.partials.salary-table', compact(
                     'salaryBase', 'totalAllowance', 'totalBonus', 'totalPenalty', 
-                    'totalOtherDeduction', 'insuranceDeduction', 'totalSalary'
+                    'totalOtherDeduction', 'insuranceDeduction', 'totalSalary', 'totalPaid'
                 ))->render(),
                 'chartData' => [
-                    'series' => [$salaryBase, $totalAllowance, $insuranceDeduction, $totalPenalty, $totalOtherDeduction, $totalBonus],
+                    'series' => $chartSeries,
                     'labels' => ['Lương cơ bản', 'Trợ cấp', 'BHXH', 'Phạt', 'Ứng lương', 'Thưởng']
                 ],
                 'summaryData' => [
-                    'salaryBase' => $salaryBase,
-                    'totalAllowance' => $totalAllowance,
-                    'totalBonus' => $totalBonus,
-                    'totalPenalty' => $totalPenalty,
-                    'totalOtherDeduction' => $totalOtherDeduction,
-                    'insuranceDeduction' => $insuranceDeduction,
-                    'totalSalary' => $totalSalary
-                ]
+                    'salaryBase' => (float) $salaryBase,
+                    'totalAllowance' => (float) $totalAllowance,
+                    'totalBonus' => (float) $totalBonus,
+                    'totalPenalty' => (float) $totalPenalty,
+                    'totalOtherDeduction' => (float) $totalOtherDeduction,
+                    'insuranceDeduction' => (float) $insuranceDeduction,
+                    'totalSalary' => (float) $totalSalary,
+                    'totalPaid' => (float) $totalPaid
+                ],
+                'paymentStatus' => $paymentStatusData
             ]);
         }
         
@@ -169,7 +185,8 @@ class UserController extends Controller
             'user', 'positions', 'licenses', 'statuses', 'licenseStatuses',
             'shipments', 'shipmentsInMonth', 'selectedMonth', 'salaryBase', 'totalAllowance', 
             'insuranceDeduction', 'totalSalary', 'salaryDetails',
-            'requests', 'totalOtherDeduction', 'totalBonus', 'totalPenalty'
+            'requests', 'totalOtherDeduction', 'totalBonus', 'totalPenalty', 'totalPaid',
+            'paymentStatusData'
         ));
     }
 
@@ -344,8 +361,21 @@ class UserController extends Controller
                 ->where('user_id', $user->id)
                 ->firstOrFail();
 
+            // Store old status for comparison
+            $oldStatus = $salaryAdvanceRequest->status;
+            $oldType = $salaryAdvanceRequest->type;
+
             // Update salary advance request
             $salaryAdvanceRequest->update($request->validated());
+
+            // Check if this is a payment request with approved/paid status
+            if ($salaryAdvanceRequest->type === SalaryAdvanceRequest::TYPE_PAYMENT && 
+                in_array($salaryAdvanceRequest->status, [SalaryAdvanceRequest::STATUS_APPROVED, SalaryAdvanceRequest::STATUS_PAID]) &&
+                ($oldStatus !== $salaryAdvanceRequest->status || $oldType !== $salaryAdvanceRequest->type)) {
+                
+                // Process salary payment
+                $this->userService->processSalaryPaymentForRequest($salaryAdvanceRequest);
+            }
 
             /** process sync salary */
             $monthRequest = Carbon::parse($request->advance_month)->format('m/Y');

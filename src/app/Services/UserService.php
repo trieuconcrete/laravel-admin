@@ -250,6 +250,7 @@ class UserService
         $totalOtherDeduction = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
         $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
         $totalPenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
+        $totalPaid = $user->getTotalSalaryPayments($startDate, $endDate);
         
         // Calculate insurance deduction (10% of total: salary base + allowances)
         $totalBeforeInsurance = ($user->salary_base+ $totalAllowance + $totalBonus) - ($totalOtherDeduction + $totalPenalty);
@@ -267,7 +268,8 @@ class UserService
             'totalExpenses' => $totalExpenses, // tổng chi phí (không tính)
             'insuranceDeduction' => $insuranceDeduction, // khấu trừ bảo hiểm
             'totalSalary' => $totalSalary, // tổng lương
-            'salaryDetails' => $salaryDetails
+            'salaryDetails' => $salaryDetails,
+            'totalPaid' => $totalPaid // số tiền đã thanh toán
         ];
     }
     
@@ -355,7 +357,15 @@ class UserService
             $data['created_by'] = Auth::id() ?? null;
         }
         
-        return $this->salaryAdvanceRequestRepository->create($data);
+        $salaryAdvanceRequest = $this->salaryAdvanceRequestRepository->create($data);
+        
+        // Check if this is a payment request with approved/paid status
+        if ($salaryAdvanceRequest->type === SalaryAdvanceRequest::TYPE_PAYMENT && 
+            in_array($salaryAdvanceRequest->status, [SalaryAdvanceRequest::STATUS_APPROVED, SalaryAdvanceRequest::STATUS_PAID])) {
+            $this->processSalaryPayment($salaryAdvanceRequest);
+        }
+        
+        return $salaryAdvanceRequest;
     }
     
     /**
@@ -399,6 +409,151 @@ class UserService
         return [
             'requests' => $formattedRequests,
             'statuses' => SalaryAdvanceRequest::getStatuses()
+        ];
+    }
+    
+    /**
+     * Process salary payment for payment type requests
+     *
+     * @param SalaryAdvanceRequest $salaryAdvanceRequest
+     * @return void
+     */
+    private function processSalaryPayment(SalaryAdvanceRequest $salaryAdvanceRequest): void
+    {
+        try {
+            // Get the user
+            $user = $salaryAdvanceRequest->user;
+            if (!$user) {
+                Log::error('User not found for salary payment request', ['request_id' => $salaryAdvanceRequest->id]);
+                return;
+            }
+            
+            // Parse the advance month to get period
+            $advanceMonth = Carbon::parse($salaryAdvanceRequest->advance_month);
+            $monthFormat = $advanceMonth->format('m/Y');
+            
+            // Sync salary data for user first to ensure SalaryDetail exists
+            $syncResult = $this->salaryService->syncSalaryForUser($user, $monthFormat);
+            
+            if (!$syncResult['success']) {
+                Log::error('Failed to sync salary data for payment request', [
+                    'request_id' => $salaryAdvanceRequest->id,
+                    'user_id' => $user->id,
+                    'month' => $monthFormat,
+                    'error' => $syncResult['message']
+                ]);
+                return;
+            }
+            
+            // Get salary detail ID from sync result
+            $salaryDetailId = $syncResult['salary_detail_id'];
+            
+            if (!$salaryDetailId) {
+                Log::error('Salary detail ID not found in sync result', [
+                    'request_id' => $salaryAdvanceRequest->id,
+                    'user_id' => $user->id,
+                    'month' => $monthFormat,
+                    'sync_result' => $syncResult
+                ]);
+                return;
+            }
+            
+            // Find salary detail to check if already paid
+            $salaryDetail = \App\Models\SalaryDetail::find($salaryDetailId);
+            
+            if (!$salaryDetail) {
+                Log::error('Salary detail not found after sync', [
+                    'request_id' => $salaryAdvanceRequest->id,
+                    'salary_detail_id' => $salaryDetailId,
+                    'user_id' => $user->id
+                ]);
+                return;
+            }
+            
+            // Check if this is a repeated payment for logging
+            $isRepeatedPayment = $salaryDetail->status === 'paid';
+            
+            // Call the salary controller's processPayment method (allow multiple payments)
+            $salaryController = app(\App\Http\Controllers\Admin\SalaryController::class);
+            $response = $salaryController->processPayment($salaryDetail->salary_id);
+            
+            // Log the result
+            if ($response->getStatusCode() === 200) {
+                Log::info('Salary payment processed successfully via payment request', [
+                    'request_id' => $salaryAdvanceRequest->id,
+                    'salary_id' => $salaryDetail->salary_id,
+                    'user_id' => $user->id,
+                    'is_repeated_payment' => $isRepeatedPayment
+                ]);
+            } else {
+                Log::error('Failed to process salary payment via payment request', [
+                    'request_id' => $salaryAdvanceRequest->id,
+                    'salary_id' => $salaryDetail->salary_id,
+                    'response' => $response->getContent()
+                ]);
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('Error processing salary payment via payment request', [
+                'request_id' => $salaryAdvanceRequest->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+    
+    /**
+     * Process salary payment for payment type requests (public method for controller)
+     *
+     * @param SalaryAdvanceRequest $salaryAdvanceRequest
+     * @return void
+     */
+    public function processSalaryPaymentForRequest(SalaryAdvanceRequest $salaryAdvanceRequest): void
+    {
+        $this->processSalaryPayment($salaryAdvanceRequest);
+    }
+
+    /**
+     * Get salary payment status for a user in a specific month
+     *
+     * @param User $user
+     * @param string $month Format: m/Y (e.g., 07/2025)
+     * @return array
+     */
+    public function getSalaryPaymentStatus(User $user, string $month): array
+    {
+        $paymentStatus = $user->isSalaryFullyPaid($month);
+        
+        // Get payment history for this month
+        $parsedMonth = Carbon::createFromFormat('m/Y', $month);
+        $startDate = $parsedMonth->copy()->startOfMonth();
+        $endDate = $parsedMonth->copy()->endOfMonth();
+        
+        $paymentRequests = $user->salaryAdvanceRequests()
+            ->where('type', SalaryAdvanceRequest::TYPE_PAYMENT)
+            ->whereBetween('advance_month', [$startDate, $endDate])
+            ->whereIn('status', ['approved', SalaryAdvanceRequest::STATUS_PAID])
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        $paymentHistory = $paymentRequests->map(function ($request) {
+            return [
+                'id' => $request->id,
+                'request_code' => $request->request_code,
+                'amount' => $request->amount,
+                'formatted_amount' => number_format($request->amount, 0, ',', '.'),
+                'status' => $request->status,
+                'status_label' => $request->status_label,
+                'request_date' => $request->request_date,
+                'formatted_request_date' => $request->request_date ? $request->request_date->format('d/m/Y H:i') : null,
+                'reason' => $request->reason
+            ];
+        });
+        
+        return [
+            'payment_status' => $paymentStatus,
+            'payment_history' => $paymentHistory,
+            'total_payments' => $paymentRequests->count(),
+            'month' => $month
         ];
     }
 }

@@ -198,7 +198,25 @@
                                     </td>
                                     <td>{{ $shipment->origin }} - {{ $shipment->destination }}</td>
                                     <td>
-                                        {{ $shipment->getDriverDisplay() ?? null }}
+                                        @php
+                                            $driver = $shipment->getDriverFromShipmentDeductions();
+                                            $displayText = $shipment->getDriverDisplay();
+                                        @endphp
+                                        @if($driver)
+                                            <a href="{{ route('admin.users.show', ['user' => $driver->id, 'tab' => 'shipment']) }}" class="text-primary">
+                                                {{ $displayText }}
+                                            </a>
+                                        @elseif($shipment->driver)
+                                            <a href="{{ route('admin.users.show', ['user' => $shipment->driver->id, 'tab' => 'shipment']) }}" class="text-primary">
+                                                {{ $displayText }}
+                                            </a>
+                                        @elseif($shipment->coDriver)
+                                            <a href="{{ route('admin.users.show', ['user' => $shipment->coDriver->id, 'tab' => 'shipment']) }}" class="text-primary">
+                                                {{ $displayText }}
+                                            </a>
+                                        @else
+                                            {{ $displayText }}
+                                        @endif
                                     </td>
                                     <td>{{ $shipment->vehicle ? $shipment->vehicle->plate_number : '' }}</td>
                                     <td>

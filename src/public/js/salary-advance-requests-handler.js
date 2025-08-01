@@ -128,7 +128,7 @@ function refreshSalaryAdvanceRequests() {
             let html = `
                 <div class="card mt-4">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">Danh sách yêu cầu</h5>
+                        <h5 class="card-title mb-3">Lịch sử thanh toán</h5>
                         <div class="table-responsive">
                             <table class="table table-sm">
                                 <thead>
@@ -183,7 +183,7 @@ function refreshSalaryAdvanceRequests() {
         })
         .catch(error => {
             console.error('Error fetching salary advance requests:', error);
-            container.innerHTML = '<div class="alert alert-danger">Có lỗi xảy ra khi tải danh sách yêu cầu</div>';
+            container.innerHTML = '<div class="alert alert-danger">Có lỗi xảy ra khi tải Lịch sử thanh toán</div>';
         });
 }
 
