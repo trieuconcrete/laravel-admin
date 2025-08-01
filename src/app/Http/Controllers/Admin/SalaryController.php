@@ -346,6 +346,14 @@ class SalaryController extends Controller
             
             // Check if the authenticated user has permission to process this payment
             // $this->authorize('process', $salaryDetail);
+
+            // Validate salary status
+            if ($salaryDetail->status === 'paid') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lương đã được thanh toán trước đó.'
+                ], 400);
+            }
             
             // Validate salary period
             if (!$salaryDetail->salaryPeriod) {
@@ -396,7 +404,7 @@ class SalaryController extends Controller
                     'net_salary' => $netSalary,
                     'is_repeated_payment' => $isRepeatedPayment
                 ],
-                'payment_id' => $salaryDetail->salary_id
+                'payment_id' => null // Set to null since this is a salary payment, not a customer payment
             ]);
 
             // Log the payment
