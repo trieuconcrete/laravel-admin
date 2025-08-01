@@ -141,7 +141,7 @@
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Ghi chú</label>
-                                                <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="Ghi chú">{!! old('Ghi chú', $shipment->Ghi chú) !!}</textarea>
+                                                <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="Ghi chú">{!! old('Ghi chú', $shipment->notes) !!}</textarea>
                                                 @error('Ghi chú')<span class="text-danger">{{ $message }}</span>@enderror
                                             </div>
                                             <hr>
