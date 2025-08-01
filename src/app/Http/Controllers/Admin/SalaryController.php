@@ -333,12 +333,6 @@ class SalaryController extends Controller
      *
      * @param  int  $id
      * @return \Illuminate\Http\JsonResponse
-     */
-    /**
-     * Process salary payment
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Database\Eloquent\ModelNotFoundException
      */
     public function processPayment($id)
@@ -353,14 +347,6 @@ class SalaryController extends Controller
             // Check if the authenticated user has permission to process this payment
             // $this->authorize('process', $salaryDetail);
             
-            // Validate salary status
-            if ($salaryDetail->status === 'paid') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Lương đã được thanh toán trước đó.'
-                ], 400);
-            }
-
             // Validate salary period
             if (!$salaryDetail->salaryPeriod) {
                 return response()->json([
@@ -372,7 +358,10 @@ class SalaryController extends Controller
             $now = now();
             $adminId = auth('admin')->id();
 
-            // Update salary status to paid
+            // Check if this is a repeated payment
+            $isRepeatedPayment = $salaryDetail->status === 'paid';
+            
+            // Update salary status to paid (allow multiple payments)
             $salaryDetail->update([
                 'status' => 'paid',
                 'payment_date' => $now,
@@ -386,7 +375,8 @@ class SalaryController extends Controller
                 'category' => 'salary',
                 'amount' => $netSalary,
                 'description' => sprintf(
-                    'Thanh toán lương tháng %d/%d cho %s (Mã NV: %s)',
+                    '%s lương tháng %d/%d cho %s (Mã NV: %s)',
+                    $isRepeatedPayment ? 'Thanh toán lại' : 'Thanh toán',
                     Carbon::parse($salaryDetail->salaryPeriod->start_date)->month,
                     Carbon::parse($salaryDetail->salaryPeriod->start_date)->year,
                     $salaryDetail->employee->full_name,
@@ -403,8 +393,10 @@ class SalaryController extends Controller
                     'base_salary' => $salaryDetail->base_salary,
                     'total_allowances' => $salaryDetail->total_allowances ?? 0,
                     'total_deductions' => $salaryDetail->total_deductions ?? 0,
-                    'net_salary' => $netSalary
-                ]
+                    'net_salary' => $netSalary,
+                    'is_repeated_payment' => $isRepeatedPayment
+                ],
+                'payment_id' => $salaryDetail->salary_id
             ]);
 
             // Log the payment
@@ -413,7 +405,8 @@ class SalaryController extends Controller
                 'employee_id' => $salaryDetail->employee_id,
                 'net_salary' => $netSalary,
                 'processed_by' => $adminId,
-                'transaction_id' => $transaction->id
+                'transaction_id' => $transaction->id,
+                'is_repeated_payment' => $isRepeatedPayment
             ]);
             
             /** process sync salary */
@@ -435,11 +428,12 @@ class SalaryController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Thanh toán lương thành công.',
+                'message' => $isRepeatedPayment ? 'Thanh toán lại lương thành công.' : 'Thanh toán lương thành công.',
                 'data' => [
                     'payment_date' => $now->format('d/m/Y H:i:s'),
                     'transaction_id' => $transaction->id,
-                    'amount' => number_format($salaryDetail->net_salary) . ' VNĐ'
+                    'amount' => number_format($salaryDetail->net_salary) . ' VNĐ',
+                    'is_repeated_payment' => $isRepeatedPayment
                 ]
             ]);
 

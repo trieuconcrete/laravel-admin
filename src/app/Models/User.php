@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -188,5 +189,80 @@ class User extends Authenticatable
             ->whereBetween('advance_month', [$startDate, $endDate])
             ->whereIn('status', ['approved', SalaryAdvanceRequest::STATUS_PAID])
             ->sum('amount');
+    }
+
+    /**
+     * Get total amount of salary payments (payment type) for a date range
+     * 
+     * @param mixed $startDate
+     * @param mixed $endDate
+     * @return float
+     */
+    public function getTotalSalaryPayments($startDate, $endDate)
+    {
+        return $this->salaryAdvanceRequests()
+            ->where('type', SalaryAdvanceRequest::TYPE_PAYMENT)
+            ->whereBetween('advance_month', [$startDate, $endDate])
+            ->whereIn('status', ['approved', SalaryAdvanceRequest::STATUS_PAID])
+            ->sum('amount');
+    }
+
+    /**
+     * Check if salary is fully paid for a specific month
+     * 
+     * @param string $month Format: m/Y (e.g., 07/2025)
+     * @return array
+     */
+    public function isSalaryFullyPaid($month)
+    {
+        // Parse month and year
+        list($monthNum, $year) = explode('/', $month);
+        $startDate = Carbon::createFromDate($year, $monthNum, 1)->startOfMonth();
+        $endDate = Carbon::createFromDate($year, $monthNum, 1)->endOfMonth();
+        
+        // Get salary detail for this month
+        $periodName = 'Kỳ lương tháng ' . $month;
+        $salaryPeriod = \App\Models\SalaryPeriod::where('period_name', $periodName)->first();
+        
+        if (!$salaryPeriod) {
+            return [
+                'is_fully_paid' => false,
+                'reason' => 'Không tìm thấy kỳ lương cho tháng này',
+                'net_salary' => 0,
+                'total_paid' => 0,
+                'remaining_amount' => 0
+            ];
+        }
+        
+        $salaryDetail = \App\Models\SalaryDetail::where('employee_id', $this->id)
+            ->where('period_id', $salaryPeriod->period_id)
+            ->first();
+            
+        if (!$salaryDetail) {
+            return [
+                'is_fully_paid' => false,
+                'reason' => 'Không tìm thấy bảng lương cho tháng này',
+                'net_salary' => 0,
+                'total_paid' => 0,
+                'remaining_amount' => 0
+            ];
+        }
+        
+        // Get total paid amount for this month
+        $totalPaid = $this->getTotalSalaryPayments($startDate, $endDate);
+        
+        // Calculate remaining amount
+        $netSalary = $salaryDetail->net_salary ?? 0;
+        $remainingAmount = $netSalary - $totalPaid;
+        
+        return [
+            'is_fully_paid' => $remainingAmount <= 0,
+            'reason' => $remainingAmount <= 0 ? 'Đã thanh toán đủ lương' : 'Chưa thanh toán đủ lương',
+            'net_salary' => $netSalary,
+            'total_paid' => $totalPaid,
+            'remaining_amount' => max(0, $remainingAmount),
+            'salary_detail_id' => $salaryDetail->salary_id,
+            'period_id' => $salaryPeriod->period_id
+        ];
     }
 }

@@ -66,6 +66,7 @@ class SalaryAdvanceRequest extends Model
     const TYPE_SALARY = 'salary';
     const TYPE_BONUS = 'bonus';
     const TYPE_PENALTY = 'penalty';
+    const TYPE_PAYMENT = 'payment';
     const TYPE_OTHER = 'other';
 
     /**
@@ -98,6 +99,7 @@ class SalaryAdvanceRequest extends Model
             self::TYPE_SALARY => 'Ứng lương',
             self::TYPE_BONUS => 'Tiền thưởng',
             self::TYPE_PENALTY => 'Phạt',
+            // self::TYPE_PAYMENT => 'Thanh toán lương',
             // self::TYPE_OTHER => 'Khác',
         ];
     }
@@ -123,6 +125,7 @@ class SalaryAdvanceRequest extends Model
             self::TYPE_SALARY => 'warning',
             self::TYPE_BONUS => 'success',
             self::TYPE_PENALTY => 'danger',
+            self::TYPE_PAYMENT => 'info',
             default => 'secondary',
         };
     }
@@ -274,6 +277,7 @@ class SalaryAdvanceRequest extends Model
             self::TYPE_SALARY => 'UL',
             self::TYPE_BONUS => 'THUONG',
             self::TYPE_PENALTY => 'PHAT',
+            self::TYPE_PAYMENT => 'TTL',
             default => 'UL',
         };
         

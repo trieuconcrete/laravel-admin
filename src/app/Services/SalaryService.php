@@ -128,22 +128,24 @@ class SalaryService
                 'period_name' => $periodName
             ]);
             
-            // Process salary data for the specific user
-            $this->processSalaryForUser($user, $salaryPeriod, $monthNum, $year);
+            // Process salary data for the specific user and get salary detail
+            $salaryDetail = $this->processSalaryForUser($user, $salaryPeriod, $monthNum, $year);
             
             // Commit transaction
             DB::commit();
             
             Log::info('Salary sync completed successfully', [
                 'user_id' => $user->id,
-                'month' => $month
+                'month' => $month,
+                'salary_detail_id' => $salaryDetail->salary_id ?? null
             ]);
             
             return [
                 'success' => true,
                 'message' => 'Đã đồng bộ dữ liệu lương cho nhân viên thành công!',
                 'month' => $month,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'salary_detail_id' => $salaryDetail->salary_id ?? null
             ];
                 
         } catch (\Exception $e) {
@@ -204,7 +206,7 @@ class SalaryService
      * @param mixed $salaryPeriod
      * @param string $month
      * @param string $year
-     * @return void
+     * @return \App\Models\SalaryDetail
      */
     protected function processSalaryForUser(User $user, $salaryPeriod, $month, $year)
     {
@@ -244,7 +246,7 @@ class SalaryService
             $updateData['payment_method'] = null;
         }
 
-        $this->salaryDetailRepository->updateOrCreate(
+        return $this->salaryDetailRepository->updateOrCreate(
             [
                 'employee_id' => $user->id,
                 'period_id' => $salaryPeriod->period_id

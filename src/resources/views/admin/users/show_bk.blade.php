@@ -1,5 +1,5 @@
 @extends('admin.layout')
-@section('title', 'Thông tin cá nhân')
+
 @section('content')
 
 <div class="container-fluid">
@@ -499,13 +499,13 @@
                                                             <td class="fw-medium">Trừ ứng lương <small class="text-muted">(Đã duyệt/Đã chi)</small></td>
                                                             <td class="text-end text-danger" data-salary="other-deduction">- {{ number_format($totalOtherDeduction) }} đ</td>
                                                         </tr>
-                                                        {{--  <tr class="border-bottom">
+                                                        <tr class="border-bottom">
                                                             <td class="fw-medium">Trừ số tiền đã thanh toán <small class="text-muted">(Đã duyệt/Đã chi)</small></td>
                                                             <td class="text-end text-danger" data-salary="paid-deduction">- {{ number_format($totalPaid) }} đ</td>
-                                                        </tr>  --}}
+                                                        </tr>
                                                         <tr>
-                                                            <td class="fw-bold fs-5">Tổng lương thực nhận</td>
-                                                            <td class="text-end fw-bold fs-5 text-success" data-salary="total">{{ number_format($totalSalary) }} đ</td>
+                                                            <td class="fw-bold fs-5">Tổng lương thực nhận <small class="text-muted">(Tiền còn lại)</small></td>
+                                                            <td class="text-end fw-bold fs-5 text-success" data-salary="total">{{ number_format($totalSalary - $totalPaid) }} đ</td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -716,7 +716,7 @@
                         </div>
                     </div>
 
-                    {{--  <div class="row mb-3">
+                    <div class="row mb-3">
                         <div class="col-md-12">
                             <label class="form-label">Hình thức thanh toán <span class="text-danger">*</span></label>
                             <select class="form-select" name="type" required>
@@ -725,7 +725,7 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>  --}}
+                    </div>
 
                     <div class="mb-3">
                         <label class="form-label">Lý do</label>
