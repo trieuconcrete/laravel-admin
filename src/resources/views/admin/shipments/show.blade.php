@@ -1,5 +1,5 @@
 @extends('admin.layout')
-@section('title', 'Thông tin chuyến hàng')@endsection
+@section('title', 'Thông tin chuyến hàng')
 @section('content')
 
 <div class="container-fluid">
