@@ -158,7 +158,7 @@ function refreshSalaryAdvanceRequests() {
                             <td>
                                 <span class="badge bg-${request.type_color}">${request.type_label}</span>
                             </td>
-                            <td>${request.formatted_request_date}</td>
+                            <td>${request.advance_month}</td>
                             <td>${request.formatted_amount} đ</td>
                             <td>${request.reason || '-'}</td>
                             <td><span class="badge bg-${request.status_color}">${request.status_label}</span></td>
