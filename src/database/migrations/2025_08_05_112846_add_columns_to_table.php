@@ -35,6 +35,11 @@ return new class extends Migration
                   ->default(false)
                   ->after('status')
                   ->comment('Đánh dấu chuyến hàng sử dụng xe thuê');
+            $table->unsignedTinyInteger('shipment_type')
+                  ->nullable()
+                  ->default(1)
+                  ->after('is_rental_car')
+                  ->comment('1: Khách chạy theo chuyến, 2: Khách thuê xe tháng, 3: Xe nâng, 4: Xe đường dài bắc-nam');
         });
     }
 
@@ -50,7 +55,7 @@ return new class extends Migration
             $table->dropColumn('salary_type');
         });
         Schema::table('shipments', function (Blueprint $table) {
-            $table->dropColumn('is_rental_car');
+            $table->dropColumn(['is_rental_car', 'shipment_type']);
         });
     }
 };
