@@ -33,7 +33,7 @@ return new class extends Migration
             $table->decimal('salary_base', 12,2)->nullable();
             $table->tinyInteger('gender')->nullable();
             $table->text('notes')->nullable();
-            $table->softDeletes();
+            $table->softDeletes(); 
             $table->rememberToken();
             $table->timestamps();
 

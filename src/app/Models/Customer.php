@@ -13,6 +13,7 @@ class Customer extends Model
 
     const TYPE_INDIVIDUAL = 'individual';
     const TYPE_BUSINESS = 'business';
+    const TYPE_CARRENTAL = 'carrental';
 
     /**
      * Các thuộc tính có thể gán hàng loạt.
@@ -138,7 +139,8 @@ class Customer extends Model
     {
         return [
             self::TYPE_INDIVIDUAL => 'Cá nhân',
-            self::TYPE_BUSINESS => 'Doanh nghiệp'
+            self::TYPE_BUSINESS => 'Doanh nghiệp',
+            self::TYPE_CARRENTAL => 'Cho thuê xe',
         ];
     }
 

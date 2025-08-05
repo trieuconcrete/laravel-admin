@@ -30,8 +30,8 @@ class Vehicle extends Model
         'capacity',
         'manufactured_year',
         'status',
-        'is_rental_car', // đánh dấu xe thuê từ nhà cung cấp
-        'rental_provider_id'    // ID nhà cung cấp cho thuê xe
+        'is_car_rental', // đánh dấu xe thuê từ nhà cung cấp
+        'customer_id'    // ID Customer cho thuê xe
     ];
 
     /**
@@ -40,6 +40,7 @@ class Vehicle extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'is_car_rental' => 'boolean',
         'capacity' => 'float',
         'manufactured_year' => 'integer',
     ];
@@ -71,6 +72,14 @@ class Vehicle extends Model
     public function vehicleType(): BelongsTo
     {
         return $this->belongsTo(VehicleType::class, 'vehicle_type_id');
+    }
+
+    /**
+     * Get the customer that owns/rents the vehicle (all types)
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class)->where('type', 'carrental');
     }
 
     /**
@@ -229,5 +238,14 @@ class Vehicle extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Scope to get only rental cars
+     * Usage: Vehicle::rental()->get()
+     */
+    public function scopeCarRental($query, $check = false)
+    {
+        return $query->where('is_car_rental', $check);
     }
 }
