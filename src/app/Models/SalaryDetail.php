@@ -55,7 +55,8 @@ class SalaryDetail extends Model
         'created_by',
         'approved_by',
         'total_allowance',
-        'total_expenses'
+        'total_expenses',
+        'salary_type' // 1: Tài xế ăn lương cơ bản, 2: Tài xế ăn lương doanh số
     ];
 
     /**
