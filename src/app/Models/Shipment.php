@@ -45,6 +45,7 @@ class Shipment extends Model
         'notes',
         'status',
         'is_rental_car', // đánh dấu chuyến hàng sử dụng xe thuê
+        'shipment_type', // 1: Khách chạy theo chuyến, 2: Khách thuê xe tháng, 3: Xe nâng, 4: Xe đường dài bắc-nam
         'created_by',
         'updated_by'
     ];
