@@ -12,15 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('vehicles', function (Blueprint $table) {
-            $table->boolean('is_rental_car')
+            $table->boolean('is_car_rental')
                   ->nullable()
                   ->default(false)
                   ->after('status')
                   ->comment('Đánh dấu xe thuê từ nhà cung cấp');
-            $table->unsignedBigInteger('rental_provider_id')
+            $table->unsignedBigInteger('customer_id')
                   ->nullable()
-                  ->after('is_rental_car')
-                  ->comment('ID nhà cung cấp cho thuê xe');
+                  ->after('is_car_rental')
+                  ->comment('ID Customer cho thuê xe');
+            $table->softDeletes();
         });
         Schema::table('salary_details', function (Blueprint $table) {
             $table->unsignedTinyInteger('salary_type')
@@ -30,7 +31,7 @@ return new class extends Migration
                   ->comment('1: Tài xế ăn lương cơ bản, 2: Tài xế ăn lương doanh số');
         });
         Schema::table('shipments', function (Blueprint $table) {
-            $table->boolean('is_rental_car')
+            $table->boolean('is_car_rental')
                   ->nullable()
                   ->default(false)
                   ->after('status')
@@ -38,9 +39,10 @@ return new class extends Migration
             $table->unsignedTinyInteger('shipment_type')
                   ->nullable()
                   ->default(1)
-                  ->after('is_rental_car')
+                  ->after('is_car_rental')
                   ->comment('1: Khách chạy theo chuyến, 2: Khách thuê xe tháng, 3: Xe nâng, 4: Xe đường dài bắc-nam');
         });
+        DB::statement("ALTER TABLE customers MODIFY COLUMN type ENUM('individual', 'business', 'carrental') NOT NULL DEFAULT 'individual' COMMENT 'Loại khách hàng: cá nhân/doanh nghiệp/cho thuê xe'");
     }
 
     /**
@@ -49,13 +51,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('vehicles', function (Blueprint $table) {
-            $table->dropColumn(['is_rental_car', 'rental_provider_id']);
+            $table->dropColumn(['is_car_rental', 'customer_id']);
         });
         Schema::table('salary_details', function (Blueprint $table) {
             $table->dropColumn('salary_type');
         });
         Schema::table('shipments', function (Blueprint $table) {
-            $table->dropColumn(['is_rental_car', 'shipment_type']);
+            $table->dropColumn(['is_car_rental', 'shipment_type']);
         });
     }
 };

@@ -259,6 +259,14 @@
                                         </div>
                                         <div class="tab-pane" id="shipmentDetail" role="tabpanel">
                                             <div class="row mb-3">
+                                                <div class="col-md-2">
+                                                    <div class="form-check form-check-secondary mb-3">
+                                                        <input class="form-check-input" name="is_rental_car" @checked($shipment->is_car_rental) type="checkbox" value="1" id="is_rental_car">
+                                                        <label class="form-check-label" for="is_rental_car">
+                                                            Xe HPL Thuê
+                                                        </label>
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
                                                     <select class="form-select" name="vehicle_id" required>
