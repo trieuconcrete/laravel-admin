@@ -44,6 +44,7 @@ class Shipment extends Model
         'has_crane_service',
         'notes',
         'status',
+        'is_rental_car', // đánh dấu chuyến hàng sử dụng xe thuê
         'created_by',
         'updated_by'
     ];

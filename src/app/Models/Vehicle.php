@@ -29,7 +29,9 @@ class Vehicle extends Model
         'driver_id',
         'capacity',
         'manufactured_year',
-        'status'
+        'status',
+        'is_rental_car', // đánh dấu xe thuê từ nhà cung cấp
+        'rental_provider_id'    // ID nhà cung cấp cho thuê xe
     ];
 
     /**
