@@ -59,7 +59,34 @@
                                 <div class="card-body">
                                     <div class="tab-content">
                                         <div class="tab-pane active" id="driverAllowance" role="tabpanel">
-                                            <h5 class="mb-3">Thông tin vận chuyển</h5>
+                                            <div class="row mb-3">
+                                                <label class="form-label fs-5">Loại chuyến xe <span class="text-danger">*</span></label>
+                                                <div class="col-md-4">
+                                                    <div class="form-check form-radio-primary mb-3">
+                                                        <input class="form-check-input" type="radio" name="shipment_type" value="1" id="shipment_type1" @checked(old('shipment_type', $shipment->shipment_type) == 1)>
+                                                        <label class="form-check-label" for="shipment_type1">
+                                                            Khách chạy theo chuyến
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-check form-radio-primary mb-3">
+                                                        <input class="form-check-input" type="radio" name="shipment_type" value="3" id="shipment_type3" @checked(old('shipment_type', $shipment->shipment_type) == 3)>
+                                                        <label class="form-check-label" for="shipment_type3">
+                                                            Xe nâng
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-check form-radio-primary mb-3">
+                                                        <input class="form-check-input" type="radio" name="shipment_type" value="4" id="shipment_type4" @checked(old('shipment_type', $shipment->shipment_type) == 4)>
+                                                        <label class="form-check-label" for="shipment_type4">
+                                                            Xe đường dài bắc-nam
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h5 class="mb-3 fs-5">Thông tin vận chuyển</h5>
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
@@ -105,14 +132,34 @@
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Điểm khởi hành <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" placeholder="Nhập điểm khởi hành" name="origin" value="{{ old('origin', $shipment->origin) }}" required>
+                                                    <label class="form-label">Điểm đi <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" placeholder="Nhập điểm đi" name="origin" value="{{ old('origin', $shipment->origin) }}" required>
                                                     @error('origin')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Điểm đến</label>
                                                     <input type="text" class="form-control" placeholder="Nhập điểm đến" name="destination" value="{{ old('destination', $shipment->destination) }}">
                                                     @error('destination')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Điểm đi 2</label>
+                                                    <input type="text" class="form-control" placeholder="Nhập điểm đi 2" name="origin2" value="{{ old('origin2',$shipment->origin2) }}">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Điểm đến 2</label>
+                                                    <input type="text" class="form-control" placeholder="Nhập điểm đến 2" name="destination2" value="{{ old('destination2',$shipment->destination2) }}">
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Điểm đi 3</label>
+                                                    <input type="text" class="form-control" placeholder="Nhập điểm đi 3" name="origin3" value="{{ old('origin3',$shipment->origin3) }}">
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Điểm đến 3</label>
+                                                    <input type="text" class="form-control" placeholder="Nhập điểm đến 3" name="destination3" value="{{ old('destination3',$shipment->destination3) }}">
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
