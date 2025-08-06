@@ -260,17 +260,10 @@
                                         <div class="tab-pane" id="shipmentDetail" role="tabpanel">
                                             <div class="row mb-3">
                                                 <div class="col-md-2">
-<<<<<<< HEAD
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" name="is_car_rental" @checked($shipment->is_car_rental) type="checkbox" value="1" id="is_car_rental">
-                                                        <label class="form-check-label" for="is_car_rental">
-                                                            Xe thuê từ nhà cung cấp
-=======
                                                     <div class="form-check form-check-secondary mb-3">
                                                         <input class="form-check-input" name="is_car_rental" @checked($shipment->is_car_rental) type="checkbox" value="1" id="is_car_rental">
                                                         <label class="form-check-label" for="is_car_rental">
                                                             Xe HPL Thuê
->>>>>>> project/vantai_hpl_dev
                                                         </label>
                                                     </div>
                                                 </div>
