@@ -157,4 +157,43 @@ class VehicleController extends Controller
             return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
+
+    public function getByCarRental(Request $request)
+    {
+        try {
+            $isRental = $request->boolean('is_car_rental');
+            
+            $vehicles = Vehicle::query()
+                ->where('is_car_rental', $isRental)
+                ->where('status', 'active') // Only active vehicles
+                ->with(['vehicleType', 'driver'])
+                ->orderBy('plate_number')
+                ->get()
+                ->map(function ($vehicle) {
+                    return [
+                        'id' => $vehicle->id,
+                        'plate_number' => $vehicle->plate_number,
+                        'vehicle_type' => $vehicle->vehicleType->name ?? '',
+                        'capacity' => $vehicle->capacity,
+                        'driver_name' => $vehicle->driver->name ?? 'Chưa phân công',
+                    ];
+                });
+            
+            return response()->json([
+                'success' => true,
+                'vehicles' => $vehicles,
+                'count' => $vehicles->count(),
+                'message' => $vehicles->isEmpty() ? 'Không có phương tiện phù hợp' : ''
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error in getByRentalStatus: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi tải dữ liệu',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
 }

@@ -264,21 +264,30 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-2">
                                                     <div class="form-check form-check-secondary mb-3">
-                                                        <input class="form-check-input" name="is_rental_car" type="checkbox" value="1" id="is_rental_car">
-                                                        <label class="form-check-label" for="is_rental_car">
+                                                        <input class="form-check-input" 
+                                                        name="is_car_rental" 
+                                                        type="checkbox" 
+                                                        value="1" 
+                                                        id="is_car_rental">
+                                                        <label class="form-check-label" for="is_car_rental">
                                                             Xe HPL Thuê
                                                         </label>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
-                                                    <select class="form-select vehicles" name="vehicle_id" required>
+                                                    <select class="form-select" name="vehicle_id" id="vehicles" required>
                                                         <option value="">Chọn phương tiện</option>
-                                                        @foreach($vehicles as $id => $plate)
-                                                            <option value="{{ $id }}" {{ old('vehicle_id') == $id ? 'selected' : '' }}>{{ $plate }}</option>
+                                                        @foreach($vehicles as $vehicle)
+                                                            <option value="{{ $vehicle->vehicle_id }}" {{ old('vehicle_id') == $vehicle->vehicle_id ? 'selected' : '' }}>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
                                                         @endforeach
                                                     </select>
                                                     @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    
+                                                    <!-- Loading spinner (hidden by default) -->
+                                                    <div class="spinner-border spinner-border-sm text-primary mt-2" id="vehicle_loading" style="display: none;">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <hr>
