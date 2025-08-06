@@ -69,14 +69,17 @@ class ShipmentController extends Controller
             
         $deductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_EXPENSE)
             ->where('status', 'active')
+            ->orderBy('order', 'asc')
             ->get();
             
         $personDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_DRIVER)
             ->where('status', 'active')
+            ->orderBy('order', 'asc')
             ->get();
             
         $subPersonDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_BUS_DRIVER)
             ->where('status', 'active')
+            ->orderBy('order', 'asc')
             ->get();
             
         $userPXs = User::whereIn('role', ['driver', 'assistant', 'helper', 'staff'])

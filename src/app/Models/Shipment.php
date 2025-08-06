@@ -28,8 +28,12 @@ class Shipment extends Model
         'shipment_code',
         'contract_id',
         'customer_id', // khách hàng
-        'origin', // điểm xuất phát
-        'destination', // điểm đến
+        'origin', // điểm đi 1
+        'origin2', // điểm đi 2
+        'origin3', // điểm đi 3
+        'destination', // điểm đến 1
+        'destination2', // điểm đến 2
+        'destination3', // điểm đến 2
         'departure_time', // thời gian khởi hành
         'estimated_arrival_time', // thời gian đến
         'cargo_weight', // trọng lượng hàng hóa
