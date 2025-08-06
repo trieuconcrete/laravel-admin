@@ -9,7 +9,7 @@ return [
     'contract_management' => 'Quản lý hợp đồng',
     'quote_management' => 'Quản lý báo giá',
     'car_rental_management' => 'Quản lý thuê xe',
-    'shipment_management' => 'Quản lý chuyến hàng',
+    'shipment_management' => 'Quản lý chuyến xe',
     'salary_management' => 'Quản lý lương',
     'settings' => 'Cài đặt',
     'customer_management' => 'Quản lý khách hàng',
