@@ -1,0 +1,207 @@
+<?php
+
+namespace App\Exports;
+
+use App\Models\CarRental;
+use App\Models\Setting;
+use Maatwebsite\Excel\Concerns\WithTitle;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use Carbon\Carbon;
+
+class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
+{
+    protected $carRental;
+    protected $shipments;
+    protected $tollFeesByDate;
+    protected $month;
+
+    /**
+     * @param CarRental $carRental
+     * @param Collection $shipments
+     * @param Collection $tollFeesByDate
+     * @param string $month
+     */
+    public function __construct(CarRental $carRental, $shipments, $tollFeesByDate, string $month = null)
+    {
+        $this->carRental = $carRental;
+        $this->shipments = $shipments;
+        $this->tollFeesByDate = $tollFeesByDate;
+        $this->month = $month ?? now()->format('m/Y');
+    }
+
+    /**
+     * @return string
+     */
+    public function title(): string
+    {
+        $monthDate = \DateTime::createFromFormat('m/Y', $this->month);
+        $monthName = $monthDate->format('m/Y');
+        
+        return "Nhật ký lộ trình xe {$monthName}";
+    }
+
+    /**
+     * @param Worksheet $sheet
+     */
+    public function styles(Worksheet $sheet)
+    {
+        // Format month name
+        $monthDate = \DateTime::createFromFormat('m/Y', $this->month);
+        $vietnameseMonth = $monthDate->format('m/Y');
+
+        // Get company settings
+        $companyName = Setting::getValue('company_name', 'CÔNG TY CỔ PHẦN VẬN TẢI HPL');
+        $companyAddress = Setting::getValue('company_address', '');
+
+        // Header content
+        $sheet->mergeCells('A1:N1');
+        $sheet->setCellValue('A1', $companyName);
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        if ($companyAddress) {
+            $sheet->mergeCells('A2:N2');
+            $sheet->setCellValue('A2', $companyAddress);
+            $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        }
+
+        $sheet->mergeCells('A4:N4');
+        $sheet->setCellValue('A4', "BIÊN BẢN NHẬT KÝ LỘ TRÌNH XE THÁNG {$vietnameseMonth}");
+        $sheet->getStyle('A4')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A4')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Customer and rental info
+        $sheet->setCellValue('A6', 'Tên khách hàng: ' . $this->carRental->customer->name);
+        $sheet->mergeCells('A6:E6');
+        $sheet->getStyle('A6')->getFont()->setBold(true);
+
+        // Table headers
+        $headers = [
+            'A13' => 'STT',
+            'B13' => 'Ngày',
+            'C13' => 'Lộ trình',
+            'D13' => 'Giờ bắt đầu',
+            'E13' => 'Giờ kết thúc',
+            'F13' => 'Số giờ tăng ca',
+            'G13' => 'Đơn giá tăng ca',
+            'H13' => 'Thành tiền tăng ca',
+            'I13' => 'Km bắt đầu',
+            'J13' => 'Km kết thúc',
+            'K13' => 'Số km đi trong ngày',
+            'L13' => 'Phụ phí phí cầu',
+            'M13' => 'Phí đậu xe',
+            'N13' => 'THỜI GIAN TĂNG CA'
+        ];
+
+        foreach ($headers as $cell => $value) {
+            $sheet->setCellValue($cell, $value);
+            $sheet->getStyle($cell)->getFont()->setBold(true);
+            $sheet->getStyle($cell)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle($cell)->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'N') as $column) {
+            $sheet->getColumnDimension($column)->setAutoSize(true);
+        }
+
+        // Set specific widths for better display
+        $sheet->getColumnDimension('C')->setWidth(30);  // Lộ trình
+        $sheet->getColumnDimension('H')->setWidth(18);  // Thành tiền tăng ca
+        $sheet->getColumnDimension('K')->setWidth(20);  // Số km đi trong ngày
+        $sheet->getColumnDimension('L')->setWidth(15);  // Phụ phí phí cầu
+        $sheet->getColumnDimension('M')->setWidth(12);  // Phí đậu xe
+        $sheet->getColumnDimension('N')->setWidth(20);  // THỜI GIAN TĂNG CA
+        
+        // Add data rows starting from row 14
+        $row = 14;
+        $totalOvertimeCost = 0;
+        $totalDistance = 0;
+        $totalTollFee = 0;
+        $totalParkingFee = 0;
+        $totalOvertimeHours = 0;
+        
+        foreach ($this->shipments as $index => $shipment) {
+            // Get toll fees for this date
+            $dateKey = Carbon::parse($shipment->run_date)->format('Y-m-d');
+            $dayTollFees = $this->tollFeesByDate->get($dateKey, collect());
+            $dayTollFeeAmount = $dayTollFees->sum('fee_amount');
+            
+            $sheet->setCellValue('A' . $row, $index + 1);
+            $sheet->setCellValue('B' . $row, Carbon::parse($shipment->run_date)->format('d/m/Y'));
+            $sheet->setCellValue('C' . $row, $shipment->origin . ' -> ' . $shipment->destination);
+            $sheet->setCellValue('D' . $row, Carbon::parse($shipment->start_time, 'H:i:s')->format('H:i'));
+            $sheet->setCellValue('E' . $row, Carbon::parse($shipment->end_time, 'H:i:s')->format('H:i'));
+            $sheet->setCellValue('F' . $row, number_format($shipment->overtime_hours, 1));
+            $sheet->setCellValue('G' . $row, number_format($shipment->overtime_rate));
+            $sheet->setCellValue('H' . $row, $shipment->total_overtime_cost > 0 ? number_format($shipment->total_overtime_cost) : '-');
+            $sheet->setCellValue('I' . $row, number_format($shipment->start_odometer));
+            $sheet->setCellValue('J' . $row, number_format($shipment->end_odometer));
+            $sheet->setCellValue('K' . $row, number_format($shipment->actual_distance));
+            $sheet->setCellValue('L' . $row, number_format($dayTollFeeAmount));
+            $sheet->setCellValue('M' . $row, number_format($shipment->parking_fee));
+            
+            // Calculate overtime time range
+            $overtimeTimeRange = '';
+            if ($shipment->overtime_hours > 0) {
+                $startTime = Carbon::parse($shipment->run_date . ' ' . $shipment->start_time);
+                $endTime = Carbon::parse($shipment->run_date . ' ' . $shipment->end_time);
+                $overtimeStart = Carbon::parse($shipment->run_date . ' 17:30');
+                
+                if ($endTime->greaterThan($overtimeStart)) {
+                    $effectiveStart = $startTime->greaterThan($overtimeStart) ? $startTime : $overtimeStart;
+                    $overtimeTimeRange = $effectiveStart->format('H:i') . ' - ' . $endTime->format('H:i');
+                }
+            }
+            $sheet->setCellValue('N' . $row, $overtimeTimeRange);
+            
+            // Accumulate totals
+            $totalOvertimeCost += $shipment->total_overtime_cost;
+            $totalDistance += $shipment->actual_distance;
+            $totalTollFee += $dayTollFeeAmount;
+            $totalParkingFee += $shipment->parking_fee;
+            $totalOvertimeHours += $shipment->overtime_hours;
+            
+            $row++;
+        }
+        
+        // Add totals row
+        $sheet->setCellValue('A' . $row, 'TỔNG CỘNG');
+        $sheet->mergeCells('A' . $row . ':E' . $row);
+        $sheet->getStyle('A' . $row)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        
+        $sheet->setCellValue('F' . $row, number_format($totalOvertimeHours, 1));
+        $sheet->setCellValue('H' . $row, number_format($totalOvertimeCost));
+        $sheet->setCellValue('K' . $row, number_format($totalDistance));
+        $sheet->setCellValue('L' . $row, number_format($totalTollFee));
+        $sheet->setCellValue('M' . $row, number_format($totalParkingFee));
+        
+        // Style totals row
+        $sheet->getStyle('A' . $row . ':N' . $row)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $row . ':N' . $row)->getFill()
+            ->setFillType(Fill::FILL_SOLID)
+            ->getStartColor()->setARGB('FFCCCCCC');
+
+        // Apply borders to data table
+        $tableRange = 'A13:N' . $row;
+        $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+            ->setBorderStyle(Border::BORDER_THIN);
+
+        // Center align numeric columns
+        $numericColumns = ['A', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
+        foreach ($numericColumns as $col) {
+            $sheet->getStyle($col . '14:' . $col . $row)
+                ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        }
+
+        return $sheet;
+    }
+} 

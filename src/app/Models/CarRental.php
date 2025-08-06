@@ -109,6 +109,14 @@ class CarRental extends Model
     }
 
     /**
+     * Get the shipments for the car rental.
+     */
+    public function shipments(): HasMany
+    {
+        return $this->hasMany(Shipment::class, 'car_rental_id');
+    }
+
+    /**
      * Get status label attribute
      *
      * @return string

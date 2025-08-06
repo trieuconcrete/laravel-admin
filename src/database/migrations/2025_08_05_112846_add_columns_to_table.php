@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -51,13 +52,30 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('vehicles', function (Blueprint $table) {
-            $table->dropColumn(['is_car_rental', 'customer_id']);
+            if (Schema::hasColumn('vehicles', 'is_car_rental')) {
+                $table->dropColumn('is_car_rental');
+            }
+            if (Schema::hasColumn('vehicles', 'customer_id')) {
+                $table->dropColumn('customer_id');
+            }
+            if (Schema::hasColumn('vehicles', 'deleted_at')) {
+                $table->dropSoftDeletes();
+            }
         });
+        
         Schema::table('salary_details', function (Blueprint $table) {
-            $table->dropColumn('salary_type');
+            if (Schema::hasColumn('salary_details', 'salary_type')) {
+                $table->dropColumn('salary_type');
+            }
         });
+        
         Schema::table('shipments', function (Blueprint $table) {
-            $table->dropColumn(['is_car_rental', 'shipment_type']);
+            if (Schema::hasColumn('shipments', 'is_car_rental')) {
+                $table->dropColumn('is_car_rental');
+            }
+            if (Schema::hasColumn('shipments', 'shipment_type')) {
+                $table->dropColumn('shipment_type');
+            }
         });
     }
 };
