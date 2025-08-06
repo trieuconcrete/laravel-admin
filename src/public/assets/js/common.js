@@ -38,7 +38,15 @@ $(document).ready(function() {
     // Cache elements
     const $rentalCheckbox = $('#is_car_rental');
     const $vehicleSelect = $('#vehicles');
+    const $driversDiv = $('#drivers');
     const $loadingSpinner = $('#vehicle_loading');
+    const isRental = $rentalCheckbox.is(':checked');
+    if (isRental) {
+        $driversDiv.hide();
+    } else {
+        $driversDiv.show();
+    }
+
     // Store original vehicle value
     let originalVehicleId = $vehicleSelect.val();
 
@@ -64,9 +72,13 @@ $(document).ready(function() {
     // With debounce to prevent multiple rapid requests
     let debounceTimer;
     $rentalCheckbox.on('change', function() {
-        // clearTimeout(debounceTimer);
+        clearTimeout(debounceTimer);
         const isRental = $(this).is(':checked');
-        console.log('Loading vehicles for rental status:', isRental);
+        if (isRental) {
+            $driversDiv.hide();
+        } else {
+            $driversDiv.show();
+        }
         
         debounceTimer = setTimeout(function() {
             loadVehicles(isRental)
