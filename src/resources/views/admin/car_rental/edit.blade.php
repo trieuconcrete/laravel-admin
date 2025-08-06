@@ -206,37 +206,37 @@
                                                     $totalOvertimeCost = 0;
                                                     $totalOvertimeHours = 0;
                                                 @endphp
-                                                @foreach($carRentalVehicleLogs as $log)
+                                                @foreach($carRentalVehicleLogs as $shipment)
                                                 @php
-                                                    $totalOvertimeCost += $log->total_overtime_cost;
-                                                    $totalOvertimeHours += $log->overtime_hours;
+                                                    $totalOvertimeCost += $shipment->total_overtime_cost;
+                                                    $totalOvertimeHours += $shipment->overtime_hours;
                                                 @endphp
                                                 <tr>
-                                                    <td>{{ $log->vehicle->vehicleType->name ?? 'N/A' }} - {{ $log->vehicle->plate_number ?? 'N/A' }}</td>
-                                                    <td class="text-center">{{ $log->run_date ? \Carbon\Carbon::parse($log->run_date)->format('Y-m-d') : '' }}</td>
-                                                    <td class="text-center">{{ \Carbon\Carbon::parse($log->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($log->end_time)->format('H:i') }}</td>
-                                                    <td class="text-center">{{ $log->start_location }} -> {{ $log->end_location }}</td>
-                                                    <td>{{ number_format($log->overtime_hours, 1) }} giờ</td>
-                                                    <td>{{ number_format($carRental->overtime_fee_per_hour_unit ) }}</td>
-                                                    <td>{{ number_format($log->total_overtime_cost) }}</td>
-                                                    <td>{{ number_format($log->start_odometer) }}</td>
-                                                    <td>{{ number_format($log->end_odometer) }}</td>
-                                                    <td>{{ number_format($log->total_distance) }}</td>
+                                                    <td>{{ $shipment->vehicle->vehicleType->name ?? 'N/A' }} - {{ $shipment->vehicle->plate_number ?? 'N/A' }}</td>
+                                                    <td class="text-center">{{ $shipment->run_date ? \Carbon\Carbon::parse($shipment->run_date)->format('Y-m-d') : '' }}</td>
+                                                    <td class="text-center">{{ $shipment->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $shipment->start_time)->format('H:i') : '' }} - {{ $shipment->end_time ? \Carbon\Carbon::createFromFormat('H:i:s', $shipment->end_time)->format('H:i') : '' }}</td>
+                                                    <td class="text-center">{{ $shipment->origin }} -> {{ $shipment->destination }}</td>
+                                                    <td>{{ number_format($shipment->overtime_hours, 1) }} giờ</td>
+                                                    <td>{{ number_format($shipment->overtime_rate) }}</td>
+                                                    <td>{{ number_format($shipment->total_overtime_cost) }}</td>
+                                                    <td>{{ number_format($shipment->start_odometer) }}</td>
+                                                    <td>{{ number_format($shipment->end_odometer) }}</td>
+                                                    <td>{{ number_format($shipment->actual_distance) }}</td>
                                                     <td>
-                                                        @if($log->tollFees->count() > 0)
-                                                            <span class="badge bg-info">{{ number_format($log->total_toll_fee) }}</span>
-                                                            <small class="d-block text-muted">{{ $log->tollFees->count() }} trạm</small>
+                                                        @if(isset($shipment->tollFees) && $shipment->tollFees->count() > 0)
+                                                            <span class="badge bg-info">{{ number_format($shipment->total_toll_fee) }}</span>
+                                                            <small class="d-block text-muted">{{ $shipment->tollFees->count() }} trạm</small>
                                                         @else
                                                             <span class="text-muted">0</span>
                                                         @endif
                                                     </td>
-                                                    <td>{{ number_format($log->parking_fee) }}</td>
+                                                    <td>{{ number_format($shipment->parking_fee) }}</td>
                                                     <td>
                                                         <div class="d-flex gap-2">
-                                                            <button type="button" class="btn btn-sm btn-primary" onclick="editVehicleLog({{ $log->id }})">
+                                                            <button type="button" class="btn btn-sm btn-primary" onclick="editVehicleLog({{ $shipment->id }})">
                                                                 <i class="ri-edit-line"></i>
                                                             </button>
-                                                            <button type="button" class="btn btn-sm btn-danger" onclick="deleteVehicleLog({{ $log->id }})">
+                                                            <button type="button" class="btn btn-sm btn-danger" onclick="deleteVehicleLog({{ $shipment->id }})">
                                                                 <i class="ri-delete-bin-line"></i>
                                                             </button>
                                                         </div>
@@ -353,15 +353,36 @@
                     <div class="row mb-3">
                         <div class="col-md-12">
                             <label class="form-label">Chọn xe <span class="text-danger">*</span></label>
-                            <select class="form-select" name="vehicle_id" required>
+                            <select class="form-select" name="vehicle_id" id="add_vehicle_id" required>
                                 <option value="">Chọn xe</option>
                                 @foreach($vehicles as $vehicle)
-                                    <option value="{{ $vehicle->vehicle_id }}">
+                                    <option value="{{ $vehicle->vehicle_id }}" data-is-rental="{{ $vehicle->is_car_rental ? 1 : 0 }}">
                                         {{ $vehicle->plate_number ?? 'N/A' }} - 
                                         {{ $vehicle->vehicleType->name ?? 'N/A' }}
+                                        @if($vehicle->is_car_rental)
+                                            <span class="text-info">(Xe HPL thuê)</span>
+                                        @endif
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
+                    </div>
+
+                    <!-- Driver Selection (Issue #180 requirement) -->
+                    <div class="row mb-3" id="driver_selection_row">
+                        <div class="col-md-12">
+                            <label class="form-label">Chọn tài xế <span class="text-danger driver-required">*</span></label>
+                            <select class="form-select" name="driver_id" id="add_driver_id">
+                                <option value="">Chọn tài xế</option>
+                                @foreach($drivers ?? [] as $driver)
+                                    <option value="{{ $driver->id }}">
+                                        {{ $driver->full_name }} - {{ $driver->employee_code }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="form-text text-muted">
+                                <small><em>Chú ý: Xe HPL thuê không cần chọn tài xế</em></small>
+                            </div>
                         </div>
                     </div>
 
@@ -473,12 +494,33 @@
                             <select class="form-select" name="vehicle_id" id="edit_vehicle_id" required>
                                 <option value="">Chọn xe</option>
                                 @foreach($vehicles as $vehicle)
-                                    <option value="{{ $vehicle->id }}">
+                                    <option value="{{ $vehicle->vehicle_id }}" data-is-rental="{{ $vehicle->is_car_rental ? 1 : 0 }}">
                                         {{ $vehicle->plate_number ?? 'N/A' }} - 
                                         {{ $vehicle->vehicleType->name ?? 'N/A' }}
+                                        @if($vehicle->is_car_rental)
+                                            <span class="text-info">(Xe HPL thuê)</span>
+                                        @endif
                                     </option>
                                 @endforeach
                             </select>
+                        </div>
+                    </div>
+
+                    <!-- Driver Selection for Edit Modal -->
+                    <div class="row mb-3" id="edit_driver_selection_row">
+                        <div class="col-md-12">
+                            <label class="form-label">Chọn tài xế <span class="text-danger edit-driver-required">*</span></label>
+                            <select class="form-select" name="driver_id" id="edit_driver_id">
+                                <option value="">Chọn tài xế</option>
+                                @foreach($drivers ?? [] as $driver)
+                                    <option value="{{ $driver->id }}">
+                                        {{ $driver->full_name }} - {{ $driver->employee_code }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="form-text text-muted">
+                                <small><em>Chú ý: Xe HPL thuê không cần chọn tài xế</em></small>
+                            </div>
                         </div>
                     </div>
 
@@ -578,6 +620,45 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
 $(document).ready(function() {
+    // Handle vehicle selection to show/hide driver selection (Issue #180)
+    $('#add_vehicle_id').on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        const isRental = selectedOption.data('is-rental') == 1;
+        
+        if (isRental) {
+            // Xe HPL thuê - ẩn select box tài xế
+            $('#driver_selection_row').hide();
+            $('#add_driver_id').prop('required', false);
+            $('.driver-required').hide();
+        } else {
+            // Xe thường - hiện select box tài xế
+            $('#driver_selection_row').show();
+            $('#add_driver_id').prop('required', true);
+            $('.driver-required').show();
+        }
+    });
+
+    // Trigger change event on page load
+    $('#add_vehicle_id').trigger('change');
+
+    // Handle vehicle selection for edit modal (Issue #180)
+    $('#edit_vehicle_id').on('change', function() {
+        const selectedOption = $(this).find('option:selected');
+        const isRental = selectedOption.data('is-rental') == 1;
+        
+        if (isRental) {
+            // Xe HPL thuê - ẩn select box tài xế
+            $('#edit_driver_selection_row').hide();
+            $('#edit_driver_id').prop('required', false);
+            $('.edit-driver-required').hide();
+        } else {
+            // Xe thường - hiện select box tài xế
+            $('#edit_driver_selection_row').show();
+            $('#edit_driver_id').prop('required', true);
+            $('.edit-driver-required').show();
+        }
+    });
+
     // Add Vehicle Log Form AJAX Submission
     $('#addCarRentalVehicleLogForm').on('submit', function(e) {
         e.preventDefault();
@@ -600,6 +681,16 @@ $(document).ready(function() {
         
         // Validate required fields
         let hasErrors = false;
+        
+        // Check vehicle and driver selection (Issue #180)
+        const selectedVehicle = $('#add_vehicle_id option:selected');
+        const isRental = selectedVehicle.data('is-rental') == 1;
+        const driverId = $('#add_driver_id').val();
+        
+        if (!isRental && !driverId) {
+            showFieldError($('#add_driver_id'), 'Vui lòng chọn tài xế cho xe này');
+            hasErrors = true;
+        }
         
         // Check start_time and end_time
         startTime = $('[name="start_time"]').val();
@@ -821,8 +912,8 @@ $(document).ready(function() {
     });
 });
 
-// Function to edit vehicle log
-window.editVehicleLog = function(logId) {
+// Function to edit vehicle log (updated for shipment-based approach)
+window.editVehicleLog = function(shipmentId) {
     // Show loading
     Swal.fire({
         title: 'Đang tải dữ liệu...',
@@ -832,9 +923,9 @@ window.editVehicleLog = function(logId) {
         }
     });
 
-    // Fetch log data
+    // Fetch log data using shipment ID
     $.ajax({
-        url: `/admin/car-rental/vehicle-log/${logId}/edit`,
+        url: `/admin/car-rental/shipment/${shipmentId}/edit-vehicle-log`,
         method: 'GET',
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -845,6 +936,10 @@ window.editVehicleLog = function(logId) {
             // Populate form fields
             $('#edit_log_id').val(response.log.id);
             $('#edit_vehicle_id').val(response.log.vehicle_id);
+            $('#edit_driver_id').val(response.log.driver_id || ''); // Load driver_id
+            
+            // Trigger vehicle change event to handle driver selection visibility
+            $('#edit_vehicle_id').trigger('change');
             
             // Convert date format for Flatpickr input
             let startTime = response.log.start_time;
@@ -854,6 +949,8 @@ window.editVehicleLog = function(logId) {
             
             $('#edit_start_time').val(startTime);
             $('#edit_end_time').val(endTime);
+            $('#edit_run_date').val(response.log.run_date ? String(response.log.run_date).substring(0, 10) : '');
+            
             // Nếu Flatpickr đã khởi tạo, update lại giá trị
             if ($('#edit_start_time').hasClass('flatpickr-input')) {
                 $('#edit_start_time')[0]._flatpickr.setDate(startTime, true, "Y-m-d H:i");
@@ -867,26 +964,37 @@ window.editVehicleLog = function(logId) {
             $('#edit_notes').val(response.log.notes);
             $('#edit_start_location').val(response.log.start_location ? String(response.log.start_location) : '');
             $('#edit_end_location').val(response.log.end_location ? String(response.log.end_location) : '');
-            $('#edit_run_date').val(response.log.run_date ? String(response.log.run_date).substring(0, 10) : '');
-            
-            // Load toll fees for edit
-            loadEditTollFees(response.log.toll_fees || []);
-            
+
+            // Clear and populate toll fees
+            $('#editTollFeesTable tbody').empty();
+            if (response.log.toll_fees && response.log.toll_fees.length > 0) {
+                response.log.toll_fees.forEach(function(tollFee) {
+                    addEditTollFeeRow(tollFee);
+                });
+            } else {
+                addEditTollFeeRow(); // Add empty row
+            }
+
             // Set form action
-            $('#editCarRentalVehicleLogForm').attr('action', `/admin/car-rental/vehicle-log/${response.log.id}`);
+            $('#editCarRentalVehicleLogForm').attr('action', `/admin/car-rental/shipment/${response.log.id}/update-vehicle-log`);
             
             // Show modal
             $('#editCarRentalVehicleLogModal').modal('show');
         },
         error: (xhr) => {
+            Swal.close();
+            let message = 'Có lỗi xảy ra khi tải dữ liệu.';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+            }
             Swal.fire({
                 title: "Lỗi!",
-                text: "Không thể tải dữ liệu nhật ký xe",
+                text: message,
                 icon: "error"
             });
         }
     });
-}
+};
 
 // Function to format number for display
 function formatNumber(number) {
@@ -919,6 +1027,16 @@ $('#editCarRentalVehicleLogForm').on('submit', function(e) {
     
     // Validate required fields
     let hasErrors = false;
+    
+    // Check vehicle and driver selection (Issue #180)
+    const selectedVehicle = $('#edit_vehicle_id option:selected');
+    const isRental = selectedVehicle.data('is-rental') == 1;
+    const driverId = $('#edit_driver_id').val();
+    
+    if (!isRental && !driverId) {
+        showFieldError($('#edit_driver_id'), 'Vui lòng chọn tài xế cho xe này');
+        hasErrors = true;
+    }
     
     // Check start_time and end_time
     startTime = $('[name="start_time"]', this).val();
@@ -1061,17 +1179,20 @@ $('#editCarRentalVehicleLogForm').on('submit', function(e) {
     });
 });
 
-function deleteVehicleLog(logId) {
+// Function to delete vehicle log (updated for shipment-based approach)
+window.deleteVehicleLog = function(shipmentId) {
     Swal.fire({
-        title: 'Bạn có chắc chắn muốn xóa?',
-        text: "Hành động này không thể hoàn tác!",
+        title: 'Xác nhận xóa',
+        text: 'Bạn có chắc chắn muốn xóa nhật ký xe này?',
         icon: 'warning',
         showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
         confirmButtonText: 'Xóa',
-        cancelButtonText: 'Hủy',
-        reverseButtons: true
+        cancelButtonText: 'Hủy'
     }).then((result) => {
         if (result.isConfirmed) {
+            // Show loading
             Swal.fire({
                 title: 'Đang xóa...',
                 allowOutsideClick: false,
@@ -1080,36 +1201,42 @@ function deleteVehicleLog(logId) {
                 }
             });
 
+            // Delete via AJAX using shipment ID
             $.ajax({
-                url: `/admin/car-rental/vehicle-log/${logId}`,
+                url: `/admin/car-rental/shipment/${shipmentId}/destroy-vehicle-log`,
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                success: function(response) {
-                    Swal.close();
+                success: (response) => {
                     if (response.success) {
                         Swal.fire({
-                            title: 'Thành công!',
+                            title: "Thành công!",
                             text: response.message,
-                            icon: 'success',
-                            timer: 1500,
-                            showConfirmButton: false
+                            icon: "success",
+                            showConfirmButton: false,
+                            timer: 1500
                         }).then(() => {
+                            // Reload page to show updated list
                             location.reload();
                         });
-                    } else {
-                        Swal.fire('Lỗi!', response.message, 'error');
                     }
                 },
-                error: function(xhr) {
-                    Swal.close();
-                    Swal.fire('Lỗi!', xhr.responseJSON?.message || 'Có lỗi xảy ra, vui lòng thử lại', 'error');
+                error: (xhr) => {
+                    let message = 'Có lỗi xảy ra khi xóa nhật ký xe.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
+                    Swal.fire({
+                        title: "Lỗi!",
+                        text: message,
+                        icon: "error"
+                    });
                 }
             });
         }
     });
-}
+};
 
 // Toll Fee Management Functions
 let tollFeeRowIndex = 0;
@@ -1147,7 +1274,7 @@ function addTollFeeRow() {
 }
 
 // Add toll fee row to edit form
-function addEditTollFeeRow() {
+function addEditTollFeeRow(tollFee = null) {
     const tbody = $('#editTollFeesTable tbody');
     const row = `
         <tr data-index="${editTollFeeRowIndex}">
@@ -1175,6 +1302,13 @@ function addEditTollFeeRow() {
     
     // Initialize number formatting for new row
     initializeEditTollFeeFormatting();
+
+    if (tollFee) {
+        $('input[name="toll_fees[' + (editTollFeeRowIndex - 1) + '][station_name]"]').val(tollFee.station_name);
+        $('input[name="toll_fees[' + (editTollFeeRowIndex - 1) + '][transaction_code]"]').val(tollFee.transaction_code || '');
+        $('input[name="toll_fees[' + (editTollFeeRowIndex - 1) + '][fee_amount]"]').val(formatNumber(tollFee.fee_amount));
+        $('input[name="toll_fees[' + (editTollFeeRowIndex - 1) + '][notes]"]').val(tollFee.notes || '');
+    }
 }
 
 // Remove toll fee row from create form
@@ -1185,42 +1319,6 @@ function removeTollFeeRow(index) {
 // Remove toll fee row from edit form
 function removeEditTollFeeRow(index) {
     $(`#editTollFeesTable tbody tr[data-index="${index}"]`).remove();
-}
-
-// Load toll fees for edit form
-function loadEditTollFees(tollFees) {
-    const tbody = $('#editTollFeesTable tbody');
-    tbody.empty();
-    editTollFeeRowIndex = 0;
-    
-    tollFees.forEach((tollFee, index) => {
-        const row = `
-            <tr data-index="${editTollFeeRowIndex}">
-                <td>
-                    <input type="text" class="form-control form-control-sm" name="toll_fees[${editTollFeeRowIndex}][station_name]" value="${tollFee.station_name}" required>
-                </td>
-                <td>
-                    <input type="text" class="form-control form-control-sm" name="toll_fees[${editTollFeeRowIndex}][transaction_code]" value="${tollFee.transaction_code || ''}" required>
-                </td>
-                <td>
-                    <input type="text" class="form-control form-control-sm edit-toll-fee-amount" name="toll_fees[${editTollFeeRowIndex}][fee_amount]" value="${formatNumber(tollFee.fee_amount)}" required>
-                </td>
-                <td>
-                    <input type="text" class="form-control form-control-sm" name="toll_fees[${editTollFeeRowIndex}][notes]" value="${tollFee.notes || ''}">
-                </td>
-                <td>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeEditTollFeeRow(${editTollFeeRowIndex})">
-                        <i class="ri-delete-bin-line"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
-        tbody.append(row);
-        editTollFeeRowIndex++;
-    });
-    
-    // Initialize number formatting for loaded rows
-    initializeEditTollFeeFormatting();
 }
 
 // Initialize number formatting for toll fee amounts in create form
