@@ -56,7 +56,7 @@ class ShipmentController extends Controller
     public function create()
     {
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
-        $vehicles = Vehicle::where('status', Vehicle::STATUS_ACTIVE)->carRental()->pluck('plate_number', 'vehicle_id');
+        $vehicles = Vehicle::with(['vehicleType', 'driver'])->where('status', Vehicle::STATUS_ACTIVE)->carRental()->get();
         
         // Get drivers (tài xế)  
         $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
@@ -126,9 +126,9 @@ class ShipmentController extends Controller
      */
     public function edit(Shipment $shipment)
     {
-        $shipment->load(['goods', 'shipmentDeductions']);
+        $shipment->load(['vehicle', 'goods', 'shipmentDeductions']);
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
-        $vehicles = Vehicle::where('status', Vehicle::STATUS_ACTIVE)->carRental($shipment->is_car_rental)->pluck('plate_number', 'vehicle_id');
+        $vehicles = Vehicle::with(['vehicleType', 'driver'])->where('status', Vehicle::STATUS_ACTIVE)->carRental($shipment->is_car_rental)->get();
         $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
             ->where('status', UserStatus::ACTIVE)
             ->whereHas('position', function ($query) {

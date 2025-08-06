@@ -159,3 +159,7 @@ Route::get('/debug/debt', function () {
         ]
     ];
 });
+
+
+Route::get('/api/vehicles/by-car-rental', [VehicleController::class, 'getByCarRental'])
+    ->name('api.vehicles.by-car-rental');
