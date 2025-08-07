@@ -16,7 +16,9 @@ class ShipmentReport extends Model
         'total_amount',
         'created_by',
         'updated_by',
-        'is_finalized'
+        'is_finalized',
+        'statement_start_date',
+        'statement_end_date'
     ];
 
     protected $casts = [

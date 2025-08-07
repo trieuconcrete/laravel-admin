@@ -141,16 +141,18 @@ class CustomerController extends Controller
         $customerStatusActives = Customer::getStatusActives();
         
         // Lấy trạng thái finalized của báo cáo tháng hiện tại
-        $shipmentReport = \App\Models\ShipmentReport::where('customer_id', $customer->id)
-            ->where('monthly', $currentMonth)
+        $shipmentReport = \App\Models\ShipmentReport::where('customer_id', $customer->id);
+        $shipmentMonthlyReports = $shipmentReport->orderBy('monthly', 'desc')->get();
+        $shipmentReport = $shipmentReport->where('monthly', $currentMonth)
             ->first();
+
         $isFinalized = $shipmentReport ? $shipmentReport->is_finalized : false;
         
         // Load all transactions by default
         try {
             $perPage = 10;
             $transactions = $this->transactionPaymentService->getCustomerTransactions($customer, [], $perPage);
-            $activeTab = $request->input('active_tab', 'transactions');
+            $activeTab = $request->input('active_tab', 'monthlyReport');
             $filters = [];
             
             return view('admin.customers.show', compact(
@@ -163,7 +165,8 @@ class CustomerController extends Controller
                 'paymentStatuses',
                 'filters',
                 'isFinalized',
-                'customerStatusActives'
+                'customerStatusActives',
+                'shipmentMonthlyReports'
             ));
         } catch (\Exception $e) {
             Log::error('Error loading default transactions', ['error' => $e->getMessage(), 'customer_id' => $customer->id]);
