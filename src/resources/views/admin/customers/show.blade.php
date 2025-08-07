@@ -229,7 +229,7 @@
                                 <table class="table table-hover" id="monthlyReportTable">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Mã chuyến hàng</th>
+                                            <th>Mã chuyến xe</th>
                                             <th>Ngày</th>
                                             <th>Điểm đi</th>
                                             <th>Điểm đến</th>
@@ -261,7 +261,7 @@
                                         @endforeach
                                         @else
                                         <tr>
-                                            <td colspan="12" class="text-center">Không có dữ liệu chuyến hàng trong tháng
+                                            <td colspan="12" class="text-center">Không có dữ liệu chuyến xe trong tháng
                                                 này</td>
                                         </tr>
                                         @endif --}}
@@ -624,7 +624,7 @@
                             document.getElementById('grandTotal').textContent = numberFormat(grandTotal);
                         } else {
                             // No data found
-                            tableBody.innerHTML = '<tr><td colspan="12" class="text-center">Không có dữ liệu chuyến hàng trong tháng này</td></tr>';
+                            tableBody.innerHTML = '<tr><td colspan="12" class="text-center">Không có dữ liệu chuyến xe trong tháng này</td></tr>';
 
                             // Reset footer totals
                             document.getElementById('totalTrips').textContent = '0';
