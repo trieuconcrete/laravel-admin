@@ -71,7 +71,7 @@
                                         <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                                         <select class="form-select" name="status">
                                             @foreach ($vehicleStatuses as $val => $label)
-                                                <option value="{{ $val }}">{{ $label }}</option>
+                                                <option value="{{ $val }}" {{ old('status', $vehicle->status) == $val ? 'selected' : '' }}>{{ $label }}</option>
                                             @endforeach
                                         </select>
                                         @error('status')
@@ -81,13 +81,73 @@
                                     <div class="col-md-6">
                                         <label class="form-label">Tài xế </label>
                                         <select class="form-select" name="driver_id">
+                                            <option value="">Chọn tài xế</option>
                                             @foreach ($drivers as $key => $driver)
-                                                <option value="{{ $key }}">{{ $driver }}</option>
+                                                <option value="{{ $key }}" {{ old('driver_id', $vehicle->driver_id) == $key ? 'selected' : '' }}>{{ $driver }}</option>
                                             @endforeach
                                         </select>
                                         @error('driver_id')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
+                                    </div>
+                                </div>
+
+                                <!-- Checkbox Xe HPL Thuê -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch form-switch-lg">
+                                            <input type="checkbox" name="is_car_rental" class="form-check-input" id="isCarRental" value="1" {{ old('is_car_rental', $vehicle->is_car_rental) ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="isCarRental">Xe HPL Thuê</label>
+                                            @error('is_car_rental')
+                                                <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Form Khách hàng cho thuê xe (ẩn mặc định) -->
+                                <div id="carRentalCustomerForm" style="display: none;">
+                                    <hr>
+                                    <h6>Thông tin khách hàng cho thuê xe</h6>
+                                    <small class="badge bg-danger-subtle text-danger mb-1">Bạn có thể chọn 1 khách hàng hoặc nhập thông tin khách hàng mới</small>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Chọn khách hàng</label>
+                                            <select name="customer_id" class="form-select" id="editCustomerId">
+                                                <option value="">Chọn khách hàng</option>
+                                                @foreach($carRentalCustomers as $id => $name)
+                                                    <option value="{{ $id }}" {{ old('customer_id', $vehicle->customer_id) == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div class="text-danger error" data-field="customer_id"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tên khách hàng <span class="text-danger">*</span></label>
+                                            <input name="customer_name" type="text" placeholder="Tên khách hàng" class="form-control" id="editCustomerName" value="{{ old('customer_name', $vehicle->customer?->name) }}">
+                                            <div class="text-danger error" data-field="customer_name"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                            <input name="customer_phone" type="text" placeholder="Số điện thoại" class="form-control" id="editCustomerPhone" value="{{ old('customer_phone', $vehicle->customer?->phone) }}">
+                                            <div class="text-danger error" data-field="customer_phone"></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                                            <input name="customer_email" type="email" placeholder="Email" class="form-control" id="editCustomerEmail" value="{{ old('customer_email', $vehicle->customer?->email) }}">
+                                            <div class="text-danger error" data-field="customer_email"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row mb-3">
+                                        <div class="col-md-12">
+                                            <label class="form-label">Địa chỉ</label>
+                                            <textarea name="customer_address" placeholder="Địa chỉ" class="form-control" id="editCustomerAddress">{{ old('customer_address', $vehicle->customer?->address) }}</textarea>
+                                            <div class="text-danger error" data-field="customer_address"></div>
+                                        </div>
                                     </div>
                                 </div>
                                 <hr>
@@ -206,6 +266,161 @@
 
 @push('scripts')
 <script>
+    // Toggle car rental customer form
+    document.addEventListener('DOMContentLoaded', function() {
+        const isCarRentalCheckbox = document.getElementById('isCarRental');
+        const carRentalCustomerForm = document.getElementById('carRentalCustomerForm');
+        
+        // Toggle form visibility based on checkbox
+        function toggleCarRentalForm() {
+            if (isCarRentalCheckbox.checked) {
+                carRentalCustomerForm.style.display = 'block';
+            } else {
+                carRentalCustomerForm.style.display = 'none';
+            }
+        }
+        
+        // Initial state
+        toggleCarRentalForm();
+        
+        // Event listener
+        isCarRentalCheckbox.addEventListener('change', toggleCarRentalForm);
+
+        // Auto-fill customer data when customer is selected
+        const customerSelect = document.querySelector('select[name="customer_id"]');
+        if (customerSelect) {
+            customerSelect.addEventListener('change', function() {
+                const customerId = this.value;
+                const customerNameField = document.querySelector('#editCustomerName');
+                const customerPhoneField = document.querySelector('#editCustomerPhone');
+                const customerEmailField = document.querySelector('#editCustomerEmail');
+                const customerAddressField = document.querySelector('#editCustomerAddress');
+                
+                if (customerId) {
+                    // Fetch customer data via AJAX
+                    fetch(`/admin/customers/${customerId}?get_customer_data=1`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Fill customer data into form fields
+                        customerNameField.value = data.name || '';
+                        customerPhoneField.value = data.phone || '';
+                        customerEmailField.value = data.email || '';
+                        customerAddressField.value = data.address || '';
+                        
+                        // Disable input fields when customer is selected
+                        customerNameField.disabled = true;
+                        customerPhoneField.disabled = true;
+                        customerEmailField.disabled = true;
+                        customerAddressField.disabled = true;
+                        
+                        // Clear validation errors
+                        clearCustomerErrors();
+                    })
+                    .catch(error => {
+                        console.error('Error fetching customer data:', error);
+                    });
+                } else {
+                    // Clear form fields if no customer selected
+                    customerNameField.value = '';
+                    customerPhoneField.value = '';
+                    customerEmailField.value = '';
+                    customerAddressField.value = '';
+                    
+                    // Enable input fields when no customer is selected
+                    customerNameField.disabled = false;
+                    customerPhoneField.disabled = false;
+                    customerEmailField.disabled = false;
+                    customerAddressField.disabled = false;
+                }
+            });
+            
+            // Initialize field states based on current customer selection
+            if (customerSelect.value) {
+                const customerNameField = document.querySelector('#editCustomerName');
+                const customerPhoneField = document.querySelector('#editCustomerPhone');
+                const customerEmailField = document.querySelector('#editCustomerEmail');
+                const customerAddressField = document.querySelector('#editCustomerAddress');
+                
+                // Disable fields if customer is already selected
+                customerNameField.disabled = true;
+                customerPhoneField.disabled = true;
+                customerEmailField.disabled = true;
+                customerAddressField.disabled = true;
+            }
+        }
+
+        // Frontend validation for edit form
+        const editForm = document.querySelector('form');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                let isValid = true;
+                
+                // Clear previous errors
+                clearCustomerErrors();
+                
+                // Validate car rental fields if checkbox is checked
+                if (isCarRentalCheckbox.checked) {
+                    const customerId = document.querySelector('#editCustomerId')?.value;
+                    const customerName = document.querySelector('#editCustomerName')?.value.trim();
+                    const customerPhone = document.querySelector('#editCustomerPhone')?.value.trim();
+                    const customerEmail = document.querySelector('#editCustomerEmail')?.value.trim();
+                    
+                    // If no customer selected, validate required fields
+                    if (!customerId) {
+                        if (!customerName) {
+                            showCustomerError('customer_name', 'Tên khách hàng là bắt buộc');
+                            isValid = false;
+                        }
+                        
+                        if (!customerPhone) {
+                            showCustomerError('customer_phone', 'Số điện thoại khách hàng là bắt buộc');
+                            isValid = false;
+                        }
+                        
+                        if (!customerEmail) {
+                            showCustomerError('customer_email', 'Email khách hàng là bắt buộc');
+                            isValid = false;
+                        } else if (!isValidEmail(customerEmail)) {
+                            showCustomerError('customer_email', 'Email không đúng định dạng');
+                            isValid = false;
+                        }
+                    }
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        }
+        
+        // Helper functions for validation
+        function clearCustomerErrors() {
+            const errorElements = document.querySelectorAll('.error[data-field^="customer_"]');
+            errorElements.forEach(element => element.textContent = '');
+        }
+        
+        function showCustomerError(field, message) {
+            const errorElement = document.querySelector(`.error[data-field="${field}"]`);
+            if (errorElement) {
+                errorElement.textContent = message;
+            }
+        }
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+    });
+
+    // Document file preview handlers
     document.getElementById('documentFile0Input').addEventListener('change', function(event) {
         const file = event.target.files[0];
     

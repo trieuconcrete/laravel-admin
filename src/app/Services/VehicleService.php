@@ -27,6 +27,28 @@ class VehicleService
     {
         $data = $request->all();
         $documents = [];
+        
+        // Handle is_car_rental checkbox logic
+        // If checkbox is not checked, it won't be sent in the request
+        // So we need to explicitly set it to false if not present
+        if (!$request->has('is_car_rental')) {
+            $data['is_car_rental'] = false;
+        }
+        
+        // Handle customer data for car rental vehicles
+        if ($request->has('is_car_rental') && $request->is_car_rental) {
+            $customerData = $this->handleCustomerData($request);
+            if ($customerData) {
+                $data['customer_id'] = $customerData->id;
+            } else {
+                // If is_car_rental is true but no customer data provided, set customer_id to null
+                $data['customer_id'] = null;
+            }
+        } else {
+            // If is_car_rental is false, always set customer_id to null
+            $data['customer_id'] = null;
+        }
+        
         // Handle documents array if it exists
         if ($request->has('documents')) {
             foreach ($request->documents as $index => $doc) {
@@ -41,6 +63,10 @@ class VehicleService
 
         $vehicleData = $data;
         unset($vehicleData['documents']);
+        unset($vehicleData['customer_name']);
+        unset($vehicleData['customer_phone']);
+        unset($vehicleData['customer_email']);
+        unset($vehicleData['customer_address']);
 
         $vehicle = $this->vehicleRepository->create($vehicleData);
 
@@ -49,6 +75,36 @@ class VehicleService
         }
 
         return $vehicle;
+    }
+
+    /**
+     * Handle customer data for car rental vehicles
+     * @param \Illuminate\Http\Request $request
+     * @return \App\Models\Customer|null
+     */
+    private function handleCustomerData(Request $request)
+    {
+        // If customer_id is provided, use existing customer
+        if ($request->has('customer_id') && $request->customer_id) {
+            return \App\Models\Customer::find($request->customer_id);
+        }
+        
+        // If customer data is provided, create new customer
+        if ($request->has('customer_name') && $request->customer_name) {
+            $customerData = [
+                'name' => $request->customer_name,
+                'phone' => $request->customer_phone,
+                'email' => $request->customer_email,
+                'address' => $request->customer_address,
+                'type' => \App\Models\Customer::TYPE_CARRENTAL,
+                'is_active' => true,
+                'created_by' => auth('admin')->id(),
+            ];
+            
+            return \App\Models\Customer::create($customerData);
+        }
+        
+        return null;
     }
 
     /**
@@ -70,6 +126,27 @@ class VehicleService
         $data = $request->all();
         $documents = [];
 
+        // Handle is_car_rental checkbox logic
+        // If checkbox is not checked, it won't be sent in the request
+        // So we need to explicitly set it to false if not present
+        if (!$request->has('is_car_rental')) {
+            $data['is_car_rental'] = false;
+        }
+
+        // Handle customer data for car rental vehicles
+        if ($request->has('is_car_rental') && $request->is_car_rental) {
+            $customerData = $this->handleCustomerData($request);
+            if ($customerData) {
+                $data['customer_id'] = $customerData->id;
+            } else {
+                // If is_car_rental is true but no customer data provided, set customer_id to null
+                $data['customer_id'] = null;
+            }
+        } else {
+            // If is_car_rental is false, always set customer_id to null
+            $data['customer_id'] = null;
+        }
+
         // Handle documents array if it exists
         if ($request->has('documents')) {
             foreach ($request->documents as $index => $doc) {
@@ -87,6 +164,10 @@ class VehicleService
 
         $vehicleData = $data;
         unset($vehicleData['documents']);
+        unset($vehicleData['customer_name']);
+        unset($vehicleData['customer_phone']);
+        unset($vehicleData['customer_email']);
+        unset($vehicleData['customer_address']);
         
         // Remove temp document fields if present
         if (isset($vehicleData['_documentFile0_temp'])) unset($vehicleData['_documentFile0_temp']);
@@ -98,7 +179,7 @@ class VehicleService
             if (!empty($doc['document_id'])) {
                 $this->vehicleDocumentRepository->update($doc['document_id'], $doc);
             } else {
-                $this->vehicleDocumentRepository->create($doc);
+                $vehicle->documents()->create($doc);
             }
         }
 

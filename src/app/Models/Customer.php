@@ -98,6 +98,14 @@ class Customer extends Model
     }
 
     /**
+     * Quan hệ với vehicles (cho khách hàng thuê xe)
+     */
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class, 'customer_id');
+    }
+
+    /**
      * Scope để lọc khách hàng theo loại
      */
     public function scopeOfType($query, $type)

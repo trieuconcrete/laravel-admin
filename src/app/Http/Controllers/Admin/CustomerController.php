@@ -76,6 +76,19 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer, Request $request)
     {
+        // Handle AJAX request for customer data (for auto-fill forms)
+        if ($request->ajax() && $request->has('get_customer_data')) {
+            return response()->json([
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'phone' => $customer->phone,
+                'email' => $customer->email,
+                'address' => $customer->address,
+                'type' => $customer->type,
+                'is_active' => $customer->is_active
+            ]);
+        }
+
         // Handle AJAX request for monthly shipments by month
         if ($request->ajax() && $request->has('month')) {
             try {
