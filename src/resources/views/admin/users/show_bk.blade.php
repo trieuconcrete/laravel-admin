@@ -324,7 +324,7 @@
                                 <table class="table table-hover">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Mã chuyến hàng</th>
+                                            <th>Mã chuyến xe</th>
                                             <th>Khách hàng</th>
                                             <th>Biển số xe</th>
                                             <th>Ngày</th>
@@ -366,7 +366,7 @@
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="9" class="text-center">Không có chuyến hàng nào trong tháng này</td>
+                                                <td colspan="9" class="text-center">Không có chuyến xe nào trong tháng này</td>
                                             </tr>
                                         @endif
                                     </tbody>
@@ -575,7 +575,7 @@
                                 <table class="table table-hover">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Mã chuyến hàng</th>
+                                            <th>Mã chuyến xe</th>
                                             <th>Ngày</th>
                                             <th>Trợ cấp</th>
                                             <th>Ghi chú</th>

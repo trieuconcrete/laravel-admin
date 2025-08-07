@@ -144,7 +144,7 @@
                                 <form action="javascript:void(0);">
                                     <div class="row g-3 mb-0 align-items-center">
                                         <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary" >
-                                            <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến hàng 
+                                            <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe 
                                         </a>
                                         <!--end col-->
                                     </div>
@@ -335,7 +335,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Tạo chuyến hàng</h5>
+                <h5 class="modal-title">Tạo chuyến xe</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <hr>
@@ -474,7 +474,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary">Tạo chuyến hàng</button>
+                <button type="button" class="btn btn-primary">Tạo chuyến xe</button>
             </div>
         </div>
     </div>

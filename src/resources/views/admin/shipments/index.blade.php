@@ -15,7 +15,7 @@
                             <div class="row g-3 mb-0 align-items-center">
                                 <div class="col-auto">
                                     <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary">
-                                        <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến hàng 
+                                        <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe 
                                     </a>
                                 </div>
                                 <!--end col-->
@@ -29,16 +29,16 @@
 
             <!-- Dashboard Cards -->
             @php
-                // Đếm tổng số chuyến hàng
+                // Đếm tổng số chuyến xe
                 $totalShipments = $shipments->total();
                 
-                // Đếm số chuyến hàng đang vận chuyển
+                // Đếm số chuyến xe đang vận chuyển
                 $inTransitCount = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_IN_TRANSIT)->count();
                 
-                // Đếm số chuyến hàng chờ xác nhận
+                // Đếm số chuyến xe chờ xác nhận
                 $pendingCount = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_PENDING)->count();
                 
-                // Đếm số chuyến hàng hoàn thành trong tháng hiện tại
+                // Đếm số chuyến xe hoàn thành trong tháng hiện tại
                 $startOfMonth = now()->startOfMonth();
                 $endOfMonth = now()->endOfMonth();
                 $completedThisMonth = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_COMPLETED)
@@ -52,7 +52,7 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <div class="text-muted">Tổng chuyến hàng</div>
+                                    <div class="text-muted">Tổng chuyến xe</div>
                                     <h4 class="mt-2">{{ $totalShipments }}</h4>
                                 </div>
                                 <div>

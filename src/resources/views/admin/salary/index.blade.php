@@ -358,7 +358,7 @@
                                     <th>Bộ phận</th>
                                     <th>Lương cơ bản</th>
                                     <th>Phụ cấp</th>
-                                    <th>Chi phí chuyến hàng</th>
+                                    <th>Chi phí chuyến xe</th>
                                     <th>Thưởng</th>
                                     <th>Phạt</th>
                                     <th>Ứng lương</th>
