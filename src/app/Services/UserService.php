@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Repositories\Interface\ShipmentRepositoryInterface as ShipmentRepository;
 use App\Repositories\Interface\SalaryAdvanceRequestRepositoryInterface as SalaryAdvanceRequestRepository;
 use App\Enum\UserStatus as EnumUserStatus;
+use App\Enum\SalaryType;
 use Illuminate\Http\JsonResponse;
 use App\Services\SalaryService;
 
@@ -79,6 +80,9 @@ class UserService
             if ($isDriver) {
                 $position = $this->positionRepository->findBy(['code' => Position::POSITION_TX]);
                 $data['position_id'] = $position->id ?? null;
+                
+                // Set default salary type for drivers
+                $data['salary_type'] = $request->salary_type ?? SalaryType::BASIC_SALARY->value;
             }
 
             // Create user

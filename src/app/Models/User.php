@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Position;
 use App\Models\SalaryAdvanceRequest;
+use App\Enum\SalaryType;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -53,7 +54,8 @@ class User extends Authenticatable
         'gender',
         'notes',
         'salary_advance_amount',
-        'join_date'
+        'join_date',
+        'salary_type'
     ];
 
     /**
@@ -76,6 +78,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'salary_type' => SalaryType::class,
         ];
     }
 
@@ -264,5 +267,55 @@ class User extends Authenticatable
             'salary_detail_id' => $salaryDetail->salary_id,
             'period_id' => $salaryPeriod->period_id
         ];
+    }
+
+    /**
+     * Get salary type label
+     *
+     * @return string
+     */
+    public function getSalaryTypeLabelAttribute(): string
+    {
+        return $this->salary_type?->getLabel() ?? 'Không xác định';
+    }
+
+    /**
+     * Get salary type color for UI
+     *
+     * @return string
+     */
+    public function getSalaryTypeColorAttribute(): string
+    {
+        return $this->salary_type?->getColor() ?? 'secondary';
+    }
+
+    /**
+     * Check if user has basic salary type
+     *
+     * @return bool
+     */
+    public function isBasicSalaryType(): bool
+    {
+        return $this->salary_type?->isBasicSalary() ?? true;
+    }
+
+    /**
+     * Check if user has commission salary type
+     *
+     * @return bool
+     */
+    public function isCommissionSalaryType(): bool
+    {
+        return $this->salary_type?->isCommissionSalary() ?? false;
+    }
+
+    /**
+     * Get all available salary types
+     *
+     * @return array
+     */
+    public static function getSalaryTypes(): array
+    {
+        return SalaryType::getTypes();
     }
 }
