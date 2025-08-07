@@ -33,7 +33,7 @@
                 <div class="card-body">
                     <form method="GET" action="{{ route('admin.vehicles.index') }}">
                         <div class="row g-3">
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select class="form-select" name="vehicle_type_id" id="vehicle_type_id">
                                     <option value="">Tất cả loại xe</option>
                                     @foreach ($vehicleTypes as $key => $val)
@@ -41,12 +41,19 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <select class="form-select" id="statusFilter" name="status">
                                     <option value="">Tất cả trạng thái</option>
                                     @foreach ($vehicleStatuses as $val => $label)
                                         <option value="{{ $val }}" {{ request('status') == $val ? 'selected' : '' }}>{{ $label }}</option>
                                     @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" name="is_car_rental" id="is_car_rental">
+                                    <option value="">Tất cả loại xe</option>
+                                    <option value="0" {{ request('is_car_rental') === '0' ? 'selected' : '' }}>Xe HPL</option>
+                                    <option value="1" {{ request('is_car_rental') === '1' ? 'selected' : '' }}>Xe HPL Thuê</option>
                                 </select>
                             </div>
                             <div class="col-md-4">
@@ -77,6 +84,7 @@
                                     <th>Tài xế</th>
                                     <th>Tải trọng</th>
                                     <th>Trạng thái</th>
+                                    <th>Xe HPL Thuê</th>
                                     <th>Đăng kiểm</th>
                                     <th>Bảo hiểm</th>
                                 </tr>
@@ -123,6 +131,20 @@
                                             >
                                                 {{ $vehicle->getStatusLabelAttribute() }}
                                             </span>
+                                        </td>
+                                        <td>
+                                            @if($vehicle->is_car_rental)
+                                                <span class="badge bg-info-subtle text-info">
+                                                    <i class="ri-car-line me-1"></i>Xe HPL Thuê
+                                                </span>
+                                                @if($vehicle->customer)
+                                                    <br><small class="text-muted">{{ $vehicle->customer->name }}</small>
+                                                @endif
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-secondary">
+                                                    <i class="ri-building-line me-1"></i>Xe HPL
+                                                </span>
+                                            @endif
                                         </td>
                                         <td>
                                             @php
@@ -219,11 +241,69 @@
                         <div class="col-md-6">
                             <label class="form-label">Tài xế </label>
                             <select class="form-select" name="driver_id">
+                                <option value="">Chọn tài xế</option>
                                 @foreach ($drivers as $key => $driver)
                                     <option value="{{ $key }}">{{ $driver }}</option>
                                 @endforeach
                             </select>
                             <div class="text-danger error" data-field="driver_id"></div>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox Xe HPL Thuê -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch form-switch-lg">
+                                <input type="checkbox" name="is_car_rental" class="form-check-input" id="modalIsCarRental" value="1">
+                                <label class="form-check-label" for="modalIsCarRental">Xe HPL Thuê</label>
+                                <div class="text-danger error" data-field="is_car_rental"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Khách hàng cho thuê xe (ẩn mặc định) -->
+                    <div id="modalCarRentalCustomerForm" style="display: none;">
+                        <hr>
+                        <h6>Thông tin khách hàng cho thuê xe</h6>
+                        <small class="badge bg-danger-subtle text-danger mb-1">Bạn có thể chọn 1 khách hàng hoặc nhập thông tin khách hàng mới</small>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Chọn khách hàng</label>
+                                <select name="customer_id" class="form-select" id="modalCustomerId">
+                                    <option value="">Chọn khách hàng</option>
+                                    @foreach($carRentalCustomers as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="text-danger error" data-field="customer_id"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tên khách hàng <span class="text-danger">*</span></label>
+                                <input name="customer_name" type="text" placeholder="Tên khách hàng" class="form-control" id="modalCustomerName">
+                                <div class="text-danger error" data-field="customer_name"></div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input name="customer_phone" type="text" placeholder="Số điện thoại" class="form-control" id="modalCustomerPhone">
+                                <div class="text-danger error" data-field="customer_phone"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <input name="customer_email" type="email" placeholder="Email" class="form-control" id="modalCustomerEmail">
+                                <div class="text-danger error" data-field="customer_email"></div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Địa chỉ</label>
+                                <textarea name="customer_address" placeholder="Địa chỉ" class="form-control" id="modalCustomerAddress"></textarea>
+                                <div class="text-danger error" data-field="customer_address"></div>
+                            </div>
                         </div>
                     </div>
                     <hr>
@@ -287,6 +367,127 @@
 @push('scripts')
 <script>
     $(document).ready(function () {
+        // Toggle car rental customer form in modal
+        $('#modalIsCarRental').on('change', function() {
+            const modalCarRentalCustomerForm = $('#modalCarRentalCustomerForm');
+            if (this.checked) {
+                modalCarRentalCustomerForm.show();
+            } else {
+                modalCarRentalCustomerForm.hide();
+            }
+        });
+
+        // Auto-fill customer data when customer is selected
+        $('select[name="customer_id"]').on('change', function() {
+            const customerId = $(this).val();
+            const customerNameField = $('#modalCustomerName');
+            const customerPhoneField = $('#modalCustomerPhone');
+            const customerEmailField = $('#modalCustomerEmail');
+            const customerAddressField = $('#modalCustomerAddress');
+            
+            if (customerId) {
+                // Fetch customer data via AJAX
+                $.ajax({
+                    url: `/admin/customers/${customerId}?get_customer_data=1`,
+                    type: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(data) {
+                        // Fill customer data into form fields
+                        customerNameField.val(data.name);
+                        customerPhoneField.val(data.phone);
+                        customerEmailField.val(data.email);
+                        customerAddressField.val(data.address);
+                        
+                        // Disable input fields when customer is selected
+                        customerNameField.prop('disabled', true);
+                        customerPhoneField.prop('disabled', true);
+                        customerEmailField.prop('disabled', true);
+                        customerAddressField.prop('disabled', true);
+                        
+                        // Clear validation errors
+                        $('.error[data-field="customer_name"]').text('');
+                        $('.error[data-field="customer_phone"]').text('');
+                        $('.error[data-field="customer_email"]').text('');
+                        $('.error[data-field="customer_address"]').text('');
+                    },
+                    error: function(xhr) {
+                        console.error('Error fetching customer data:', xhr);
+                    }
+                });
+            } else {
+                // Clear form fields if no customer selected
+                customerNameField.val('');
+                customerPhoneField.val('');
+                customerEmailField.val('');
+                customerAddressField.val('');
+                
+                // Enable input fields when no customer is selected
+                customerNameField.prop('disabled', false);
+                customerPhoneField.prop('disabled', false);
+                customerEmailField.prop('disabled', false);
+                customerAddressField.prop('disabled', false);
+            }
+        });
+
+        // Frontend validation for modal form
+        $('#add-vehicle-form').on('submit', function(e) {
+            let isValid = true;
+            
+            // Clear previous errors
+            $('.error').text('');
+            
+            // Validate car rental fields if checkbox is checked
+            if ($('#modalIsCarRental').is(':checked')) {
+                const customerId = $('#modalCustomerId').val();
+                const customerName = $('#modalCustomerName').val().trim();
+                const customerPhone = $('#modalCustomerPhone').val().trim();
+                const customerEmail = $('#modalCustomerEmail').val().trim();
+                
+                // If no customer selected, validate required fields
+                if (!customerId) {
+                    if (!customerName) {
+                        $('.error[data-field="customer_name"]').text('Tên khách hàng là bắt buộc');
+                        isValid = false;
+                    }
+                    
+                    if (!customerPhone) {
+                        $('.error[data-field="customer_phone"]').text('Số điện thoại khách hàng là bắt buộc');
+                        isValid = false;
+                    }
+                    
+                    if (!customerEmail) {
+                        $('.error[data-field="customer_email"]').text('Email khách hàng là bắt buộc');
+                        isValid = false;
+                    } else if (!isValidEmail(customerEmail)) {
+                        $('.error[data-field="customer_email"]').text('Email không đúng định dạng');
+                        isValid = false;
+                    }
+                }
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // Email validation function
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Reset modal form when modal is hidden
+        $('#addVehicleModal').on('hidden.bs.modal', function () {
+            $('#add-vehicle-form')[0].reset();
+            $('#modalCarRentalCustomerForm').hide();
+            $('#add-vehicle-form .error').text('');
+        });
+
         $('.delete-vehicle-btn').click(function (e) {
             e.preventDefault();
     

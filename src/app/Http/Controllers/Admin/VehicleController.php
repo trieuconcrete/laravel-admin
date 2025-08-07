@@ -16,6 +16,7 @@ use App\Repositories\Interface\UserRepositoryInterface as UserRepository;
 use App\Models\User;
 use App\Http\Requests\Vehicle\UpdateVehicleRequest;
 use App\Enum\UserStatus;
+use App\Models\Customer;
 
 class VehicleController extends Controller
 {
@@ -38,7 +39,7 @@ class VehicleController extends Controller
      */
     public function index(Request $request)
     {
-        $filters = $request->only(['vehicle_type_id', 'status', 'keyword']);
+        $filters = $request->only(['vehicle_type_id', 'status', 'keyword', 'is_car_rental']);
 
         $vehicles = $this->vehicleService->getFilteredVehicles($filters);
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
@@ -47,8 +48,13 @@ class VehicleController extends Controller
             'role' => User::ROLE_DRIVER,
             'status' => UserStatus::ACTIVE
         ])->pluck('full_name', 'id');
+        
+        // Get car rental customers for modal
+        $carRentalCustomers = \App\Models\Customer::where('type', Customer::TYPE_CARRENTAL)
+            ->where('is_active', true)
+            ->pluck('name', 'id');
 
-        return view('admin.vehicles.index', compact('vehicles', 'vehicleTypes', 'vehicleStatuses', 'drivers'));
+        return view('admin.vehicles.index', compact('vehicles', 'vehicleTypes', 'vehicleStatuses', 'drivers', 'carRentalCustomers'));
     }
 
     /**
@@ -57,7 +63,19 @@ class VehicleController extends Controller
      */
     public function create()
     {
-        return view('admin.vehicles.create');
+        $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
+        $vehicleStatuses = Vehicle::getStatuses();
+        $drivers = $this->userRepository->getUserByConditions([
+            'role' => User::ROLE_DRIVER,
+            'status' => UserStatus::ACTIVE
+        ])->pluck('full_name', 'id');
+        
+        // Get car rental customers
+        $carRentalCustomers = \App\Models\Customer::where('type', Customer::TYPE_CARRENTAL)
+            ->where('is_active', true)
+            ->pluck('name', 'id');
+
+        return view('admin.vehicles.create', compact('vehicleTypes', 'vehicleStatuses', 'drivers', 'carRentalCustomers'));
     }
 
     /**
@@ -111,8 +129,13 @@ class VehicleController extends Controller
             'role' => User::ROLE_DRIVER,
             'status' => UserStatus::ACTIVE
         ])->pluck('full_name', 'id');
+        
+        // Get car rental customers
+        $carRentalCustomers = \App\Models\Customer::where('type', Customer::TYPE_CARRENTAL)
+            ->where('is_active', true)
+            ->pluck('name', 'id');
 
-        return view('admin.vehicles.edit', compact('vehicle', 'vehicleTypes', 'vehicleStatuses', 'drivers'));
+        return view('admin.vehicles.edit', compact('vehicle', 'vehicleTypes', 'vehicleStatuses', 'drivers', 'carRentalCustomers'));
     }
 
     /**

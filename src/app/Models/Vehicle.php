@@ -79,7 +79,15 @@ class Vehicle extends Model
      */
     public function customer(): BelongsTo
     {
-        return $this->belongsTo(Customer::class)->where('type', 'carrental');
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    /**
+     * Get the car rental customer (only for car rental vehicles)
+     */
+    public function carRentalCustomer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'customer_id')->where('type', 'carrental');
     }
 
     /**
