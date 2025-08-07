@@ -56,10 +56,9 @@
                     <!-- Nav Tabs -->
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'generalInfo' ? 'active' : '' }}" id="nav-overview-tab" data-bs-toggle="tab" data-bs-target="#generalInfo"
-                            type="button" role="tab" aria-controls="generalInfo" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'generalInfo' ? 'true' : 'false' }}">Tổng quan</button>
+                            type="button" role="tab" aria-controls="generalInfo" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'generalInfo' ? 'true' : 'false' }}">Thông tin</button>
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'active' : '' }}" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#monthlyReport"
-                            type="button" role="tab" aria-controls="monthlyReport" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'true' : 'false' }}">Bảng kê theo
-                            tháng</button>
+                            type="button" role="tab" aria-controls="monthlyReport" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'true' : 'false' }}">Bảng kê</button>
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'active' : '' }}" id="nav-transactions-tab" data-bs-toggle="tab"
                             data-bs-target="#transactions" type="button" role="tab" aria-controls="transactions"
                             aria-selected="{{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'true' : 'false' }}">Giao dịch</button>
@@ -207,12 +206,43 @@
 
                         <!-- monthly report -->
                         <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'show active' : '' }}" id="monthlyReport">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <div class="flex-shrink-0 text-start">
-                                    <h6 class="mb-1">Tháng</h6>
-                                    <input type="month" id="monthSelector" class="form-control" value="{{ date('Y-m') }}">
+                            <div class="row mb-3">
+                                <div class="col-md-2">
+                                    <label class="">Chọn bảng kê</label>
+                                    {{-- <input type="month" id="monthSelector" class="form-control" value="{{ date('Y-m') }}"> --}}
+                                    <select class="form-select" name="month" id="month">
+                                        @foreach($shipmentMonthlyReports as $val)
+                                            <option value="{{ $val->monthly }}">{{ $val->monthly }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <div>
+                                <div class="col-md-2">
+                                    <div class="">
+                                        <label class="">Ngày bắt đầu  <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control date-input" name="statement_start_date" value="" required autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="">
+                                        <label class="">Ngày kết thúc <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control date-input" name="statement_end_date" value="" required autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="">
+                                        <label class="">Loại chuyến xe <span class="text-danger">*</span></label>
+                                        <select class="form-control" name="shipment_type" id="">
+                                            <option value="">Chọn loại chuyến xe</option>
+                                            <option value="1">Khách chạy theo chuyến</option>
+                                            <option value="3">Xe nâng</option>
+                                            <option value="4">Xe đường dài bắc-nam</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            <div class="row mb-5 mt-5">
+                                <div class="col-md-12 text-center">
                                     <button type="button" id="summarizeReport"
                                         class="btn {{ $isFinalized ? 'btn-success' : 'btn-secondary' }} me-2"
                                         @if($isFinalized) disabled @endif>
