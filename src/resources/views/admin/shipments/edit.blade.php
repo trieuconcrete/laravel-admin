@@ -139,6 +139,18 @@
                                             </div>
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
+                                                    <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $shipment->unit_price) }}">
+                                                    @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Số lượng chuyến</label>
+                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count) }}">
+                                                    @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
                                                     <label class="form-label">Số KM</label>
                                                     <input type="text" class="form-control" placeholder="Nhập số KM" name="distance" value="{{ old('distance', $shipment->distance) }}">
                                                     @error('distance')<span class="text-danger">{{ $message }}</span>@enderror
@@ -192,18 +204,6 @@
                                                 </div>
                                             </div>
                                             <!-- End -->
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Số lượng chuyến</label>
-                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count) }}">
-                                                    @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $shipment->unit_price) }}">
-                                                    @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                            </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Ghi chú</label>
                                                 <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="Ghi chú">{!! old('Ghi chú', $shipment->notes) !!}</textarea>
