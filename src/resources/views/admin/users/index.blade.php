@@ -197,6 +197,14 @@
                             <div class="text-danger error" data-field="salary_base"></div>
                         </div>
                         <div class="col-xxl-6">
+                            <label class="form-label">Loại lương tài xế</label>
+                            <select name="salary_type" class="form-select">
+                                <option value="1">Tài xế ăn lương cơ bản</option>
+                                <option value="2">Tài xế ăn lương doanh số</option>
+                            </select>
+                            <div class="text-danger error" data-field="salary_type"></div>
+                        </div>
+                        <div class="col-xxl-6">
                             <label class="form-label">Trạng thái làm việc</label>
                             <select name="status" class="form-select">
                                 @foreach($statuses as $key => $label)

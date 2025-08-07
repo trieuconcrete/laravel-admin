@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Collection;
 use App\Constants;
+use App\Enum\SalaryType;
 use Illuminate\Support\Facades\Log;
 
 class SalaryService
@@ -237,6 +238,7 @@ class SalaryService
             'bonus' => $salaryDetails['totalTypeBonus'], // No bonus calculation
             'penalty' => $salaryDetails['totalTypePenalty'], // No penalty calculation
             'other_deduction' => $salaryDetails['totalTypeSalary'], // Not used in current calculation
+            'salary_type' => $user->salary_type?->value ?? SalaryType::BASIC_SALARY->value, // Loại lương của tài xế
         ];
 
         // Only update status if not already paid
