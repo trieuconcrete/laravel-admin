@@ -20,6 +20,63 @@ class ShipmentRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
+        // Xử lý vehicle_id để đảm bảo là integer
+        if ($this->has('vehicle_id') && $this->input('vehicle_id')) {
+            $vehicleId = $this->input('vehicle_id');
+            // Nếu là string chứa text, cố gắng extract ID
+            if (is_string($vehicleId) && strpos($vehicleId, '-') !== false) {
+                // Nếu có format "92-G106594 - Xe đầu kéo", extract số đầu tiên
+                if (preg_match('/^(\d+)/', $vehicleId, $matches)) {
+                    $this->merge(['vehicle_id' => (int)$matches[1]]);
+                }
+            } else {
+                // Đảm bảo là integer
+                $this->merge(['vehicle_id' => (int)$vehicleId]);
+            }
+        }
+        
+        // Xử lý format thời gian start_time và end_time
+        if ($this->has('start_time') && $this->input('start_time')) {
+            $startTime = $this->input('start_time');
+            // Đảm bảo format H:i
+            if (preg_match('/^\d{1,2}:\d{2}$/', $startTime)) {
+                // Format đã đúng, không cần thay đổi
+            } else {
+                // Nếu format không đúng, cố gắng parse và format lại
+                $time = strtotime($startTime);
+                if ($time !== false) {
+                    $this->merge(['start_time' => date('H:i', $time)]);
+                }
+            }
+        }
+        
+        if ($this->has('end_time') && $this->input('end_time')) {
+            $endTime = $this->input('end_time');
+            // Đảm bảo format H:i
+            if (preg_match('/^\d{1,2}:\d{2}$/', $endTime)) {
+                // Format đã đúng, không cần thay đổi
+            } else {
+                // Nếu format không đúng, cố gắng parse và format lại
+                $time = strtotime($endTime);
+                if ($time !== false) {
+                    $this->merge(['end_time' => date('H:i', $time)]);
+                }
+            }
+        }
+        
+        // Xử lý is_car_rental để đảm bảo không null
+        if ($this->has('is_car_rental')) {
+            $isCarRental = $this->input('is_car_rental');
+            if ($isCarRental === null || $isCarRental === '') {
+                $this->merge(['is_car_rental' => false]);
+            } else {
+                $this->merge(['is_car_rental' => (bool)$isCarRental]);
+            }
+        } else {
+            // Nếu không có field is_car_rental, set default là false
+            $this->merge(['is_car_rental' => false]);
+        }
+        
         // TEMPORARY: Disable filtering to test if this is the issue
         // Filter drivers array based on submitted rows
         if ($this->has('driver_row_indexes')) {
@@ -98,7 +155,10 @@ class ShipmentRequest extends FormRequest
                 if (isset($driver['deductions']) && is_array($driver['deductions'])) {
                     foreach ($driver['deductions'] as $deductionKey => $value) {
                         if (!empty($value)) {
-                            $drivers[$driverIndex]['deductions'][$deductionKey] = str_replace(',', '', $value);
+                            // Chỉ xóa dấu phẩy nếu không phải là "Ghi chú"
+                            if ($deductionKey !== 'Ghi chú') {
+                                $drivers[$driverIndex]['deductions'][$deductionKey] = str_replace(',', '', $value);
+                            }
                         }
                     }
                 }
@@ -107,14 +167,18 @@ class ShipmentRequest extends FormRequest
                 'drivers' => $drivers
             ]);
         }
-
+        
+        // Remove commas from driverPX deduction values
         if ($this->has('driverPXs')) {
             $driverPXs = $this->input('driverPXs', []);
             foreach ($driverPXs as $driverIndex => $driver) {
                 if (isset($driver['deductions']) && is_array($driver['deductions'])) {
                     foreach ($driver['deductions'] as $deductionKey => $value) {
                         if (!empty($value)) {
-                            $driverPXs[$driverIndex]['deductions'][$deductionKey] = str_replace(',', '', $value);
+                            // Chỉ xóa dấu phẩy nếu không phải là "Ghi chú"
+                            if ($deductionKey !== 'Ghi chú') {
+                                $driverPXs[$driverIndex]['deductions'][$deductionKey] = str_replace(',', '', $value);
+                            }
                         }
                     }
                 }
@@ -123,8 +187,8 @@ class ShipmentRequest extends FormRequest
                 'driverPXs' => $driverPXs
             ]);
         }
-
-        // Remove commas from unit price
+        
+        // Remove commas from unit_price
         if ($this->unit_price) {
             $this->merge([
                 'unit_price' => str_replace(',', '', $this->unit_price),
@@ -134,13 +198,48 @@ class ShipmentRequest extends FormRequest
 
     public function rules()
     {
-        return [
+        // Debug logging
+        if (app()->environment('local')) {
+            // Kiểm tra xem vehicle_id có tồn tại trong database không
+            $vehicleId = $this->input('vehicle_id');
+            $vehicleExists = null;
+            if ($vehicleId) {
+                $vehicleExists = \App\Models\Vehicle::where('vehicle_id', $vehicleId)->exists();
+            }
+            
+            Log::info('ShipmentRequest - rules:', [
+                'all_data' => $this->all(),
+                'is_car_rental' => $this->input('is_car_rental'),
+                'is_car_rental_after_processing' => $this->input('is_car_rental'),
+                'vehicle_id' => $this->input('vehicle_id'),
+                'vehicle_id_type' => gettype($this->input('vehicle_id')),
+                'vehicle_id_raw' => $this->input('vehicle_id'),
+                'vehicle_exists_in_db' => $vehicleExists,
+                'available_vehicle_ids' => \App\Models\Vehicle::pluck('vehicle_id')->toArray(),
+                'shipment_type' => $this->input('shipment_type'),
+                'start_time' => $this->input('start_time'),
+                'end_time' => $this->input('end_time'),
+            ]);
+        }
+        
+        $rules = [
             'customer_id' => 'required|exists:customers,id',
-            'vehicle_id' => 'required|exists:vehicles,vehicle_id',
+            'vehicle_id' => 'nullable|exists:vehicles,vehicle_id',
             'origin' => 'required|string|max:255',
             'destination' => 'nullable|string|max:255',
+            'origin2' => 'nullable|string|max:255',
+            'destination2' => 'nullable|string|max:255',
+            'origin3' => 'nullable|string|max:255',
+            'destination3' => 'nullable|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'company2' => 'nullable|string|max:255',
+            'company3' => 'nullable|string|max:255',
             'departure_time' => 'required|' . $this->getSystemDateFormatRule(),
             'estimated_arrival_time' => 'required|' . $this->getSystemDateFormatRule() . '|after_or_equal:departure_time',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i',
+            'shipment_type' => 'required|integer|in:1,2,3,4',
+            'is_car_rental' => 'nullable|boolean',
             'notes' => 'nullable|string',
             'status' => 'required|string',
             'distance' => 'nullable|numeric|min:0',
@@ -157,17 +256,23 @@ class ShipmentRequest extends FormRequest
             'goods.*.unit' => 'nullable|numeric|min:0',
             'goods.*.notes' => 'nullable|string|max:255',
             'goods.*.weight' => 'nullable|numeric|min:0',
-            // Tài xế/lơ xe và phụ cấp
-            'drivers' => 'array',
-            'drivers.*.user_id' => 'required|exists:users,id',
-            'drivers.*.deductions' => 'array',
-            'drivers.*.deductions.*' => 'nullable',
-            // Tài xế phụ cấp
-            'driverPXs' => 'array|nullable',
-            'driverPXs.*.user_id' => 'nullable|exists:users,id',
-            'driverPXs.*.deductions' => 'array',
-            'driverPXs.*.deductions.*' => 'nullable'
         ];
+
+        // Nếu không phải xe thuê, thì yêu cầu thông tin tài xế và phương tiện
+        if (!$this->input('is_car_rental')) {
+            $rules['vehicle_id'] = 'required|exists:vehicles,vehicle_id';
+            $rules['drivers'] = 'array';
+            $rules['drivers.*.user_id'] = 'required|exists:users,id';
+            $rules['drivers.*.deductions'] = 'array';
+            $rules['drivers.*.deductions.*'] = 'nullable';
+            
+            $rules['driverPXs'] = 'array|nullable';
+            $rules['driverPXs.*.user_id'] = 'nullable|exists:users,id';
+            $rules['driverPXs.*.deductions'] = 'array';
+            $rules['driverPXs.*.deductions.*'] = 'nullable';
+        }
+
+        return $rules;
     }
 
     public function attributes()
@@ -177,8 +282,19 @@ class ShipmentRequest extends FormRequest
             'vehicle_id' => 'Phương tiện',
             'origin' => 'Điểm xuất phát',
             'destination' => 'Điểm đến',
+            'origin2' => 'Điểm đi 2',
+            'destination2' => 'Điểm đến 2',
+            'origin3' => 'Điểm đi 3',
+            'destination3' => 'Điểm đến 3',
+            'company' => 'Công ty',
+            'company2' => 'Công ty 2',
+            'company3' => 'Công ty 3',
             'departure_time' => 'Thời gian khởi hành',
             'estimated_arrival_time' => 'Thời gian dự kiến đến',
+            'start_time' => 'Giờ khởi hành',
+            'end_time' => 'Giờ đến',
+            'shipment_type' => 'Loại chuyến xe',
+            'is_car_rental' => 'Xe HPL Thuê',
             'notes' => 'Ghi chú',
             'status' => 'Trạng thái',
             'deductions' => 'Chi phí chuyến hàng',

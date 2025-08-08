@@ -60,25 +60,33 @@
                                         <div class="tab-pane active" id="driverAllowance" role="tabpanel">
                                             <div class="row mb-3">
                                                 <label class="form-label fs-5">Loại chuyến xe <span class="text-danger">*</span></label>
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <div class="form-check form-radio-primary mb-3">
-                                                        <input class="form-check-input" type="radio" name="shipment_type" value="1" id="shipment_type1" checked>
+                                                        <input class="form-check-input" type="radio" name="shipment_type" value="1" id="shipment_type1" {{ old('shipment_type', '1') == '1' ? 'checked' : '' }}>
                                                         <label class="form-check-label" for="shipment_type1">
                                                             Khách chạy theo chuyến
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <div class="form-check form-radio-primary mb-3">
-                                                        <input class="form-check-input" type="radio" name="shipment_type" value="3" id="shipment_type3">
+                                                        <input class="form-check-input" type="radio" name="shipment_type" value="2" id="shipment_type2" {{ old('shipment_type') == '2' ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="shipment_type2">
+                                                            Khách chạy theo tháng
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-check form-radio-primary mb-3">
+                                                        <input class="form-check-input" type="radio" name="shipment_type" value="3" id="shipment_type3" {{ old('shipment_type') == '3' ? 'checked' : '' }}>
                                                         <label class="form-check-label" for="shipment_type3">
                                                             Xe nâng
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <div class="form-check form-radio-primary mb-3">
-                                                        <input class="form-check-input" type="radio" name="shipment_type" value="4" id="shipment_type4">
+                                                        <input class="form-check-input" type="radio" name="shipment_type" value="4" id="shipment_type4" {{ old('shipment_type') == '4' ? 'checked' : '' }}>
                                                         <label class="form-check-label" for="shipment_type4">
                                                             Xe đường dài bắc-nam
                                                         </label>
@@ -111,7 +119,6 @@
                                             </div>
                                             <div class="row mb-3">
                                                 @php
-                                                // Xử lý giá trị mặc định và giá trị old() đúng định dạng
                                                 $defaultDeparture = date('Y-m-d');
                                                 $defaultArrival = date('Y-m-d', strtotime('+1 week'));
                                                 
@@ -119,23 +126,25 @@
                                                 $departureDateValue = old('departure_time', $defaultDeparture);
                                                 $arrivalDateValue = old('estimated_arrival_time', $defaultArrival);
                                                 @endphp
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <label class="form-label">Thời gian khởi hành<span class="text-danger">*</span></label>
                                                     <input type="date" class="form-control date-input" name="departure_time" value="@formatDateForInput($departureDateValue)" required autocomplete="off">
                                                     @error('departure_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
-                                                <div class="col-md-2">
+                                                <div class="col-md-3">
                                                     <label class="form-label">Giờ khởi hành <span class="text-danger">*</span></label>
-                                                    <input type="time" class="form-control" name="start_time" id="start_time" required inputmode="numeric" style="cursor:pointer;">
+                                                    <input type="time" class="form-control" name="start_time" id="start_time" value="{{ old('start_time') }}" inputmode="numeric" style="cursor:pointer;">
+                                                    @error('start_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <label class="form-label">Thời gian dự kiến đến<span class="text-danger">*</span></label>
                                                     <input type="date" class="form-control date-input" name="estimated_arrival_time" value="@formatDateForInput($arrivalDateValue)" required autocomplete="off">
                                                     @error('estimated_arrival_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
-                                                <div class="col-md-2">
-                                                    <label class="form-label">Giờ đến <span class="text-danger">*</span></label>
-                                                    <input type="time" class="form-control" name="end_time" id="end_time" required inputmode="numeric" style="cursor:pointer;">
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Giờ đến</label>
+                                                    <input type="time" class="form-control" name="end_time" value="{{ old('end_time') }}">
+                                                    @error('end_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
@@ -162,53 +171,63 @@
                                                     @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
-                                            <!-- Additional fields for origin and destination -->
-                                            <div class="origin-destination bg-light p-3 mb-2">
-                                                <div class="row mb-3">
-                                                    <div class="col-md-4">
-                                                        <label class="form-label">Điểm đi<span class="text-danger">*</span></label>
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đi" name="origin" value="{{ old('origin') }}" required>
-                                                        @error('origin')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label">Công ty</label>
-                                                        <input type="text" class="form-control" placeholder="Nhập công ty" name="company" value="{{ old('company') }}">
-                                                        @error('company')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label">Điểm đến</label>
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 1" name="destination" value="{{ old('destination') }}">
-                                                        @error('destination')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-3">
-                                                    <div class="col-md-4">
-                                                    </div>
-                                                    <div class="col-md-4">
+                                                                                         <!-- Additional fields for origin and destination -->
+                                             <div class="origin-destination bg-light p-3 mb-2">
+                                                 <div class="row mb-3">
+                                                     <div class="col-md-4">
+                                                         <label class="form-label">Điểm đi<span class="text-danger">*</span></label>
+                                                         <input type="text" class="form-control" placeholder="Nhập điểm đi" name="origin" value="{{ old('origin') }}" required>
+                                                         @error('origin')<span class="text-danger">{{ $message }}</span>@enderror
+                                                     </div>
+                                                     <div class="col-md-4">
+                                                         <label class="form-label">Công ty</label>
+                                                         <input type="text" class="form-control" placeholder="Nhập công ty" name="company" value="{{ old('company') }}">
+                                                         @error('company')<span class="text-danger">{{ $message }}</span>@enderror
+                                                     </div>
+                                                     <div class="col-md-4">
+                                                         <label class="form-label">Điểm đến</label>
+                                                         <input type="text" class="form-control" placeholder="Nhập điểm đến 1" name="destination" value="{{ old('destination') }}">
+                                                         @error('destination')<span class="text-danger">{{ $message }}</span>@enderror
+                                                     </div>
+                                                 </div>
+                                                 <div class="row mb-3">
+                                                     <div class="col-md-4">
+                                                         {{--  <label class="form-label">Điểm đi 2</label>  --}}
+                                                        <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 2" name="origin2" value="{{ old('origin2') }}">
+                                                        @error('origin2')<span class="text-danger">{{ $message }}</span>@enderror
+                                                     </div>
+                                                     <div class="col-md-4">
                                                         <input type="text" class="form-control" placeholder="Nhập công ty" name="company2" value="{{ old('company2') }}">
                                                         @error('company2')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-4">
+                                                     </div>
+                                                     <div class="col-md-4">
                                                         <input type="text" class="form-control" placeholder="Nhập điểm đến 2" name="destination2" value="{{ old('destination2') }}">
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-3">
-                                                    <div class="col-md-4">
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <input type="text" class="form-control" placeholder="Nhập công ty" name="company3" value="{{ old('company3') }}" required>
+                                                        @error('destination2')<span class="text-danger">{{ $message }}</span>@enderror
+                                                     </div>
+                                                 </div>
+                                                 <div class="row mb-3">
+                                                     <div class="col-md-4">
+                                                         {{--  <label class="form-label">Điểm đi 3</label>  --}}
+                                                        <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 3" name="origin3" value="{{ old('origin3') }}">
+                                                        @error('origin3')<span class="text-danger">{{ $message }}</span>@enderror
+                                                     </div>
+                                                     <div class="col-md-4">
+                                                        <input type="text" class="form-control" placeholder="Nhập công ty" name="company3" value="{{ old('company3') }}">
                                                         @error('company3')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 3" name="destination3" value="{{ old('destination3') }}">
-                                                    </div>
+                                                     </div>
+                                                     <div class="col-md-4">
+                                                         <input type="text" class="form-control" placeholder="Nhập điểm đến 3" name="destination3" value="{{ old('destination3') }}">
+                                                         @error('destination3')<span class="text-danger">{{ $message }}</span>@enderror
+                                                     </div>
+                                                 </div>
+                                             </div>
+                                             <!-- End -->
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <label class="form-label">Ghi chú</label>
+                                                    <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="notes">{!! old('notes') !!}</textarea>
+                                                    @error('notes')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
-                                            </div>
-                                            <!-- End -->
-                                            <div class="mb-3">
-                                                <label class="form-label">Ghi chú</label>
-                                                <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="Ghi chú" value="{{ old('Ghi chú') }}"></textarea>
-                                                @error('note')<span class="text-danger">{{ $message }}</span>@enderror
                                             </div>
                                             
                                             <hr>
@@ -343,10 +362,10 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
-                                                    <select class="form-select" name="vehicle_id" id="vehicles" required>
+                                                    <select class="form-select" name="vehicle_id" id="vehicles">
                                                         <option value="">Chọn phương tiện</option>
                                                         @foreach($vehicles as $vehicle)
-                                                            <option value="{{ $vehicle->vehicle_id }}" {{ old('vehicle_id') == $vehicle->vehicle_id ? 'selected' : '' }}>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
+                                                            <option value="{{ (int)$vehicle->vehicle_id }}" {{ old('vehicle_id') == (int)$vehicle->vehicle_id ? 'selected' : '' }}>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
                                                         @endforeach
                                                     </select>
                                                     @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
@@ -763,6 +782,32 @@
         
         // Kiểm tra và chuyển đến tab có lỗi nếu có
         handleFormErrors();
+        
+        // Xử lý checkbox "Xe HPL Thuê"
+        const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
+        const driverSection = document.getElementById('drivers');
+        
+        function toggleDriverSections() {
+            if (!isCarRentalCheckbox || !driverSection) {
+                return; // Exit if elements don't exist
+            }
+            
+            const isChecked = isCarRentalCheckbox.checked;
+            if (isChecked) {
+                // Nếu là xe thuê, ẩn phần tài xế
+                driverSection.style.display = 'none';
+            } else {
+                // Nếu không phải xe thuê, hiện phần tài xế
+                driverSection.style.display = 'block';
+            }
+        }
+        
+        // Thêm event listener cho checkbox
+        if (isCarRentalCheckbox) {
+            isCarRentalCheckbox.addEventListener('change', toggleDriverSections);
+            // Chạy lần đầu khi trang load
+            toggleDriverSections();
+        }
         
         // Xử lý submit form
         document.getElementById('shipmentForm').addEventListener('submit', function(e) {

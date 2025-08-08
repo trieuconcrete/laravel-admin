@@ -194,7 +194,7 @@ class VehicleController extends Controller
                 ->get()
                 ->map(function ($vehicle) {
                     return [
-                        'id' => $vehicle->id,
+                        'id' => $vehicle->vehicle_id, // Sử dụng vehicle_id thay vì id
                         'plate_number' => $vehicle->plate_number,
                         'vehicle_type' => $vehicle->vehicleType->name ?? '',
                         'capacity' => $vehicle->capacity,

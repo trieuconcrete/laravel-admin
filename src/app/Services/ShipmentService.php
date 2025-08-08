@@ -53,8 +53,19 @@ class ShipmentService
                 'vehicle_id' => $data['vehicle_id'],
                 'origin' => $data['origin'],
                 'destination' => $data['destination'],
+                'origin2' => $data['origin2'] ?? null,
+                'destination2' => $data['destination2'] ?? null,
+                'origin3' => $data['origin3'] ?? null,
+                'destination3' => $data['destination3'] ?? null,
+                'company' => $data['company'] ?? null,
+                'company2' => $data['company2'] ?? null,
+                'company3' => $data['company3'] ?? null,
                 'departure_time' => $data['departure_time'],
                 'estimated_arrival_time' => $data['estimated_arrival_time'] ?? null,
+                'start_time' => $data['start_time'] ?? null,
+                'end_time' => $data['end_time'] ?? null,
+                'shipment_type' => $data['shipment_type'] ?? Shipment::SHIPMENT_TYPE_PER_TRIP,
+                'is_car_rental' => $data['is_car_rental'] ?? false,
                 'notes' => $data['notes'] ?? null,
                 'status' => $data['status'],
                 'distance' => $data['distance'] ?? null,
@@ -106,8 +117,8 @@ class ShipmentService
                 }
             }
 
-            // 4. Lưu các phụ cấp tài xế/lơ xe
-            if (!empty($data['drivers'])) {
+            // 4. Lưu các phụ cấp tài xế/lơ xe (chỉ khi không phải xe thuê)
+            if (!empty($data['drivers']) && !($data['is_car_rental'] ?? false)) {
                 foreach ($data['drivers'] as $person) {
                     // Kiểm tra user_id có tồn tại và là số nguyên dương
                     if (isset($person['user_id']) && is_numeric($person['user_id']) && (int)$person['user_id'] > 0) {
@@ -145,7 +156,8 @@ class ShipmentService
                 }
             }
 
-            if (!empty($data['driverPXs'])) {
+            // 5. Lưu các phụ cấp tài xế phụ cấp (chỉ khi không phải xe thuê)
+            if (!empty($data['driverPXs']) && !($data['is_car_rental'] ?? false)) {
                 foreach ($data['driverPXs'] as $driverPX) {
                     // Kiểm tra user_id có tồn tại và là số nguyên dương
                     if (isset($driverPX['user_id']) && is_numeric($driverPX['user_id']) && (int)$driverPX['user_id'] > 0) {
@@ -187,6 +199,14 @@ class ShipmentService
     public function update(Shipment $shipment, array $data)
     {
         Log::info('Dữ liệu cập nhật shipment: ' . json_encode($data));
+        
+        // Debug log cho is_car_rental
+        Log::info('is_car_rental debug:', [
+            'raw_value' => $data['is_car_rental'] ?? 'NOT_SET',
+            'type' => gettype($data['is_car_rental'] ?? 'NOT_SET'),
+            'bool_value' => (bool)($data['is_car_rental'] ?? false),
+            'will_save_drivers' => !($data['is_car_rental'] ?? false)
+        ]);
         
         // Debug log cho drivers data
         if (!empty($data['drivers'])) {
@@ -245,10 +265,10 @@ class ShipmentService
                 }
             }
             
-            // 4. Xóa và cập nhật lại các phụ cấp tài xế/lơ xe
+            // 4. Xóa và cập nhật lại các phụ cấp tài xế/lơ xe (chỉ khi không phải xe thuê)
             $shipment->shipmentDeductions()->whereNotNull('user_id')->delete();
             
-            if (!empty($data['drivers'])) {
+            if (!empty($data['drivers']) && !($data['is_car_rental'] ?? false)) {
                 foreach ($data['drivers'] as $person) {
                     // Kiểm tra user_id có tồn tại và là số nguyên dương
                     if (isset($person['user_id']) && is_numeric($person['user_id']) && (int)$person['user_id'] > 0) {
@@ -286,7 +306,8 @@ class ShipmentService
                 }
             }
 
-            if (!empty($data['driverPXs'])) {
+            // 5. Xóa và cập nhật lại các phụ cấp tài xế phụ cấp (chỉ khi không phải xe thuê)
+            if (!empty($data['driverPXs']) && !($data['is_car_rental'] ?? false)) {
                 foreach ($data['driverPXs'] as $driverPX) {
                     // Kiểm tra user_id có tồn tại và là số nguyên dương
                     if (isset($driverPX['user_id']) && is_numeric($driverPX['user_id']) && (int)$driverPX['user_id'] > 0) {
