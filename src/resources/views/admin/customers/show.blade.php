@@ -243,6 +243,9 @@
                             </div>
                             <div class="row mb-5 mt-5">
                                 <div class="col-md-12 text-center">
+                                    <button type="submit" class="btn btn-info me-2">
+                                        <i class="ri-search-line"></i>Tìm kiếm chuyến xe
+                                    </button>
                                     <button type="button" id="summarizeReport"
                                         class="btn {{ $isFinalized ? 'btn-success' : 'btn-secondary' }} me-2"
                                         @if($isFinalized) disabled @endif>
