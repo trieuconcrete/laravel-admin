@@ -12,11 +12,16 @@ class ShipmentReport extends Model
 
     protected $fillable = [
         'monthly',
+        'shipment_type', // 1: Khách chạy theo chuyến, 2: Khách thuê xe tháng, 3: Xe nâng, 4: Xe đường dài bắc-nam
+        'statement_start_date',
+        'statement_end_date',
         'customer_id',
         'total_amount',
         'created_by',
         'updated_by',
-        'is_finalized'
+        'is_finalized',
+        'statement_start_date',
+        'statement_end_date'
     ];
 
     protected $casts = [

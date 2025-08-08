@@ -56,7 +56,7 @@ class ShipmentController extends Controller
     public function create()
     {
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
-        $vehicles = Vehicle::where('status', Vehicle::STATUS_ACTIVE)->pluck('plate_number', 'vehicle_id');
+        $vehicles = Vehicle::with(['vehicleType', 'driver'])->where('status', Vehicle::STATUS_ACTIVE)->get();
         
         // Get drivers (tài xế)  
         $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
@@ -69,14 +69,17 @@ class ShipmentController extends Controller
             
         $deductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_EXPENSE)
             ->where('status', 'active')
+            ->orderBy('order', 'asc')
             ->get();
             
         $personDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_DRIVER)
             ->where('status', 'active')
+            ->orderBy('order', 'asc')
             ->get();
             
         $subPersonDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_BUS_DRIVER)
             ->where('status', 'active')
+            ->orderBy('order', 'asc')
             ->get();
             
         $userPXs = User::whereIn('role', ['driver', 'assistant', 'helper', 'staff'])
@@ -126,9 +129,10 @@ class ShipmentController extends Controller
      */
     public function edit(Shipment $shipment)
     {
-        $shipment->load(['goods', 'shipmentDeductions']);
+        $shipment->load(['vehicle', 'goods', 'shipmentDeductions']);
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
-        $vehicles = Vehicle::where('status', Vehicle::STATUS_ACTIVE)->pluck('plate_number', 'vehicle_id');
+        // Load tất cả vehicles, không filter theo carRental để có thể chọn bất kỳ xe nào
+        $vehicles = Vehicle::with(['vehicleType', 'driver'])->where('status', Vehicle::STATUS_ACTIVE)->get();
         $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
             ->where('status', UserStatus::ACTIVE)
             ->whereHas('position', function ($query) {
@@ -144,6 +148,13 @@ class ShipmentController extends Controller
                 'is_array' => is_array($users),
                 'count' => count($users),
                 'data' => $users
+            ]);
+            
+            logger('Vehicles in edit method:', [
+                'count' => $vehicles->count(),
+                'vehicle_ids' => $vehicles->pluck('vehicle_id')->toArray(),
+                'shipment_vehicle_id' => $shipment->vehicle_id,
+                'shipment_is_car_rental' => $shipment->is_car_rental
             ]);
         }
         $deductionTypes = ShipmentDeductionType::where('type', 'expense')->where('status', 'active')->get();

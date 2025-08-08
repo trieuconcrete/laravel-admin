@@ -12,12 +12,12 @@ class ShipmentDeductionType extends Model
     const TYPE_DRIVER = 'driver';
     const TYPE_EXPENSE = 'expense';
     const TYPE_BUS_DRIVER = 'bus_driver';
+    const STATUS_ACTIVE = 'active';
     
     protected $fillable = [
         'name', 
         'type', 
         'status',
-        'is_main_driver',
         'notes'
     ];
 }

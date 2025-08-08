@@ -143,6 +143,20 @@
                                                     @enderror
                                                 </div>
                                             </div>
+                                            @if($user->role === 'driver')
+                                            <div class="col-xxl-6">
+                                                <div class="mb-3">
+                                                    <label for="salaryType" class="form-label">Loại lương tài xế</label>
+                                                    <select name="salary_type" class="form-select">
+                                                        <option value="1" {{ $user->salary_type?->value == 1 ? 'selected' : '' }}>Tài xế ăn lương cơ bản</option>
+                                                        <option value="2" {{ $user->salary_type?->value == 2 ? 'selected' : '' }}>Tài xế ăn lương doanh số</option>
+                                                    </select>
+                                                    @error('salary_type')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            @endif
                                             <!--end col-->
                                             <div class="col-lg-12">
                                                 <div class="mb-3">
@@ -324,7 +338,7 @@
                                 <table class="table table-hover">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Mã chuyến hàng</th>
+                                            <th>Mã chuyến xe</th>
                                             <th>Khách hàng</th>
                                             <th>Biển số xe</th>
                                             <th>Ngày</th>
@@ -366,7 +380,7 @@
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="9" class="text-center">Không có chuyến hàng nào trong tháng này</td>
+                                                <td colspan="9" class="text-center">Không có chuyến xe nào trong tháng này</td>
                                             </tr>
                                         @endif
                                     </tbody>
@@ -575,7 +589,7 @@
                                 <table class="table table-hover">
                                     <thead class="table-light">
                                         <tr>
-                                            <th>Mã chuyến hàng</th>
+                                            <th>Mã chuyến xe</th>
                                             <th>Ngày</th>
                                             <th>Trợ cấp</th>
                                             <th>Ghi chú</th>

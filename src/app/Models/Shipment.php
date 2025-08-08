@@ -28,8 +28,15 @@ class Shipment extends Model
         'shipment_code',
         'contract_id',
         'customer_id', // khách hàng
-        'origin', // điểm xuất phát
-        'destination', // điểm đến
+        'origin', // điểm đi 1
+        'origin2', // điểm đi 2
+        'origin3', // điểm đi 3
+        'destination', // điểm đến 1
+        'destination2', // điểm đến 2
+        'destination3', // điểm đến 2
+        'company',
+        'company2', 
+        'company3',
         'departure_time', // thời gian khởi hành
         'estimated_arrival_time', // thời gian đến
         'cargo_weight', // trọng lượng hàng hóa
@@ -44,8 +51,22 @@ class Shipment extends Model
         'has_crane_service',
         'notes',
         'status',
+        'is_car_rental', // đánh dấu chuyến hàng sử dụng xe thuê
+        'shipment_type', // 1: Khách chạy theo chuyến, 2: Khách thuê xe tháng, 3: Xe nâng, 4: Xe đường dài bắc-nam
         'created_by',
-        'updated_by'
+        'updated_by',
+        
+        // Từ CarRentalVehicleLog
+        'car_rental_id',
+        'start_time',
+        'end_time',
+        'run_date',
+        'overtime_hours',
+        'start_odometer',
+        'end_odometer',
+        'overtime_rate',
+        'total_overtime_cost',
+        'parking_fee'
     ];
 
     /**
@@ -64,6 +85,17 @@ class Shipment extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        
+        // Từ CarRentalVehicleLog
+        'start_time' => 'string', // time
+        'end_time' => 'string',   // time  
+        'run_date' => 'date',
+        'overtime_hours' => 'decimal:2',
+        'start_odometer' => 'decimal:2',
+        'end_odometer' => 'decimal:2',
+        'overtime_rate' => 'decimal:2',
+        'total_overtime_cost' => 'decimal:2',
+        'parking_fee' => 'decimal:2',
     ];
 
     /**
@@ -87,6 +119,12 @@ class Shipment extends Model
     const STATUS_DELAYED = 'delayed';
     const STATUS_COMPLETED = 'completed';
 
+    // Shipment Type Constants (đáp ứng issue #180)
+    const SHIPMENT_TYPE_PER_TRIP = 1;      // Khách chạy theo chuyến
+    const SHIPMENT_TYPE_MONTHLY_RENTAL = 2; // Khách thuê xe tháng
+    const SHIPMENT_TYPE_CRANE = 3;         // Xe nâng
+    const SHIPMENT_TYPE_LONG_DISTANCE = 4; // Xe đường dài bắc-nam
+
     public static function getStatuses()
     {
         return [
@@ -97,6 +135,16 @@ class Shipment extends Model
             self::STATUS_CANCELLED => 'Đã hủy',
             self::STATUS_DELAYED => 'Bị trễ',
             self::STATUS_COMPLETED => 'Hoàn thành'
+        ];
+    }
+
+    public static function getShipmentTypes()
+    {
+        return [
+            self::SHIPMENT_TYPE_PER_TRIP => 'Khách chạy theo chuyến',
+            self::SHIPMENT_TYPE_MONTHLY_RENTAL => 'Khách thuê xe tháng',
+            self::SHIPMENT_TYPE_CRANE => 'Xe nâng',
+            self::SHIPMENT_TYPE_LONG_DISTANCE => 'Xe đường dài bắc-nam'
         ];
     }
     public function getStatusLabelAttribute()
@@ -126,6 +174,14 @@ class Shipment extends Model
     }
 
     /**
+     * Quan hệ với hợp đồng thuê xe
+     */
+    public function carRental()
+    {
+        return $this->belongsTo(CarRental::class, 'car_rental_id');
+    }
+
+    /**
      * Quan hệ với tài xế
      */
     public function driver()
@@ -146,7 +202,15 @@ class Shipment extends Model
      */
     public function vehicle()
     {
-        return $this->belongsTo(Vehicle::class, 'vehicle_id');  
+        return $this->belongsTo(Vehicle::class, 'vehicle_id', 'vehicle_id');
+    }
+
+    /**
+     * Lấy thông tin phí cầu đường
+     */
+    public function tollFees()
+    {
+        return $this->hasMany(TollFee::class, 'shipment_id');
     }
 
     /**
@@ -457,5 +521,73 @@ class Shipment extends Model
             $query->where('type', ShipmentDeductionType::TYPE_EXPENSE)
                 ->where('status', 'active');
         });
+    }
+
+    /**
+     * Tính tổng chi phí phát sinh (từ CarRentalVehicleLog)
+     */
+    public function getTotalExtraCostAttribute()
+    {
+        return $this->total_overtime_cost + $this->parking_fee;
+    }
+
+    /**
+     * Tính thời gian hoạt động (giờ) - chỉ khi có start_time và end_time
+     */
+    public function getOperatingHoursAttribute()
+    {
+        if (!$this->start_time || !$this->end_time) {
+            return 0;
+        }
+        
+        try {
+            $start = \Carbon\Carbon::createFromFormat('H:i:s', $this->start_time);
+            $end = \Carbon\Carbon::createFromFormat('H:i:s', $this->end_time);
+            
+            // Nếu end_time nhỏ hơn start_time, có nghĩa là qua ngày
+            if ($end->lt($start)) {
+                $end->addDay();
+            }
+            
+            return $start->diffInHours($end);
+        } catch (\Exception $e) {
+            return 0;
+        }
+    }
+
+    /**
+     * Tính quãng đường thực tế từ đồng hồ
+     */
+    public function getActualDistanceAttribute()
+    {
+        if (!$this->start_odometer || !$this->end_odometer) {
+            return $this->distance; // Fallback to manual distance
+        }
+        
+        return $this->end_odometer - $this->start_odometer;
+    }
+
+    /**
+     * Kiểm tra có phải xe HPL thuê không (đáp ứng yêu cầu issue #180)
+     */
+    public function isHplRental()
+    {
+        return $this->vehicle && $this->vehicle->is_car_rental;
+    }
+
+    /**
+     * Kiểm tra có cần chọn tài xế không (logic theo issue #180)
+     */
+    public function requiresDriverSelection()
+    {
+        return !$this->isHplRental();
+    }
+
+    /**
+     * Lấy label cho shipment type
+     */
+    public function getShipmentTypeLabelAttribute()
+    {
+        return self::getShipmentTypes()[$this->shipment_type] ?? 'Không xác định';
     }
 }

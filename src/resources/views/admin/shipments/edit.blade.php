@@ -14,7 +14,7 @@
     @endif
     <div class="row">
         <div class="col">
-            <form action="{{ route('admin.shipments.update', $shipment) }}" method="POST" enctype="multipart/form-data" id="shipmentForm">
+            <form action="{{ route('admin.shipments.update', $shipment) }}" method="POST" enctype="multipart/form-data" id="shipmentForm" data-current-vehicle-id="{{ $shipment->vehicle_id }}">
                 @method('PUT')
                 @csrf
                 <div class="row mb-3 pb-1">
@@ -22,7 +22,7 @@
                         <div class="col-12">
                             <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                                 <div class="flex-grow-1">
-                                    <h4 class="fs-16 mb-1">Chi tiết chuyến hàng</h4>
+                                    <h4 class="fs-16 mb-1">Chi tiết chuyến xe</h4>
                                 </div>
                                 <div class="mt-3 mt-lg-0">
                                     <div class="row g-3 mb-0 align-items-center">
@@ -59,7 +59,42 @@
                                 <div class="card-body">
                                     <div class="tab-content">
                                         <div class="tab-pane active" id="driverAllowance" role="tabpanel">
-                                            <h5 class="mb-3">Thông tin vận chuyển</h5>
+                                            <div class="row mb-3">
+                                                <label class="form-label fs-5">Loại chuyến xe <span class="text-danger">*</span></label>
+                                                <div class="col-md-3">
+                                                    <div class="form-check form-radio-primary mb-3">
+                                                        <input class="form-check-input" type="radio" name="shipment_type" value="1" id="shipment_type1" @checked(old('shipment_type', $shipment->shipment_type) == 1)>
+                                                        <label class="form-check-label" for="shipment_type1">
+                                                            Khách chạy theo chuyến
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-check form-radio-primary mb-3">
+                                                        <input class="form-check-input" type="radio" name="shipment_type" value="2" id="shipment_type2" @checked(old('shipment_type', $shipment->shipment_type) == 2)>
+                                                        <label class="form-check-label" for="shipment_type2">
+                                                            Khách chạy theo tháng
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-check form-radio-primary mb-3">
+                                                        <input class="form-check-input" type="radio" name="shipment_type" value="3" id="shipment_type3" @checked(old('shipment_type', $shipment->shipment_type) == 3)>
+                                                        <label class="form-check-label" for="shipment_type3">
+                                                            Xe nâng
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="form-check form-radio-primary mb-3">
+                                                        <input class="form-check-input" type="radio" name="shipment_type" value="4" id="shipment_type4" @checked(old('shipment_type', $shipment->shipment_type) == 4)>
+                                                        <label class="form-check-label" for="shipment_type4">
+                                                            Xe đường dài bắc-nam
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <h5 class="mb-3 fs-5">Thông tin vận chuyển</h5>
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
@@ -85,7 +120,7 @@
                                                 $departure_time = old('departure_time', $shipment?->departure_time);
                                                 $estimated_arrival_time = old('estimated_arrival_time', $shipment?->estimated_arrival_time);
                                                 @endphp
-                                                <div class="col-md-6">
+                                                <div class="col-md-3">
                                                     <label class="form-label">Thời gian khởi hành<span class="text-danger">*</span></label>
                                                     <input type="date" class="form-control" name="departure_time"
                                                            value="@formatDateForInput($departure_time)">
@@ -93,7 +128,12 @@
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Giờ khởi hành <span class="text-danger">*</span></label>
+                                                    <input type="time" class="form-control" name="start_time" id="start_time" value="{{ old('start_time', $shipment->start_time) }}" inputmode="numeric" style="cursor:pointer;">
+                                                    @error('start_time')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-3">
                                                     <label class="form-label">Thời gian dự kiến đến<span class="text-danger">*</span></label>
                                                     <input type="date" class="form-control" name="estimated_arrival_time"
                                                     value="@formatDateForInput($estimated_arrival_time)">
@@ -101,18 +141,25 @@
                                                         <span class="text-danger">{{ $message }}</span>
                                                     @enderror
                                                 </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Giờ đến</label>
+                                                    <input type="time" class="form-control" name="end_time" value="{{ old('end_time', $shipment->end_time) }}">
+                                                    @error('end_time')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
                                             </div>
+
+
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Điểm khởi hành <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" placeholder="Nhập điểm khởi hành" name="origin" value="{{ old('origin', $shipment->origin) }}" required>
-                                                    @error('origin')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $shipment->unit_price) }}">
+                                                    @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Điểm đến</label>
-                                                    <input type="text" class="form-control" placeholder="Nhập điểm đến" name="destination" value="{{ old('destination', $shipment->destination) }}">
-                                                    @error('destination')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    <label class="form-label">Số lượng chuyến</label>
+                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count) }}">
+                                                    @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
@@ -127,26 +174,67 @@
                                                     @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Số lượng chuyến</label>
-                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count) }}">
-                                                    @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
+                                            <!-- Additional fields for origin and destination -->
+                                            <div class="origin-destination bg-light p-3 mb-2">
+                                                <div class="row mb-3">
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">Điểm đi<span class="text-danger">*</span></label>
+                                                        <input type="text" class="form-control" placeholder="Nhập điểm đi" name="origin" value="{{ old('origin', $shipment->origin) }}" required>
+                                                        @error('origin')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">Công ty</label>
+                                                        <input type="text" class="form-control" placeholder="Nhập công ty" name="company" value="{{ old('company', $shipment->company) }}">
+                                                        @error('company')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">Điểm đến</label>
+                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 1" name="destination" value="{{ old('destination', $shipment->destination) }}">
+                                                        @error('destination')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $shipment->unit_price) }}">
-                                                    @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
+                                                <div class="row mb-3">
+                                                    <div class="col-md-4">
+                                                        {{--  <label class="form-label">Điểm đi 2</label>  --}}
+                                                        <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 2" name="origin2" value="{{ old('origin2', $shipment->origin2) }}">
+                                                        @error('origin2')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <input type="text" class="form-control" placeholder="Nhập công ty" name="company2" value="{{ old('company2', $shipment->company2) }}">
+                                                        @error('company2')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 2" name="destination2" value="{{ old('destination2', $shipment->destination2) }}">
+                                                        @error('destination2')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <div class="col-md-4">
+                                                        {{--  <label class="form-label">Điểm đi 3</label>  --}}
+                                                        <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 3" name="origin3" value="{{ old('origin3', $shipment->origin3) }}">
+                                                        @error('origin3')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <input type="text" class="form-control" placeholder="Nhập công ty" name="company3" value="{{ old('company3', $shipment->company3) }}">
+                                                        @error('company3')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 3" name="destination3" value="{{ old('destination3', $shipment->destination3) }}">
+                                                        @error('destination3')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Ghi chú</label>
-                                                <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="Ghi chú">{!! old('Ghi chú', $shipment->notes) !!}</textarea>
-                                                @error('Ghi chú')<span class="text-danger">{{ $message }}</span>@enderror
+                                            <!-- End -->
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <label class="form-label">Ghi chú</label>
+                                                    <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="notes">{!! old('notes', $shipment->notes) !!}</textarea>
+                                                    @error('notes')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
                                             </div>
                                             <hr>
                                             <div class="mb-3">
-                                                <label class="form-label">Chi phí chuyến hàng</label>
+                                                <label class="form-label">Chi phí chuyến xe</label>
                                                 <div class="table-responsive">
                                                     <table class="table table-bordered">
                                                         <thead>
@@ -259,189 +347,204 @@
                                         </div>
                                         <div class="tab-pane" id="shipmentDetail" role="tabpanel">
                                             <div class="row mb-3">
+                                                <div class="col-md-2">
+                                                    <div class="form-check form-check-secondary mb-3">
+                                                        <input class="form-check-input" name="is_car_rental" @checked($shipment->is_car_rental) type="checkbox" value="1" id="is_car_rental">
+                                                        <label class="form-check-label" for="is_car_rental">
+                                                            Xe HPL Thuê
+                                                        </label>
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
-                                                    <select class="form-select" name="vehicle_id" required>
+                                                    <select class="form-select" name="vehicle_id" id="vehicles">
                                                         <option value="">Chọn phương tiện</option>
-                                                        @foreach($vehicles as $id => $plate)
-                                                            <option value="{{ $id }}" {{ old('vehicle_id', $shipment->vehicle_id) == $id ? 'selected' : '' }}>{{ $plate }}</option>
+                                                        @foreach($vehicles as $vehicle)
+                                                            <option value="{{ (int)$vehicle->vehicle_id }}" @selected(old('vehicle_id', $shipment->vehicle_id) == (int)$vehicle->vehicle_id)>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
                                                         @endforeach
                                                     </select>
                                                     @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
+                                                
+                                                    <!-- Loading spinner (hidden by default) -->
+                                                    <div class="spinner-border spinner-border-sm text-primary mt-2" id="vehicle_loading" style="display: none;">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <hr>
-                                            <div class="mb-3">
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <label class="form-label mb-0">Tài xế</label>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" id="addPersonBtn">
-                                                        <i class="fas fa-plus me-1"></i>Thêm tài xế
-                                                    </button>
-                                                </div>
-                                                <div class="table-responsive">
-                                                    <table class="table table-sm" id="personTable">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Nhân sự <span class="text-danger">*</span></th>
-                                                                <th>Lái chính </th>
-                                                                @foreach($personDeductionTypes as $type)
-                                                                    <th>{{ $type->name }}</th>
+                                            <div id="drivers">
+                                                <hr>
+                                                <div class="mb-3">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <label class="form-label mb-0">Tài xế</label>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" id="addPersonBtn">
+                                                            <i class="fas fa-plus me-1"></i>Thêm tài xế
+                                                        </button>
+                                                    </div>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm" id="personTable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Nhân sự <span class="text-danger">*</span></th>
+                                                                    <th>Lái chính </th>
+                                                                    @foreach($personDeductionTypes as $type)
+                                                                        <th>{{ $type->name }}</th>
+                                                                    @endforeach
+                                                                    <th>Ghi chú</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            @php
+                                                                $driversArray = [];
+                                                                foreach($driverDeductions as $userId => $deductions) {
+                                                                    // Lấy is_main_driver từ bất kỳ deduction record nào của driver này
+                                                                    $isMainDriver = $deductions->first() ? $deductions->first()->is_main_driver : false;
+                                                                    $driversArray[] = [
+                                                                        'user_id' => $userId,
+                                                                        'deductions' => $deductions->keyBy('shipment_deduction_type_id'),
+                                                                        'is_main_driver' => $isMainDriver
+                                                                    ];
+                                                                }
+                                                            @endphp
+                                                            
+                                                            @if(count($driversArray) > 0)
+                                                                @foreach($driversArray as $i => $driver)
+                                                                    
+                                                                    <tr>
+                                                                        <td>
+                                                                            <select name="drivers[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
+                                                                                <option value="">Chọn nhân sự</option>
+                                                                                @foreach($users as $id => $name)
+                                                                                    <option value="{{ $id }}" {{ old('drivers.'.$i.'.user_id', $driver['user_id']) == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                            @error('drivers.'.$i.'.user_id')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        </td>
+                                                                        <td class="text-center">
+                                                                            <div class="form-check form-switch d-inline-block">
+                                                                                <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input" 
+                                                                                    value="1" 
+                                                                                    {{ old('drivers.'.$i.'.deductions.is_main_driver', $driver['is_main_driver']) ? 'checked' : '' }}>
+                                                                            </div>
+                                                                            @error('drivers.{{ $i }}.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        </td>
+                                                                        @foreach($personDeductionTypes as $type)
+                                                                            <td>
+                                                                                <input type="text" name="drivers[{{ $i }}][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0" value="{{ old('drivers.'.$i.'.deductions.'.$type->id, isset($driver['deductions'][$type->id]) ? $driver['deductions'][$type->id]->amount : '') }}">
+                                                                                @error('drivers.'.$i.'.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
+                                                                            </td>
+                                                                        @endforeach
+                                                                        <td>
+                                                                            <input type="text" name="drivers[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.Ghi chú', $driver['deductions']->first() ? $driver['deductions']->first()->notes : '') }}">
+                                                                            @error('drivers.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        </td>
+                                                                        <td>
+                                                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
+                                                                            <input type="hidden" name="driver_rows[]" value="{{ $i }}">
+                                                                        </td>
+                                                                    </tr>
                                                                 @endforeach
-                                                                <th>Ghi chú</th>
-                                                                <th></th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        @php
-                                                            $driversArray = [];
-                                                            foreach($driverDeductions as $userId => $deductions) {
-                                                                // Lấy is_main_driver từ bất kỳ deduction record nào của driver này
-                                                                $isMainDriver = $deductions->first() ? $deductions->first()->is_main_driver : false;
-                                                                $driversArray[] = [
-                                                                    'user_id' => $userId,
-                                                                    'deductions' => $deductions->keyBy('shipment_deduction_type_id'),
-                                                                    'is_main_driver' => $isMainDriver
-                                                                ];
-                                                            }
-                                                        @endphp
-                                                        
-                                                        @if(count($driversArray) > 0)
-                                                            @foreach($driversArray as $i => $driver)
-                                                                
+                                                            @else
                                                                 <tr>
                                                                     <td>
-                                                                        <select name="drivers[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
+                                                                        <select name="drivers[0][user_id]" class="form-select form-select-sm" required>
                                                                             <option value="">Chọn nhân sự</option>
                                                                             @foreach($users as $id => $name)
-                                                                                <option value="{{ $id }}" {{ old('drivers.'.$i.'.user_id', $driver['user_id']) == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                                                                <option value="{{ $id }}">{{ $name }}</option>
                                                                             @endforeach
                                                                         </select>
-                                                                        @error('drivers.'.$i.'.user_id')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        @error('drivers.0.user_id')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     <td class="text-center">
                                                                         <div class="form-check form-switch d-inline-block">
-                                                                            <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input" 
+                                                                            <input type="checkbox" name="drivers[0][deductions][is_main_driver]" class="form-check-input deduction-input" 
                                                                                 value="1" 
-                                                                                {{ old('drivers.'.$i.'.deductions.is_main_driver', $driver['is_main_driver']) ? 'checked' : '' }}>
+                                                                                {{ old('drivers.0.deductions.is_main_driver', false) ? 'checked' : '' }}>
                                                                         </div>
-                                                                        @error('drivers.{{ $i }}.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        @error('drivers.0.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     @foreach($personDeductionTypes as $type)
                                                                         <td>
-                                                                            <input type="text" name="drivers[{{ $i }}][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0" value="{{ old('drivers.'.$i.'.deductions.'.$type->id, isset($driver['deductions'][$type->id]) ? $driver['deductions'][$type->id]->amount : '') }}">
-                                                                            @error('drivers.'.$i.'.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
+                                                                            <input type="text" name="drivers[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
+                                                                            @error('drivers.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
                                                                     @endforeach
                                                                     <td>
-                                                                        <input type="text" name="drivers[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.Ghi chú', $driver['deductions']->first() ? $driver['deductions']->first()->notes : '') }}">
-                                                                        @error('drivers.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        <input type="text" name="drivers[0][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.Ghi chú', '') }}">
+                                                                        @error('drivers.0.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     <td>
-                                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
-                                                                        <input type="hidden" name="driver_rows[]" value="{{ $i }}">
+                                                                        <input type="hidden" name="driver_rows[]" value="0">
                                                                     </td>
                                                                 </tr>
-                                                            @endforeach
-                                                        @else
-                                                            <tr>
-                                                                <td>
-                                                                    <select name="drivers[0][user_id]" class="form-select form-select-sm" required>
-                                                                        <option value="">Chọn nhân sự</option>
-                                                                        @foreach($users as $id => $name)
-                                                                            <option value="{{ $id }}">{{ $name }}</option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                    @error('drivers.0.user_id')<div class="text-danger">{{ $message }}</div>@enderror
-                                                                </td>
-                                                                <td class="text-center">
-                                                                    <div class="form-check form-switch d-inline-block">
-                                                                        <input type="checkbox" name="drivers[0][deductions][is_main_driver]" class="form-check-input deduction-input" 
-                                                                            value="1" 
-                                                                            {{ old('drivers.0.deductions.is_main_driver', false) ? 'checked' : '' }}>
-                                                                    </div>
-                                                                    @error('drivers.0.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
-                                                                </td>
-                                                                @foreach($personDeductionTypes as $type)
-                                                                    <td>
-                                                                        <input type="text" name="drivers[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
-                                                                        @error('drivers.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
-                                                                    </td>
-                                                                @endforeach
-                                                                <td>
-                                                                    <input type="text" name="drivers[0][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.Ghi chú', '') }}">
-                                                                    @error('drivers.0.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
-                                                                </td>
-                                                                <td>
-                                                                    <input type="hidden" name="driver_rows[]" value="0">
-                                                                </td>
-                                                            </tr>
-                                                        @endif
-                                                        </tbody>
-                                                    </table>
+                                                            @endif
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <hr>
-                                            <div class="mb-3">
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <label class="form-label mb-0">Lơ xe</label>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" id="addPersonPxBtn">
-                                                        <i class="fas fa-plus me-1"></i>Thêm lơ xe
-                                                    </button>
-                                                </div>
-                                                <div class="table-responsive">
-                                                    <table class="table table-sm" id="personPxTable">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Nhân sự <span class="text-danger">*</span></th>
-                                                                @foreach($subPersonDeductionTypes as $type)
-                                                                    <th>{{ $type->name }}</th>
-                                                                @endforeach
-                                                                <th>Ghi chú</th>
-                                                                <th></th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                        @php
-                                                            $driverPXsArray = [];
-                                                            foreach($driverPXDeductions as $userId => $deductions) {
-                                                                $driverPXsArray[] = [
-                                                                    'user_id' => $userId,
-                                                                    'deductions' => $deductions->keyBy('shipment_deduction_type_id')
-                                                                ];
-                                                            }
-                                                        @endphp
-                                                        
-                                                        @if(count($driverPXsArray) > 0)
-                                                            @foreach($driverPXsArray as $i => $driver)
-                                                                <tr id="driver-row-{{ $i }}">
-                                                                    <td>
-                                                                        <select name="driverPXs[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
-                                                                            <option value="">Chọn nhân sự</option>
-                                                                            @foreach($userPXs as $id => $name)
-                                                                                <option value="{{ $id }}" {{ old('driverPXs.'.$i.'.user_id', $driver['user_id']) == $id ? 'selected' : '' }}>{{ $name }}</option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                        @error('driverPXs.'.$i.'.user_id')<div class="text-danger">{{ $message }}</div>@enderror
-                                                                    </td>
+                                                <hr>
+                                                <div class="mb-3">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <label class="form-label mb-0">Lơ xe</label>
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" id="addPersonPxBtn">
+                                                            <i class="fas fa-plus me-1"></i>Thêm lơ xe
+                                                        </button>
+                                                    </div>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm" id="personPxTable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Nhân sự <span class="text-danger">*</span></th>
                                                                     @foreach($subPersonDeductionTypes as $type)
-                                                                        <td>
-                                                                            <input type="text" name="driverPXs[{{ $i }}][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0" value="{{ old('driverPXs.'.$i.'.deductions.'.$type->id, isset($driver['deductions'][$type->id]) ? $driver['deductions'][$type->id]->amount : '') }}">
-                                                                            @error('driverPXs.'.$i.'.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
-                                                                        </td>
+                                                                        <th>{{ $type->name }}</th>
                                                                     @endforeach
-                                                                    <td>
-                                                                        <input type="text" name="driverPXs[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('driverPXs.'.$i.'.deductions.Ghi chú', isset($driver['deductions'][$type->id]['Ghi chú']) ? $driver['deductions'][$type->id]['Ghi chú'] : '') }}">
-                                                                        @error('driverPXs.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
-                                                                    </td>
-                                                                    <td>
-                                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
-                                                                        <input type="hidden" name="driverPX_rows[]" value="{{ $i }}">
-                                                                    </td>
+                                                                    <th>Ghi chú</th>
+                                                                    <th></th>
                                                                 </tr>
-                                                            @endforeach
-                                                        @endif
-                                                        </tbody>
-                                                    </table>
+                                                            </thead>
+                                                            <tbody>
+                                                            @php
+                                                                $driverPXsArray = [];
+                                                                foreach($driverPXDeductions as $userId => $deductions) {
+                                                                    $driverPXsArray[] = [
+                                                                        'user_id' => $userId,
+                                                                        'deductions' => $deductions->keyBy('shipment_deduction_type_id')
+                                                                    ];
+                                                                }
+                                                            @endphp
+                                                            
+                                                            @if(count($driverPXsArray) > 0)
+                                                                @foreach($driverPXsArray as $i => $driver)
+                                                                    <tr id="driver-row-{{ $i }}">
+                                                                        <td>
+                                                                            <select name="driverPXs[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
+                                                                                <option value="">Chọn nhân sự</option>
+                                                                                @foreach($userPXs as $id => $name)
+                                                                                    <option value="{{ $id }}" {{ old('driverPXs.'.$i.'.user_id', $driver['user_id']) == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                            @error('driverPXs.'.$i.'.user_id')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        </td>
+                                                                        @foreach($subPersonDeductionTypes as $type)
+                                                                            <td>
+                                                                                <input type="text" name="driverPXs[{{ $i }}][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0" value="{{ old('driverPXs.'.$i.'.deductions.'.$type->id, isset($driver['deductions'][$type->id]) ? $driver['deductions'][$type->id]->amount : '') }}">
+                                                                                @error('driverPXs.'.$i.'.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
+                                                                            </td>
+                                                                        @endforeach
+                                                                        <td>
+                                                                            <input type="text" name="driverPXs[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('driverPXs.'.$i.'.deductions.Ghi chú', isset($driver['deductions'][$type->id]['Ghi chú']) ? $driver['deductions'][$type->id]['Ghi chú'] : '') }}">
+                                                                            @error('driverPXs.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        </td>
+                                                                        <td>
+                                                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
+                                                                            <input type="hidden" name="driverPX_rows[]" value="{{ $i }}">
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            @endif
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -739,11 +842,37 @@
         // Kiểm tra và chuyển đến tab có lỗi nếu có
         handleFormErrors();
         
+        // Xử lý checkbox "Xe HPL Thuê"
+        const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
+        const driverSection = document.getElementById('drivers');
+        
+        function toggleDriverSections() {
+            if (!isCarRentalCheckbox || !driverSection) {
+                return; // Exit if elements don't exist
+            }
+            
+            const isChecked = isCarRentalCheckbox.checked;
+            if (isChecked) {
+                // Nếu là xe thuê, ẩn phần tài xế
+                driverSection.style.display = 'none';
+            } else {
+                // Nếu không phải xe thuê, hiện phần tài xế
+                driverSection.style.display = 'block';
+            }
+        }
+        
+        // Thêm event listener cho checkbox
+        if (isCarRentalCheckbox) {
+            isCarRentalCheckbox.addEventListener('change', toggleDriverSections);
+            // Chạy lần đầu khi trang load
+            toggleDriverSections();
+        }
+        
         // Xử lý submit form
         document.getElementById('shipmentForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            if (validateShipmentForm()) {
-                prepareFormBeforeSubmit();
+            if (validateShipmentForm(this)) {
+                prepareFormBeforeSubmit(this);
                 this.submit();
             }
         });

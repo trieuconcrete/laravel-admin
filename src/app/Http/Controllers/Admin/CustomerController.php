@@ -76,6 +76,19 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer, Request $request)
     {
+        // Handle AJAX request for customer data (for auto-fill forms)
+        if ($request->ajax() && $request->has('get_customer_data')) {
+            return response()->json([
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'phone' => $customer->phone,
+                'email' => $customer->email,
+                'address' => $customer->address,
+                'type' => $customer->type,
+                'is_active' => $customer->is_active
+            ]);
+        }
+
         // Handle AJAX request for monthly shipments by month
         if ($request->ajax() && $request->has('month')) {
             try {
@@ -128,16 +141,18 @@ class CustomerController extends Controller
         $customerStatusActives = Customer::getStatusActives();
         
         // Lấy trạng thái finalized của báo cáo tháng hiện tại
-        $shipmentReport = \App\Models\ShipmentReport::where('customer_id', $customer->id)
-            ->where('monthly', $currentMonth)
+        $shipmentReport = \App\Models\ShipmentReport::where('customer_id', $customer->id);
+        $shipmentMonthlyReports = $shipmentReport->orderBy('monthly', 'desc')->get();
+        $shipmentReport = $shipmentReport->where('monthly', $currentMonth)
             ->first();
+
         $isFinalized = $shipmentReport ? $shipmentReport->is_finalized : false;
         
         // Load all transactions by default
         try {
             $perPage = 10;
             $transactions = $this->transactionPaymentService->getCustomerTransactions($customer, [], $perPage);
-            $activeTab = $request->input('active_tab', 'transactions');
+            $activeTab = $request->input('active_tab', 'monthlyReport');
             $filters = [];
             
             return view('admin.customers.show', compact(
@@ -150,7 +165,8 @@ class CustomerController extends Controller
                 'paymentStatuses',
                 'filters',
                 'isFinalized',
-                'customerStatusActives'
+                'customerStatusActives',
+                'shipmentMonthlyReports'
             ));
         } catch (\Exception $e) {
             Log::error('Error loading default transactions', ['error' => $e->getMessage(), 'customer_id' => $customer->id]);

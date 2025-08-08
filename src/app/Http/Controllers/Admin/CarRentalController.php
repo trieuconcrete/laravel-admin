@@ -13,7 +13,6 @@ use App\Http\Requests\CarRental\StoreCarRentalRequest;
 use App\Models\VehicleType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\CarRentalVehicleLog;
 use App\Models\TollStation;
 use App\Models\TollFee;
 use Maatwebsite\Excel\Facades\Excel;
@@ -98,10 +97,26 @@ class CarRentalController extends Controller
         $carRentalVehicles = $carRental->carRentalVehicles;
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
 
-        // Thêm danh sách nhật ký xe
-        $carRentalVehicleLogs = CarRentalVehicleLog::where('car_rental_id', $id)
-            ->with(['vehicle', 'driver', 'tollFees'])
-            ->latest()
+        // Get shipments instead of vehicle logs (Issue #180 implementation)
+        $carRentalVehicleLogs = \App\Models\Shipment::where('car_rental_id', $id)
+            ->where('shipment_type', \App\Models\Shipment::SHIPMENT_TYPE_MONTHLY_RENTAL)
+            ->where('is_car_rental', true)
+            ->with(['driver', 'vehicle.vehicleType', 'tollFees'])
+            ->latest('run_date')
+            ->get();
+
+        // Calculate total toll fees for each shipment
+        foreach ($carRentalVehicleLogs as $shipment) {
+            $shipment->total_toll_fee = $shipment->tollFees->sum('fee_amount');
+        }
+
+        // Thêm danh sách drivers cho form (Issue #180 requirement)
+        $drivers = \App\Models\User::whereIn('role', ['driver', 'assistant', 'helper'])
+            ->where('status', \App\Enum\UserStatus::ACTIVE)
+            ->whereHas('position', function ($query) {
+                $query->where('code', \App\Models\Position::POSITION_TX);
+            })
+            ->select('id', 'full_name', 'employee_code')
             ->get();
 
         return view('admin.car_rental.edit', compact(
@@ -110,8 +125,9 @@ class CarRentalController extends Controller
             'carRentalVehicles',
             'vehicleTypes',
             'carRentalstatuses',
-            'carRentalVehicleLogs',
-            'vehicles'
+            'carRentalVehicleLogs', // Now contains shipments, but keeping same variable name for view compatibility
+            'vehicles',
+            'drivers' // Thêm drivers vào compact
         ));
     }
 
@@ -183,6 +199,7 @@ class CarRentalController extends Controller
             $validated = validator($data, [
                 'car_rental_id' => 'required|exists:car_rentals,id',
                 'vehicle_id' => 'required|exists:vehicles,vehicle_id',
+                'driver_id' => 'nullable|exists:users,id', // Thêm validate cho driver_id
                 'run_date' => 'required|date',
                 'start_time' => 'required|date_format:H:i',
                 'end_time' => 'required|date_format:H:i|after:start_time',
@@ -200,16 +217,13 @@ class CarRentalController extends Controller
                 'toll_fees.*.notes' => 'nullable|string'
             ])->validate();
 
-            // Lấy car rental để lấy overtime_fee_per_hour
-            $carRental = CarRental::find($validated['car_rental_id']);
-            $overtimeRate = $carRental->overtime_fee_per_hour ?? CarRental::OVERTIME_FEE_PER_HOUR_DEFAULT;
-            $validated['overtime_rate'] = $overtimeRate;
+            $validated['overtime_rate'] = $validated['overtime_rate'] ?? 50000;
             $validated['parking_fee'] = isset($validated['parking_fee']) ? abs((float)$validated['parking_fee']) : 0;
 
-            $totalDistance = abs($validated['end_odometer'] - $validated['start_odometer']);
-            // Ghép run_date + start_time, end_time thành datetime cho tính toán
+            // Tính toán thời gian và quãng đường
             $startDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['start_time']);
             $endDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['end_time']);
+            $totalDistance = abs($validated['end_odometer'] - $validated['start_odometer']);
 
             // Tính overtime_hours (chỉ tính sau 17:30)
             $overtimeHours = 0;
@@ -223,33 +237,67 @@ class CarRentalController extends Controller
             }
             $totalOvertimeCost = abs($overtimeRate * $overtimeHours);
 
-            $logData = [
-                'car_rental_id' => $validated['car_rental_id'],
+            // Get vehicle và car rental để lấy thông tin
+            $vehicle = \App\Models\Vehicle::findOrFail($validated['vehicle_id']);
+            $carRental = \App\Models\CarRental::with('customer')->findOrFail($validated['car_rental_id']);
+
+            // Kiểm tra có phải xe HPL thuê không
+            $isHplRental = $vehicle->is_car_rental;
+            $driverId = null;
+            
+            // Chỉ bắt buộc chọn tài xế nếu không phải xe HPL thuê
+            if (!$isHplRental) {
+                if (empty($validated['driver_id'])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Vui lòng chọn tài xế cho xe này.'
+                    ], 422);
+                }
+                $driverId = $validated['driver_id'];
+            }
+
+            DB::beginTransaction();
+
+            // Tạo Shipment mới (đáp ứng yêu cầu issue #180)
+            $shipmentData = [
+                'shipment_code' => \App\Models\Shipment::generateShipmentCode(),
+                'customer_id' => $carRental->customer_id,
+                'origin' => $validated['start_location'] ?? 'Điểm bắt đầu',
+                'destination' => $validated['end_location'] ?? 'Điểm kết thúc',
+                'departure_time' => $startDateTime,
+                'estimated_arrival_time' => $endDateTime,
+                'cargo_description' => 'Thuê xe - ' . ($carRental->description ?? 'Dịch vụ thuê xe'),
+                'driver_id' => $driverId,
                 'vehicle_id' => $validated['vehicle_id'],
-                'run_date' => $validated['run_date'],
+                'distance' => $totalDistance,
+                'status' => \App\Models\Shipment::STATUS_COMPLETED,
+                'is_car_rental' => true,
+                'shipment_type' => \App\Models\Shipment::SHIPMENT_TYPE_MONTHLY_RENTAL, // Set = 2 theo yêu cầu
+                'created_by' => auth('admin')->id(),
+                
+                // Thông tin từ vehicle log
+                'car_rental_id' => $validated['car_rental_id'],
                 'start_time' => $validated['start_time'],
                 'end_time' => $validated['end_time'],
-                'start_location' => $validated['start_location'] ?? null,
-                'end_location' => $validated['end_location'] ?? null,
+                'run_date' => $validated['run_date'],
+                'overtime_hours' => $overtimeHours,
                 'start_odometer' => abs($validated['start_odometer']),
                 'end_odometer' => abs($validated['end_odometer']),
-                'total_distance' => $totalDistance,
-                'overtime_hours' => $overtimeHours,
                 'overtime_rate' => $validated['overtime_rate'],
                 'total_overtime_cost' => $totalOvertimeCost,
                 'parking_fee' => $validated['parking_fee'],
-                'notes' => $validated['notes'],
-                'status' => CarRentalVehicleLog::STATUS_COMPLETED
+                'notes' => $validated['notes']
             ];
 
-            $CarRentalVehicleLog = CarRentalVehicleLog::create($logData);
+            $shipment = \App\Models\Shipment::create($shipmentData);
 
             // Create toll fees if provided
             if (!empty($validated['toll_fees'])) {
                 foreach ($validated['toll_fees'] as $tollFeeData) {
                     if (!empty($tollFeeData['station_name']) && !empty($tollFeeData['fee_amount'])) {
                         \App\Models\TollFee::create([
-                            'vehicle_log_id' => $CarRentalVehicleLog->id,
+                            'vehicle_log_id' => null,
+                            'shipment_id' => $shipment->id,
                             'station_name' => $tollFeeData['station_name'],
                             'transaction_code' => $tollFeeData['transaction_code'] ?? null,
                             'fee_amount' => abs((float)$tollFeeData['fee_amount']),
@@ -259,17 +307,22 @@ class CarRentalController extends Controller
                 }
             }
 
+            DB::commit();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Tạo nhật ký xe thành công',
-                'log' => $CarRentalVehicleLog
+                'shipment' => $shipment,
+                'is_hpl_rental' => $isHplRental
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Vehicle log creation failed', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
@@ -279,31 +332,32 @@ class CarRentalController extends Controller
     }
 
     /**
-     * Get vehicle log data for editing
+     * Get shipment data for editing
      * 
-     * @param int $logId
+     * @param int $shipmentId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function editCarRentalVehicleLog($logId)
+    public function editShipmentVehicleLog($shipmentId)
     {
         try {
-            $log = CarRentalVehicleLog::with('tollFees')->findOrFail($logId);
+            $shipment = \App\Models\Shipment::with('tollFees')->findOrFail($shipmentId);
             return response()->json([
                 'success' => true,
                 'log' => [
-                    'id' => $log->id,
-                    'vehicle_id' => $log->vehicle_id,
-                    'run_date' => $log->run_date,
-                    'start_time' => $log->start_time,
-                    'end_time' => $log->end_time,
-                    'start_location' => $log->start_location,
-                    'end_location' => $log->end_location,
-                    'start_odometer' => number_format($log->start_odometer),
-                    'end_odometer' => number_format($log->end_odometer),
-                    'overtime_rate' => number_format($log->overtime_rate),
-                    'parking_fee' => number_format($log->parking_fee),
-                    'notes' => $log->notes,
-                    'toll_fees' => $log->tollFees->map(function($fee) {
+                    'id' => $shipment->id,
+                    'vehicle_id' => $shipment->vehicle_id,
+                    'driver_id' => $shipment->driver_id,
+                    'run_date' => $shipment->run_date,
+                    'start_time' => $shipment->start_time,
+                    'end_time' => $shipment->end_time,
+                    'start_location' => $shipment->origin,
+                    'end_location' => $shipment->destination,
+                    'start_odometer' => number_format($shipment->start_odometer),
+                    'end_odometer' => number_format($shipment->end_odometer),
+                    'overtime_rate' => number_format($shipment->overtime_rate),
+                    'parking_fee' => number_format($shipment->parking_fee),
+                    'notes' => $shipment->notes,
+                    'toll_fees' => $shipment->tollFees->map(function($fee) {
                         return [
                             'station_name' => $fee->station_name,
                             'transaction_code' => $fee->transaction_code,
@@ -314,7 +368,7 @@ class CarRentalController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            Log::error('Failed to get vehicle log for editing', ['error' => $e->getMessage()]);
+            Log::error('Failed to get shipment for editing', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Không thể tải dữ liệu nhật ký xe'
@@ -323,22 +377,22 @@ class CarRentalController extends Controller
     }
 
     /**
-     * Update vehicle log
+     * Update shipment vehicle log
      * 
      * @param Request $request
-     * @param int $logId
+     * @param int $shipmentId
      * @return \Illuminate\Http\JsonResponse
      */
-    public function updateCarRentalVehicleLog(Request $request, $logId)
+    public function updateShipmentVehicleLog(Request $request, $shipmentId)
     {
         try {
-            $log = CarRentalVehicleLog::findOrFail($logId);
+            $shipment = \App\Models\Shipment::findOrFail($shipmentId);
             $data = $request->all();
             $data['start_odometer'] = str_replace(',', '', $data['start_odometer']);
             $data['end_odometer'] = str_replace(',', '', $data['end_odometer']);
             $data['parking_fee'] = str_replace(',', '', $data['parking_fee']);
-            $data['max_distance'] = str_replace(',', '', $data['max_distance']);
-            $data['over_distance_fee_per_km'] = str_replace(',', '', $data['over_distance_fee_per_km']);
+            $data['max_distance'] = str_replace(',', '', $data['max_distance'] ?? '');
+            $data['over_distance_fee_per_km'] = str_replace(',', '', $data['over_distance_fee_per_km'] ?? '');
             if (!empty($data['toll_fees'])) {
                 foreach ($data['toll_fees'] as &$tollFee) {
                     if (!empty($tollFee['fee_amount'])) {
@@ -346,9 +400,11 @@ class CarRentalController extends Controller
                     }
                 }
             }
+            
             $validated = validator($data, [
                 'car_rental_id' => 'required|exists:car_rentals,id',
                 'vehicle_id' => 'required|exists:vehicles,vehicle_id',
+                'driver_id' => 'nullable|exists:users,id',
                 'run_date' => 'required|date',
                 'start_time' => 'required|date_format:H:i',
                 'end_time' => 'required|date_format:H:i|after:start_time',
@@ -356,6 +412,7 @@ class CarRentalController extends Controller
                 'end_location' => 'nullable|string|max:255',
                 'start_odometer' => 'required|numeric|min:0',
                 'end_odometer' => 'required|numeric|gt:start_odometer',
+                'overtime_rate' => 'nullable|numeric|min:0',
                 'parking_fee' => 'nullable|numeric|min:0',
                 'notes' => 'nullable|string',
                 'toll_fees' => 'nullable|array',
@@ -364,16 +421,35 @@ class CarRentalController extends Controller
                 'toll_fees.*.fee_amount' => 'nullable|numeric|min:0',
                 'toll_fees.*.notes' => 'nullable|string'
             ])->validate();
-            $validated['overtime_rate'] = 50000;
+            
+            $validated['overtime_rate'] = $validated['overtime_rate'] ?? 50000;
             $validated['parking_fee'] = isset($validated['parking_fee']) ? abs((float)$validated['parking_fee']) : 0;
 
-            // Lấy car rental để lấy overtime_fee_per_hour
-            $carRental = CarRental::find($validated['car_rental_id']);
-            $overtimeRate = $carRental->overtime_fee_per_hour ?? CarRental::OVERTIME_FEE_PER_HOUR_DEFAULT;
-            $validated['overtime_rate'] = $overtimeRate;
+            // Get vehicle và car rental để lấy thông tin
+            $vehicle = \App\Models\Vehicle::findOrFail($validated['vehicle_id']);
+            $carRental = \App\Models\CarRental::with('customer')->findOrFail($validated['car_rental_id']);
+
+            // Kiểm tra có phải xe HPL thuê không
+            $isHplRental = $vehicle->is_car_rental;
+            $driverId = null;
+            
+            // Chỉ bắt buộc chọn tài xế nếu không phải xe HPL thuê
+            if (!$isHplRental) {
+                if (empty($validated['driver_id'])) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Vui lòng chọn tài xế cho xe này.'
+                    ], 422);
+                }
+                $driverId = $validated['driver_id'];
+            }
+
+            // Tính toán lại các giá trị
             $totalDistance = abs($validated['end_odometer'] - $validated['start_odometer']);
             $startDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['start_time']);
             $endDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['end_time']);
+            
+            // Tính overtime_hours (chỉ tính sau 17:30)
             $overtimeHours = 0;
             $overtimeRate = $validated['overtime_rate'] ?? 0;
             if ($overtimeRate > 0) {
@@ -384,32 +460,41 @@ class CarRentalController extends Controller
                 }
             }
             $totalOvertimeCost = abs($overtimeRate * $overtimeHours);
-            $logData = [
-                'car_rental_id' => $validated['car_rental_id'],
+
+            DB::beginTransaction();
+
+            // Update Shipment
+            $shipmentData = [
+                'origin' => $validated['start_location'] ?? $shipment->origin,
+                'destination' => $validated['end_location'] ?? $shipment->destination,
+                'departure_time' => $startDateTime,
+                'estimated_arrival_time' => $endDateTime,
+                'driver_id' => $driverId,
                 'vehicle_id' => $validated['vehicle_id'],
-                'run_date' => $validated['run_date'],
+                'distance' => $totalDistance,
+                
+                // Thông tin từ vehicle log
                 'start_time' => $validated['start_time'],
                 'end_time' => $validated['end_time'],
-                'start_location' => $validated['start_location'] ?? null,
-                'end_location' => $validated['end_location'] ?? null,
+                'run_date' => $validated['run_date'],
+                'overtime_hours' => $overtimeHours,
                 'start_odometer' => abs($validated['start_odometer']),
                 'end_odometer' => abs($validated['end_odometer']),
-                'total_distance' => $totalDistance,
-                'overtime_hours' => $overtimeHours,
                 'overtime_rate' => $validated['overtime_rate'],
                 'total_overtime_cost' => $totalOvertimeCost,
                 'parking_fee' => $validated['parking_fee'],
-                'notes' => $validated['notes'],
-                'status' => CarRentalVehicleLog::STATUS_COMPLETED
+                'notes' => $validated['notes']
             ];
-            $log->update($logData);
+            $shipment->update($shipmentData);
+
             // Xóa toàn bộ toll_fees cũ và lưu lại danh sách mới
-            $log->tollFees()->delete();
+            $shipment->tollFees()->delete();
             if (!empty($validated['toll_fees'])) {
                 foreach ($validated['toll_fees'] as $tollFeeData) {
                     if (!empty($tollFeeData['station_name']) && !empty($tollFeeData['fee_amount'])) {
                         \App\Models\TollFee::create([
-                            'vehicle_log_id' => $log->id,
+                            'vehicle_log_id' => null,
+                            'shipment_id' => $shipment->id,
                             'station_name' => $tollFeeData['station_name'],
                             'transaction_code' => $tollFeeData['transaction_code'] ?? null,
                             'fee_amount' => abs((float)$tollFeeData['fee_amount']),
@@ -418,18 +503,24 @@ class CarRentalController extends Controller
                     }
                 }
             }
+
+            DB::commit();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Cập nhật nhật ký xe thành công',
-                'log' => $log
+                'shipment' => $shipment,
+                'is_hpl_rental' => $isHplRental
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            Log::error('Vehicle log update failed', ['error' => $e->getMessage()]);
+            DB::rollBack();
+            Log::error('Shipment update failed', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
@@ -438,20 +529,30 @@ class CarRentalController extends Controller
     }
 
     /**
-     * Xóa vehicle log
+     * Xóa shipment vehicle log
      */
-    public function destroyCarRentalVehicleLog($logId)
+    public function destroyShipmentVehicleLog($shipmentId)
     {
         try {
-            $log = CarRentalVehicleLog::findOrFail($logId);
-            $log->delete();
+            DB::beginTransaction();
+            
+            $shipment = \App\Models\Shipment::findOrFail($shipmentId);
+            
+            // Xóa toll fees liên quan
+            $shipment->tollFees()->delete();
+            
+            // Xóa shipment
+            $shipment->delete();
+
+            DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Xóa nhật ký xe thành công!'
             ]);
         } catch (\Exception $e) {
-            Log::error('Delete vehicle log failed', ['error' => $e->getMessage()]);
+            DB::rollBack();
+            Log::error('Delete shipment failed', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi xóa nhật ký xe!'
@@ -460,7 +561,46 @@ class CarRentalController extends Controller
     }
 
     /**
+     * Get vehicle log from shipment ID for editing
+     * 
+     * @param int $shipmentId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function editCarRentalVehicleLogFromShipment($shipmentId)
+    {
+        try {
+            return $this->editShipmentVehicleLog($shipmentId);
+        } catch (\Exception $e) {
+            Log::error('Failed to get vehicle log from shipment', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể tải dữ liệu nhật ký xe'
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete vehicle log from shipment ID
+     * 
+     * @param int $shipmentId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroyCarRentalVehicleLogFromShipment($shipmentId)
+    {
+        try {
+            return $this->destroyShipmentVehicleLog($shipmentId);
+        } catch (\Exception $e) {
+            Log::error('Failed to delete vehicle log from shipment', ['error' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể xóa nhật ký xe'
+            ], 500);
+        }
+    }
+
+    /**
      * Download all vehicle logs for a car rental as an Excel file
+     * Updated to use Shipments instead of CarRentalVehicleLog
      *
      * @param int $car_rental_id
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
@@ -468,14 +608,28 @@ class CarRentalController extends Controller
     public function downloadVehicleLog($car_rental_id)
     {
         $carRental = CarRental::with('customer')->findOrFail($car_rental_id);
-        $logs = CarRentalVehicleLog::where('car_rental_id', $car_rental_id)
-            ->with('tollFees')
+        
+        // Get shipments instead of vehicle logs (Issue #180 implementation)
+        $shipments = \App\Models\Shipment::where('car_rental_id', $car_rental_id)
+            ->where('shipment_type', \App\Models\Shipment::SHIPMENT_TYPE_MONTHLY_RENTAL)
+            ->where('is_car_rental', true)
+            ->with(['driver', 'vehicle', 'tollFees'])
             ->orderBy('run_date', 'asc')
             ->get();
+
+        // Group toll fees by run_date for easy access
+        $tollFeesByDate = collect();
+        foreach ($shipments as $shipment) {
+            $dateKey = \Carbon\Carbon::parse($shipment->run_date)->format('Y-m-d');
+            if (!$tollFeesByDate->has($dateKey)) {
+                $tollFeesByDate->put($dateKey, collect());
+            }
+            $tollFeesByDate->get($dateKey)->push(...$shipment->tollFees);
+        }
 
         $month = now()->format('m/Y');
         $fileName = 'bien_ban_nhat_ky_lo_trinh_xe_' . $carRental->id . '_' . str_replace('/', '', $month) . '.xlsx';
 
-        return Excel::download(new \App\Exports\VehicleLogWithTollFeeExport($carRental, $logs, $month), $fileName);
+        return Excel::download(new \App\Exports\ShipmentVehicleLogExport($carRental, $shipments, $tollFeesByDate, $month), $fileName);
     }
 }

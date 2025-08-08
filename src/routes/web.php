@@ -17,7 +17,6 @@ use App\Http\Controllers\Admin\PriceQuoteController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
 use App\Http\Controllers\Admin\PaymentTransactionController;
-use App\Http\Controllers\Admin\CarRentalVehicleLogController;
 
 Route::get('/', [HomepageController::class, 'index'])->name('homepage');
 Route::get('/trangchu', [HomepageController::class, 'index1'])->name('homepage1');
@@ -64,9 +63,14 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('quotes', PriceQuoteController::class);
     Route::resource('car-rental', CarRentalController::class);
     Route::post('car-rental/store-vehicle-log', [CarRentalController::class, 'storeCarRentalVehicleLog'])->name('car-rental.store-vehicle-log');
-    Route::get('car-rental/vehicle-log/{logId}/edit', [CarRentalController::class, 'editCarRentalVehicleLog'])->name('car-rental.edit-vehicle-log');
-    Route::put('car-rental/vehicle-log/{logId}', [CarRentalController::class, 'updateCarRentalVehicleLog'])->name('car-rental.update-vehicle-log');
-    Route::delete('car-rental/vehicle-log/{logId}', [CarRentalController::class, 'destroyCarRentalVehicleLog'])->name('car-rental.destroy-vehicle-log');
+    Route::get('car-rental/shipment/{shipmentId}/edit-vehicle-log', [CarRentalController::class, 'editShipmentVehicleLog'])->name('car-rental.edit-vehicle-log');
+    Route::put('car-rental/shipment/{shipmentId}/update-vehicle-log', [CarRentalController::class, 'updateShipmentVehicleLog'])->name('car-rental.update-vehicle-log');
+    Route::delete('car-rental/shipment/{shipmentId}/destroy-vehicle-log', [CarRentalController::class, 'destroyShipmentVehicleLog'])->name('car-rental.destroy-vehicle-log');
+    
+    // Backward compatibility routes
+    Route::get('car-rental/shipment/{shipmentId}/edit-vehicle-log-from-shipment', [CarRentalController::class, 'editCarRentalVehicleLogFromShipment'])->name('car-rental.edit-vehicle-log-from-shipment');
+    Route::delete('car-rental/shipment/{shipmentId}/destroy-vehicle-log-from-shipment', [CarRentalController::class, 'destroyCarRentalVehicleLogFromShipment'])->name('car-rental.destroy-vehicle-log-from-shipment');
+    
     Route::get('car-rental/{car_rental_id}/download-vehicle-log', [CarRentalController::class, 'downloadVehicleLog'])->name('car-rental.download-vehicle-log');
     Route::resource('shipments', ShipmentController::class);
     Route::resource('salary', SalaryController::class);
@@ -155,3 +159,7 @@ Route::get('/debug/debt', function () {
         ]
     ];
 });
+
+
+Route::get('/api/vehicles/by-car-rental', [VehicleController::class, 'getByCarRental'])
+    ->name('api.vehicles.by-car-rental');

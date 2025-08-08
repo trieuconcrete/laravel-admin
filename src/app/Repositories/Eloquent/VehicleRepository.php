@@ -23,7 +23,7 @@ class VehicleRepository extends BaseRepository implements VehicleRepositoryInter
      */
     public function getVehiclesWithFilters(array $filters)
     {
-        $query = Vehicle::with(['driver', 'vehicleType', 'documents'])->latest();
+        $query = Vehicle::with(['driver', 'vehicleType', 'documents', 'customer'])->latest();
 
         /** search vehicle type */
         if (!empty($filters['vehicle_type_id'])) {
@@ -35,6 +35,11 @@ class VehicleRepository extends BaseRepository implements VehicleRepositoryInter
             $query->where('status', $filters['status']);
         }
 
+        /** search is_car_rental */
+        if (isset($filters['is_car_rental']) && $filters['is_car_rental'] !== '') {
+            $query->where('is_car_rental', $filters['is_car_rental']);
+        }
+
         /** search keyword */
         if (!empty($filters['keyword'])) {
             $keyword = $filters['keyword'];
@@ -44,6 +49,9 @@ class VehicleRepository extends BaseRepository implements VehicleRepositoryInter
                     ->orWhere('manufactured_year', 'like', '%' . $keyword . '%')
                     ->orWhereHas('driver', function ($q2) use ($keyword) {
                         $q2->where('full_name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhereHas('customer', function ($q2) use ($keyword) {
+                        $q2->where('name', 'like', '%' . $keyword . '%');
                     });
             });
         }

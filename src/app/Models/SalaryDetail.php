@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\User;
+use App\Enum\SalaryType;
 
 class SalaryDetail extends Model
 {
@@ -55,7 +56,8 @@ class SalaryDetail extends Model
         'created_by',
         'approved_by',
         'total_allowance',
-        'total_expenses'
+        'total_expenses',
+        'salary_type' // 1: Tài xế ăn lương cơ bản, 2: Tài xế ăn lương doanh số
     ];
 
     /**
@@ -68,6 +70,21 @@ class SalaryDetail extends Model
         'created_at',
         'updated_at',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'payment_date' => 'date',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+            'salary_type' => SalaryType::class,
+        ];
+    }
 
     /**
      * Lấy thông tin nhân viên của bảng lương.
@@ -159,5 +176,45 @@ class SalaryDetail extends Model
         $this->total_salary = $this->calculateTotalSalary();
         $this->net_salary = $this->calculateNetSalary();
         $this->save();
+    }
+
+    /**
+     * Get salary type label
+     *
+     * @return string
+     */
+    public function getSalaryTypeLabelAttribute(): string
+    {
+        return $this->salary_type?->getLabel() ?? 'Không xác định';
+    }
+
+    /**
+     * Get salary type color for UI
+     *
+     * @return string
+     */
+    public function getSalaryTypeColorAttribute(): string
+    {
+        return $this->salary_type?->getColor() ?? 'secondary';
+    }
+
+    /**
+     * Check if this is basic salary type
+     *
+     * @return bool
+     */
+    public function isBasicSalaryType(): bool
+    {
+        return $this->salary_type?->isBasicSalary() ?? true;
+    }
+
+    /**
+     * Check if this is commission salary type
+     *
+     * @return bool
+     */
+    public function isCommissionSalaryType(): bool
+    {
+        return $this->salary_type?->isCommissionSalary() ?? false;
     }
 }
