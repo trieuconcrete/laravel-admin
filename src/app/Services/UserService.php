@@ -76,7 +76,7 @@ class UserService
             }
 
             // Set role and position
-            $data['role'] = $isDriver ? User::ROLE_DRIVER : User::ROLE_STAFF;
+            $data['role'] = $isDriver ? User::ROLE_DRIVER : ($request->is_admin ? User::ROLE_ADMIN : User::ROLE_STAFF);
             if ($isDriver) {
                 $position = $this->positionRepository->findBy(['code' => Position::POSITION_TX]);
                 $data['position_id'] = $position->id ?? null;
@@ -152,6 +152,9 @@ class UserService
             $data['avatar'] = ImageHelper::replace($user->avatar, $data['avatar'], 'avatars');
         } else {
             unset($data['avatar']);
+        }
+        if ($request->is_admin) {
+            $data['role'] = User::ROLE_ADMIN;
         }
 
         // Update user
@@ -297,7 +300,7 @@ class UserService
     public function getUserListingData(): array
     {
         return [
-            'positions' => Position::pluck('name', 'id'),
+            'positions' => Position::active()->pluck('name', 'id'),
             'licenses' => DriverLicense::getCarLicenseTypes(),
             'statuses' => EnumUserStatus::options()
         ];
