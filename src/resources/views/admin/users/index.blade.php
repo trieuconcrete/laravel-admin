@@ -267,7 +267,7 @@
                             <div class="text-danger error" data-field="id_number"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <label class="form-label">Email</label>
                             <input type="email" name="email" class="form-control" placeholder="Nhập email">
                             <div class="text-danger error" data-field="email"></div>
                         </div>
@@ -297,6 +297,15 @@
                             <label class="form-label">Lương cơ bản</label>
                             <input type="text" name="salary_base" class="form-control" placeholder="Nhập lương cơ bản">
                             <div class="text-danger error" data-field="salary_base"></div>
+                        </div>
+                        <div class="col-xxl-6 col-md-6">
+                            <label class="form-label">Vai trò</label>
+                            <div class="form-check form-check-secondary mb-3">
+                                <input class="form-check-input" type="checkbox" value="1" id="isAdmin" name="is_admin" {{ request('is_admin') ? 'checked' : '' }}>
+                                <label class="form-check-label" for="isAdmin">
+                                    Admin
+                                </label>
+                            </div>
                         </div>
                         <div class="col-xxl-6">
                             <label class="form-label">Trạng thái làm việc</label>

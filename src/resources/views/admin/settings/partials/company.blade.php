@@ -21,6 +21,38 @@
         <input type="email" class="form-control" id="company_email" name="company[company_email]" required
             value="{{ old('company.company_email', $settings['company']->where('key', 'company_email')->first()->value ?? '') }}">
     </div>
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label for="social_insurance_contribution_rate" class="form-label">số tiền đóng BHXH</label>
+                <input type="text" class="form-control number" id="social_insurance_contribution_amount" name="company[social_insurance_contribution_amount]"
+                    value="{{ old('company.social_insurance_contribution_amount', $settings['company']->where('key', 'social_insurance_contribution_amount')->first()->value ?? '') }}">
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3">
+                <label for="social_insurance_contribution_rate" class="form-label">Mức đóng BHXH(%)</label>
+                <input type="text" class="form-control" id="social_insurance_contribution_rate" name="company[social_insurance_contribution_rate]"
+                    value="{{ old('company.social_insurance_contribution_rate', $settings['company']->where('key', 'social_insurance_contribution_rate')->first()->value ?? '') }}">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <label for="salary_start_date" class="form-label">Ngày bắt đầu tính lương</label>
+                <input type="text" class="form-control" id="salary_start_date" name="company[salary_start_date]"
+                    value="{{ old('company.salary_start_date', $settings['company']->where('key', 'salary_start_date')->first()->value ?? '') }}">
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3">
+                <label for="salary_end_date" class="form-label">Ngày kết thúc tính lương</label>
+                <input type="text" class="form-control" id="salary_end_date" name="company[salary_end_date]"
+                    value="{{ old('company.salary_end_date', $settings['company']->where('key', 'salary_end_date')->first()->value ?? '') }}">
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="col-md-6">

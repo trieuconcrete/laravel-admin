@@ -156,7 +156,6 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Thao tác</th>
-                                    <th>Mã chuyến</th>
                                     <th>Khách hàng</th>
                                     <th>Tuyến đường</th>
                                     <th>Tài xế</th>
@@ -188,7 +187,6 @@
                                             </form>
                                         </div>
                                     </td>
-                                    <td><strong>{{ $shipment->shipment_code }}</strong></td>
                                     <td>
                                         @if($shipment->customer)
                                         <a href="{{ route('admin.customers.show', optional($shipment->customer)->id) }}" class="text-primary" target="_blank">
