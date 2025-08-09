@@ -102,10 +102,9 @@ class Shipment extends Model
      * Mảng các giá trị enum cho trạng thái chuyến hàng.
      */
     public static $statuses = [
-        'pending' => 'Chờ xác nhận',
+        'pending' => 'Tạo mới',
         'confirmed' => 'Đã xác nhận',
         'in_transit' => 'Đang vận chuyển',
-        'delivered' => 'Đã giao hàng',
         'cancelled' => 'Đã hủy',
         'delayed' => 'Bị trễ',
         'completed' => 'Hoàn thành'

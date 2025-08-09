@@ -108,9 +108,8 @@
                                                 <div class="col-md-6">
                                                     <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                                                     <select class="form-select" name="status" required>
-                                                        <option value="pending">Chờ xác nhận</option>
+                                                        <option value="pending">Tạo mới</option>
                                                         <option value="in_transit">Đang vận chuyển</option>
-                                                        <option value="delivered">Đã giao hàng</option>
                                                         <option value="cancelled">Đã hủy</option>
                                                         <option value="delayed">Bị trễ</option>
                                                         <option value="completed">Hoàn thành</option>

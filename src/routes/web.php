@@ -17,6 +17,8 @@ use App\Http\Controllers\Admin\PriceQuoteController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
 use App\Http\Controllers\Admin\PaymentTransactionController;
+use App\Http\Controllers\Admin\ShipmentDeductionTypeController;
+
 
 Route::get('/', [HomepageController::class, 'index'])->name('homepage');
 Route::get('/trangchu', [HomepageController::class, 'index1'])->name('homepage1');
@@ -83,6 +85,23 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::post('settings/update', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
     Route::get('settings/reset', [\App\Http\Controllers\Admin\SettingController::class, 'resetToDefault'])->name('settings.reset');
     Route::get('settings/clear-cache', [\App\Http\Controllers\Admin\SettingController::class, 'clearCache'])->name('settings.clear-cache');
+
+    // Shipment Deduction Types Routes
+    Route::prefix('shipment-deduction-types')->name('shipment-deduction-types.')->group(function () {
+        // CRUD routes
+        Route::get('/', [ShipmentDeductionTypeController::class, 'index'])->name('index');
+        Route::get('/create', [ShipmentDeductionTypeController::class, 'create'])->name('create');
+        Route::post('/', [ShipmentDeductionTypeController::class, 'store'])->name('store');
+        Route::get('/{shipment_deduction_type}', [ShipmentDeductionTypeController::class, 'show'])->name('show');
+        Route::get('/{shipment_deduction_type}/edit', [ShipmentDeductionTypeController::class, 'edit'])->name('edit');
+        Route::put('/{shipment_deduction_type}', [ShipmentDeductionTypeController::class, 'update'])->name('update');
+        Route::delete('/{shipment_deduction_type}', [ShipmentDeductionTypeController::class, 'destroy'])->name('destroy');
+        
+        // Additional routes
+        Route::post('/update-order', [ShipmentDeductionTypeController::class, 'updateOrder'])->name('update-order');
+        Route::post('/bulk-delete', [ShipmentDeductionTypeController::class, 'bulkDelete'])->name('bulk-delete');
+        Route::post('/bulk-update-status', [ShipmentDeductionTypeController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
+    });
 });
 
 
