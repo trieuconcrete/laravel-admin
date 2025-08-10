@@ -31,6 +31,7 @@
                     </span>
                 </button>
 
+                <h4 class="header-item fs-5">@yield('title')</h4>
             </div>
 
             <div class="d-flex align-items-center">
