@@ -81,11 +81,11 @@
                         <i class="ri-file-list-2-line"></i> </i> <span data-key="t-timekeeping">{{ __('sidebar.income_and_expense_management') }}</span>
                     </a>
                 </li> --}}
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a class="nav-link menu-link" href="{{ route('admin.shipment-deduction-types.index') }}">
                         <i class="ri-settings-2-line"></i> </i> <span data-key="t-settings">Cài đặt chi phí chuyến xe</span>
                     </a>
-                </li>
+                </li> --}}
                 <li class="nav-item">
                     <a class="nav-link menu-link" href="{{ route('admin.settings.index') }}">
                         <i class="ri-settings-2-line"></i> </i> <span data-key="t-settings">{{ __('sidebar.settings') }}</span>

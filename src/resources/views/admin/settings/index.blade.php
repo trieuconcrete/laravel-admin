@@ -4,99 +4,85 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="row">
+    <div class="row mb-3 pb-1">
         <div class="col-12">
-            <div class="page-title-box d-flex align-items-center justify-content-between">
-                <h4 class="mb-0">Quản lý cài đặt hệ thống</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Trang chủ</a></li>
-                        <li class="breadcrumb-item active">Cài đặt</li>
-                    </ol>
+            <div class="d-flex align-items-lg-center flex-lg-row flex-column mb-3">
+                <div class="flex-grow-1">
+                    {{-- <h4><i class="ri-group-fill fs-1"></i>Quản lý nhân sự</h4> --}}
                 </div>
-            </div>
+                <div class="mt-3 mt-lg-0">
+                    <div class="row g-3 mb-0 align-items-center flex">
+                        <div class="col-auto">
+                            <form id="clear-cache-form" action="{{ route('admin.settings.clear-cache') }}" method="GET" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-broom mr-1"></i> Xóa cache
+                                </button>
+                            </form>
+                            <form id="reset-settings-form" action="{{ route('admin.settings.reset') }}" method="GET" class="d-inline ml-2">
+                                @csrf
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-undo mr-1"></i> Khôi phục mặc định
+                                </button>
+                            </form>
+                        </div>
+                        <!--end col-->
+                    </div>
+                    <!--end row-->
+                </div>
+            </div><!-- end card header -->
         </div>
+        <!--end col-->
     </div>
-
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 d-flex justify-content-between align-items-center">
-            <h6 class="m-0 font-weight-bold text-primary">Cài đặt hệ thống</h6>
-            <div>
-                <form id="clear-cache-form" action="{{ route('admin.settings.clear-cache') }}" method="GET" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-warning btn-sm">
-                        <i class="fas fa-broom mr-1"></i> Xóa cache
-                    </button>
-                </form>
-                <form id="reset-settings-form" action="{{ route('admin.settings.reset') }}" method="GET" class="d-inline ml-2">
-                    @csrf
-                    <button type="submit" class="btn btn-danger btn-sm">
-                        <i class="fas fa-undo mr-1"></i> Khôi phục mặc định
-                    </button>
-                </form>
+    <div class="row mt-5">
+        <!--end col-->
+        <div class="col-xxl-12">
+            <div class="card mt-xxl-n5">
+                <div class="card-header">
+                    <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0" role="tablist" id="settingsTabs">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {{ $activeTab == 'company' ? 'active' : '' }}" id="company-tab" data-bs-toggle="tab" href="#company" role="tab" aria-controls="company" aria-selected="{{ $activeTab == 'company' ? 'true' : 'false' }}">
+                                <i class="fas fa-building mr-1"></i> Thông tin công ty
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {{ $activeTab == 'system' ? 'active' : '' }}" id="system-tab" data-bs-toggle="tab" href="#system" role="tab" aria-controls="system" aria-selected="{{ $activeTab == 'system' ? 'true' : 'false' }}">
+                                <i class="fas fa-cogs mr-1"></i> Hệ thống
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {{ $activeTab == 'shipment' ? 'active' : '' }}" id="shipment-tab" data-bs-toggle="tab" href="#shipment" role="tab" aria-controls="shipment" aria-selected="{{ $activeTab == 'shipment' ? 'true' : 'false' }}">
+                                <i class="fas fa-truck mr-1"></i> Vận chuyển
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {{ $activeTab == 'shipment-fee' ? 'active' : '' }}" id="fee-tab" data-bs-toggle="tab" href="#shipment-fee" role="tab" aria-controls="shipment-fee" aria-selected="{{ $activeTab == 'shipment-fee' ? 'true' : 'false' }}">
+                                <i class="fas fa-bell mr-1"></i> Chi phí chuyến xe
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-4">
+                    <div class="tab-content" id="settingsTabContent">
+                        <div class="tab-pane fade {{ $activeTab == 'company' ? 'show active' : '' }}" id="company" role="tabpanel" aria-labelledby="company-tab">
+                            @include('admin.settings.partials.company', ['activeTab' => $activeTab])
+                        </div>
+                        
+                        <div class="tab-pane fade {{ $activeTab == 'system' ? 'show active' : '' }}" id="system" role="tabpanel" aria-labelledby="system-tab">
+                            @include('admin.settings.partials.system', ['activeTab' => $activeTab])
+                        </div>
+                        
+                        <div class="tab-pane fade {{ $activeTab == 'shipment' ? 'show active' : '' }}" id="shipment" role="tabpanel" aria-labelledby="shipment-tab">
+                            @include('admin.settings.partials.shipment', ['activeTab' => $activeTab])
+                        </div>
+                        <div class="tab-pane fade {{ $activeTab == 'shipment-fee' ? 'show active' : '' }}" id="shipment-fee" role="tabpanel" aria-labelledby="shipment-fee-tab">
+                            @include('admin.settings.partials.shipment_fee', ['deductionTypes' => $deductionTypes])
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="card-body">
-            <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <ul class="nav nav-tabs mb-4" id="settingsTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link {{ $activeTab == 'company' ? 'active' : '' }}" id="company-tab" data-bs-toggle="tab" href="#company" role="tab" aria-controls="company" aria-selected="{{ $activeTab == 'company' ? 'true' : 'false' }}">
-                            <i class="fas fa-building mr-1"></i> Thông tin công ty
-                        </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link {{ $activeTab == 'system' ? 'active' : '' }}" id="system-tab" data-bs-toggle="tab" href="#system" role="tab" aria-controls="system" aria-selected="{{ $activeTab == 'system' ? 'true' : 'false' }}">
-                            <i class="fas fa-cogs mr-1"></i> Hệ thống
-                        </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link {{ $activeTab == 'shipment' ? 'active' : '' }}" id="shipment-tab" data-bs-toggle="tab" href="#shipment" role="tab" aria-controls="shipment" aria-selected="{{ $activeTab == 'shipment' ? 'true' : 'false' }}">
-                            <i class="fas fa-truck mr-1"></i> Vận chuyển
-                        </a>
-                    </li>
-                    {{-- <li class="nav-item" role="presentation">
-                        <a class="nav-link {{ $activeTab == 'notifications' ? 'active' : '' }}" id="notifications-tab" data-bs-toggle="tab" href="#notifications" role="tab" aria-controls="notifications" aria-selected="{{ $activeTab == 'notifications' ? 'true' : 'false' }}">
-                            <i class="fas fa-bell mr-1"></i> Thông báo
-                        </a>
-                    </li> --}}
-                </ul>
-
-                <input type="hidden" name="group" id="settingGroup" value="{{ $activeTab ?? 'company' }}">
-                
-                <div class="tab-content" id="settingsTabContent">
-                    <div class="tab-pane fade {{ $activeTab == 'company' ? 'show active' : '' }}" id="company" role="tabpanel" aria-labelledby="company-tab">
-                        <div class="row">
-                            @include('admin.settings.partials.company')
-                        </div>
-                    </div>
-                    
-                    <div class="tab-pane fade {{ $activeTab == 'system' ? 'show active' : '' }}" id="system" role="tabpanel" aria-labelledby="system-tab">
-                        <div class="row">
-                            @include('admin.settings.partials.system')
-                        </div>
-                    </div>
-                    
-                    <div class="tab-pane fade {{ $activeTab == 'shipment' ? 'show active' : '' }}" id="shipment" role="tabpanel" aria-labelledby="shipment-tab">
-                        <div class="row">
-                            @include('admin.settings.partials.shipment')
-                        </div>
-                    </div>
-                    
-                    {{-- <div class="tab-pane fade {{ $activeTab == 'notifications' ? 'show active' : '' }}" id="notifications" role="tabpanel" aria-labelledby="notifications-tab">
-                        <div class="row">
-                            @include('admin.settings.partials.notifications')
-                        </div>
-                    </div> --}}
-                </div>
-
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save mr-1"></i> Lưu cài đặt
-                    </button>
-                </div>
-            </form>
-        </div>
+        <!--end col-->
     </div>
 </div>
 @endsection
@@ -136,11 +122,11 @@
         });
         
         // Đảm bảo form submit đúng giá trị group
-        $('form').on('submit', function() {
-            const activeTabId = $('.nav-link.active').attr('href').replace('#', '');
-            $('#settingGroup').val(activeTabId);
-            console.log('Form submitted, setting group to:', activeTabId);
-        });
+        // $('form').on('submit', function() {
+        //     const activeTabId = $('.nav-link.active').attr('href').replace('#', '');
+        //     $('#settingGroup').val(activeTabId);
+        //     console.log('Form submitted, setting group to:', activeTabId);
+        // });
         
         // Xử lý hiển thị lỗi validation trong tab tương ứng
         $(document).ready(function() {
@@ -205,3 +191,4 @@
     });
 </script>
 @endsection
+ 
