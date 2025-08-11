@@ -28,32 +28,32 @@ class UpdateSettingRequest extends FormRequest
             
             // Company settings
             'company' => 'nullable|array',
-            'company.company_name' => 'required|string|max:255',
-            'company.company_address' => 'required|string',
-            'company.company_phone' => 'required|string|max:20',
-            'company.company_email' => 'required|email|max:255',
-            'company.company_tax_code' => 'required|string|max:50',
-            'company.company_bank_account' => 'required|string|max:50',
-            'company.company_bank_name' => 'required|string|max:100',
+            'company.company_name' => 'nullable|string|max:255',
+            'company.company_address' => 'nullable|string',
+            'company.company_phone' => 'nullable|string|max:20',
+            'company.company_email' => 'nullable|email|max:255',
+            'company.company_tax_code' => 'nullable|string|max:50',
+            'company.company_bank_account' => 'nullable|string|max:50',
+            'company.company_bank_name' => 'nullable|string|max:100',
             'company.company_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             
             // System settings
             'system' => 'nullable|array',
-            'system.site_title' => 'required|string|max:255',
-            'system.pagination_limit' => 'required|integer|min:5|max:100',
-            'system.date_format' => 'required|string',
+            'system.site_title' => 'nullable|string|max:255',
+            'system.pagination_limit' => 'nullable|integer|min:5|max:100',
+            'system.date_format' => 'nullable|string',
             'system.time_format' => 'nullable|string',
             'system.timezone' => 'nullable|string',
             
             // Shipment settings
             'shipment' => 'nullable|array',
-            'shipment.default_distance_unit' => 'required|string',
-            'shipment.default_weight_unit' => 'required|string',
-            'shipment.shipment_code_prefix' => 'required_if:shipment.auto_generate_shipment_code,1|string|max:10',
+            'shipment.default_distance_unit' => 'nullable|string',
+            'shipment.default_weight_unit' => 'nullable|string',
+            // 'shipment.shipment_code_prefix' => 'required_if:shipment.auto_generate_shipment_code,1|string|max:10',
             
             // Notification settings
             'notifications' => 'nullable|array',
-            'notifications.notification_email' => 'required_if:notifications.email_notifications,1|email',
+            // 'notifications.notification_email' => 'required_if:notifications.email_notifications,1|email',
         ];
     }
 
