@@ -91,7 +91,6 @@ class SettingController extends Controller
     public function update(UpdateSettingRequest $request, $tab = 'company')
     {
         try {
-            dd($tab);
             $group = $request->input('group');
             
             // Lấy dữ liệu theo group từ request
