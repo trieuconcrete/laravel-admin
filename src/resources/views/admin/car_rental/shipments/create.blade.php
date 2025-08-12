@@ -489,11 +489,6 @@
         // Cập nhật trạng thái nút thêm tài xế
         updateAddPersonButtonState();
         
-        // Thêm event listener cho nút thêm hàng hóa
-        document.getElementById('addGoodBtn').onclick = function() {
-            goodsCount = addGoodRow(goodsTable, goodsCount);
-        };
-        
         // Thêm event listener cho nút thêm người
         document.getElementById('addPersonBtn').onclick = function() {
             // Kiểm tra số lượng user trước khi thêm
