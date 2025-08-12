@@ -1,4 +1,4 @@
-<form action="{{ route('admin.settings.update', 'system') }}" method="POST">
+<form action="{{ route('admin.settings.update', 'system') }}#system" method="POST">
     @csrf
     <input type="hidden" name="group" id="settingGroup" value="system">
     <div class="row">

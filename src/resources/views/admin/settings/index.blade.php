@@ -129,7 +129,7 @@
         // });
         
         // Xử lý hiển thị lỗi validation trong tab tương ứng
-        $(document).ready(function() {
+        // $(document).ready(function() {
             // Kiểm tra xem có lỗi validation nào không
             const hasErrors = $('.is-invalid').length > 0;
             
@@ -168,7 +168,7 @@
                     }
                 }
             }
-        });
+        // });
         
         // Kiểm tra xem có tab được chỉ định trong URL không
         const urlParams = new URLSearchParams(window.location.search);
