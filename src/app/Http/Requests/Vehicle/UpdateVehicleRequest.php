@@ -51,7 +51,7 @@ class UpdateVehicleRequest extends FormRequest
             $rules['customer_id'] = 'nullable|exists:customers,id';
             $rules['customer_name'] = 'required_without:customer_id|string|max:255';
             $rules['customer_phone'] = 'required_without:customer_id|string|max:20';
-            $rules['customer_email'] = 'required_without:customer_id|email|max:255';
+            // $rules['customer_email'] = 'required_without:customer_id|email|max:255';
             $rules['customer_address'] = 'nullable|string|max:500';
         }
 
