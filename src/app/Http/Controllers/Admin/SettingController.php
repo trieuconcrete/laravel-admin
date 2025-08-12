@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Setting\UpdateSettingRequest;
-use App\Services\SettingService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
+use App\Services\SettingService;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
+use App\Models\ShipmentDeductionType;
+use Illuminate\Support\Facades\Artisan;
+use App\Http\Requests\Setting\UpdateSettingRequest;
 
 class SettingController extends Controller
 {
@@ -34,15 +35,51 @@ class SettingController extends Controller
      */
     public function index(Request $request)
     {
-        $activeTab = $request->get('tab', 'company');
-        $groups = ['company', 'system', 'shipment', 'notifications'];
+        $activeTab = $request->get('group', session('last_active_tab', 'company'));
+        $groups = ['company', 'system', 'shipment', 'shepment-fee', 'notifications'];
         
         $settings = [];
         foreach ($groups as $group) {
             $settings[$group] = $this->settingService->getByGroup($group);
         }
+
+        $query = ShipmentDeductionType::query();
+
+        // Filter by type
+        if ($request->filled('type')) {
+            $query->where('type', $request->type);
+        }
+
+        // Filter by status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Search by name
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'order');
+        $sortDirection = $request->get('sort_direction', 'asc');
         
-        return view('admin.settings.index', compact('settings', 'activeTab', 'groups'));
+        if (in_array($sortBy, ['id', 'name', 'type', 'status', 'order', 'created_at', 'updated_at'])) {
+            $query->orderBy($sortBy, $sortDirection);
+        } else {
+            $query->ordered();
+        }
+
+        $deductionTypes = $query->paginate(20);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'data' => $deductionTypes,
+            ]);
+        }
+
+        return view('admin.settings.index', compact('settings', 'activeTab', 'groups', 'deductionTypes'));
     }
 
     /**
@@ -51,10 +88,10 @@ class SettingController extends Controller
      * @param UpdateSettingRequest $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(UpdateSettingRequest $request)
+    public function update(UpdateSettingRequest $request, $tab = 'company')
     {
         try {
-            $group = $request->input('group');
+            session(['last_active_tab' => $tab]);
             
             // Lấy dữ liệu theo group từ request
             $companySettings = $request->input('company', []);
@@ -83,7 +120,7 @@ class SettingController extends Controller
                 config(['app.timezone' => $systemSettings['timezone']]);
             }
             
-            return redirect()->route('admin.settings.index')
+            return redirect()->route('admin.settings.index')->withFragment($tab)
                 ->with('success', 'Cài đặt đã được cập nhật thành công.');
         } catch (\Exception $e) {
             Log::error('Lỗi khi cập nhật cài đặt: ' . $e->getMessage());

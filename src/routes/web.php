@@ -82,7 +82,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     
     // Quản lý cài đặt
     Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
-    Route::post('settings/update', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+    Route::post('settings/update/{tab?}', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
     Route::get('settings/reset', [\App\Http\Controllers\Admin\SettingController::class, 'resetToDefault'])->name('settings.reset');
     Route::get('settings/clear-cache', [\App\Http\Controllers\Admin\SettingController::class, 'clearCache'])->name('settings.clear-cache');
 

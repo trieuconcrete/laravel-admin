@@ -1,98 +1,108 @@
-<div class="col-md-6">
-    <div class="mb-3">
-        <label for="company_name" class="form-label">Tên công ty <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="company_name" name="company[company_name]" required
-            value="{{ old('company.company_name', $settings['company']->where('key', 'company_name')->first()->value ?? '') }}">
-    </div>
-    
-    <div class="mb-3">
-        <label for="company_address" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
-        <textarea class="form-control" id="company_address" name="company[company_address]" rows="3" required>{{ old('company.company_address', $settings['company']->where('key', 'company_address')->first()->value ?? '') }}</textarea>
-    </div>
-    
-    <div class="mb-3">
-        <label for="company_phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="company_phone" name="company[company_phone]" required
-            value="{{ old('company.company_phone', $settings['company']->where('key', 'company_phone')->first()->value ?? '') }}">
-    </div>
-    
-    <div class="mb-3">
-        <label for="company_email" class="form-label">Email <span class="text-danger">*</span></label>
-        <input type="email" class="form-control" id="company_email" name="company[company_email]" required
-            value="{{ old('company.company_email', $settings['company']->where('key', 'company_email')->first()->value ?? '') }}">
-    </div>
+<form action="{{ route('admin.settings.update', 'company') }}#system" method="POST" enctype="multipart/form-data">
+    @csrf
+    <input type="hidden" name="group" id="settingGroup" value="company">
     <div class="row">
-        <div class="col">
+        <div class="col-md-6">
             <div class="mb-3">
-                <label for="social_insurance_contribution_rate" class="form-label">số tiền đóng BHXH</label>
-                <input type="text" class="form-control number" id="social_insurance_contribution_amount" name="company[social_insurance_contribution_amount]"
-                    value="{{ old('company.social_insurance_contribution_amount', $settings['company']->where('key', 'social_insurance_contribution_amount')->first()->value ?? '') }}">
+                <label for="company_name" class="form-label">Tên công ty <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="company_name" name="company[company_name]" required
+                    value="{{ old('company.company_name', $settings['company']->where('key', 'company_name')->first()->value ?? '') }}">
+            </div>
+            
+            <div class="mb-3">
+                <label for="company_address" class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                <textarea class="form-control" id="company_address" name="company[company_address]" rows="3" required>{{ old('company.company_address', $settings['company']->where('key', 'company_address')->first()->value ?? '') }}</textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="company_phone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="company_phone" name="company[company_phone]" required
+                    value="{{ old('company.company_phone', $settings['company']->where('key', 'company_phone')->first()->value ?? '') }}">
+            </div>
+            
+            <div class="mb-3">
+                <label for="company_email" class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="company_email" name="company[company_email]" required
+                    value="{{ old('company.company_email', $settings['company']->where('key', 'company_email')->first()->value ?? '') }}">
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="social_insurance_contribution_rate" class="form-label">số tiền đóng BHXH</label>
+                        <input type="text" class="form-control number" id="social_insurance_contribution_amount" name="company[social_insurance_contribution_amount]"
+                            value="{{ old('company.social_insurance_contribution_amount', $settings['company']->where('key', 'social_insurance_contribution_amount')->first()->value ?? '') }}">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="social_insurance_contribution_rate" class="form-label">Mức đóng BHXH(%)</label>
+                        <input type="text" class="form-control" id="social_insurance_contribution_rate" name="company[social_insurance_contribution_rate]"
+                            value="{{ old('company.social_insurance_contribution_rate', $settings['company']->where('key', 'social_insurance_contribution_rate')->first()->value ?? '') }}">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="salary_start_date" class="form-label">Ngày bắt đầu tính lương</label>
+                        <input type="text" class="form-control" id="salary_start_date" name="company[salary_start_date]"
+                            value="{{ old('company.salary_start_date', $settings['company']->where('key', 'salary_start_date')->first()->value ?? '') }}">
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        <label for="salary_end_date" class="form-label">Ngày kết thúc tính lương</label>
+                        <input type="text" class="form-control" id="salary_end_date" name="company[salary_end_date]"
+                            value="{{ old('company.salary_end_date', $settings['company']->where('key', 'salary_end_date')->first()->value ?? '') }}">
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col">
-            <div class="mb-3">
-                <label for="social_insurance_contribution_rate" class="form-label">Mức đóng BHXH(%)</label>
-                <input type="text" class="form-control" id="social_insurance_contribution_rate" name="company[social_insurance_contribution_rate]"
-                    value="{{ old('company.social_insurance_contribution_rate', $settings['company']->where('key', 'social_insurance_contribution_rate')->first()->value ?? '') }}">
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div class="mb-3">
-                <label for="salary_start_date" class="form-label">Ngày bắt đầu tính lương</label>
-                <input type="text" class="form-control" id="salary_start_date" name="company[salary_start_date]"
-                    value="{{ old('company.salary_start_date', $settings['company']->where('key', 'salary_start_date')->first()->value ?? '') }}">
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3">
-                <label for="salary_end_date" class="form-label">Ngày kết thúc tính lương</label>
-                <input type="text" class="form-control" id="salary_end_date" name="company[salary_end_date]"
-                    value="{{ old('company.salary_end_date', $settings['company']->where('key', 'salary_end_date')->first()->value ?? '') }}">
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="col-md-6">
-    <div class="mb-3">
-        <label for="company_tax_code" class="form-label">Mã số thuế <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="company_tax_code" name="company[company_tax_code]" required
-            value="{{ old('company.company_tax_code', $settings['company']->where('key', 'company_tax_code')->first()->value ?? '') }}">
-    </div>
-    
-    <div class="mb-3">
-        <label for="company_bank_account" class="form-label">Tài khoản ngân hàng <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="company_bank_account" name="company[company_bank_account]" required
-            value="{{ old('company.company_bank_account', $settings['company']->where('key', 'company_bank_account')->first()->value ?? '') }}">
-    </div>
-    
-    <div class="mb-3">
-        <label for="company_bank_name" class="form-label">Ngân hàng <span class="text-danger">*</span></label>
-        <input type="text" class="form-control" id="company_bank_name" name="company[company_bank_name]" required
-            value="{{ old('company.company_bank_name', $settings['company']->where('key', 'company_bank_name')->first()->value ?? '') }}">
-    </div>
-    
-    @php
-        $logoPath = $settings['company']->where('key', 'company_logo')->first()->value ?? '';
-        $logoFilePath = storage_path('app/public/' . $logoPath);
-    @endphp
-    <div class="mb-4">
-        <label for="company_logo" class="form-label">Logo công ty</label>
-        <input type="file" name="company[company_logo]" id="company_logo" class="form-control mt-1 border p-2 rounded">
-        <small class="text-muted">Định dạng: JPG, PNG, GIF. Kích thước tối đa: 2MB</small>
-        @if($logoPath)
-            <div class="mt-2">
-                <img id="company_logo_preview"
-                    src="{{ ($logoPath && file_exists($logoFilePath)) ? asset('storage/' . $logoPath) : asset('assets/images/logo-light.png') }}"
-                    class="w-24 h-24 rounded-full mt-4"
-                    alt="Logo Preview">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="company_tax_code" class="form-label">Mã số thuế <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="company_tax_code" name="company[company_tax_code]" required
+                    value="{{ old('company.company_tax_code', $settings['company']->where('key', 'company_tax_code')->first()->value ?? '') }}">
             </div>
-        @endif
+            
+            <div class="mb-3">
+                <label for="company_bank_account" class="form-label">Tài khoản ngân hàng <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="company_bank_account" name="company[company_bank_account]" required
+                    value="{{ old('company.company_bank_account', $settings['company']->where('key', 'company_bank_account')->first()->value ?? '') }}">
+            </div>
+            
+            <div class="mb-3">
+                <label for="company_bank_name" class="form-label">Ngân hàng <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="company_bank_name" name="company[company_bank_name]" required
+                    value="{{ old('company.company_bank_name', $settings['company']->where('key', 'company_bank_name')->first()->value ?? '') }}">
+            </div>
+            
+            @php
+                $logoPath = $settings['company']->where('key', 'company_logo')->first()->value ?? '';
+                $logoFilePath = storage_path('app/public/' . $logoPath);
+            @endphp
+            <div class="mb-4">
+                <label for="company_logo" class="form-label">Logo công ty</label>
+                <input type="file" name="company[company_logo]" id="company_logo" class="form-control mt-1 border p-2 rounded">
+                <small class="text-muted">Định dạng: JPG, PNG, GIF. Kích thước tối đa: 2MB</small>
+                @if($logoPath)
+                    <div class="mt-2">
+                        <img id="company_logo_preview"
+                            src="{{ ($logoPath && file_exists($logoFilePath)) ? asset('storage/' . $logoPath) : asset('assets/images/logo-light.png') }}"
+                            class="w-24 h-24 rounded-full mt-4"
+                            alt="Logo Preview">
+                    </div>
+                @endif
+            </div>
+        </div>
     </div>
-</div>
-
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save mr-1"></i> Lưu cài đặt
+        </button>
+    </div>
+</form>
 <script>
 document.getElementById('company_logo').addEventListener('change', function(event) {
         const file = event.target.files[0];

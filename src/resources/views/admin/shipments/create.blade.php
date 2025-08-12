@@ -70,14 +70,6 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <div class="form-check form-radio-primary mb-3">
-                                                        <input class="form-check-input" type="radio" name="shipment_type" value="2" id="shipment_type2" {{ old('shipment_type') == '2' ? 'checked' : '' }}>
-                                                        <label class="form-check-label" for="shipment_type2">
-                                                            Khách chạy theo tháng
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="form-check form-radio-primary mb-3">
                                                         <input class="form-check-input" type="radio" name="shipment_type" value="3" id="shipment_type3" {{ old('shipment_type') == '3' ? 'checked' : '' }}>
                                                         <label class="form-check-label" for="shipment_type3">
                                                             Xe nâng
