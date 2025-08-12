@@ -1,5 +1,5 @@
 <!-- Filters -->
-<form method="GET" action="{{ route('admin.settings.index', 'shipment-fee') }}" class="mb-4">
+<form method="GET" action="{{ route('admin.settings.index', 'shipment-fee') }}#shipment-fee" class="mb-4">
     <input type="hidden" name="group" id="settingGroup" value="shipment-fee">
     <div class="row g-3">
         <div class="col-md-3">

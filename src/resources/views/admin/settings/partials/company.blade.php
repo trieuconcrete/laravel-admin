@@ -1,6 +1,6 @@
-<form action="{{ route('admin.settings.update', 'company') }}" method="POST" enctype="multipart/form-data">
+<form action="{{ route('admin.settings.update', 'company') }}#system" method="POST" enctype="multipart/form-data">
     @csrf
-    <input type="hidden" name="group" id="settingGroup" value="{{ $activeTab ?? 'company' }}">
+    <input type="hidden" name="group" id="settingGroup" value="company">
     <div class="row">
         <div class="col-md-6">
             <div class="mb-3">

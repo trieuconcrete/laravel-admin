@@ -35,8 +35,8 @@ class SettingController extends Controller
      */
     public function index(Request $request)
     {
-        $activeTab = $request->get('group', 'company');
-        $groups = ['company', 'system', 'shipment', 'notifications'];
+        $activeTab = $request->get('group', session('last_active_tab', 'company'));
+        $groups = ['company', 'system', 'shipment', 'shepment-fee', 'notifications'];
         
         $settings = [];
         foreach ($groups as $group) {
@@ -91,7 +91,7 @@ class SettingController extends Controller
     public function update(UpdateSettingRequest $request, $tab = 'company')
     {
         try {
-            $group = $request->input('group');
+            session(['last_active_tab' => $tab]);
             
             // Lấy dữ liệu theo group từ request
             $companySettings = $request->input('company', []);
@@ -120,7 +120,7 @@ class SettingController extends Controller
                 config(['app.timezone' => $systemSettings['timezone']]);
             }
             
-            return redirect()->route('admin.settings.index')
+            return redirect()->route('admin.settings.index')->withFragment($tab)
                 ->with('success', 'Cài đặt đã được cập nhật thành công.');
         } catch (\Exception $e) {
             Log::error('Lỗi khi cập nhật cài đặt: ' . $e->getMessage());

@@ -199,6 +199,63 @@
             <form id="add-vehicle-form" enctype="multipart/form-data" action="{{ route('admin.vehicles.store') }}" method="POST">
                 <div class="modal-body">
                     @csrf
+                    <!-- Checkbox Xe HPL Thuê -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch form-switch-lg">
+                                <input type="checkbox" name="is_car_rental" class="form-check-input" id="modalIsCarRental" value="1">
+                                <label class="form-check-label" for="modalIsCarRental">Xe HPL Thuê</label>
+                                <div class="text-danger error" data-field="is_car_rental"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Khách hàng cho thuê xe (ẩn mặc định) -->
+                    <div id="modalCarRentalCustomerForm" style="display: none;">
+                        <hr>
+                        <h6>Thông tin khách hàng cho thuê xe</h6>
+                        <small class="badge bg-danger-subtle text-danger mb-1">Bạn có thể chọn 1 khách hàng hoặc nhập thông tin khách hàng mới</small>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Chọn đối tác</label>
+                                <select name="customer_id" class="form-select" id="modalCustomerId">
+                                    <option value="">Chọn đối tác</option>
+                                    @foreach($carRentalCustomers as $id => $name)
+                                        <option value="{{ $id }}">{{ $name }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="text-danger error" data-field="customer_id"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tên đối tác cho thuê xe <span class="text-danger">*</span></label>
+                                <input name="customer_name" type="text" placeholder="Tên Tên đối tác cho thuê xe" class="form-control" id="modalCustomerName">
+                                <div class="text-danger error" data-field="customer_name"></div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input name="customer_phone" type="text" placeholder="Số điện thoại" class="form-control" id="modalCustomerPhone">
+                                <div class="text-danger error" data-field="customer_phone"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input name="customer_email" type="email" placeholder="Email" class="form-control" id="modalCustomerEmail">
+                                <div class="text-danger error" data-field="customer_email"></div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label">Địa chỉ</label>
+                                <textarea name="customer_address" placeholder="Địa chỉ" class="form-control" id="modalCustomerAddress"></textarea>
+                                <div class="text-danger error" data-field="customer_address"></div>
+                            </div>
+                        </div>
+                        <hr>
+                    </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Biển số xe <span class="text-danger">*</span></label>
@@ -238,7 +295,7 @@
                             </select>
                             <div class="text-danger error" data-field="status"></div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-6" id="driverSelect">
                             <label class="form-label">Tài xế </label>
                             <select class="form-select" name="driver_id">
                                 <option value="">Chọn tài xế</option>
@@ -249,102 +306,47 @@
                             <div class="text-danger error" data-field="driver_id"></div>
                         </div>
                     </div>
-
-                    <!-- Checkbox Xe HPL Thuê -->
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <div class="form-check form-switch form-switch-lg">
-                                <input type="checkbox" name="is_car_rental" class="form-check-input" id="modalIsCarRental" value="1">
-                                <label class="form-check-label" for="modalIsCarRental">Xe HPL Thuê</label>
-                                <div class="text-danger error" data-field="is_car_rental"></div>
+                    <hr>
+                    <div id="documentsGroup">
+                        <h6>Thông tin đăng kiểm</h6>
+                        <input type="text" class="form-control" name="documents[0][document_type]" value="{{ \App\Models\VehicleDocument::TYPE_INSPECTION }}" hidden>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Số giấy đăng kiểm </label>
+                                <input type="text" class="form-control" name="documents[0][document_number]">
+                                <div class="text-danger error" data-field="documents.0.document_number"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ngày hết hạn</label>
+                                <input type="date" class="form-control" name="documents[0][expiry_date]" value="@formatDateForInput(old('documents.0.expiry_date'))">
+                                <div class="text-danger error" data-field="documents.0.expiry_date"></div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Form Khách hàng cho thuê xe (ẩn mặc định) -->
-                    <div id="modalCarRentalCustomerForm" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">Tệp đính kèm</label>
+                            <input type="file" class="form-control" name="documents[0][document_file]" >
+                            <div class="text-danger error" data-field="documents.0.document_file"></div>
+                        </div>
                         <hr>
-                        <h6>Thông tin khách hàng cho thuê xe</h6>
-                        <small class="badge bg-danger-subtle text-danger mb-1">Bạn có thể chọn 1 khách hàng hoặc nhập thông tin khách hàng mới</small>
-                        
+                        <h6>Thông tin bảo hiểm</h6>
                         <div class="row mb-3">
+                            <input type="text" class="form-control" name="documents[1][document_type]" value="{{ \App\Models\VehicleDocument::TYPE_INSURANCE }}" hidden>
                             <div class="col-md-6">
-                                <label class="form-label">Chọn khách hàng</label>
-                                <select name="customer_id" class="form-select" id="modalCustomerId">
-                                    <option value="">Chọn khách hàng</option>
-                                    @foreach($carRentalCustomers as $id => $name)
-                                        <option value="{{ $id }}">{{ $name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="text-danger error" data-field="customer_id"></div>
+                                <label class="form-label">Số hợp đồng bảo hiểm </label>
+                                <input type="text" class="form-control" name="documents[1][document_number]">
+                                <div class="text-danger error" data-field="documents.1.document_number"></div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Tên khách hàng <span class="text-danger">*</span></label>
-                                <input name="customer_name" type="text" placeholder="Tên khách hàng" class="form-control" id="modalCustomerName">
-                                <div class="text-danger error" data-field="customer_name"></div>
+                                <label class="form-label">Ngày hết hạn </label>
+                                <input type="date" class="form-control" name="documents[1][expiry_date]" value="@formatDateForInput(old('documents.1.expiry_date'))">
+                                <div class="text-danger error" data-field="documents.1.expiry_date"></div>
                             </div>
                         </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                                <input name="customer_phone" type="text" placeholder="Số điện thoại" class="form-control" id="modalCustomerPhone">
-                                <div class="text-danger error" data-field="customer_phone"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Email <span class="text-danger">*</span></label>
-                                <input name="customer_email" type="email" placeholder="Email" class="form-control" id="modalCustomerEmail">
-                                <div class="text-danger error" data-field="customer_email"></div>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tệp đính kèm </label>
+                            <input type="file" class="form-control" name="documents[1][document_file]" >
+                            <div class="text-danger error" data-field="documents.1.document_file"></div>
                         </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label class="form-label">Địa chỉ</label>
-                                <textarea name="customer_address" placeholder="Địa chỉ" class="form-control" id="modalCustomerAddress"></textarea>
-                                <div class="text-danger error" data-field="customer_address"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <hr>
-                    <h6>Thông tin đăng kiểm</h6>
-                    <input type="text" class="form-control" name="documents[0][document_type]" value="{{ \App\Models\VehicleDocument::TYPE_INSPECTION }}" hidden>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Số giấy đăng kiểm </label>
-                            <input type="text" class="form-control" name="documents[0][document_number]">
-                            <div class="text-danger error" data-field="documents.0.document_number"></div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Ngày hết hạn</label>
-                            <input type="date" class="form-control" name="documents[0][expiry_date]" value="@formatDateForInput(old('documents.0.expiry_date'))">
-                            <div class="text-danger error" data-field="documents.0.expiry_date"></div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tệp đính kèm</label>
-                        <input type="file" class="form-control" name="documents[0][document_file]" >
-                        <div class="text-danger error" data-field="documents.0.document_file"></div>
-                    </div>
-                    <hr>
-                    <h6>Thông tin bảo hiểm</h6>
-                    <div class="row mb-3">
-                        <input type="text" class="form-control" name="documents[1][document_type]" value="{{ \App\Models\VehicleDocument::TYPE_INSURANCE }}" hidden>
-                        <div class="col-md-6">
-                            <label class="form-label">Số hợp đồng bảo hiểm </label>
-                            <input type="text" class="form-control" name="documents[1][document_number]">
-                            <div class="text-danger error" data-field="documents.1.document_number"></div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Ngày hết hạn </label>
-                            <input type="date" class="form-control" name="documents[1][expiry_date]" value="@formatDateForInput(old('documents.1.expiry_date'))">
-                            <div class="text-danger error" data-field="documents.1.expiry_date"></div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tệp đính kèm </label>
-                        <input type="file" class="form-control" name="documents[1][document_file]" >
-                        <div class="text-danger error" data-field="documents.1.document_file"></div>
                     </div>
                 </div>
                 <hr>
@@ -370,10 +372,16 @@
         // Toggle car rental customer form in modal
         $('#modalIsCarRental').on('change', function() {
             const modalCarRentalCustomerForm = $('#modalCarRentalCustomerForm');
+            const documentsGroup = $('#documentsGroup');
+            const driverSelect  = $('#driverSelect');
             if (this.checked) {
                 modalCarRentalCustomerForm.show();
+                documentsGroup.hide();
+                driverSelect.hide();
             } else {
                 modalCarRentalCustomerForm.hide();
+                documentsGroup.show();
+                driverSelect.show();
             }
         });
 
@@ -459,10 +467,11 @@
                         isValid = false;
                     }
                     
-                    if (!customerEmail) {
-                        $('.error[data-field="customer_email"]').text('Email khách hàng là bắt buộc');
-                        isValid = false;
-                    } else if (!isValidEmail(customerEmail)) {
+                    // if (!customerEmail) {
+                    //     $('.error[data-field="customer_email"]').text('Email khách hàng là bắt buộc');
+                    //     isValid = false;
+                    // } else 
+                    if (!isValidEmail(customerEmail)) {
                         $('.error[data-field="customer_email"]').text('Email không đúng định dạng');
                         isValid = false;
                     }

@@ -1,4 +1,4 @@
-<form action="{{ route('admin.settings.update', 'shipment') }}" method="POST">
+<form action="{{ route('admin.settings.update', 'shipment') }}#shipment" method="POST">
     @csrf
     <input type="hidden" name="group" id="settingGroup" value="shipment">
     <div class="row">
