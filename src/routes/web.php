@@ -64,6 +64,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('contracts', ContractController::class);
     Route::resource('quotes', PriceQuoteController::class);
     Route::resource('car-rental', CarRentalController::class);
+    Route::get('car-rental/{id}/shipment-create', [CarRentalController::class, 'shipmentCreate'])->name('car-rental.shipment-create');
     Route::post('car-rental/store-vehicle-log', [CarRentalController::class, 'storeCarRentalVehicleLog'])->name('car-rental.store-vehicle-log');
     Route::get('car-rental/shipment/{shipmentId}/edit-vehicle-log', [CarRentalController::class, 'editShipmentVehicleLog'])->name('car-rental.edit-vehicle-log');
     Route::put('car-rental/shipment/{shipmentId}/update-vehicle-log', [CarRentalController::class, 'updateShipmentVehicleLog'])->name('car-rental.update-vehicle-log');
