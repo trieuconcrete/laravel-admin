@@ -176,9 +176,9 @@
                                             <a href="{{ route('admin.car-rental.download-vehicle-log', ['car_rental_id' => $carRental->id]) }}" class="btn btn-success me-2">
                                                 <i class="ri-download-2-line align-bottom me-1"></i> Download nhật ký
                                             </a>
-                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCarRentalVehicleLogModal">
+                                            <a  href="{{ route('admin.car-rental.shipment-create', parameters: $carRental->id) }}" class="btn btn-primary">
                                                 <i class="ri-add-line align-bottom me-1"></i> Thêm nhật ký
-                                        </button>
+                                            </a>
                                         </div>
                                     </div>
 

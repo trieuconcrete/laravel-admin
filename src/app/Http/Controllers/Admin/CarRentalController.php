@@ -2,21 +2,25 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\User;
+use App\Models\TollFee;
+use App\Models\Vehicle;
+use App\Enum\UserStatus;
+use App\Models\Position;
 use App\Models\CarRental;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Repositories\Interface\CustomerRepositoryInterface as CustomerRepository;
-use App\Repositories\Interface\VehicleRepositoryInterface as VehicleRepository;
-use App\Http\Requests\CarRental\UpdateCarRentalRequest;
-use App\Services\CarRentalService;
-use App\Http\Requests\CarRental\StoreCarRentalRequest;
+use App\Models\TollStation;
 use App\Models\VehicleType;
+use Illuminate\Http\Request;
+use App\Services\CarRentalService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use App\Models\TollStation;
-use App\Models\TollFee;
+use App\Http\Controllers\Controller;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Models\Vehicle;
+use App\Models\ShipmentDeductionType;
+use App\Http\Requests\CarRental\StoreCarRentalRequest;
+use App\Http\Requests\CarRental\UpdateCarRentalRequest;
+use App\Repositories\Interface\VehicleRepositoryInterface as VehicleRepository;
+use App\Repositories\Interface\CustomerRepositoryInterface as CustomerRepository;
 
 class CarRentalController extends Controller
 {
@@ -631,5 +635,60 @@ class CarRentalController extends Controller
         $fileName = 'bien_ban_nhat_ky_lo_trinh_xe_' . $carRental->id . '_' . str_replace('/', '', $month) . '.xlsx';
 
         return Excel::download(new \App\Exports\ShipmentVehicleLogExport($carRental, $shipments, $tollFeesByDate, $month), $fileName);
+    }
+
+    /**
+     * Summary of create
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function shipmentCreate($id)
+    {
+        $vehicles = Vehicle::with(['vehicleType', 'driver'])->where('status', Vehicle::STATUS_ACTIVE)->get();
+        
+        // Get drivers (tài xế)  
+        $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
+            ->where('status', UserStatus::ACTIVE)
+            ->whereHas('position', function ($query) {
+                $query->where('code', Position::POSITION_TX);
+            })
+            ->pluck('full_name', 'id')
+            ->toArray();
+            
+        $deductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_EXPENSE)
+            ->where('status', 'active')
+            ->orderBy('order', 'asc')
+            ->get();
+            
+        $personDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_DRIVER)
+            ->where('status', 'active')
+            ->orderBy('order', 'asc')
+            ->get();
+            
+        $subPersonDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_BUS_DRIVER)
+            ->where('status', 'active')
+            ->orderBy('order', 'asc')
+            ->get();
+            
+        $userPXs = User::whereIn('role', ['driver', 'assistant', 'helper', 'staff'])
+            ->where('status', UserStatus::ACTIVE)
+            ->whereHas('position', function ($query) {
+                $query->whereIn('code', [Position::POSITION_PX, Position::POSITION_TX]);
+            })
+            ->pluck('full_name', 'id')
+            ->toArray();
+            
+        // Debug log to check users
+        if (app()->environment('local')) {
+            logger('Users loaded in create method:', ['count' => count($users), 'users' => $users]);
+        }
+            
+        return view('admin.car_rental.shipments.create', compact(
+            'vehicles',
+            'users', 
+            'deductionTypes', 
+            'personDeductionTypes', 
+            'subPersonDeductionTypes', 
+            'userPXs'
+        ));
     }
 }
