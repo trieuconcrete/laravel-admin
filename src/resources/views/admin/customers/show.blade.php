@@ -207,33 +207,36 @@
                         <!-- monthly report -->
                         <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'show active' : '' }}" id="monthlyReport">
                             <div class="row mb-3">
-                                <div class="col-md-2">
-                                    <label class="">Chọn bảng kê</label>
-                                    {{-- <input type="month" id="monthSelector" class="form-control" value="{{ date('Y-m') }}"> --}}
+                                <div class="col-md-3">
+                                    <label class="">Chọn bảng kê (tùy chọn)</label>
                                     <select class="form-select" name="month" id="month">
-                                        @foreach($shipmentMonthlyReports as $val)
-                                            <option value="{{ $val->monthly }}">{{ $val->monthly }}</option>
-                                        @endforeach
+                                        <option value="">Chọn tháng kê</option>
+                                        @if($shipmentMonthlyReports->count() > 0)
+                                            @foreach($shipmentMonthlyReports as $index => $val)
+                                                <option value="{{ $val->monthly }}">{{ $val->monthly }}</option>
+                                            @endforeach
+                                        @endif
                                     </select>
                                 </div>
-                                <div class="col-md-2">
+                                <div class="col-md-3">
                                     <div class="">
-                                        <label class="">Ngày bắt đầu  <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control date-input" name="statement_start_date" value="" required autocomplete="off">
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="">
-                                        <label class="">Ngày kết thúc <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control date-input" name="statement_end_date" value="" required autocomplete="off">
+                                        <label class="">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control date-input" name="statement_start_date" id="statement_start_date" value="" required autocomplete="off">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="">
-                                        <label class="">Loại chuyến xe <span class="text-danger">*</span></label>
-                                        <select class="form-control" name="shipment_type" id="">
-                                            <option value="">Chọn loại chuyến xe</option>
+                                        <label class="">Ngày kết thúc <span class="text-danger">*</span></label>
+                                        <input type="date" class="form-control date-input" name="statement_end_date" id="statement_end_date" value="" required autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="">
+                                        <label class="">Loại chuyến xe</label>
+                                        <select class="form-control" name="shipment_type" id="shipment_type">
+                                            <option value="">Tất cả loại chuyến xe</option>
                                             <option value="1">Khách chạy theo chuyến</option>
+                                            <option value="2">Khách chạy theo tháng</option>
                                             <option value="3">Xe nâng</option>
                                             <option value="4">Xe đường dài bắc-nam</option>
                                         </select>
@@ -241,20 +244,19 @@
                                 </div>
                                 
                             </div>
+
                             <div class="row mb-5 mt-5">
                                 <div class="col-md-12 text-center">
-                                    <button type="submit" class="btn btn-info me-2">
+                                    <button type="button" id="searchShipments" class="btn btn-info me-2">
                                         <i class="ri-search-line"></i>Tìm kiếm chuyến xe
                                     </button>
                                     <button type="button" id="summarizeReport"
-                                        class="btn {{ $isFinalized ? 'btn-success' : 'btn-secondary' }} me-2"
-                                        @if($isFinalized) disabled @endif>
-                                        <i
-                                            class="las {{ $isFinalized ? 'la-check-circle' : 'la-calculator' }} align-middle me-1"></i>
-                                        {{ $isFinalized ? 'Đã tổng kết' : 'Tổng kết bảng kê' }}
+                                        class="btn btn-secondary me-2">
+                                        <i class="las la-calculator align-middle me-1"></i>
+                                        Tổng kết bảng kê
                                     </button>
                                     <button type="button" id="exportInvoice" class="btn btn-outline-primary">
-                                        <i class="las la-file-invoice align-middle me-1"></i> Xuất bảng kê
+                                        <i class="las la-file-invoice align-middle me-2"></i> Xuất bảng kê
                                     </button>
                                 </div>
                             </div>
@@ -666,18 +668,12 @@
                             document.getElementById('grandTotal').textContent = '0';
                         }
 
-                        // Update summarize button state based on isFinalized
+                        // Button luôn hiển thị và sẵn sàng để tổng kết
                         const summarizeButton = document.getElementById('summarizeReport');
                         if (summarizeButton) {
-                            if (data.isFinalized) {
-                                summarizeButton.disabled = true;
-                                summarizeButton.innerHTML = '<i class="las la-check-circle align-middle me-1"></i> Đã tổng kết';
-                                summarizeButton.className = 'btn btn-success me-2';
-                            } else {
-                                summarizeButton.disabled = false;
-                                summarizeButton.innerHTML = '<i class="las la-calculator align-middle me-1"></i> Tổng kết bảng kê';
-                                summarizeButton.className = 'btn btn-secondary me-2';
-                            }
+                            summarizeButton.disabled = false;
+                            summarizeButton.innerHTML = '<i class="las la-calculator align-middle me-1"></i> Tổng kết bảng kê';
+                            summarizeButton.className = 'btn btn-secondary me-2';
                         }
 
                         // Re-enable controls
@@ -729,26 +725,405 @@
                 return statusLabels[status] || status;
             }
 
-            // Handle summarize report button click
-            const summarizeButton = document.getElementById('summarizeReport');
-            if (summarizeButton) {
-                summarizeButton.addEventListener('click', function () {
-                    const month = monthSelector.value;
-                    const customerId = {{ $customer->id }};
+            // Helper function to get shipment type label
+            function getShipmentTypeLabel(shipmentType) {
+                const typeLabels = {
+                    '1': 'Khách chạy theo chuyến',
+                    '2': 'Khách thuê xe tháng',
+                    '3': 'Xe nâng',
+                    '4': 'Xe đường dài bắc-nam'
+                };
+                return typeLabels[shipmentType] || 'Loại chuyến xe';
+            }
 
-                    if (!month) {
+                        // Function to perform search with given parameters
+            function performSearch(startDate, endDate, shipmentType = '') {
+                console.log('=== performSearch called ===');
+                console.log('Parameters:', { startDate, endDate, shipmentType });
+                console.log('Start date type:', typeof startDate);
+                console.log('End date type:', typeof endDate);
+                
+                // Build query parameters - if shipmentType is empty, don't include it in query
+                const queryParams = new URLSearchParams({
+                    statement_start_date: startDate,
+                    statement_end_date: endDate
+                });
+                
+                if (shipmentType && shipmentType !== '') {
+                    queryParams.append('shipment_type', shipmentType);
+                }
+
+                console.log('Query params:', queryParams.toString());
+
+                // Show loading
+                const searchButton = document.getElementById('searchShipments');
+                if (searchButton) {
+                    searchButton.disabled = true;
+                    const originalText = searchButton.innerHTML;
+                    searchButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang tìm kiếm...';
+
+                    const apiUrl = `{{ route('admin.shipment-reports.data', $customer) }}?${queryParams.toString()}`;
+                    console.log('Making fetch request to:', apiUrl);
+                    console.log('Full URL:', window.location.origin + apiUrl);
+
+                    // Load data
+                    fetch(apiUrl, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                        }
+                    })
+                    .then(response => {
+                        console.log('=== Response received ===');
+                        console.log('Response status:', response.status);
+                        console.log('Response ok:', response.ok);
+                        console.log('Response headers:', response.headers);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('=== Response data parsed ===');
+                        console.log('Response data:', data);
+                        console.log('Data success:', data.success);
+                        console.log('Data data:', data.data);
+                        console.log('Data total_count:', data.total_count);
+                        if (data.success) {
+                            console.log('=== API call successful ===');
+                            console.log('Calling updateTableWithData with:', data.data);
+                            
+                            // Update table with data
+                            updateTableWithData(data.data);
+                            
+                            // Load debt summary after updating table (tổng công nợ từ trước đến nay)
+                            loadDebtSummary();
+                            
+                            // Show success message
+                            const shipmentType = document.querySelector('select[name="shipment_type"]').value;
+                            const typeLabel = shipmentType && shipmentType !== '' ? getShipmentTypeLabel(shipmentType) : 'Tất cả các loại';
+                            
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công',
+                                text: `Tìm thấy ${data.total_count} chuyến xe (${typeLabel}) với tổng tiền ${numberFormat(data.total_amount)} VND`,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            console.log('=== API returned error ===');
+                            console.log('API error data:', data);
+                            console.log('API error message:', data.message);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: data.message || 'Có lỗi xảy ra khi tìm kiếm.'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('=== Error occurred ===');
+                        console.error('Error type:', error.constructor.name);
+                        console.error('Error message:', error.message);
+                        console.error('Error stack:', error.stack);
                         Swal.fire({
                             icon: 'error',
                             title: 'Lỗi',
-                            text: 'Vui lòng chọn tháng để tổng kết.'
+                            text: 'Có lỗi xảy ra khi tìm kiếm.'
+                        });
+                    })
+                    .finally(() => {
+                        console.log('=== Request completed ===');
+                        console.log('Re-enabling search button');
+                        searchButton.disabled = false;
+                        searchButton.innerHTML = originalText;
+                    });
+                }
+            }
+
+            // Handle month dropdown change
+            const monthSelect = document.getElementById('month');
+            if (monthSelect) {
+                monthSelect.addEventListener('change', function() {
+                    const selectedMonth = this.value;
+                    console.log('Month dropdown changed to:', selectedMonth);
+                    
+                    if (selectedMonth && selectedMonth !== '') {
+                        // Calculate start and end date for the selected month
+                        const [year, month] = selectedMonth.split('-');
+                        const startDate = `${year}-${month}-01`;
+                        // Fix: month is 1-indexed for Date constructor, so we need to use month-1 for current month
+                        const lastDay = new Date(year, month, 0).getDate();
+                        const endDate = `${year}-${month}-${lastDay}`;
+                        
+                        console.log('Calculated dates:', { startDate, endDate, year, month, lastDay });
+                        
+                        // Update date inputs
+                        document.querySelector('input[name="statement_start_date"]').value = startDate;
+                        document.querySelector('input[name="statement_end_date"]').value = endDate;
+                        
+                        // Get current shipment type
+                        const shipmentType = document.querySelector('select[name="shipment_type"]').value;
+                        
+                        console.log('Shipment type:', shipmentType);
+                        
+                        // Perform search automatically (with or without shipment type)
+                        performSearch(startDate, endDate, shipmentType);
+                        
+                        // Load debt summary after search (tổng công nợ từ trước đến nay)
+                        loadDebtSummary();
+                    } else {
+                        // If "Chọn ngày tùy ý" is selected, set current month dates but don't search
+                        console.log('"Chọn ngày tùy ý" selected, setting current month dates');
+                        const currentDate = new Date();
+                        const year = currentDate.getFullYear();
+                        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                        const startDate = `${year}-${month}-01`;
+                        const lastDay = new Date(year, month, 0).getDate();
+                        const endDate = `${year}-${month}-${lastDay}`;
+                        
+                        document.querySelector('input[name="statement_start_date"]').value = startDate;
+                        document.querySelector('input[name="statement_end_date"]').value = endDate;
+                        
+                        // Auto-search with all types when no specific type is selected
+                        performSearch(startDate, endDate, '');
+                    }
+                });
+            }
+
+            // Handle search shipments button click
+            const searchButton = document.getElementById('searchShipments');
+            if (searchButton) {
+                searchButton.addEventListener('click', function () {
+                    // Validate form fields
+                    const startDate = document.querySelector('input[name="statement_start_date"]').value;
+                    const endDate = document.querySelector('input[name="statement_end_date"]').value;
+                    const shipmentType = document.querySelector('select[name="shipment_type"]').value;
+
+                    if (!startDate || !endDate) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Vui lòng điền đầy đủ thông tin: Ngày bắt đầu và Ngày kết thúc.'
                         });
                         return;
                     }
 
+                    if (new Date(startDate) > new Date(endDate)) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.'
+                        });
+                        return;
+                    }
+
+
+
+                    // Perform search
+                    performSearch(startDate, endDate, shipmentType);
+                    
+                    // Load debt summary after search (tổng công nợ từ trước đến nay)
+                    loadDebtSummary();
+                    
+                    console.log('Search button clicked');
+                });
+            }
+
+            // Function to load debt summary from API (tổng công nợ từ trước đến nay)
+            function loadDebtSummary() {
+                const customerId = {{ $customer->id }};
+                
+                // Call API to get debt summary (không cần tham số thời gian)
+                // Luôn lấy tổng công nợ từ trước đến nay, không phụ thuộc vào thời gian search
+                fetch(`{{ route('admin.customers.debt-summary', $customer) }}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateDebtSummary(data.debt_summary);
+                    } else {
+                        console.error('Error loading debt summary:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading debt summary:', error);
+                });
+            }
+
+            // Function to update debt summary UI
+            function updateDebtSummary(debtSummary) {
+                const totalReportedEl = document.getElementById('totalReported');
+                const totalPaidEl = document.getElementById('totalPaid');
+                const remainingDebtEl = document.getElementById('remainingDebt');
+                const debtLabelEl = document.getElementById('debtLabel');
+                const debtNoteEl = document.getElementById('debtNote');
+                const refundNoteEl = document.getElementById('refundNote');
+                
+                if (totalReportedEl) totalReportedEl.textContent = numberFormat(debtSummary.total_reported);
+                if (totalPaidEl) totalPaidEl.textContent = numberFormat(debtSummary.total_paid);
+                if (remainingDebtEl) remainingDebtEl.textContent = numberFormat(Math.abs(debtSummary.remaining_debt));
+                
+                // Update debt label and note based on debt type
+                if (debtSummary.is_refund_case) {
+                    if (refundNoteEl) refundNoteEl.classList.remove('d-none');
+                    
+                    if (debtSummary.debt_type === 'customer_owes') {
+                        if (debtLabelEl) debtLabelEl.textContent = 'Còn nợ';
+                        if (debtNoteEl) debtNoteEl.textContent = '(*) Có điều chỉnh';
+                        if (remainingDebtEl) remainingDebtEl.className = 'fs-4 fw-bold text-danger';
+                    } else {
+                        if (debtLabelEl) debtLabelEl.textContent = 'Công ty nợ';
+                        if (debtNoteEl) debtNoteEl.textContent = '(*) Có điều chỉnh';
+                        if (remainingDebtEl) remainingDebtEl.className = 'fs-4 fw-bold text-success';
+                    }
+                } else {
+                    if (refundNoteEl) refundNoteEl.classList.add('d-none');
+                    
+                    if (debtSummary.debt_type === 'customer_owes') {
+                        if (debtLabelEl) debtLabelEl.textContent = 'Còn nợ';
+                        if (debtNoteEl) debtNoteEl.textContent = '';
+                        if (remainingDebtEl) remainingDebtEl.className = 'fs-4 fw-bold text-danger';
+                    } else if (debtSummary.debt_type === 'company_owes') {
+                        if (debtLabelEl) debtLabelEl.textContent = 'Công ty nợ';
+                        if (debtNoteEl) debtNoteEl.textContent = '';
+                        if (remainingDebtEl) remainingDebtEl.className = 'fs-4 fw-bold text-success';
+                    } else {
+                        if (debtLabelEl) debtLabelEl.textContent = 'Đã cân bằng';
+                        if (debtNoteEl) debtNoteEl.textContent = '';
+                        if (remainingDebtEl) remainingDebtEl.className = 'fs-4 fw-bold text-info';
+                    }
+                }
+            }
+
+            // Function to update table with data
+            function updateTableWithData(shipments) {
+                console.log('=== updateTableWithData called ===');
+                console.log('Shipments data:', shipments);
+                console.log('Shipments length:', shipments ? shipments.length : 'null');
+                const tableBody = document.querySelector('#monthlyReportTable tbody');
+                const tableFoot = document.querySelector('#monthlyReportTable tfoot');
+                console.log('Table body element:', tableBody);
+                console.log('Table foot element:', tableFoot);
+                
+                tableBody.innerHTML = '';
+
+                if (shipments.length === 0) {
+                    console.log('No shipments found, showing empty message');
+                    tableBody.innerHTML = '<tr><td colspan="11" class="text-center">Không có dữ liệu chuyến xe trong thời gian này</td></tr>';
+                    // Ẩn tfoot khi không có dữ liệu
+                    if (tableFoot) {
+                        tableFoot.style.display = 'none';
+                    }
+                    return;
+                }
+
+                // Hiển thị tfoot khi có dữ liệu
+                if (tableFoot) {
+                    tableFoot.style.display = 'table-footer-group';
+                }
+
+                let totalTrips = 0;
+                let totalWeight = 0;
+                let totalCombinedFees = 0;
+                let grandTotal = 0;
+
+                shipments.forEach(shipment => {
+                    const row = document.createElement('tr');
+                    
+                    totalTrips += parseInt(shipment.trip_count) || 0;
+                    totalWeight += parseFloat(shipment.cargo_weight) || 0;
+                    totalCombinedFees += parseFloat(shipment.combined_fees) || 0;
+                    grandTotal += parseFloat(shipment.total_amount) || 0;
+
+                    row.innerHTML = `
+                        <td><a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a></td>
+                        <td>${shipment.departure_time}</td>
+                        <td>${shipment.origin}</td>
+                        <td>${shipment.destination}</td>
+                        <td>${shipment.trip_count}</td>
+                        <td>${shipment.cargo_weight}</td>
+                        <td>${numberFormat(shipment.unit_price)}</td>
+                        <td>${shipment.combined_fees > 0 ? numberFormat(shipment.combined_fees) : ''}</td>
+                        <td>${numberFormat(shipment.total_amount)}</td>
+                        <td>${shipment.notes || ''}</td>
+                        <td><span class="badge bg-${getStatusBadgeClass(shipment.status)}">${getStatusLabel(shipment.status)}</span></td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+
+                // Update footer totals
+                document.getElementById('totalTrips').textContent = totalTrips;
+                document.getElementById('totalWeight').textContent = totalWeight.toFixed(2);
+                document.getElementById('totalCombinedFees').textContent = numberFormat(totalCombinedFees);
+                document.getElementById('grandTotal').textContent = numberFormat(grandTotal);
+            }
+
+            // Handle summarize report button click
+            const summarizeButton = document.getElementById('summarizeReport');
+            if (summarizeButton) {
+                summarizeButton.addEventListener('click', function () {
+                    // Get selected dates and shipment type
+                    const startDate = document.getElementById('statement_start_date').value;
+                    const endDate = document.getElementById('statement_end_date').value;
+                    const shipmentType = document.querySelector('select[name="shipment_type"]').value;
+
+                    if (!startDate || !endDate) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Vui lòng chọn ngày bắt đầu và ngày kết thúc để tổng kết.'
+                        });
+                        return;
+                    }
+
+                    // Bắt buộc phải chọn loại chuyến xe
+                    if (!shipmentType || shipmentType === '') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Vui lòng chọn loại chuyến xe để tổng kết.'
+                        });
+                        return;
+                    }
+                    
+                    // Debug log
+                    console.log('Debug summarize button:', {
+                        startDate,
+                        endDate,
+                        shipmentType,
+                        shipmentTypeType: typeof shipmentType,
+                        shipmentTypeLength: shipmentType ? shipmentType.length : 'null'
+                    });
+
+                    if (new Date(startDate) > new Date(endDate)) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.'
+                        });
+                        return;
+                    }
+
+                    const customerId = {{ $customer->id }};
+
+                    // Get shipment type label
+                    const shipmentTypeLabel = getShipmentTypeLabel(shipmentType);
+                    
                     // Show confirmation dialog
                     Swal.fire({
                         title: 'Xác nhận tổng kết bảng kê?',
-                        text: `Bạn có chắc chắn muốn tổng kết bảng kê cho tháng ${month} không?`,
+                        html: `
+                            <div class="text-start">
+                                <p><strong>Thời gian:</strong> ${startDate} - ${endDate}</p>
+                                <p><strong>Loại chuyến xe:</strong> ${shipmentTypeLabel}</p>
+                                <p class="text-warning"><i class="las la-exclamation-triangle"></i> Chỉ tổng kết cho loại chuyến xe này</p>
+                            </div>
+                        `,
                         icon: 'question',
                         showCancelButton: true,
                         confirmButtonText: 'Tổng kết',
@@ -765,7 +1140,7 @@
                             summarizeButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
 
                             // Send request to summarize
-                            fetch(`{{ route('admin.customers.summarize-monthly-report', $customer) }}`, {
+                            fetch(`{{ route('admin.shipment-reports.summarize', $customer) }}`, {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -773,33 +1148,35 @@
                                     'X-Requested-With': 'XMLHttpRequest'
                                 },
                                 body: JSON.stringify({
-                                    month: month
+                                    statement_start_date: startDate,
+                                    statement_end_date: endDate,
+                                    shipment_type: parseInt(shipmentType),
+                                    customer_id: customerId
                                 })
                             })
                                 .then(response => response.json())
                                 .then(data => {
                                     if (data.success) {
+                                        // Debug log for success response
+                                        console.log('Debug success response:', {
+                                            data,
+                                            shipmentType,
+                                            shipmentTypeLabel: getShipmentTypeLabel(shipmentType)
+                                        });
+                                        
                                         Swal.fire({
                                             icon: 'success',
                                             title: 'Thành công',
                                             html: `
                                             <div class="text-start">
-                                                <p><strong>Tháng:</strong> ${data.data.month}</p>
+                                                <p><strong>Thời gian:</strong> ${startDate} - ${endDate}</p>
+                                                <p><strong>Loại chuyến xe:</strong> ${getShipmentTypeLabel(shipmentType)}</p>
                                                 <p><strong>Số chuyến:</strong> ${data.data.shipment_count}</p>
-                                                <p><strong>Tổng tiền:</strong> ${data.data.formatted_amount} VND</p>
-                                                <p><strong>Thời gian:</strong> ${data.data.updated_at}</p>
+                                                <p><strong>Tổng tiền:</strong> ${numberFormat(data.data.total_amount)} VND</p>
                                             </div>
                                         `,
                                             showConfirmButton: true,
                                             confirmButtonText: 'Đóng'
-                                        }).then(() => {
-                                            // Update button state to finalized
-                                            summarizeButton.disabled = true;
-                                            summarizeButton.innerHTML = '<i class="las la-check-circle align-middle me-1"></i> Đã tổng kết';
-                                            summarizeButton.className = 'btn btn-success me-2';
-
-                                            // Reload debt summary to reflect changes
-                                            loadDebtSummary();
                                         });
                                     } else {
                                         Swal.fire({
@@ -827,223 +1204,105 @@
                 });
             }
 
-            // Function to load debt summary
-            function loadDebtSummary() {
-                const customerId = {{ $customer->id }};
-
-                fetch(`{{ route('admin.customers.show', $customer) }}?debt_summary=1`, {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.debt_summary) {
-                            const debtSummary = data.debt_summary;
-
-                            // Hiển thị tổng bảng kê
-                            const totalReportedElement = document.getElementById('totalReported');
-                            if (debtSummary.is_refund_case) {
-                                totalReportedElement.textContent = '(' + numberFormat(debtSummary.total_reported) + ') VND';
-                                totalReportedElement.className = 'fs-4 fw-bold text-warning';
-                            } else {
-                                totalReportedElement.textContent = numberFormat(debtSummary.total_reported) + ' VND';
-                                totalReportedElement.className = 'fs-4 fw-bold text-primary';
-                            }
-
-                            // Hiển thị đã thanh toán
-                            document.getElementById('totalPaid').textContent = numberFormat(debtSummary.total_paid) + ' VND';
-
-                            // Hiển thị còn nợ với logic phức tạp
-                            const remainingDebt = debtSummary.remaining_debt;
-                            const remainingElement = document.getElementById('remainingDebt');
-
-                            // Xác định văn bản hiển thị dựa trên debt_type
-                            let displayText = '';
-                            let cssClass = '';
-
-                            switch (debtSummary.debt_type) {
-                                case 'customer_owes':
-                                    displayText = numberFormat(Math.abs(remainingDebt)) + ' VND';
-                                    cssClass = 'fs-4 fw-bold text-danger';
-                                    break;
-                                case 'company_owes':
-                                    displayText = '(' + numberFormat(Math.abs(remainingDebt)) + ') VND';
-                                    cssClass = 'fs-4 fw-bold text-success';
-                                    break;
-                                case 'balanced':
-                                    displayText = '0 VND';
-                                    cssClass = 'fs-4 fw-bold text-muted';
-                                    break;
-                                default:
-                                    displayText = numberFormat(remainingDebt) + ' VND';
-                                    cssClass = 'fs-4 fw-bold text-muted';
-                            }
-
-                            remainingElement.textContent = displayText;
-                            remainingElement.className = cssClass;
-
-                            // Cập nhật các element phụ
-                            const refundNote = document.getElementById('refundNote');
-                            const debtLabel = document.getElementById('debtLabel');
-                            const debtNote = document.getElementById('debtNote');
-
-                            // Reset các element
-                            refundNote.classList.add('d-none');
-                            debtNote.textContent = '';
-
-                            // Hiển thị note cho trường hợp hoàn tiền
-                            if (debtSummary.is_refund_case) {
-                                refundNote.classList.remove('d-none');
-                            }
-
-                            // Cập nhật label và note cho phần còn nợ
-                            switch (debtSummary.debt_type) {
-                                case 'customer_owes':
-                                    debtLabel.textContent = 'Khách hàng nợ';
-                                    debtNote.textContent = 'Khách hàng cần thanh toán thêm';
-                                    debtNote.className = 'text-danger small';
-                                    break;
-                                case 'company_owes':
-                                    debtLabel.textContent = 'Công ty nợ';
-                                    debtNote.textContent = 'Công ty cần hoàn trả khách hàng';
-                                    debtNote.className = 'text-success small';
-                                    break;
-                                case 'balanced':
-                                    debtLabel.textContent = 'Đã cân bằng';
-                                    debtNote.textContent = 'Không còn công nợ';
-                                    debtNote.className = 'text-muted small';
-                                    break;
-                                default:
-                                    debtLabel.textContent = 'Còn nợ';
-                                    debtNote.textContent = '';
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading debt summary:', error);
-                    });
-            }
-
-            // Load debt summary on page load
-            loadDebtSummary();
-
             // Handle invoice export button click
             const invoiceButton = document.getElementById('exportInvoice');
             if (invoiceButton) {
                 invoiceButton.addEventListener('click', function () {
-                    try {
-                        const month = monthSelector.value;
-                        const monthDate = new Date(month + '-01');
+                    // Get selected dates and shipment type
+                    const startDate = document.getElementById('statement_start_date').value;
+                    const endDate = document.getElementById('statement_end_date').value;
+                    const shipmentType = document.querySelector('select[name="shipment_type"]').value;
 
-                        // Validate month format
-                        if (isNaN(monthDate.getTime())) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Lỗi',
-                                text: 'Định dạng tháng không hợp lệ. Vui lòng chọn lại.'
-                            });
-                            return;
-                        }
-
-                        // Check if there's data in the table
-                        const rows = document.querySelectorAll('#monthlyReportTable tbody tr');
-                        if (rows.length === 1 && rows[0].cells.length === 1 && rows[0].cells[0].colSpan === 11) {
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Không có dữ liệu',
-                                text: 'Không có dữ liệu để xuất bảng kê'
-                            });
-                            return;
-                        }
-
-                        // Get customer ID from URL
-                        const urlParts = window.location.pathname.split('/');
-                        const customerId = urlParts[urlParts.indexOf('customers') + 1];
-
-                        // Show confirmation dialog
-                        Swal.fire({
-                            title: 'Xác nhận xuất bảng kê?',
-                            text: 'Bạn có chắc chắn muốn xuất bảng kê cho tháng này không?',
-                            icon: 'question',
-                            showCancelButton: true,
-                            confirmButtonText: 'Có, xuất ngay',
-                            cancelButtonText: 'Hủy bỏ',
-                            customClass: {
-                                confirmButton: 'btn btn-secondary',
-                                cancelButton: 'btn btn-light'
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                Swal.fire({
-                                    title: 'Đang xử lý...',
-                                    text: 'Vui lòng chờ trong giây lát',
-                                    allowOutsideClick: false,
-                                    didOpen: () => {
-                                        Swal.showLoading();
-
-                                        // Create a fetch request to the export URL
-                                        fetch(`${window.location.origin}/admin/customers/${customerId}/export-invoice?month=${month}&tax_rate=10`, {
-                                            method: 'GET',
-                                            headers: {
-                                                'X-Requested-With': 'XMLHttpRequest'
-                                            }
-                                        })
-                                            .then(response => {
-                                                if (!response.ok) {
-                                                    throw new Error('Network response was not ok');
-                                                }
-                                                return response.blob();
-                                            })
-                                            .then(blob => {
-                                                // Create a download link and trigger it
-                                                const url = window.URL.createObjectURL(blob);
-                                                const link = document.createElement('a');
-                                                link.href = url;
-
-                                                // Create filename with customer name and month/year
-                                                const customerName = '{{ $customer->name }}'.replace(/\s+/g, '_');
-                                                const monthYear = month.replace('-', '_');
-                                                const filename = `Bang_ke_${customerName}_${monthYear}.xlsx`;
-                                                link.setAttribute('download', filename);
-
-                                                document.body.appendChild(link);
-                                                link.click();
-                                                document.body.removeChild(link);
-
-                                                // Show success message after download starts
-                                                Swal.close();
-                                                Swal.fire({
-                                                    icon: 'success',
-                                                    title: 'Xuất bảng kê thành công',
-                                                    showConfirmButton: false,
-                                                    timer: 2000
-                                                });
-                                            })
-                                            .catch(error => {
-                                                console.error('Error downloading file:', error);
-                                                Swal.close();
-                                                Swal.fire({
-                                                    icon: 'error',
-                                                    title: 'Lỗi',
-                                                    text: 'Đã xảy ra lỗi khi xuất bảng kê. Vui lòng thử lại sau.'
-                                                });
-                                            });
-                                    }
-                                });
-                            }
-                        });
-                    } catch (error) {
-                        console.error('Lỗi khi xuất bảng kê:', error);
+                    if (!startDate || !endDate) {
                         Swal.fire({
                             icon: 'error',
                             title: 'Lỗi',
-                            text: 'Đã xảy ra lỗi khi xuất bảng kê. Vui lòng thử lại sau.'
+                            text: 'Vui lòng chọn ngày bắt đầu và ngày kết thúc để xuất.'
                         });
+                        return;
                     }
+
+                    if (!shipmentType) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Vui lòng chọn loại chuyến xe để xuất.'
+                        });
+                        return;
+                    }
+
+                    // Get shipment type label
+                    const shipmentTypeLabel = getShipmentTypeLabel(shipmentType);
+                    
+                    // Show confirmation dialog
+                    Swal.fire({
+                        title: 'Xác nhận xuất bảng kê?',
+                        html: `
+                            <div class="text-start">
+                                <p><strong>Thời gian:</strong> ${startDate} - ${endDate}</p>
+                                <p><strong>Loại chuyến xe:</strong> ${shipmentTypeLabel}</p>
+                            </div>
+                        `,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Có, xuất ngay',
+                        cancelButtonText: 'Hủy bỏ',
+                        customClass: {
+                            confirmButton: 'btn btn-secondary',
+                            cancelButton: 'btn btn-light'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            Swal.fire({
+                                title: 'Đang xử lý...',
+                                text: 'Vui lòng chờ trong giây lát',
+                                allowOutsideClick: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+
+                                    // Create download link
+                                    const params = new URLSearchParams({
+                                        statement_start_date: startDate,
+                                        statement_end_date: endDate,
+                                        shipment_type: shipmentType
+                                    });
+
+                                    const downloadUrl = `{{ route('admin.shipment-reports.export', $customer) }}?${params.toString()}`;
+                                    
+                                    // Create a temporary link and trigger download
+                                    const link = document.createElement('a');
+                                    link.href = downloadUrl;
+                                    link.style.display = 'none';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+
+                                    // Show success message after download starts
+                                    setTimeout(() => {
+                                        Swal.close();
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: 'Xuất bảng kê thành công',
+                                            showConfirmButton: false,
+                                            timer: 2000
+                                        });
+                                    }, 1000);
+                                }
+                            });
+                        }
+                    });
                 });
+            }
+
+            // Helper function to get shipment type label
+            function getShipmentTypeLabel(type) {
+                const labels = {
+                    1: 'Khách chạy theo chuyến',
+                    2: 'Khách chạy theo tháng',
+                    3: 'Xe nâng',
+                    4: 'Xe đường dài bắc-nam'
+                };
+                return labels[type] || 'Không xác định';
             }
 
             // Transaction form submission
@@ -1400,6 +1659,112 @@
                     }
                 });
             });
+
+
+
+            // Main event: Use window.onload to ensure everything is ready
+            window.addEventListener('load', function() {
+                console.log('=== Window loaded - Main event ===');
+                const monthSelect = document.getElementById('month');
+                console.log('Month select element:', monthSelect);
+                console.log('Month select value:', monthSelect ? monthSelect.value : 'null');
+                
+                // Always set default dates to current month first
+                const currentDate = new Date();
+                const year = currentDate.getFullYear();
+                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                const startDate = `${year}-${month}-01`;
+                const lastDay = new Date(year, month, 0).getDate();
+                const endDate = `${year}-${month}-${lastDay}`;
+                
+                console.log('Current date info:', { currentDate, year, month, startDate, lastDay, endDate });
+                
+                // Get input elements
+                const startDateInput = document.getElementById('statement_start_date');
+                const endDateInput = document.getElementById('statement_end_date');
+                
+                console.log('Input elements:', { startDateInput, endDateInput });
+                
+                if (startDateInput && endDateInput) {
+                    console.log('Setting default dates:', startDate, 'to', endDate);
+                    startDateInput.value = startDate;
+                    endDateInput.value = endDate;
+                    
+                    // Verify values were set
+                    console.log('After setting - Start date value:', startDateInput.value);
+                    console.log('After setting - End date value:', endDateInput.value);
+                } else {
+                    console.error('Input elements not found!');
+                }
+                
+                // Check if month select has a meaningful value and trigger change event
+                if (monthSelect && monthSelect.value && monthSelect.value !== '' && !monthSelect.dataset.loaded) {
+                    console.log('Month select has value, triggering change event for month:', monthSelect.value);
+                    monthSelect.dataset.loaded = 'true';
+                    monthSelect.dispatchEvent(new Event('change'));
+                } else {
+                    console.log('No month select value or empty value, auto-searching with current month dates');
+                    // Auto-search with all types when no specific month is selected
+                    performSearch(startDate, endDate, '');
+                }
+                
+                // Load initial debt summary (tổng công nợ từ trước đến nay)
+                loadDebtSummary();
+                
+                // Mark that we've already handled the initial load
+                window.initialLoadHandled = true;
+            });
+
+            // Additional backup: Use setTimeout to ensure everything is ready (only if initial load not handled)
+            setTimeout(function() {
+                console.log('=== Timeout check for auto-load ===');
+                
+                // Check if initial load has already been handled
+                if (window.initialLoadHandled === true) {
+                    console.log('Timeout - initial load already handled, skipping');
+                    return;
+                }
+                
+                const monthSelect = document.getElementById('month');
+                
+                // Check if month select has a meaningful value and not loaded yet
+                if (monthSelect && monthSelect.value && monthSelect.value !== '' && !monthSelect.dataset.loaded) {
+                    console.log('Timeout - triggering change event for month:', monthSelect.value);
+                    monthSelect.dataset.loaded = 'true';
+                    monthSelect.dispatchEvent(new Event('change'));
+                } else if (!monthSelect || !monthSelect.value || monthSelect.value === '') {
+                    // If no month selected or empty value, check if we need to set default dates
+                    const startDateInput = document.getElementById('statement_start_date');
+                    const endDateInput = document.getElementById('statement_end_date');
+                    
+                    if (!startDateInput.value || !endDateInput.value) {
+                        console.log('Timeout - setting default dates but not searching');
+                        const currentDate = new Date();
+                        const year = currentDate.getFullYear();
+                        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                        const startDate = `${year}-${month}-01`;
+                        const lastDay = new Date(year, month, 0).getDate();
+                        const endDate = `${year}-${month}-${lastDay}`;
+                        
+                        startDateInput.value = startDate;
+                        endDateInput.value = endDate;
+                        
+                        console.log('Dates set, waiting for user to select shipment_type and click search');
+                    } else {
+                        console.log('Timeout - dates already set, auto-searching with all types');
+                        performSearch(startDateInput.value, endDateInput.value, '');
+                    }
+                }
+                
+                // Mark that we've handled the load (even if it's from timeout)
+                window.initialLoadHandled = true;
+            }, 1000);
+
+
+
+
+
+
         });
     </script>
 @endpush

@@ -176,12 +176,12 @@
                                             </div>
                                             <!-- Additional fields for origin and destination -->
                                             <div class="origin-destination bg-light p-3 mb-2">
-                                                <div class="row mb-3">
+                                            <div class="row mb-3">
                                                     <div class="col-md-4">
                                                         <label class="form-label">Điểm đi<span class="text-danger">*</span></label>
                                                         <input type="text" class="form-control" placeholder="Nhập điểm đi" name="origin" value="{{ old('origin', $shipment->origin) }}" required>
                                                         @error('origin')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
+                                                </div>
                                                     <div class="col-md-4">
                                                         <label class="form-label">Công ty</label>
                                                         <input type="text" class="form-control" placeholder="Nhập công ty" name="company" value="{{ old('company', $shipment->company) }}">
@@ -191,14 +191,14 @@
                                                         <label class="form-label">Điểm đến</label>
                                                         <input type="text" class="form-control" placeholder="Nhập điểm đến 1" name="destination" value="{{ old('destination', $shipment->destination) }}">
                                                         @error('destination')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
                                                 </div>
-                                                <div class="row mb-3">
+                                            </div>
+                                            <div class="row mb-3">
                                                     <div class="col-md-4">
                                                         {{--  <label class="form-label">Điểm đi 2</label>  --}}
                                                         <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 2" name="origin2" value="{{ old('origin2', $shipment->origin2) }}">
                                                         @error('origin2')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
+                                                </div>
                                                     <div class="col-md-4">
                                                         <input type="text" class="form-control" placeholder="Nhập công ty" name="company2" value="{{ old('company2', $shipment->company2) }}">
                                                         @error('company2')<span class="text-danger">{{ $message }}</span>@enderror
@@ -206,28 +206,28 @@
                                                     <div class="col-md-4">
                                                         <input type="text" class="form-control" placeholder="Nhập điểm đến 2" name="destination2" value="{{ old('destination2', $shipment->destination2) }}">
                                                         @error('destination2')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
                                                 </div>
-                                                <div class="row mb-3">
+                                            </div>
+                                            <div class="row mb-3">
                                                     <div class="col-md-4">
                                                         {{--  <label class="form-label">Điểm đi 3</label>  --}}
                                                         <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 3" name="origin3" value="{{ old('origin3', $shipment->origin3) }}">
                                                         @error('origin3')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
+                                                </div>
                                                     <div class="col-md-4">
                                                         <input type="text" class="form-control" placeholder="Nhập công ty" name="company3" value="{{ old('company3', $shipment->company3) }}">
                                                         @error('company3')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
+                                                </div>
                                                     <div class="col-md-4">
                                                         <input type="text" class="form-control" placeholder="Nhập điểm đến 3" name="destination3" value="{{ old('destination3', $shipment->destination3) }}">
                                                         @error('destination3')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
+                                            </div>
                                                 </div>
                                             </div>
                                             <!-- End -->
                                             <div class="row mb-3">
                                                 <div class="col-md-12">
-                                                    <label class="form-label">Ghi chú</label>
+                                                <label class="form-label">Ghi chú</label>
                                                     <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="notes">{!! old('notes', $shipment->notes) !!}</textarea>
                                                     @error('notes')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
