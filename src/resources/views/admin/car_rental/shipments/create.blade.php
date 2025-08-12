@@ -646,6 +646,61 @@
             reader.readAsDataURL(file);
         }
     });
+
+    // Toll Fee Management Functions
+    let tollFeeRowIndex = 0;
+    let editTollFeeRowIndex = 0;
+
+    // Add toll fee row to create form
+    function addTollFeeRow() {
+        const tbody = $('#tollFeesTable tbody');
+        const row = `
+            <tr data-index="${tollFeeRowIndex}">
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="toll_fees[${tollFeeRowIndex}][station_name]" placeholder="Tên trạm" required>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="toll_fees[${tollFeeRowIndex}][transaction_code]" placeholder="Mã giao dịch" required>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm toll-fee-amount" name="toll_fees[${tollFeeRowIndex}][fee_amount]" placeholder="Số tiền" required>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="toll_fees[${tollFeeRowIndex}][notes]" placeholder="Ghi chú">
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTollFeeRow(${tollFeeRowIndex})">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        tbody.append(row);
+        tollFeeRowIndex++;
+        
+        // Initialize number formatting for new row
+        initializeTollFeeFormatting();
+    }
+
+    // Remove toll fee row from create form
+    function removeTollFeeRow(index) {
+        $(`#tollFeesTable tbody tr[data-index="${index}"]`).remove();
+    }
+
+    // Initialize number formatting for toll fee amounts in create form
+    function initializeTollFeeFormatting() {
+        $('.toll-fee-amount').off('input').on('input', function() {
+            let value = $(this).val();
+            value = value.replace(/[^0-9.]/g, '');
+            
+            let parts = value.split('.');
+            let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
+            
+            $(this).val(integerPart + decimalPart);
+        });
+    }
+
 </script>
 @endpush
 
