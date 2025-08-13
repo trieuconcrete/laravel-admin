@@ -348,18 +348,24 @@
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
-                                                    <select class="form-select" name="vehicle_id" id="vehicles">
-                                                        <option value="">Chọn phương tiện</option>
-                                                        @foreach($vehicles as $vehicle)
-                                                            <option value="{{ (int)$vehicle->vehicle_id }}" @selected(old('vehicle_id', $shipment->vehicle_id) == (int)$vehicle->vehicle_id)>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
-                                                
-                                                    <!-- Loading spinner (hidden by default) -->
-                                                    <div class="spinner-border spinner-border-sm text-primary mt-2" id="vehicle_loading" style="display: none;">
-                                                        <span class="visually-hidden">Loading...</span>
+                                                    <div class="row">
+                                                        <div class="col-md-2">
+                                                            <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
+                                                        </div>
+                                                    <div class="col-md-8">
+                                                        <select class="form-select" name="vehicle_id" id="vehicles">
+                                                            <option value="">Chọn phương tiện</option>
+                                                            @foreach($vehicles as $vehicle)
+                                                                <option value="{{ (int)$vehicle->vehicle_id }}" @selected(old('vehicle_id', $shipment->vehicle_id) == (int)$vehicle->vehicle_id)>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <!-- Loading spinner (hidden by default) -->
+                                                        <div class="spinner-border spinner-border-sm text-primary mt-2" id="vehicle_loading" style="display: none;">
+                                                            <span class="visually-hidden">Loading...</span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -534,6 +540,46 @@
                                                                     </tr>
                                                                 @endforeach
                                                             @endif
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="carRental" class="mt-3">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
+                                                        <small class="text-muted">Chi phí HPL trả cho đối tác cho thuê xe</small>
+                                                        <input type="text" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price_for_car_rental" value="{{ old('unit_price_for_car_rental') }}">
+                                                        @error('unit_price_for_car_rental')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="mb-3">
+                                                    <label class="form-label fs-5">Chi phí chuyến xe</label> <small class="text-muted">Chi phí HPL trả cho đối tác cho thuê xe</small>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    @foreach($carRentalDeductionTypes as $type)
+                                                                        <th>{{ $type->name }}</th>
+                                                                    @endforeach
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    @foreach($carRentalDeductionTypes as $type)
+                                                                        <td>
+                                                                            <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
+                                                                            @if($type->name === 'Ghi chú')
+                                                                                <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id) }}</textarea>
+                                                                            @else
+                                                                                <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id) }}">
+                                                                            @endif
+                                                                            @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
+                                                                        </td>
+                                                                    @endforeach
+                                                                </tr>
                                                             </tbody>
                                                         </table>
                                                     </div>
