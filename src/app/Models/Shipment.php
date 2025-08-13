@@ -103,7 +103,7 @@ class Shipment extends Model
      */
     public static $statuses = [
         'pending' => 'Tạo mới',
-        'confirmed' => 'Đã xác nhận',
+        // 'confirmed' => 'Đã xác nhận',
         'in_transit' => 'Đang vận chuyển',
         'cancelled' => 'Đã hủy',
         'delayed' => 'Bị trễ',
@@ -127,7 +127,7 @@ class Shipment extends Model
     public static function getStatuses()
     {
         return [
-            self::STATUS_PENDING => 'Chờ xác nhận',
+            self::STATUS_PENDING => 'Tạo mới',
             self::STATUS_CONFIRMED => 'Đã xác nhận',
             self::STATUS_IN_TRANSIT => 'Đang vận chuyển',
             self::STATUS_DELIVERED => 'Đã giao hàng',

@@ -44,6 +44,7 @@ class ShipmentDeductionType extends Model
      * Type options
      */
     const TYPE_EXPENSE = 'expense';
+    const TYPE_CAR_RENTAL_EXPENSE = 'car_rental_expense';
     const TYPE_DRIVER = 'driver';
     const TYPE_BUS_DRIVER = 'bus_driver';
 
@@ -62,6 +63,7 @@ class ShipmentDeductionType extends Model
     {
         return [
             self::TYPE_EXPENSE => 'Expense',
+            self::TYPE_CAR_RENTAL_EXPENSE => 'Car Rental Expense',
             self::TYPE_DRIVER => 'Driver',
             self::TYPE_BUS_DRIVER => 'Bus Driver',
         ];

@@ -151,8 +151,8 @@
             <!-- List View -->
             <div class="card mb-4">
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
+                    <div class="table-responsive mt-4 mt-xl-0">
+                        <table class="table table-hover table-striped align-middle table-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>Thao tác</th>
