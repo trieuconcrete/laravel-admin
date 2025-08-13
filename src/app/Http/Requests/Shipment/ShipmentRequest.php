@@ -157,7 +157,7 @@ class ShipmentRequest extends FormRequest
                         if (!empty($value)) {
                             // Chỉ xóa dấu phẩy nếu không phải là "Ghi chú"
                             if ($deductionKey !== 'Ghi chú') {
-                                $drivers[$driverIndex]['deductions'][$deductionKey] = str_replace(',', '', $value);
+                            $drivers[$driverIndex]['deductions'][$deductionKey] = str_replace(',', '', $value);
                             }
                         }
                     }
@@ -167,7 +167,7 @@ class ShipmentRequest extends FormRequest
                 'drivers' => $drivers
             ]);
         }
-        
+
         // Remove commas from driverPX deduction values
         if ($this->has('driverPXs')) {
             $driverPXs = $this->input('driverPXs', []);
@@ -177,7 +177,7 @@ class ShipmentRequest extends FormRequest
                         if (!empty($value)) {
                             // Chỉ xóa dấu phẩy nếu không phải là "Ghi chú"
                             if ($deductionKey !== 'Ghi chú') {
-                                $driverPXs[$driverIndex]['deductions'][$deductionKey] = str_replace(',', '', $value);
+                            $driverPXs[$driverIndex]['deductions'][$deductionKey] = str_replace(',', '', $value);
                             }
                         }
                     }
@@ -187,7 +187,7 @@ class ShipmentRequest extends FormRequest
                 'driverPXs' => $driverPXs
             ]);
         }
-        
+
         // Remove commas from unit_price
         if ($this->unit_price) {
             $this->merge([

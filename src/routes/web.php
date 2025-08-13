@@ -61,6 +61,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::get('customers/{customer}/transactions/{transaction}/edit', [PaymentTransactionController::class, 'editTransaction'])->name('customers.edit-transaction');
     Route::put('customers/{customer}/transactions/{transaction}', [PaymentTransactionController::class, 'updateTransaction'])->name('customers.update-transaction');
     Route::delete('customers/{customer}/transactions/{transaction}', [PaymentTransactionController::class, 'destroyTransaction'])->name('customers.destroy-transaction');
+    Route::get('customers/{customer}/debt-summary', [CustomerController::class, 'getDebtSummary'])->name('customers.debt-summary');
     Route::resource('contracts', ContractController::class);
     Route::resource('quotes', PriceQuoteController::class);
     Route::resource('car-rental', CarRentalController::class);
@@ -76,6 +77,14 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     
     Route::get('car-rental/{car_rental_id}/download-vehicle-log', [CarRentalController::class, 'downloadVehicleLog'])->name('car-rental.download-vehicle-log');
     Route::resource('shipments', ShipmentController::class);
+    
+    // Shipment Report routes
+    Route::prefix('shipment-reports')->name('shipment-reports.')->group(function () {
+        Route::post('{customer}/summarize', [\App\Http\Controllers\Admin\ShipmentReportController::class, 'summarize'])->name('summarize');
+        Route::get('{customer}/export', [\App\Http\Controllers\Admin\ShipmentReportController::class, 'export'])->name('export');
+        Route::get('{customer}/data', [\App\Http\Controllers\Admin\ShipmentReportController::class, 'getReportData'])->name('data');
+    });
+    
     Route::resource('salary', SalaryController::class);
     Route::post('salary/sync', [SalaryController::class, 'sync'])->name('salary.sync');
     Route::post('salary/{salary}/pay', [SalaryController::class, 'processPayment'])->name('salary.pay');

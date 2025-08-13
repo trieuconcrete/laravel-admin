@@ -1041,8 +1041,8 @@ function initShipmentForm(initialDriverCount = 1) {
     const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
         submitBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+        e.preventDefault();
+        e.stopPropagation();
             
             // Tìm form bằng nhiều cách
             let form = document.getElementById('shipmentForm');
@@ -1061,11 +1061,11 @@ function initShipmentForm(initialDriverCount = 1) {
                 console.error('Form element not found');
                 return;
             }
-            
-            if (validateShipmentForm(form)) {
-                form.submit();
-            }
-        });
+        
+        if (validateShipmentForm(form)) {
+            form.submit();
+        }
+    });
     } else {
         console.error('Submit button not found with ID "submitBtn"');
     }
