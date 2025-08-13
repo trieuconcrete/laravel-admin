@@ -55,7 +55,7 @@
                 <div class="card-body">
                     <div class="live-preview">
                         <div class="table-responsive table-card">
-                            <table class="table align-middle table-nowrap mb-0">
+                            <table class="table table-hover align-middle table-nowrap mb-0">
                                 <thead class="table-light">
                                     <tr class="bg-gray-100">
                                         <th class="py-2 px-4">Thao tác</th>
