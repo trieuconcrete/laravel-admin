@@ -71,6 +71,11 @@ class ShipmentController extends Controller
             ->where('status', 'active')
             ->orderBy('order', 'asc')
             ->get();
+
+        $carRentalDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_CAR_RENTAL_EXPENSE)
+            ->where('status', 'active')
+            ->orderBy('order', 'asc')
+            ->get();
             
         $personDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_DRIVER)
             ->where('status', 'active')
@@ -99,7 +104,8 @@ class ShipmentController extends Controller
             'customers', 
             'vehicles', 
             'users', 
-            'deductionTypes', 
+            'deductionTypes',
+            'carRentalDeductionTypes',
             'personDeductionTypes', 
             'subPersonDeductionTypes', 
             'userPXs'
@@ -158,6 +164,10 @@ class ShipmentController extends Controller
             ]);
         }
         $deductionTypes = ShipmentDeductionType::where('type', 'expense')->where('status', 'active')->get();
+        $carRentalDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_CAR_RENTAL_EXPENSE)
+            ->where('status', 'active')
+            ->orderBy('order', 'asc')
+            ->get();
         $personDeductionTypes =ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_DRIVER)
             ->where('status', 'active')
             ->get();
@@ -194,12 +204,9 @@ class ShipmentController extends Controller
             ->get()
             ->groupBy('user_id');
 
-        // dd($driverDeductions);
-
-
         return view('admin.shipments.edit', compact(
             'shipment', 'customers', 'vehicles', 'users', 
-            'deductionTypes', 'personDeductionTypes', 
+            'deductionTypes', 'carRentalDeductionTypes', 'personDeductionTypes', 
             'subPersonDeductionTypes', 'shipmentDeductions', 'driverDeductions', 'shipmentStatus', 'userPXs', 'driverPXDeductions'
         ));
     }

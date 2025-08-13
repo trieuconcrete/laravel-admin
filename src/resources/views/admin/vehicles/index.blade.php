@@ -9,7 +9,6 @@
                 <div class="col-12">
                     <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                         <div class="flex-grow-1">
-                            <h4><i class="ri-truck-fill fs-1"></i> Quản lý xe vận tải</h4>
                         </div>
                         <div class="mt-3 mt-lg-0">
                             <div class="row g-3 mb-0 align-items-center">
@@ -29,8 +28,8 @@
             <!-- Dashboard Cards -->
 
             <!-- Filter Section -->
-            <div class="card mb-4">
-                <div class="card-body">
+            <div class="row mb-3 pb-1">
+                <div class="col-12">
                     <form method="GET" action="{{ route('admin.vehicles.index') }}">
                         <div class="row g-3">
                             <div class="col-md-2">
@@ -74,8 +73,8 @@
             <!-- Vehicles Table -->
             <div class="card">
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
+                    <div class="table-responsive table-card">
+                        <table class="table table-hover align-middle table-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>Thao tác</th>
