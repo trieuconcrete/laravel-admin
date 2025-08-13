@@ -115,22 +115,7 @@ class CustomerController extends Controller
             }
         }
         
-        // Handle AJAX request for debt summary
-        if ($request->ajax() && $request->has('debt_summary')) {
-            try {
-                $debtSummary = ShipmentReport::getCustomerDebtSummary($customer->id);
-                
-                return response()->json([
-                    'success' => true,
-                    'debt_summary' => $debtSummary
-                ]);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error fetching debt summary: ' . $e->getMessage()
-                ], 500);
-            }
-        }
+
         
         // Get current month in YYYY-MM format for initial data
         $currentMonth = date('Y-m');
@@ -140,13 +125,16 @@ class CustomerController extends Controller
         $paymentStatuses = Payment::getStatuses();
         $customerStatusActives = Customer::getStatusActives();
         
-        // Lấy trạng thái finalized của báo cáo tháng hiện tại
-        $shipmentReport = \App\Models\ShipmentReport::where('customer_id', $customer->id);
-        $shipmentMonthlyReports = $shipmentReport->orderBy('monthly', 'desc')->get();
-        $shipmentReport = $shipmentReport->where('monthly', $currentMonth)
-            ->first();
+        // Lấy danh sách các tháng có báo cáo (unique months)
+        $shipmentMonthlyReports = \App\Models\ShipmentReport::where('customer_id', $customer->id)
+            ->select('monthly')
+            ->distinct()
+            ->orderBy('monthly', 'desc')
+            ->get();
+        
 
-        $isFinalized = $shipmentReport ? $shipmentReport->is_finalized : false;
+        
+
         
         // Load all transactions by default
         try {
@@ -164,7 +152,6 @@ class CustomerController extends Controller
                 'paymentMethods',
                 'paymentStatuses',
                 'filters',
-                'isFinalized',
                 'customerStatusActives',
                 'shipmentMonthlyReports'
             ));
@@ -308,6 +295,37 @@ class CustomerController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Đã xảy ra lỗi khi tổng kết bảng kê: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Lấy tổng kết công nợ khách hàng từ trước đến nay
+     *
+     * @param Customer $customer
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDebtSummary(Customer $customer, Request $request)
+    {
+        try {
+            // Luôn lấy debt summary tổng cộng từ trước đến nay
+            $debtSummary = ShipmentReport::getCustomerDebtSummary($customer->id);
+
+            return response()->json([
+                'success' => true,
+                'debt_summary' => $debtSummary
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getting debt summary', [
+                'customer_id' => $customer->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi khi lấy tổng kết công nợ: ' . $e->getMessage()
             ], 500);
         }
     }

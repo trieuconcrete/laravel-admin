@@ -20,8 +20,6 @@ class ShipmentReport extends Model
         'created_by',
         'updated_by',
         'is_finalized',
-        'statement_start_date',
-        'statement_end_date'
     ];
 
     protected $casts = [
@@ -29,6 +27,9 @@ class ShipmentReport extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'is_finalized' => 'boolean',
+        'statement_start_date' => 'date',
+        'statement_end_date' => 'date',
+        'shipment_type' => 'integer',
     ];
 
     /**
@@ -109,6 +110,46 @@ class ShipmentReport extends Model
                 'debt_type' => $remainingDebt > 0 ? 'customer_owes' : ($remainingDebt < 0 ? 'company_owes' : 'balanced')
             ];
         }
+    }
+
+    /**
+     * Kiểm tra thời gian có chồng lên nhau với các bảng kê khác không
+     */
+    public static function checkTimeOverlap($customerId, $startDate, $endDate, $shipmentType = null, $excludeId = null)
+    {
+        $query = self::where('customer_id', $customerId)
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->where(function ($subQ) use ($startDate, $endDate) {
+                    // Kiểm tra overlap: start_date <= endDate AND end_date >= startDate
+                    $subQ->where('statement_start_date', '<=', $endDate)
+                          ->where('statement_end_date', '>=', $startDate);
+                });
+            });
+
+        // Chỉ kiểm tra overlap cho cùng loại shipment_type
+        if ($shipmentType) {
+            $query->where('shipment_type', $shipmentType);
+        }
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->exists();
+    }
+
+    /**
+     * Lấy danh sách báo cáo theo khách hàng và loại chuyến xe
+     */
+    public static function getReportsByCustomerAndType($customerId, $shipmentType = null)
+    {
+        $query = self::where('customer_id', $customerId);
+        
+        if ($shipmentType) {
+            $query->where('shipment_type', $shipmentType);
+        }
+        
+        return $query->orderBy('monthly', 'desc')->get();
     }
 
     /**
