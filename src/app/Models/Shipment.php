@@ -46,6 +46,7 @@ class Shipment extends Model
         'vehicle_id',
         'distance', // số km
         'unit_price', // giá chuyến hàng
+        'unit_price_for_car_rental', // giá chuyến hàng
         'trip_count', // số lượng chuyến hàng
         'crane_price',
         'has_crane_service',
@@ -81,6 +82,7 @@ class Shipment extends Model
         'cargo_weight' => 'decimal:2',
         'distance' => 'decimal:2', // Cast cho trường số km
         'unit_price' => 'decimal:2',
+        'unit_price_for_car_rental' => 'decimal:2',
         'crane_price' => 'decimal:2', // Cast cho trường đơn giá cẩu hàng
         'has_crane_service' => 'boolean', // Cast cho trường có dịch vụ cẩu hàng
         'created_at' => 'datetime',
@@ -105,7 +107,7 @@ class Shipment extends Model
      */
     public static $statuses = [
         'pending' => 'Tạo mới',
-        'confirmed' => 'Đã xác nhận',
+        // 'confirmed' => 'Đã xác nhận',
         'in_transit' => 'Đang vận chuyển',
         'cancelled' => 'Đã hủy',
         'delayed' => 'Bị trễ',
@@ -129,7 +131,7 @@ class Shipment extends Model
     public static function getStatuses()
     {
         return [
-            self::STATUS_PENDING => 'Chờ xác nhận',
+            self::STATUS_PENDING => 'Tạo mới',
             self::STATUS_CONFIRMED => 'Đã xác nhận',
             self::STATUS_IN_TRANSIT => 'Đang vận chuyển',
             self::STATUS_DELIVERED => 'Đã giao hàng',
@@ -496,7 +498,7 @@ class Shipment extends Model
             return $this->coDriver->full_name;
         }
         
-        return 'Chưa phân công';
+        return 'Xe HPL thuê';
     }
 
     /**

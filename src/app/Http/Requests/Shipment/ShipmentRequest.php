@@ -194,6 +194,12 @@ class ShipmentRequest extends FormRequest
                 'unit_price' => str_replace(',', '', $this->unit_price),
             ]);
         }
+        // Remove commas from unit_price_for_car_rental
+        if ($this->unit_price_for_car_rental) {
+            $this->merge([
+                'unit_price_for_car_rental' => str_replace(',', '', $this->unit_price_for_car_rental),
+            ]);
+        }
     }
 
     public function rules()
@@ -249,6 +255,7 @@ class ShipmentRequest extends FormRequest
             'unit_price' => 'required|numeric|min:0',
             'overtime_rate' => 'nullable|numeric|min:0',
             'is_overtime_at_noon' => 'nullable|boolean',
+            'unit_price_for_car_rental' => 'nullable|numeric|min:0',
             // Chi phí chuyến hàng
             'deductions' => 'array',
             'deductions.*' => 'nullable', // Cho phép cả numeric và string cho "Ghi chú"

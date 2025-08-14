@@ -21,7 +21,7 @@
             </div>
             
             <div class="mb-3">
-                <label for="company_email" class="form-label">Email <span class="text-danger">*</span></label>
+                <label for="company_email" class="form-label">Email</label>
                 <input type="email" class="form-control" id="company_email" name="company[company_email]" required
                     value="{{ old('company.company_email', $settings['company']->where('key', 'company_email')->first()->value ?? '') }}">
             </div>

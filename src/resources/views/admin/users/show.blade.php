@@ -72,19 +72,33 @@
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
-                                                    <label for="emailInput" class="form-label">Email <span class="text-danger">*</span></label>
-                                                    <input type="email" class="form-control" name="email" id="emailInput" placeholder="Enter your Email" value="{{ old('email', $user->email) }}">
-                                                    @error('email')
+                                                    <label for="phonenumberInput" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="phone" id="phonenumberInput" placeholder="Enter your phone number" value="{{ old('phone', $user->phone) }}">
+                                                    @error('phone')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                                     @enderror
                                                 </div>
                                             </div>
+                                            <div class="col-xxl-6">
+                                                <div class="mb-3">
+                                                    <label for="idNumber" class="form-label">Số CCCD <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="id_number" placeholder="Nhập số CCCD" value="{{ old('id_number', $user->id_number) }}">
+                                                    @error('id_number')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-xxl-6">
+                                                <label class="form-label">Ngày cấp </label>
+                                                <input type="date" name="id_number_issuance_date" class="form-control" value="{{ old('id_number', $user->id_number_issuance_date) }}">
+                                                <div class="text-danger error" data-field="id_number_issuance_date"></div>
+                                            </div>
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
-                                                    <label for="phonenumberInput" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="phone" id="phonenumberInput" placeholder="Enter your phone number" value="{{ old('phone', $user->phone) }}">
-                                                    @error('phone')
+                                                    <label for="emailInput" class="form-label">Email</label>
+                                                    <input type="email" class="form-control" name="email" id="emailInput" placeholder="Enter your Email" value="{{ old('email', $user->email) }}">
+                                                    @error('email')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                                     @enderror
                                                 </div>
@@ -110,6 +124,15 @@
                                             </div>
                                             <div class="col-xxl-6">
                                                 <div class="mb-4">
+                                                    <label for="salaryBase" class="form-label">Giới tính</label>
+                                                    <select name="gender" class="form-select">
+                                                        <option value="1" @selected($user->gender == 1)>Nam</option>
+                                                        <option value="0" @selected($user->gender == 0)>Nữ</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-xxl-6">
+                                                <div class="mb-4">
                                                     <label for="salaryBase" class="form-label">Trạng thái làm việc</label>
                                                     <select name="status" class="form-select">
                                                         @foreach($statuses as $key => $label)
@@ -125,15 +148,7 @@
                                                 </div>
                                             </div>
                                             <!--end col-->
-                                            <div class="col-xxl-6">
-                                                <div class="mb-3">
-                                                    <label for="idNumber" class="form-label">CCCD/CMND <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="id_number" placeholder="Nhập CCCD/CMND" value="{{ old('id_number', $user->id_number) }}">
-                                                    @error('id_number')
-                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                                    @enderror
-                                                </div>
-                                            </div>
+                                            
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
                                                     <label for="salaryBase" class="form-label">Lương cơ bản </label>

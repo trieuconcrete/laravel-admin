@@ -54,20 +54,21 @@ class UpdateUserRequest extends FormRequest
                         Rule::unique('users', 'phone')->whereNull('deleted_at')->ignore($this->user->id),
                     ],
                     'email' => [
-                        'required',
+                        'nullable',
                         'email',
                         Rule::unique('users', 'email')->whereNull('deleted_at')->ignore($this->user->id),
                     ],
                     'birthday' => 'nullable|' . $this->getSystemDateFormatRule(),
                     'password' => ['nullable', 'confirmed', 'min:6'],
                     'status' => 'required|boolean',
+                    'gender' => 'nullable',
                     'avatar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
                     'notes' => ['nullable', 'string'],
                     'id_number' => 'required|max:20',
                     'salary_base' => ['nullable', 'numeric', 'min:0'],
                     'address' => 'nullable|max:100',
                     'tab' => 'nullable|string',
-                    'join_date' => 'required|' . $this->getSystemDateFormatRule(),
+                    'join_date' => 'nullable|' . $this->getSystemDateFormatRule(),
                 ];
                 break;
             case Constants::USER_ACTION_CHANGE_LICENSE:

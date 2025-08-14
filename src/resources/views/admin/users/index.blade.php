@@ -55,25 +55,28 @@
                 <div class="card-body">
                     <div class="live-preview">
                         <div class="table-responsive table-card">
-                            <table class="table align-middle table-nowrap mb-0">
-                                <thead class="table-light">
+                            <table class="table table-hover align-middle table-nowrap mb-0">
+                                <thead class="table-light text-uppercase">
                                     <tr class="bg-gray-100">
-                                        <th class="py-2 px-4">Thao tác</th>
-                                        <th class="py-2 px-4">Mã NV</th>
-                                        <th class="py-2 px-4">Họ tên</th>
-                                        <th class="py-2 px-4">SĐT</th>
-                                        <th class="py-2 px-4">Email</th>
-                                        <th class="py-2 px-4">Vị trí</th>
-                                        <th class="py-2 px-4">Lương cơ bản</th>
-                                        <th class="py-2 px-4">Loại bằng lái</th>
-                                        <th class="py-2 px-4">Hạn bằng lái</th>
-                                        <th class="py-2 px-4">Trạng thái</th>
+                                        <th class="">Thao tác</th>
+                                        <th class="">HỌ TÊN</th>
+                                        <th class="">NĂM SINH</th>
+                                        <th class="">GIỚI TÍNH</th>
+                                        <th class="">CHỨC VỤ</th>
+                                        <th class="">Số CCCD</th>
+                                        <th class="">Ngày cấp</th>
+                                        <th class="">Loại BL</th>
+                                        <th class="">Hạn BL</th>
+                                        <th class="">SĐT</th>
+                                        <th class="">EMAIL</th>
+                                        <th class="">Lương cơ bản</th>
+                                        <th class="">Trạng thái</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($users as $user)
                                         <tr>
-                                            <td class="py-2 px-4 flex gap-2">
+                                            <td class=" flex gap-2">
                                                 <div class="btn-group">
                                                     <a href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
                                                     
@@ -94,21 +97,24 @@
                                                     @endif
                                                 </div>
                                             </td>
-                                            <td class="py-2 px-4">{{ $user->employee_code }}</td>
-                                            <td class="py-2 px-4">{{ $user->full_name }}</td>
-                                            <td class="py-2 px-4">{{ $user->phone }}</td>
-                                            <td class="py-2 px-4">{{ $user->email }}</td>
-                                            <td class="py-2 px-4">{{ ucfirst(optional($user->position)->name) }}</td>
-                                            <td class="py-2 px-4">{{ number_format($user->salary_base) }}</td>
-                                            <td class="py-2 px-4">{{  optional($user->license)->license_type }}</td>
-                                            <td class="py-2 px-4">
+                                            <td class="">{{ $user->full_name }}</td>
+                                            <td class="">{{ $user->birthday }}</td>
+                                            <td class="">{{ $user->getGenderLabel() }}</td>
+                                             <td class="">{{ ucfirst(optional($user->position)->name) }}</td>
+                                             <td class="">{{ $user->id_number }}</td>
+                                             <td class="">{{ $user->id_number_issuance_date }}</td>
+                                             <td class="">{{  optional($user->license)->license_type }}</td>
+                                            <td class="">
                                                 @if (optional($user->license)->status == 'expired')
                                                     <span class="text-danger">{{ optional($user->license)->getStatusLabelAttribute() }}</span>
                                                 @else
                                                     <span class="text-success">{{ optional($user->license)->getStatusLabelAttribute() }}</span>
                                                 @endif
                                             </td>
-                                            <td class="py-2 px-4">
+                                            <td class="">{{ $user->phone }}</td>
+                                            <td class="">{{ $user->email }}</td>
+                                            <td class="">{{ number_format($user->salary_base) }}</td>
+                                            <td class="">
                                                 @if ($user->status) <span class="badge bg-success-subtle text-success">Đang làm việc</span>
                                                 @else
                                                 <span class="badge bg-danger-subtle text-danger">Đã nghỉ việc</span>
@@ -153,24 +159,19 @@
                             <div class="text-danger error" data-field="phone"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">CCCD/CMND <span class="text-danger">*</span></label>
-                            <input type="text" name="id_number" class="form-control" placeholder="Nhập CCCD/CMND">
+                            <label class="form-label">Số CCCD <span class="text-danger">*</span></label>
+                            <input type="text" name="id_number" class="form-control" placeholder="Nhập số CCCD">
                             <div class="text-danger error" data-field="id_number"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <label class="form-label">Ngày cấp </label>
+                            <input type="date" name="id_number_issuance_date" class="form-control" value="@formatDateForInput(request('id_number_issuance_date'))">
+                            <div class="text-danger error" data-field="id_number_issuance_date"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Email</label>
                             <input type="email" name="email" class="form-control" placeholder="Nhập email">
                             <div class="text-danger error" data-field="email"></div>
-                        </div>
-                        <div class="col-xxl-6">
-                            <label class="form-label">Ngày sinh </label>
-                            <input type="date" name="birthday" class="form-control" value="@formatDateForInput(request('birthday'))">
-                            <div class="text-danger error" data-field="birthday"></div>
-                        </div>
-                        <div class="col-xxl-6">
-                            <label class="form-label">Ngày vào làm <span class="text-danger">*</span></label>
-                            <input type="date" name="join_date" class="form-control">
-                            <div class="text-danger error" data-field="join_date"></div>
                         </div>
                         <div class="col-xxl-6">
                             <label class="form-label">Loại bằng lái <span class="text-danger">*</span></label>
@@ -188,6 +189,16 @@
                             <div class="text-danger error" data-field="license_expire_date"></div>
                         </div>
                         <div class="col-xxl-6">
+                            <label class="form-label">Ngày sinh </label>
+                            <input type="date" name="birthday" class="form-control" value="@formatDateForInput(request('birthday'))">
+                            <div class="text-danger error" data-field="birthday"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Ngày vào làm <span class="text-danger">*</span></label>
+                            <input type="date" name="join_date" class="form-control">
+                            <div class="text-danger error" data-field="join_date"></div>
+                        </div>
+                        <div class="col-xxl-6">
                             <label class="form-label">Lương cơ bản </label>
                             <input type="text" name="salary_base" class="form-control" placeholder="Nhập lương cơ bản">
                             <div class="text-danger error" data-field="salary_base"></div>
@@ -199,6 +210,13 @@
                                 <option value="2">Tài xế ăn lương doanh số</option>
                             </select>
                             <div class="text-danger error" data-field="salary_type"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Giới tính</label>
+                            <select name="gender" class="form-select">
+                                    <option value="1">Nam</option>
+                                    <option value="0">Nữ</option>
+                            </select>
                         </div>
                         <div class="col-xxl-6">
                             <label class="form-label">Trạng thái làm việc</label>
@@ -258,24 +276,14 @@
                             <div class="text-danger error" data-field="phone"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">CCCD/CMND <span class="text-danger">*</span></label>
-                            <input type="text" name="id_number" class="form-control" placeholder="Nhập CCCD/CMND">
+                            <label class="form-label">Số CCCD <span class="text-danger">*</span></label>
+                            <input type="text" name="id_number" class="form-control" placeholder="Nhập Số CCCD">
                             <div class="text-danger error" data-field="id_number"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Email <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control" placeholder="Nhập email">
-                            <div class="text-danger error" data-field="email"></div>
-                        </div>
-                        <div class="col-xxl-6">
-                            <label class="form-label">Ngày sinh</label>
-                            <input type="date" name="birthday" class="form-control">
-                            <div class="text-danger error" data-field="birthday"></div>
-                        </div>
-                        <div class="col-xxl-6">
-                            <label class="form-label">Ngày vào làm <span class="text-danger">*</span></label>
-                            <input type="date" name="join_date" class="form-control">
-                            <div class="text-danger error" data-field="join_date"></div>
+                            <label class="form-label">Ngày cấp </label>
+                            <input type="date" name="id_number_issuance_date" class="form-control" value="@formatDateForInput(request('id_number_issuance_date'))">
+                            <div class="text-danger error" data-field="id_number_issuance_date"></div>
                         </div>
                         <div class="col-xxl-6">
                             <label class="form-label">Vị trí <span class="text-danger">*</span></label>
@@ -288,6 +296,21 @@
                                 @endforeach
                             </select>
                             <div class="text-danger error" data-field="position_id"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" placeholder="Nhập email">
+                            <div class="text-danger error" data-field="email"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Ngày sinh</label>
+                            <input type="date" name="birthday" class="form-control">
+                            <div class="text-danger error" data-field="birthday"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Ngày vào làm</label>
+                            <input type="date" name="join_date" class="form-control">
+                            <div class="text-danger error" data-field="join_date"></div>
                         </div>
                         <div class="col-xxl-6">
                             <label class="form-label">Lương cơ bản</label>
@@ -311,6 +334,13 @@
                                 @endforeach
                             </select>
                             <div class="text-danger error" data-field="status"></div>
+                        </div>
+                         <div class="col-xxl-6">
+                            <label class="form-label">Giới tính</label>
+                            <select name="gender" class="form-select">
+                                    <option value="1">Nam</option>
+                                    <option value="0">Nữ</option>
+                            </select>
                         </div>
                         <div class="col-lg-12">
                             <label class="form-label">Địa chỉ </label>

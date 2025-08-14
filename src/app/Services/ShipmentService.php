@@ -113,6 +113,7 @@ class ShipmentService
                 'overtime_rate' => $data['overtime_rate'] ?? 50000,
                 'is_overtime_at_noon' => $data['is_overtime_at_noon'] ?? false,
                 'created_by' => auth()->id(),
+                'unit_price_for_car_rental' => $data['unit_price_for_car_rental'] ?? null,
             ];
 
             $shipment = Shipment::create($shipmentData);

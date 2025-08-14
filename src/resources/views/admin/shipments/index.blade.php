@@ -5,28 +5,6 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col">
-            <div class="row mb-3 pb-1">
-                <div class="col-12">
-                    <div class="d-flex align-items-lg-center flex-lg-row flex-column">
-                        <div class="flex-grow-1">
-                            <h4><i class="ri-route-fill fs-1"></i> Quản lý chuyến xe</h4>
-                        </div>
-                        <div class="mt-3 mt-lg-0">
-                            <div class="row g-3 mb-0 align-items-center">
-                                <div class="col-auto">
-                                    <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary">
-                                        <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe 
-                                    </a>
-                                </div>
-                                <!--end col-->
-                            </div>
-                            <!--end row-->
-                        </div>
-                    </div><!-- end card header -->
-                </div>
-                <!--end col-->
-            </div>
-
             <!-- Dashboard Cards -->
             @php
                 // Đếm tổng số chuyến xe
@@ -46,7 +24,7 @@
                     ->count();
             @endphp
             
-            <div class="row mb-4">
+            <div class="row">
                 <div class="col-md-6 col-lg-3 mb-3">
                     <div class="card card-dashboard h-100" style="border-left-color: #4e73df;">
                         <div class="card-body">
@@ -109,9 +87,30 @@
                 </div>
             </div>
 
+            <div class="row mb-3 pb-1">
+                <div class="col-12">
+                    <div class="d-flex align-items-lg-center flex-lg-row flex-column">
+                        <div class="flex-grow-1">
+                        </div>
+                        <div class="mt-3 mt-lg-0">
+                            <div class="row g-3 mb-0 align-items-center">
+                                <div class="col-auto">
+                                    <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary">
+                                        <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe 
+                                    </a>
+                                </div>
+                                <!--end col-->
+                            </div>
+                            <!--end row-->
+                        </div>
+                    </div><!-- end card header -->
+                </div>
+                <!--end col-->
+            </div>
+
             <!-- Filter Section -->
-            <div class="card mb-4">
-                <div class="card-body">
+            <div class="row mb-4">
+                <div class="col">
                     <form action="{{ route('admin.shipments.index') }}" method="GET">
                         <div class="row g-3">
                             <div class="col-md-2">
@@ -151,11 +150,12 @@
             <!-- List View -->
             <div class="card mb-4">
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
+                    <div class="table-responsive mt-4 mt-xl-0">
+                        <table class="table table-hover table-striped align-middle table-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>Thao tác</th>
+                                    <th>Trạng thái</th>
                                     <th>Khách hàng</th>
                                     <th>Tuyến đường</th>
                                     <th>Tài xế</th>
@@ -163,7 +163,6 @@
                                     <th>Thời gian</th>
                                     <th>Ngày tạo</th>
                                     <th>Người tạo</th>
-                                    <th>Trạng thái</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -187,6 +186,7 @@
                                             </form>
                                         </div>
                                     </td>
+                                    <td><span class="badge {{ $shipment->statusBadgeClass }}">{{ $shipment->status_label }}</span></td>
                                     <td>
                                         @if($shipment->customer)
                                         <a href="{{ route('admin.customers.show', optional($shipment->customer)->id) }}" class="text-primary" target="_blank">
@@ -213,27 +213,24 @@
                                                 {{ $displayText }}
                                             </a>
                                         @else
-                                            {{ $displayText }}
+                                            <span class="text-warning">{{ $displayText }}</span>
                                         @endif
                                     </td>
-                                    <td>{{ $shipment->vehicle ? $shipment->vehicle->plate_number : '' }}</td>
+                                    <td>{{ $shipment->vehicle ? $shipment->vehicle->plate_number . '-' . optional($shipment->vehicle)->vehicleType->name : '' }}</td>
                                     <td>
                                         <div>KH: @formatDate($shipment->departure_time)</div>
                                         <div>DK: @formatDate($shipment->estimated_arrival_time)</div>
                                     </td>
                                     <td>@formatDate($shipment->created_at)</td>
                                     <td>{{ $shipment->creator->full_name ?? null }}</td>
-                                    <td><span class="badge {{ $shipment->statusBadgeClass }}">{{ $shipment->status_label }}</span></td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="card-footer bg-white">
-                    {!! $shipments->withQueryString()->links() !!}
-                </div>
             </div>
+            {!! $shipments->withQueryString()->links('vendor.pagination.bootstrap-5') !!}
         </div> <!-- end col -->
     </div>
 </div>

@@ -72,7 +72,7 @@
                                             <!--end col-->
                                             <div class="col-lg-6">
                                                 <div class="mb-3">
-                                                    <label for="emailInput" class="form-label">Email <span class="text-danger">*</span></label>
+                                                    <label for="emailInput" class="form-label">Email</label>
                                                     <input type="email" class="form-control" name="email" id="emailInput" placeholder="Enter your Email" value="{{ old('email', $user->email) }}">
                                                     @error('email')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
