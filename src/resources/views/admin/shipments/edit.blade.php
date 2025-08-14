@@ -349,10 +349,10 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="row">
-                                                        <div class="col-md-2">
+                                                        <div class="col-md-3">
                                                             <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
                                                         </div>
-                                                    <div class="col-md-8">
+                                                    <div class="col-md-7">
                                                         <select class="form-select" name="vehicle_id" id="vehicles">
                                                             <option value="">Chọn phương tiện</option>
                                                             @foreach($vehicles as $vehicle)
@@ -883,7 +883,8 @@
         // Xử lý checkbox "Xe HPL Thuê"
         const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
         const driverSection = document.getElementById('drivers');
-        
+        const carRentalSection = document.getElementById('carRental');
+
         function toggleDriverSections() {
             if (!isCarRentalCheckbox || !driverSection) {
                 return; // Exit if elements don't exist
@@ -893,9 +894,11 @@
             if (isChecked) {
                 // Nếu là xe thuê, ẩn phần tài xế
                 driverSection.style.display = 'none';
+                carRentalSection.style.display = 'block';
             } else {
                 // Nếu không phải xe thuê, hiện phần tài xế
                 driverSection.style.display = 'block';
+                carRentalSection.style.display = 'none';
             }
         }
         

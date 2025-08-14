@@ -1,5 +1,5 @@
 @extends('admin.layout')
-
+@section('title', 'Quản lý báo giá')
 @section('content')
 
 <div class="container-fluid">
@@ -9,7 +9,6 @@
                 <div class="col-12">
                     <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                         <div class="flex-grow-1">
-                            <h4><i class="ri-suitcase-fill fs-1"></i> Quản lý báo giá</h4>
                         </div>
                         <div class="mt-3 mt-lg-0">
                             <div class="row g-3 mb-0 align-items-center">
@@ -28,8 +27,8 @@
             </div>
 
             <!-- Filter Section -->
-            <div class="card mb-4">
-                <div class="card-body">
+            <div class="row mb-3 pb-1">
+                <div class="col-12">
                     <form method="GET" action="{{ route('admin.quotes.index') }}">
                         <div class="row g-3">
                             <div class="col-md-4">
@@ -57,8 +56,8 @@
 
             <div class="card">
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
+                    <div class="table-responsive table-card">
+                        <table class="table table-hover align-middle table-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>Thao tác</th>

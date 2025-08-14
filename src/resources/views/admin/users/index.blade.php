@@ -55,7 +55,7 @@
                 <div class="card-body">
                     <div class="live-preview">
                         <div class="table-responsive table-card">
-                            <table class="table align-middle table-nowrap mb-0">
+                            <table class="table table-hover align-middle table-nowrap mb-0">
                                 <thead class="table-light">
                                     <tr class="bg-gray-100">
                                         <th class="py-2 px-4">Thao tác</th>
@@ -158,7 +158,7 @@
                             <div class="text-danger error" data-field="id_number"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <label class="form-label">Email</label>
                             <input type="email" name="email" class="form-control" placeholder="Nhập email">
                             <div class="text-danger error" data-field="email"></div>
                         </div>
@@ -263,7 +263,7 @@
                             <div class="text-danger error" data-field="id_number"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <label class="form-label">Email</label>
                             <input type="email" name="email" class="form-control" placeholder="Nhập email">
                             <div class="text-danger error" data-field="email"></div>
                         </div>

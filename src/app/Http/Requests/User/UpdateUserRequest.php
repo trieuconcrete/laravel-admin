@@ -54,7 +54,7 @@ class UpdateUserRequest extends FormRequest
                         Rule::unique('users', 'phone')->whereNull('deleted_at')->ignore($this->user->id),
                     ],
                     'email' => [
-                        'required',
+                        'nullable',
                         'email',
                         Rule::unique('users', 'email')->whereNull('deleted_at')->ignore($this->user->id),
                     ],

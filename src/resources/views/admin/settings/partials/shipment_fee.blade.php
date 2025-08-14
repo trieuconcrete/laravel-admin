@@ -5,7 +5,8 @@
         <div class="col-md-3">
             <select name="type" class="form-select">
                 <option value="">Tất cả loại</option>
-                <option value="expense" {{ request('type') == 'expense' ? 'selected' : '' }}>Chi phí khác hàng thanh toán</option>
+                <option value="expense" {{ request('type') == 'expense' ? 'selected' : '' }}>Chi phí khách hàng thanh toán</option>
+                <option value="car_rental_expense" {{ request('type') == 'car_rental_expense' ? 'selected' : '' }}>Chi phí HPL trả cho đối tác cho thuê xe</option>
                 <option value="driver" {{ request('type') == 'driver' ? 'selected' : '' }}>Chi phí cho Tài</option>
                 <option value="bus_driver" {{ request('type') == 'bus_driver' ? 'selected' : '' }}>Chi phí cho Lơ</option>
             </select>
