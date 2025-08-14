@@ -5,28 +5,6 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col">
-            <div class="row mb-3 pb-1">
-                <div class="col-12">
-                    <div class="d-flex align-items-lg-center flex-lg-row flex-column">
-                        <div class="flex-grow-1">
-                            <h4><i class="ri-route-fill fs-1"></i> Quản lý chuyến xe</h4>
-                        </div>
-                        <div class="mt-3 mt-lg-0">
-                            <div class="row g-3 mb-0 align-items-center">
-                                <div class="col-auto">
-                                    <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary">
-                                        <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe 
-                                    </a>
-                                </div>
-                                <!--end col-->
-                            </div>
-                            <!--end row-->
-                        </div>
-                    </div><!-- end card header -->
-                </div>
-                <!--end col-->
-            </div>
-
             <!-- Dashboard Cards -->
             @php
                 // Đếm tổng số chuyến xe
@@ -46,7 +24,7 @@
                     ->count();
             @endphp
             
-            <div class="row mb-4">
+            <div class="row">
                 <div class="col-md-6 col-lg-3 mb-3">
                     <div class="card card-dashboard h-100" style="border-left-color: #4e73df;">
                         <div class="card-body">
@@ -109,9 +87,30 @@
                 </div>
             </div>
 
+            <div class="row mb-3 pb-1">
+                <div class="col-12">
+                    <div class="d-flex align-items-lg-center flex-lg-row flex-column">
+                        <div class="flex-grow-1">
+                        </div>
+                        <div class="mt-3 mt-lg-0">
+                            <div class="row g-3 mb-0 align-items-center">
+                                <div class="col-auto">
+                                    <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary">
+                                        <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe 
+                                    </a>
+                                </div>
+                                <!--end col-->
+                            </div>
+                            <!--end row-->
+                        </div>
+                    </div><!-- end card header -->
+                </div>
+                <!--end col-->
+            </div>
+
             <!-- Filter Section -->
-            <div class="card mb-4">
-                <div class="card-body">
+            <div class="row mb-4">
+                <div class="col">
                     <form action="{{ route('admin.shipments.index') }}" method="GET">
                         <div class="row g-3">
                             <div class="col-md-2">
@@ -230,10 +229,8 @@
                         </table>
                     </div>
                 </div>
-                <div class="card-footer bg-white">
-                    {!! $shipments->withQueryString()->links() !!}
-                </div>
             </div>
+            {!! $shipments->withQueryString()->links('vendor.pagination.bootstrap-5') !!}
         </div> <!-- end col -->
     </div>
 </div>

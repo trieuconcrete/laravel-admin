@@ -1,5 +1,5 @@
 @extends('admin.layout')
-
+@section('title', 'Quản lý lương')
 @section('content')
 
 <div class="container-fluid">
@@ -9,12 +9,11 @@
                 <div class="col-12">
                     <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                         <div class="flex-grow-1">
-                            <h4><i class="ri-currency-fill fs-1"></i> Quản lý lương</h4>
                         </div>
                         <div class="mt-3 mt-lg-0">
                             <div class="row g-3 mb-0 align-items-center">
                                 <div class="col-auto">
-                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target=".sync-salary-model">Đồng bộ lương</button>
+                                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target=".sync-salary-model">Tạo kỳ lương</button>
                                 </div>
                                 <!--end col-->
                             </div>
@@ -24,163 +23,167 @@
                 </div>
                 <!--end col-->
             </div>
+        </div>
+    </div>
 
-            <!-- Charts & Statistics -->
-            <div class="row mb-4">
-                <div class="col-lg-4 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header bg-white">
-                            <h6 class="mb-0">Thống kê theo bộ phận</h6>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Bộ phận</th>
-                                            <th>Số người</th>
-                                            <th>Tổng lương</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($departmentStats as $dept)
-                                        @if($dept['code'] != \App\Models\Position::POSITION_GD)
-                                        <tr>
-                                            <td>{{ $dept['name'] }}</td>
-                                            <td>{{ $dept['count'] }}</td>
-                                            <td>{{ number_format($dept['total_salary'], 0, ',', '.') }} ₫</td>
-                                        </tr>
-                                        @endif
-                                        @empty
-                                        <tr>
-                                            <td colspan="3" class="text-center">Không có dữ liệu bộ phận</td>
-                                        </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+    <!-- Charts & Statistics -->
+    <div class="row mb-4">
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">Thống kê theo bộ phận</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Bộ phận</th>
+                                    <th>Số người</th>
+                                    <th>Tổng lương</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($departmentStats as $dept)
+                                @if($dept['code'] != \App\Models\Position::POSITION_GD)
+                                <tr>
+                                    <td>{{ $dept['name'] }}</td>
+                                    <td>{{ $dept['count'] }}</td>
+                                    <td>{{ number_format($dept['total_salary'], 0, ',', '.') }} ₫</td>
+                                </tr>
+                                @endif
+                                @empty
+                                <tr>
+                                    <td colspan="3" class="text-center">Không có dữ liệu bộ phận</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="col-lg-8 mb-4">
-                    <div class="card h-100">
-                        <div class="card-header bg-white">
-                            <h6 class="mb-0">Biểu đồ chi phí lương theo tháng</h6>
-                        </div>
-                        <div class="card-body">
-                            <div id="salary_monthly_chart" data-colors='["--vz-primary"]' class="apex-charts" dir="ltr"></div>
-                        </div>
-                        
-                        <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            // Chart data
-                            var chartData = @json($chartData);
-                            
-                            // Prepare series and categories
-                            var months = [];
-                            var salaryData = [];
-                            
-                            chartData.forEach(function(item) {
-                                months.push(item.month);
-                                salaryData.push(Math.round(item.total / 1000000)); // Convert to millions for better display
-                            });
-                            
-                            // Chart options
-                            var options = {
-                                chart: {
-                                    height: 350,
-                                    type: 'bar',
-                                    toolbar: {
-                                        show: false
-                                    }
-                                },
-                                plotOptions: {
-                                    bar: {
-                                        dataLabels: {
-                                            position: 'top'
-                                        },
-                                        columnWidth: '40%',
-                                    }
-                                },
+            </div>
+        </div>
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">Biểu đồ chi phí lương theo tháng</h6>
+                </div>
+                <div class="card-body">
+                    <div id="salary_monthly_chart" data-colors='["--vz-primary"]' class="apex-charts" dir="ltr"></div>
+                </div>
+                
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Chart data
+                    var chartData = @json($chartData);
+                    
+                    // Prepare series and categories
+                    var months = [];
+                    var salaryData = [];
+                    
+                    chartData.forEach(function(item) {
+                        months.push(item.month);
+                        salaryData.push(Math.round(item.total / 1000000)); // Convert to millions for better display
+                    });
+                    
+                    // Chart options
+                    var options = {
+                        chart: {
+                            height: 350,
+                            type: 'bar',
+                            toolbar: {
+                                show: false
+                            }
+                        },
+                        plotOptions: {
+                            bar: {
                                 dataLabels: {
-                                    enabled: true,
-                                    formatter: function(val) {
-                                        return val + ' triệu';
-                                    },
-                                    offsetY: -20,
-                                    style: {
-                                        fontSize: '12px',
-                                        colors: ["#304758"]
-                                    }
+                                    position: 'top'
                                 },
-                                series: [{
-                                    name: 'Tổng lương',
-                                    data: salaryData
-                                }],
-                                xaxis: {
-                                    categories: months,
-                                    position: 'bottom',
-                                    axisBorder: {
-                                        show: false
-                                    },
-                                    axisTicks: {
-                                        show: false
-                                    },
-                                    crosshairs: {
-                                        fill: {
-                                            type: 'gradient',
-                                            gradient: {
-                                                colorFrom: '#D8E3F0',
-                                                colorTo: '#BED1E6',
-                                                stops: [0, 100],
-                                                opacityFrom: 0.4,
-                                                opacityTo: 0.5,
-                                            }
-                                        }
-                                    },
-                                    tooltip: {
-                                        enabled: true,
+                                columnWidth: '40%',
+                            }
+                        },
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function(val) {
+                                return val + ' triệu';
+                            },
+                            offsetY: -20,
+                            style: {
+                                fontSize: '12px',
+                                colors: ["#304758"]
+                            }
+                        },
+                        series: [{
+                            name: 'Tổng lương',
+                            data: salaryData
+                        }],
+                        xaxis: {
+                            categories: months,
+                            position: 'bottom',
+                            axisBorder: {
+                                show: false
+                            },
+                            axisTicks: {
+                                show: false
+                            },
+                            crosshairs: {
+                                fill: {
+                                    type: 'gradient',
+                                    gradient: {
+                                        colorFrom: '#D8E3F0',
+                                        colorTo: '#BED1E6',
+                                        stops: [0, 100],
+                                        opacityFrom: 0.4,
+                                        opacityTo: 0.5,
                                     }
-                                },
-                                yaxis: {
-                                    axisBorder: {
-                                        show: false
-                                    },
-                                    axisTicks: {
-                                        show: false,
-                                    },
-                                    labels: {
-                                        show: true,
-                                        formatter: function(val) {
-                                            return val + ' triệu';
-                                        }
-                                    }
-                                },
-                                title: {
-                                    text: 'Chi phí lương theo tháng (triệu đồng)',
-                                    floating: false,
-                                    offsetY: 0,
-                                    align: 'center',
-                                    style: {
-                                        color: '#444',
-                                        fontWeight: '500',
-                                    }
-                                },
-                                colors: ['#4e73df']
-                            };
-                            
-                            // Initialize chart
-                            var chart = new ApexCharts(document.querySelector("#salary_monthly_chart"), options);
-                            chart.render();
-                        });
-                        </script>
-                    </div>
-                </div>
+                                }
+                            },
+                            tooltip: {
+                                enabled: true,
+                            }
+                        },
+                        yaxis: {
+                            axisBorder: {
+                                show: false
+                            },
+                            axisTicks: {
+                                show: false,
+                            },
+                            labels: {
+                                show: true,
+                                formatter: function(val) {
+                                    return val + ' triệu';
+                                }
+                            }
+                        },
+                        title: {
+                            text: 'Chi phí lương theo tháng (triệu đồng)',
+                            floating: false,
+                            offsetY: 0,
+                            align: 'center',
+                            style: {
+                                color: '#444',
+                                fontWeight: '500',
+                            }
+                        },
+                        colors: ['#4e73df']
+                    };
+                    
+                    // Initialize chart
+                    var chart = new ApexCharts(document.querySelector("#salary_monthly_chart"), options);
+                    chart.render();
+                });
+                </script>
             </div>
+        </div>
+    </div>
 
-            <div class="row mb-4">
-            </div>
+    <div class="row mb-4">
+    </div>
 
+    <div class="row">
+        <div class="col">
             <!-- Pending Salary Advance Requests Section -->
             <div class="card mb-4">
                 <div class="card-header bg-warning bg-opacity-10">
@@ -200,8 +203,8 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
+                    <div class="table-responsive table-card">
+                        <table class="table table-hover align-middle table-nowrap mb-0">
                             <thead class="table-light">
                                 <tr>
                                     <th>Mã yêu cầu</th>
@@ -344,72 +347,75 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Salary Table -->
-            <div class="card">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Thao tác</th>
-                                    <th>Mã NV</th>
-                                    <th>Họ và tên</th>
-                                    <th>Bộ phận</th>
-                                    <th>Lương cơ bản</th>
-                                    <th>Phụ cấp</th>
-                                    <th>Chi phí chuyến xe</th>
-                                    <th>Thưởng</th>
-                                    <th>Phạt</th>
-                                    <th>Ứng lương</th>
-                                    <th>Tổng trước BHXH</th>
-                                    <th>BHXH (10%)</th>
-                                    <th>Tổng lương</th>
-                                    <th>Trạng thái</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($salaries as $salary)
-                                <tr data-period="{{ $selectedMonth }}" data-status="{{ $salary['status'] }}">
-                                    <td>
-                                        <div class="btn-group">
-                                            <a href="{{ route('admin.users.show', ['user' => $salary['user_id']]) }}" class="btn btn-sm btn-outline-primary">
-                                                Chi tiết
-                                            </a>
-                                        </div>
-                                    </td>
-                                    <td>{{ $salary['employee_code'] }}</td>
-                                    <td>{{ $salary['name'] }}</td>
-                                    <td>{{ $salary['department'] }}</td>
-                                    <td>{{ number_format($salary['base_salary']) }} ₫</td>
-                                    <td>{{ number_format($salary['allowance']) }} ₫</td>
-                                    <td>{{ number_format($salary['total_expenses']) }} ₫</td>
-                                    <td>{{ number_format($salary['bonus']) }} ₫</td>
-                                    <td>{{ number_format($salary['penalty']) }} ₫</td>
-                                    <td>{{ number_format($salary['other_deduction']) }} ₫</td>
-                                    <td>{{ number_format($salary['total_salary']) }} ₫</td>
-                                    <td>{{ number_format($salary['insurance']) }} ₫</td>
-                                    <td>{{ number_format($salary['total']) }} ₫</td>
-                                    <td>
-                                        @if($salary['status'] == 'paid')
-                                            <span class="status-indicator status-paid text-success badge bg-success-subtle">Đã thanh toán</span>
-                                        @elseif($salary['status'] == 'pending')
-                                            <span class="status-indicator status-pending text-warning badge bg-warning-subtle">Chờ duyệt</span>
-                                        @elseif($salary['status'] == 'unpaid')
-                                            <span class="status-indicator status-unpaid text-danger badge bg-danger-subtle">Chưa thanh toán</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                {{--  @empty
-                                <tr>
-                                    <td colspan="14" class="text-center">Không có dữ liệu lương</td>
-                                </tr>  --}}
-                                @endforeach
-                            </tbody>
-                        </table>
+            <div class="row">
+                <div class="col">
+                    <!-- Salary Table -->
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive table-card">
+                                <table class="table table-hover align-middle table-nowrap mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Thao tác</th>
+                                            <th>Mã NV</th>
+                                            <th>Họ và tên</th>
+                                            <th>Bộ phận</th>
+                                            <th>Lương cơ bản</th>
+                                            <th>Phụ cấp</th>
+                                            <th>Chi phí chuyến xe</th>
+                                            <th>Thưởng</th>
+                                            <th>Phạt</th>
+                                            <th>Ứng lương</th>
+                                            <th>Tổng trước BHXH</th>
+                                            <th>BHXH (10%)</th>
+                                            <th>Tổng lương</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($salaries as $salary)
+                                        <tr data-period="{{ $selectedMonth }}" data-status="{{ $salary['status'] }}">
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{{ route('admin.users.show', ['user' => $salary['user_id']]) }}" class="btn btn-sm btn-outline-primary">
+                                                        Chi tiết
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            <td>{{ $salary['employee_code'] }}</td>
+                                            <td>{{ $salary['name'] }}</td>
+                                            <td>{{ $salary['department'] }}</td>
+                                            <td>{{ number_format($salary['base_salary']) }} ₫</td>
+                                            <td>{{ number_format($salary['allowance']) }} ₫</td>
+                                            <td>{{ number_format($salary['total_expenses']) }} ₫</td>
+                                            <td>{{ number_format($salary['bonus']) }} ₫</td>
+                                            <td>{{ number_format($salary['penalty']) }} ₫</td>
+                                            <td>{{ number_format($salary['other_deduction']) }} ₫</td>
+                                            <td>{{ number_format($salary['total_salary']) }} ₫</td>
+                                            <td>{{ number_format($salary['insurance']) }} ₫</td>
+                                            <td>{{ number_format($salary['total']) }} ₫</td>
+                                            <td>
+                                                @if($salary['status'] == 'paid')
+                                                    <span class="status-indicator status-paid text-success badge bg-success-subtle">Đã thanh toán</span>
+                                                @elseif($salary['status'] == 'pending')
+                                                    <span class="status-indicator status-pending text-warning badge bg-warning-subtle">Chờ duyệt</span>
+                                                @elseif($salary['status'] == 'unpaid')
+                                                    <span class="status-indicator status-unpaid text-danger badge bg-danger-subtle">Chưa thanh toán</span>
+                                                @endif
+                                            </td>
+                                        </tr>
+                                        {{--  @empty
+                                        <tr>
+                                            <td colspan="14" class="text-center">Không có dữ liệu lương</td>
+                                        </tr>  --}}
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                    {{ $users->appends(request()->query())->links() }}
                 </div>
+                {{ $users->appends(request()->query())->links('vendor.pagination.bootstrap-5') }}
             </div>
         </div> <!-- end col -->
     </div>
