@@ -1,5 +1,5 @@
 @extends('admin.layout')
-
+@section('title', 'Báo cáo và thống kê')
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -138,18 +138,16 @@
                     <div class="col-12">
                         <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                             <div class="flex-grow-1">
-                                <h4 class="fs-16 mb-1">{{ greeting_message() }}</h4>
                             </div>
                             <div class="mt-3 mt-lg-0">
-                                <form action="javascript:void(0);">
-                                    <div class="row g-3 mb-0 align-items-center">
+                                <div class="row g-3 mb-0 align-items-center">
+                                    <div class="col-auto">
                                         <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary" >
                                             <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe 
                                         </a>
-                                        <!--end col-->
                                     </div>
-                                    <!--end row-->
-                                </form>
+                                    <!--end col-->
+                                </div>
                             </div>
                         </div><!-- end card header -->
                     </div>
