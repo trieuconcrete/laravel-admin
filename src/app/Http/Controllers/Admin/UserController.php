@@ -211,7 +211,6 @@ class UserController extends Controller
         DB::beginTransaction();
         try {
             $this->authorize('update', $user);
-
             $this->userService->update($request, $user);
 
             DB::commit();

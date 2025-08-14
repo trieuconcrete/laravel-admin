@@ -49,6 +49,7 @@ class User extends Authenticatable
         'department_id',
         'salary_base',
         'id_number',
+        'id_number_issuance_date',
         'profile_image',
         'address',
         'gender',
@@ -96,6 +97,11 @@ class User extends Authenticatable
             self::ROLE_STAFF => 'Nhân viên',
             self::ROLE_USER => 'Người dùng'
         ];
+    }
+
+    public function getGenderLabel(): string
+    {
+        return $this->gender ? 'Nam' : 'Nữ';
     }
 
     /**
