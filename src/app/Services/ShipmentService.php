@@ -70,8 +70,10 @@ class ShipmentService
                 'status' => $data['status'],
                 'distance' => $data['distance'] ?? null,
                 'unit_price' => $data['unit_price'] ?? null,
+                'unit_price_for_car_rental' => $data['unit_price_for_car_rental'] ?? null,
                 'created_by' => auth()->id(),
             ];
+            // dd($shipmentData);
             $shipment = Shipment::create($shipmentData);
 
             // 2. Lưu các chi phí chuyến hàng (ShipmentDeduction)

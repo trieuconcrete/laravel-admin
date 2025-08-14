@@ -550,7 +550,7 @@
                                                     <div class="col-md-6">
                                                         <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
                                                         <small class="text-muted">Chi phí HPL trả cho đối tác cho thuê xe</small>
-                                                        <input type="text" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price_for_car_rental" value="{{ old('unit_price_for_car_rental') }}">
+                                                        <input type="text" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price_for_car_rental" value="{{ old('unit_price_for_car_rental', $shipment->unit_price_for_car_rental) }}">
                                                         @error('unit_price_for_car_rental')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
                                                 </div>
@@ -572,9 +572,9 @@
                                                                         <td>
                                                                             <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
                                                                             @if($type->name === 'Ghi chú')
-                                                                                <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id) }}</textarea>
+                                                                                <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->notes : '') }}</textarea>
                                                                             @else
-                                                                                <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id) }}">
+                                                                                <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->amount : '') }}">
                                                                             @endif
                                                                             @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
                                                                         </td>
