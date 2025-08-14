@@ -20,12 +20,12 @@
                             <!-- Nav tabs -->
                             <ul class="nav nav-tabs mb-3" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active" data-bs-toggle="tab" href="#rental-info" role="tab">
+                                    <a class="nav-link {{ session('active_tab') !== 'vehicle-logs' ? 'active' : '' }}" data-bs-toggle="tab" href="#rental-info" role="tab">
                                         Thông tin thuê xe
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" data-bs-toggle="tab" href="#vehicle-logs" role="tab">
+                                    <a class="nav-link {{ session('active_tab') === 'vehicle-logs' ? 'active' : '' }}" data-bs-toggle="tab" href="#vehicle-logs" role="tab">
                                         Nhật ký lộ trình xe
                                     </a>
                                 </li>
@@ -34,22 +34,11 @@
                             <!-- Tab panes -->
                             <div class="tab-content">
                                 <!-- Rental Info Tab -->
-                                <div class="tab-pane active" id="rental-info" role="tabpanel">
+                                <div class="tab-pane {{ session('active_tab') !== 'vehicle-logs' ? 'active' : '' }}" id="rental-info" role="tabpanel">
                             <form action="{{ route('admin.car-rental.update', $carRental->id) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
-                                <script>
-                                $(document).ready(function() {
-                                    $('form[action*="car-rental.update"]').on('submit', function(e) {
-                                        // Loại bỏ dấu phẩy trong monthly_rental_fee trước khi submit
-                                        let monthlyRentalFeeInput = $('input[name="monthly_rental_fee"]', this);
-                                        let monthlyRentalFeeValue = monthlyRentalFeeInput.val();
-                                        if (monthlyRentalFeeValue) {
-                                            monthlyRentalFeeInput.val(monthlyRentalFeeValue.replace(/,/g, ''));
-                                        }
-                                    });
-                                });
-                                </script>
+                               
 
                                 <div class="row mb-4">
                                     <div class="col-md-6">
@@ -169,7 +158,7 @@
                         </div>
 
                                 <!-- Vehicle Logs Tab -->
-                                <div class="tab-pane" id="vehicle-logs" role="tabpanel">
+                                <div class="tab-pane {{ session('active_tab') === 'vehicle-logs' ? 'active' : '' }}" id="vehicle-logs" role="tabpanel">
                                     <div class="d-flex justify-content-between align-items-center mb-4">
                                         <h5 class="card-title mb-0">Danh sách Nhật ký lộ trình xe</h5>
                                         <div>
@@ -205,44 +194,61 @@
                                                 @php
                                                     $totalOvertimeCost = 0;
                                                     $totalOvertimeHours = 0;
+                                                    $totalTollFees = 0;
+                                                    $totalParkingFees = 0;
                                                 @endphp
-                                                @foreach($carRentalVehicleLogs as $shipment)
-                                                @php
-                                                    $totalOvertimeCost += $shipment->total_overtime_cost;
-                                                    $totalOvertimeHours += $shipment->overtime_hours;
-                                                @endphp
-                                                <tr>
-                                                    <td>{{ $shipment->vehicle->vehicleType->name ?? 'N/A' }} - {{ $shipment->vehicle->plate_number ?? 'N/A' }}</td>
-                                                    <td class="text-center">{{ $shipment->run_date ? \Carbon\Carbon::parse($shipment->run_date)->format('Y-m-d') : '' }}</td>
-                                                    <td class="text-center">{{ $shipment->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $shipment->start_time)->format('H:i') : '' }} - {{ $shipment->end_time ? \Carbon\Carbon::createFromFormat('H:i:s', $shipment->end_time)->format('H:i') : '' }}</td>
-                                                    <td class="text-center">{{ $shipment->origin }} -> {{ $shipment->destination }}</td>
-                                                    <td>{{ number_format($shipment->overtime_hours, 1) }} giờ</td>
-                                                    <td>{{ number_format($shipment->overtime_rate) }}</td>
-                                                    <td>{{ number_format($shipment->total_overtime_cost) }}</td>
-                                                    <td>{{ number_format($shipment->start_odometer) }}</td>
-                                                    <td>{{ number_format($shipment->end_odometer) }}</td>
-                                                    <td>{{ number_format($shipment->actual_distance) }}</td>
-                                                    <td>
-                                                        @if(isset($shipment->tollFees) && $shipment->tollFees->count() > 0)
-                                                            <span class="badge bg-info">{{ number_format($shipment->total_toll_fee) }}</span>
-                                                            <small class="d-block text-muted">{{ $shipment->tollFees->count() }} trạm</small>
-                                                        @else
-                                                            <span class="text-muted">0</span>
-                                                        @endif
-                                                    </td>
-                                                    <td>{{ number_format($shipment->parking_fee) }}</td>
-                                                    <td>
-                                                        <div class="d-flex gap-2">
-                                                            <button type="button" class="btn btn-sm btn-primary" onclick="editVehicleLog({{ $shipment->id }})">
-                                                                <i class="ri-edit-line"></i>
-                                                            </button>
-                                                            <button type="button" class="btn btn-sm btn-danger" onclick="deleteVehicleLog({{ $shipment->id }})">
-                                                                <i class="ri-delete-bin-line"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                @endforeach
+                                                @if (!$carRentalVehicleLogs->isEmpty())
+                                                    @foreach($carRentalVehicleLogs as $shipment)
+                                                    @php
+                                                        $totalOvertimeCost += $shipment->total_overtime_cost ?? 0;
+                                                        $totalOvertimeHours += $shipment->overtime_hours ?? 0;
+                                                        
+                                                        // Tính tổng phí cầu đường
+                                                        if (isset($shipment->tollFees) && $shipment->tollFees->count() > 0) {
+                                                            $totalTollFees += $shipment->tollFees->sum('fee_amount');
+                                                        }
+                                                        
+                                                        // Tính tổng phí đậu xe
+                                                        $totalParkingFees += $shipment->parking_fee ?? 0;
+                                                    @endphp
+                                                    
+                                                    <tr>
+                                                        <td>{{ $shipment->vehicle->vehicleType->name ?? 'N/A' }} - {{ $shipment->vehicle->plate_number ?? 'N/A' }}</td>
+                                                        <td class="text-center">{{ $shipment->run_date ? \Carbon\Carbon::parse($shipment->run_date)->format('Y-m-d') : '' }}</td>
+                                                        <td class="text-center">{{ $shipment->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $shipment->start_time)->format('H:i') : '' }} - {{ $shipment->end_time ? \Carbon\Carbon::createFromFormat('H:i:s', $shipment->end_time)->format('H:i') : '' }}</td>
+                                                        <td class="text-center">{{ $shipment->origin }} -> {{ $shipment->destination }}</td>
+                                                        <td>{{ number_format($shipment->overtime_hours, 1) }} giờ</td>
+                                                        <td>{{ number_format($shipment->overtime_rate) }}</td>
+                                                        <td>{{ number_format($shipment->total_overtime_cost) }}</td>
+                                                        <td>{{ number_format($shipment->start_odometer) }}</td>
+                                                        <td>{{ number_format($shipment->end_odometer) }}</td>
+                                                        <td>{{ number_format($shipment->actual_distance) }}</td>
+                                                        <td>
+                                                            @if(isset($shipment->tollFees) && $shipment->tollFees->count() > 0)
+                                                                <span class="badge bg-info">{{ number_format($shipment->total_toll_fee) }}</span>
+                                                                <small class="d-block text-muted">{{ $shipment->tollFees->count() }} trạm</small>
+                                                            @else
+                                                                <span class="text-muted">0</span>
+                                                            @endif
+                                                        </td>
+                                                        <td>{{ number_format($shipment->parking_fee) }}</td>
+                                                        <td>
+                                                            <div class="d-flex gap-2">
+                                                                <a href="{{ route('admin.car-rental.edit-vehicle-log', $shipment->id) }}" class="btn btn-sm btn-primary">
+                                                                    <i class="ri-edit-line"></i>
+                                                                </a>
+                                                                <button type="button" class="btn btn-sm btn-danger" onclick="deleteVehicleLog({{ $shipment->id }})">
+                                                                    <i class="ri-delete-bin-line"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    @endforeach
+                                                @else
+                                                    <tr>
+                                                        <td colspan="13" class="text-center">Chưa có nhật ký lộ trình xe</td>
+                                                    </tr>
+                                                @endif
                                             </tbody>
                                         </table>
                                     </div>
@@ -280,19 +286,19 @@
                                 <tr class="py-1">
                                     <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                         - Phát sinh phí tăng ca ({{ number_format($totalOvertimeHours, 2) }} giờ x 50.000 VND):
-                                        <span class="fw-bold text-warning">{{ number_format($carRental->total_overtime_cost, 0, ',', '.') }} VNĐ</span>
+                                        <span class="fw-bold text-warning">{{ number_format($totalOvertimeCost, 0, ',', '.') }} VNĐ</span>
                                     </td>
                                 </tr>
                                 <tr class="py-1">
                                     <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                         - Phát sinh phụ phí cầu đường:
-                                        <span class="fw-bold text-info">{{ number_format($carRental->total_toll_fee, 0, ',', '.') }} VNĐ</span>
+                                        <span class="fw-bold text-info">{{ number_format($totalTollFees, 0, ',', '.') }} VNĐ</span>
                                     </td>
                                 </tr>
                                 <tr class="py-1">
                                     <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                         - Phí bãi xe:
-                                        <span class="fw-bold text-secondary">{{ number_format($carRental->total_parking_fees, 0, ',', '.') }} VNĐ</span>
+                                        <span class="fw-bold text-secondary">{{ number_format($totalParkingFees, 0, ',', '.') }} VNĐ</span>
                                     </td>
                                 </tr>
 
@@ -311,21 +317,27 @@
                                 <tr class="border-top py-1">
                                     <td class="text-start fw-bold py-1" style="padding: 0.25rem 0.5rem;">
                                         <i class="ri-calculator-line text-dark me-2"></i>Tổng cộng (chưa thuế VAT):
-                                        <span class="fw-bold text-danger">{{ number_format($carRental->subtotal, 0, ',', '.') }} VNĐ</span>
+                                        <span class="fw-bold text-danger">{{ number_format(($carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFees + $totalParkingFees + ($carRental->over_distance_fee ?? 0), 0, ',', '.') }} VNĐ</span>
                                     </td>
                                 </tr>
+                                
+                                @php
+                                    $subtotal = ($carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFees + $totalParkingFees + ($carRental->over_distance_fee ?? 0);
+                                    $vatAmount = $subtotal * 0.08;
+                                    $totalWithVat = $subtotal + $vatAmount;
+                                @endphp
                                 
                                 <tr class="py-1">
                                     <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                         <i class="ri-percent-line text-muted me-2"></i>Thuế VAT 8%:
-                                        <span class="fw-bold text-muted">{{ number_format($carRental->vat_amount, 0, ',', '.') }} VNĐ</span>
+                                        <span class="fw-bold text-muted">{{ number_format($vatAmount, 0, ',', '.') }} VNĐ</span>
                                     </td>
                                 </tr>
                                 
                                 <tr class="border-top py-1">
                                     <td class="text-start fw-bold fs-5 py-1" style="padding: 0.25rem 0.5rem;">
                                         <i class="ri-money-dollar-circle-line text-success me-2"></i>Tổng cộng bao gồm thuế VAT:
-                                        <span class="fw-bold text-success">{{ number_format($carRental->total_amount_with_vat, 0, ',', '.') }} VNĐ</span>
+                                        <span class="fw-bold text-success">{{ number_format($totalWithVat, 0, ',', '.') }} VNĐ</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -337,279 +349,6 @@
     </div>
 </div>
 
-<!-- Add Vehicle Log Modal -->
-<div class="modal fade" id="addCarRentalVehicleLogModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Thêm nhật ký xe</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{{ route('admin.car-rental.store-vehicle-log') }}" method="POST" id="addCarRentalVehicleLogForm">
-                @csrf
-                <input type="hidden" name="car_rental_id" value="{{ $carRental->id }}">
-                
-                <div class="modal-body">
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label class="form-label">Chọn xe <span class="text-danger">*</span></label>
-                            <select class="form-select" name="vehicle_id" id="add_vehicle_id" required>
-                                <option value="">Chọn xe</option>
-                                @foreach($vehicles as $vehicle)
-                                    <option value="{{ $vehicle->vehicle_id }}" data-is-rental="{{ $vehicle->is_car_rental ? 1 : 0 }}">
-                                        {{ $vehicle->plate_number ?? 'N/A' }} - 
-                                        {{ $vehicle->vehicleType->name ?? 'N/A' }}
-                                        @if($vehicle->is_car_rental)
-                                            <span class="text-info">(Xe HPL thuê)</span>
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Driver Selection (Issue #180 requirement) -->
-                    <div class="row mb-3" id="driver_selection_row">
-                        <div class="col-md-12">
-                            <label class="form-label">Chọn tài xế <span class="text-danger driver-required">*</span></label>
-                            <select class="form-select" name="driver_id" id="add_driver_id">
-                                <option value="">Chọn tài xế</option>
-                                @foreach($drivers ?? [] as $driver)
-                                    <option value="{{ $driver->id }}">
-                                        {{ $driver->full_name }} - {{ $driver->employee_code }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="form-text text-muted">
-                                <small><em>Chú ý: Xe HPL thuê không cần chọn tài xế</em></small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Ngày chạy <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" name="run_date" id="run_date" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" name="start_time" id="start_time" required inputmode="numeric" style="cursor:pointer;">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Giờ kết thúc <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" name="end_time" id="end_time" required inputmode="numeric" style="cursor:pointer;">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Vị trí đi <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="start_location" required id="start_location">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Vị trí đến <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="end_location" required id="end_location">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Km bắt đầu <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="start_odometer" id="start_odometer" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Km kết thúc <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="end_odometer" id="end_odometer" required>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Đơn giá tăng ca (VNĐ/giờ)</label>
-                            <input type="text" class="form-control" value="50,000">
-                            <small class="text-muted">Đơn giá cố định: 50,000 VNĐ/giờ</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Phí đậu xe</label>
-                            <input type="text" class="form-control" name="parking_fee">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label mb-0">Phí cầu đường</label>
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addTollFeeRow()">
-                                <i class="fas fa-plus me-1"></i>Thêm trạm
-                            </button>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-sm" id="tollFeesTable">
-                                <thead>
-                                    <tr>
-                                        <th>Tên trạm</th>
-                                        <th>Mã giao dịch</th>
-                                        <th>Số tiền</th>
-                                        <th>Ghi chú</th>
-                                        <th width="80"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Toll fee rows will be added here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Ghi chú</label>
-                        <textarea class="form-control" name="notes" rows="3"></textarea>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary">Lưu nhật ký</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Vehicle Log Modal -->
-<div class="modal fade" id="editCarRentalVehicleLogModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chỉnh sửa nhật ký xe</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="" method="POST" id="editCarRentalVehicleLogForm">
-                @csrf
-                @method('PUT')
-                <input type="hidden" name="car_rental_id" value="{{ $carRental->id }}">
-                <input type="hidden" name="log_id" id="edit_log_id">
-                
-                <div class="modal-body">
-                    <div class="row mb-3">
-                        <div class="col-md-12">
-                            <label class="form-label">Chọn xe <span class="text-danger">*</span></label>
-                            <select class="form-select" name="vehicle_id" id="edit_vehicle_id" required>
-                                <option value="">Chọn xe</option>
-                                @foreach($vehicles as $vehicle)
-                                    <option value="{{ $vehicle->vehicle_id }}" data-is-rental="{{ $vehicle->is_car_rental ? 1 : 0 }}">
-                                        {{ $vehicle->plate_number ?? 'N/A' }} - 
-                                        {{ $vehicle->vehicleType->name ?? 'N/A' }}
-                                        @if($vehicle->is_car_rental)
-                                            <span class="text-info">(Xe HPL thuê)</span>
-                                        @endif
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Driver Selection for Edit Modal -->
-                    <div class="row mb-3" id="edit_driver_selection_row">
-                        <div class="col-md-12">
-                            <label class="form-label">Chọn tài xế <span class="text-danger edit-driver-required">*</span></label>
-                            <select class="form-select" name="driver_id" id="edit_driver_id">
-                                <option value="">Chọn tài xế</option>
-                                @foreach($drivers ?? [] as $driver)
-                                    <option value="{{ $driver->id }}">
-                                        {{ $driver->full_name }} - {{ $driver->employee_code }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <div class="form-text text-muted">
-                                <small><em>Chú ý: Xe HPL thuê không cần chọn tài xế</em></small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Ngày chạy <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" name="run_date" id="edit_run_date" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" name="start_time" id="edit_start_time" required inputmode="numeric" style="cursor:pointer;">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Giờ kết thúc <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" name="end_time" id="edit_end_time" required inputmode="numeric" style="cursor:pointer;">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Vị trí đi <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="start_location" required id="edit_start_location">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Vị trí đến <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="end_location" required id="edit_end_location">
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Km bắt đầu <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="start_odometer" id="edit_start_odometer" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Km kết thúc <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="end_odometer" id="edit_end_odometer" required>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Đơn giá tăng ca</label>
-                            <input type="text" class="form-control" value="50,000" readonly style="background-color: #f8f9fa;">
-                            <small class="text-muted">Đơn giá cố định: 50,000 VNĐ/giờ</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Phí đậu xe</label>
-                            <input type="text" class="form-control" name="parking_fee" id="edit_parking_fee">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="form-label mb-0">Phí cầu đường</label>
-                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addEditTollFeeRow()">
-                                <i class="fas fa-plus me-1"></i>Thêm trạm
-                            </button>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-sm" id="editTollFeesTable">
-                                <thead>
-                                    <tr>
-                                        <th>Tên trạm <span class="text-danger">*</span></th>
-                                        <th>Mã giao dịch <span class="text-danger">*</span></th>
-                                        <th>Số tiền <span class="text-danger">*</span></th>
-                                        <th>Ghi chú</th>
-                                        <th width="80"></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Edit toll fee rows will be added here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Ghi chú</label>
-                        <textarea class="form-control" name="notes" id="edit_notes" rows="3"></textarea>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Đóng</button>
-                    <button type="submit" class="btn btn-primary">Cập nhật nhật ký</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 @endsection
 
 @push('head')
@@ -641,197 +380,9 @@ $(document).ready(function() {
     // Trigger change event on page load
     $('#add_vehicle_id').trigger('change');
 
-    // Handle vehicle selection for edit modal (Issue #180)
-    $('#edit_vehicle_id').on('change', function() {
-        const selectedOption = $(this).find('option:selected');
-        const isRental = selectedOption.data('is-rental') == 1;
-        
-        if (isRental) {
-            // Xe HPL thuê - ẩn select box tài xế
-            $('#edit_driver_selection_row').hide();
-            $('#edit_driver_id').prop('required', false);
-            $('.edit-driver-required').hide();
-        } else {
-            // Xe thường - hiện select box tài xế
-            $('#edit_driver_selection_row').show();
-            $('#edit_driver_id').prop('required', true);
-            $('.edit-driver-required').show();
-        }
-    });
 
-    // Add Vehicle Log Form AJAX Submission
-    $('#addCarRentalVehicleLogForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        // Chuẩn hóa start_time, end_time về H:i
-        let startTimeInput = $('[name="start_time"]', this);
-        let endTimeInput = $('[name="end_time"]', this);
-        let startTime = startTimeInput.val();
-        let endTime = endTimeInput.val();
-        if (startTime && startTime.length > 5) startTimeInput.val(startTime.substring(0,5));
-        if (endTime && endTime.length > 5) endTimeInput.val(endTime.substring(0,5));
-        
-        // Loại bỏ dấu phẩy trong các input fee_amount (toll_fees)
-        $(this).find('input[name^="toll_fees"][name$="[fee_amount]"]').each(function() {
-            let val = $(this).val();
-            if (val) $(this).val(val.replace(/,/g, ''));
-        });
-        // Clear previous error messages
-        $('.text-danger').remove();
-        
-        // Validate required fields
-        let hasErrors = false;
-        
-        // Check vehicle and driver selection (Issue #180)
-        const selectedVehicle = $('#add_vehicle_id option:selected');
-        const isRental = selectedVehicle.data('is-rental') == 1;
-        const driverId = $('#add_driver_id').val();
-        
-        if (!isRental && !driverId) {
-            showFieldError($('#add_driver_id'), 'Vui lòng chọn tài xế cho xe này');
-            hasErrors = true;
-        }
-        
-        // Check start_time and end_time
-        startTime = $('[name="start_time"]').val();
-        endTime = $('[name="end_time"]').val();
-        
-        if (!startTime) {
-            showFieldError('[name="start_time"]', 'Thời gian bắt đầu là bắt buộc');
-            hasErrors = true;
-        }
-        
-        if (!endTime) {
-            showFieldError('[name="end_time"]', 'Thời gian kết thúc là bắt buộc');
-            hasErrors = true;
-        }
-        
-        // Check toll fees required fields
-        $('#tollFeesTable tbody tr').each(function(index) {
-            const stationName = $(this).find('[name*="[station_name]"]').val();
-            const transactionCode = $(this).find('[name*="[transaction_code]"]').val();
-            const feeAmount = $(this).find('[name*="[fee_amount]"]').val();
-            
-            if (!stationName) {
-                showFieldError($(this).find('[name*="[station_name]"]'), 'Tên trạm là bắt buộc');
-                hasErrors = true;
-            }
-            
-            if (!transactionCode) {
-                showFieldError($(this).find('[name*="[transaction_code]"]'), 'Mã giao dịch là bắt buộc');
-                hasErrors = true;
-            }
-            
-            if (!feeAmount) {
-                showFieldError($(this).find('[name*="[fee_amount]"]'), 'Số tiền là bắt buộc');
-                hasErrors = true;
-            }
-        });
-        
-        if (hasErrors) {
-            Swal.fire({
-                title: "Lỗi!",
-                text: "Vui lòng điền đầy đủ thông tin bắt buộc",
-                icon: "error"
-            });
-            return;
-        }
-        
-        // Get form data
-        const formData = new FormData(this);
-        
-        // Basic validation
-        const startOdo = parseFloat($('[name="start_odometer"]').val().replace(/,/g, ''));
-        const endOdo = parseFloat($('[name="end_odometer"]').val().replace(/,/g, ''));
 
-        if (new Date(endTime) <= new Date(startTime)) {
-            Swal.fire({
-                title: "Lỗi!",
-                text: "Thời gian kết thúc phải sau thời gian bắt đầu",
-                icon: "error"
-            });
-            return;
-        }
 
-        if (endOdo <= startOdo) {
-            Swal.fire({
-                title: "Lỗi!",
-                text: "Km kết thúc phải lớn hơn Km bắt đầu",
-                icon: "error"
-            });
-            return;
-        }
-
-        // Show loading
-        Swal.fire({
-            title: 'Đang xử lý...',
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            }
-        });
-
-        // Submit via AJAX
-        $.ajax({
-            url: $(this).attr('action'),
-            method: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: (response) => {
-                if (response.success) {
-                    // Close modal
-                    $('#addCarRentalVehicleLogModal').modal('hide');
-                    
-                    // Reset form
-                    this.reset();
-
-                    // Show success message
-                    Swal.fire({
-                        title: "Thành công!",
-                        text: response.message,
-                        icon: "success",
-                        showConfirmButton: false,
-                        timer: 1500
-                    }).then(() => {
-                        // Reload page to show new log
-                        location.reload();
-                    });
-                }
-            },
-            error: (xhr) => {
-                if (xhr.status === 422) {
-                    // Validation errors
-                    const errors = xhr.responseJSON.errors;
-                    Object.keys(errors).forEach(field => {
-                        const input = $(`[name="${field}"]`);
-                        if (input.length) {
-                            const errorDiv = $('<div>')
-                                .addClass('text-danger mt-1')
-                                .text(errors[field][0]);
-                            input.parent().append(errorDiv);
-                        }
-                    });
-
-                    Swal.fire({
-                        title: "Lỗi!",
-                        text: "Vui lòng kiểm tra lại thông tin nhập liệu",
-                        icon: "error"
-                    });
-                } else {
-                    // Other errors
-                    Swal.fire({
-                        title: "Lỗi!",
-                        text: xhr.responseJSON?.message || "Có lỗi xảy ra, vui lòng thử lại",
-                        icon: "error"
-                    });
-                }
-            }
-        });
-    });
 
     // Initialize datetime pickers
     $('input[type="datetime-local"]').flatpickr({
@@ -910,6 +461,21 @@ $(document).ready(function() {
             }
         });
     });
+
+    // Tự động chuyển tab dựa trên active_tab từ session
+    @if(session('active_tab') === 'vehicle-logs')
+        // Nếu có active_tab = 'vehicle-logs', chuyển đến tab đó
+        $(document).ready(function() {
+            // Chờ DOM load xong
+            setTimeout(function() {
+                // Tìm tab "Nhật ký lộ trình xe" và click vào nó
+                const vehicleLogsTab = $('a[href="#vehicle-logs"]');
+                if (vehicleLogsTab.length > 0) {
+                    vehicleLogsTab.tab('show');
+                }
+            }, 100);
+        });
+    @endif
 });
 
 // Function to edit vehicle log (updated for shipment-based approach)
@@ -1316,10 +882,7 @@ function removeTollFeeRow(index) {
     $(`#tollFeesTable tbody tr[data-index="${index}"]`).remove();
 }
 
-// Remove toll fee row from edit form
-function removeEditTollFeeRow(index) {
-    $(`#editTollFeesTable tbody tr[data-index="${index}"]`).remove();
-}
+
 
 // Initialize number formatting for toll fee amounts in create form
 function initializeTollFeeFormatting() {
@@ -1335,28 +898,9 @@ function initializeTollFeeFormatting() {
     });
 }
 
-// Initialize number formatting for toll fee amounts in edit form
-function initializeEditTollFeeFormatting() {
-    $('.edit-toll-fee-amount').off('input').on('input', function() {
-        let value = $(this).val();
-        value = value.replace(/[^0-9.]/g, '');
-        
-        let parts = value.split('.');
-        let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
-        
-        $(this).val(integerPart + decimalPart);
-    });
-}
 
-// Initialize toll fee formatting when modals are shown
-$('#addCarRentalVehicleLogModal').on('shown.bs.modal', function() {
-    initializeTollFeeFormatting();
-});
 
-$('#editCarRentalVehicleLogModal').on('shown.bs.modal', function() {
-    initializeEditTollFeeFormatting();
-});
+
 
 // Function to show field error
 function showFieldError(selector, message) {
@@ -1412,5 +956,7 @@ $(document).ready(function() {
         $(this).val(integerPart + decimalPart);
     });
 });
+
+
 </script>
 @endpush

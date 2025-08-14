@@ -9,3 +9,34 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Highlight error animation for validation */
+.highlight-error {
+    animation: highlightError 2s ease-in-out;
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+
+@keyframes highlightError {
+    0% {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+    50% {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.4rem rgba(220, 53, 69, 0.5);
+        transform: scale(1.02);
+    }
+    100% {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+}
+
+/* Ensure disabled fields don't interfere with validation */
+.form-control:disabled,
+.form-select:disabled {
+    background-color: #e9ecef;
+    opacity: 0.65;
+    pointer-events: none;
+}

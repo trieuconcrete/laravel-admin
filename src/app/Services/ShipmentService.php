@@ -42,6 +42,45 @@ class ShipmentService
         return $this->shipmentRepository->find($id)->with(['driver', 'vehicle', 'goods', 'shipmentDeductions.shipmentDeductionType'])->first();
     }
 
+    /**
+     * Tính toán overtime theo yêu cầu issue #180
+     * - Thời gian tính OT dựa trên giờ kết thúc thực tế, không phải default 17:30
+     * - Thêm tăng ca trưa 1h nếu có chọn checkbox "Có tăng ca trưa"
+     */
+    private function calculateOvertime($runDate, $startTime, $endTime, $overtimeRate, $isOvertimeAtNoon = false)
+    {
+        $startDateTime = \Carbon\Carbon::parse($runDate . ' ' . $startTime);
+        $endDateTime = \Carbon\Carbon::parse($runDate . ' ' . $endTime);
+        
+        // Tính tổng thời gian làm việc
+        $totalWorkingHours = $startDateTime->floatDiffInRealHours($endDateTime);
+        
+        // Tính OT dựa trên giờ kết thúc thực tế (không phải 17:30 cố định)
+        $overtimeHours = 0;
+        $overtimeStart = \Carbon\Carbon::parse($runDate . ' 17:30');
+        
+        if ($endDateTime->greaterThan($overtimeStart)) {
+            $effectiveStart = $startDateTime->greaterThan($overtimeStart) ? $startDateTime : $overtimeStart;
+            $overtimeHours = $endDateTime->floatDiffInRealHours($effectiveStart);
+        }
+        
+        // Thêm tăng ca trưa 1h nếu có chọn checkbox
+        if ($isOvertimeAtNoon) {
+            $overtimeHours += 1;
+        }
+        
+        $totalOvertimeCost = $overtimeRate * $overtimeHours;
+        
+        return [
+            'start_time' => $startTime,
+            'end_time' => $endTime,
+            'run_date' => $runDate,
+            'overtime_hours' => round($overtimeHours, 2),
+            'overtime_rate' => $overtimeRate,
+            'total_overtime_cost' => round($totalOvertimeCost, 2),
+        ];
+    }
+
     public function createShipment($data)
     {
         Log::info($data);
@@ -64,17 +103,26 @@ class ShipmentService
                 'estimated_arrival_time' => $data['estimated_arrival_time'] ?? null,
                 'start_time' => $data['start_time'] ?? null,
                 'end_time' => $data['end_time'] ?? null,
+                'run_date' => $data['run_date'] ?? null,
                 'shipment_type' => $data['shipment_type'] ?? Shipment::SHIPMENT_TYPE_PER_TRIP,
                 'is_car_rental' => $data['is_car_rental'] ?? false,
                 'notes' => $data['notes'] ?? null,
                 'status' => $data['status'],
                 'distance' => $data['distance'] ?? null,
                 'unit_price' => $data['unit_price'] ?? null,
-                'unit_price_for_car_rental' => $data['unit_price_for_car_rental'] ?? null,
+                'overtime_rate' => $data['overtime_rate'] ?? 50000,
+                'is_overtime_at_noon' => $data['is_overtime_at_noon'] ?? false,
                 'created_by' => auth()->id(),
+                'unit_price_for_car_rental' => $data['unit_price_for_car_rental'] ?? null,
             ];
-            // dd($shipmentData);
+
             $shipment = Shipment::create($shipmentData);
+
+            // Tính toán OT mới theo yêu cầu issue #180
+            if (!empty($data['start_time']) && !empty($data['end_time']) && !empty($data['run_date'])) {
+                $overtimeData = $this->calculateOvertime($data['run_date'], $data['start_time'], $data['end_time'], $data['overtime_rate'], $data['is_overtime_at_noon'] ?? false);
+                $shipment->update($overtimeData);
+            }
 
             // 2. Lưu các chi phí chuyến hàng (ShipmentDeduction)
             if (!empty($data['deductions'])) {
@@ -215,6 +263,12 @@ class ShipmentService
             Log::info('Drivers data trong update:', $data['drivers']);
         }
         return DB::transaction(function () use ($shipment, $data) {
+            // Tính toán OT mới theo yêu cầu issue #180
+            if (!empty($data['start_time']) && !empty($data['end_time']) && !empty($data['run_date'])) {
+                $overtimeData = $this->calculateOvertime($data['run_date'], $data['start_time'], $data['end_time'], $data['overtime_rate'], $data['is_overtime_at_noon'] ?? false);
+                $data = array_merge($data, $overtimeData);
+            }
+
             // 1. Cập nhật thông tin cơ bản của shipment
             $shipmentData = $data;
             unset($shipmentData['goods'], $shipmentData['deductions'], $shipmentData['drivers']);
