@@ -155,6 +155,7 @@
                             <thead class="table-light">
                                 <tr>
                                     <th>Thao tác</th>
+                                    <th>Trạng thái</th>
                                     <th>Khách hàng</th>
                                     <th>Tuyến đường</th>
                                     <th>Tài xế</th>
@@ -162,7 +163,6 @@
                                     <th>Thời gian</th>
                                     <th>Ngày tạo</th>
                                     <th>Người tạo</th>
-                                    <th>Trạng thái</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -186,6 +186,7 @@
                                             </form>
                                         </div>
                                     </td>
+                                    <td><span class="badge {{ $shipment->statusBadgeClass }}">{{ $shipment->status_label }}</span></td>
                                     <td>
                                         @if($shipment->customer)
                                         <a href="{{ route('admin.customers.show', optional($shipment->customer)->id) }}" class="text-primary" target="_blank">
@@ -212,17 +213,16 @@
                                                 {{ $displayText }}
                                             </a>
                                         @else
-                                            {{ $displayText }}
+                                            <span class="text-warning">{{ $displayText }}</span>
                                         @endif
                                     </td>
-                                    <td>{{ $shipment->vehicle ? $shipment->vehicle->plate_number : '' }}</td>
+                                    <td>{{ $shipment->vehicle ? $shipment->vehicle->plate_number . '-' . optional($shipment->vehicle)->vehicleType->name : '' }}</td>
                                     <td>
                                         <div>KH: @formatDate($shipment->departure_time)</div>
                                         <div>DK: @formatDate($shipment->estimated_arrival_time)</div>
                                     </td>
                                     <td>@formatDate($shipment->created_at)</td>
                                     <td>{{ $shipment->creator->full_name ?? null }}</td>
-                                    <td><span class="badge {{ $shipment->statusBadgeClass }}">{{ $shipment->status_label }}</span></td>
                                 </tr>
                                 @endforeach
                             </tbody>

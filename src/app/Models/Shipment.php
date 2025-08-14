@@ -46,6 +46,7 @@ class Shipment extends Model
         'vehicle_id',
         'distance', // số km
         'unit_price', // giá chuyến hàng
+        'unit_price_for_car_rental', // giá chuyến hàng
         'trip_count', // số lượng chuyến hàng
         'crane_price',
         'has_crane_service',
@@ -495,7 +496,7 @@ class Shipment extends Model
             return $this->coDriver->full_name;
         }
         
-        return 'Chưa phân công';
+        return 'Xe HPL thuê';
     }
 
     /**
