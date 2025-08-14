@@ -193,7 +193,7 @@
                                 <div class="text-danger error" data-field="phone"></div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <label class="form-label">Email</label>
                                 <input type="email" name="email" class="form-control" placeholder="Nhập email">
                                 <div class="text-danger error" data-field="email"></div>
                             </div>

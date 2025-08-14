@@ -45,7 +45,7 @@ class StoreCustomerRequest extends FormRequest
                 Rule::unique('customers', 'phone')->whereNull('deleted_at')
             ],
             'email' => [
-                'required',
+                'nullable',
                 'email',
                 'max:255',
                 Rule::unique('customers', 'email')->whereNull('deleted_at')
