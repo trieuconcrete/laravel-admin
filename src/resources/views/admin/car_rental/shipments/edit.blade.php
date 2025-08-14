@@ -1,5 +1,5 @@
 @extends('admin.layout')
-@section('title', 'Sửa chuyến')
+@section('title', 'Chỉnh sửa nhật ký hành trình thuê xe')
 @section('content')
 
 <div class="container-fluid">
@@ -14,21 +14,24 @@
     @endif
     <div class="row">
         <div class="col">
-            <form action="{{ route('admin.shipments.update', $shipment) }}" method="POST" enctype="multipart/form-data" id="shipmentForm" data-current-vehicle-id="{{ $shipment->vehicle_id }}">
-                @method('PUT')
+            <form action="{{ route('admin.car-rental.update-vehicle-log', $shipment->id) }}" method="POST" enctype="multipart/form-data" id="shipmentForm">
                 @csrf
+                @method('PUT')
+                <!-- Hidden fields -->
+                <input type="hidden" name="customer_id" value="{{ $shipment->customer_id }}">
+                <input type="hidden" name="car_rental_id" value="{{ $shipment->car_rental_id }}">
+                
                 <div class="row mb-3 pb-1">
                     <div class="row mb-3 pb-1">
                         <div class="col-12">
                             <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                                 <div class="flex-grow-1">
-                                    <h4 class="fs-16 mb-1">Chi tiết chuyến xe</h4>
                                 </div>
                                 <div class="mt-3 mt-lg-0">
                                     <div class="row g-3 mb-0 align-items-center">
                                         <div class="col-auto">
                                             <button type="submit" class="btn btn-success" id="submitBtn">
-                                                <i class="ri-save-3-line align-middle me-1"></i>Lưu 
+                                                <i class="ri-save-3-line align-middle me-1"></i>Cập nhật 
                                             </button>
                                         </div>
                                         <!--end col-->
@@ -46,7 +49,7 @@
                                     <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0" role="tablist">
                                         <li class="nav-item">
                                             <a class="nav-link active" data-bs-toggle="tab" href="#driverAllowance" role="tab">
-                                                <i class="far fa-user"></i> Thông tin vận chuyển 
+                                                <i class="far fa-user"></i> Thông tin chuyến
                                             </a>
                                         </li>
                                         <li class="nav-item">
@@ -59,276 +62,202 @@
                                 <div class="card-body">
                                     <div class="tab-content">
                                         <div class="tab-pane active" id="driverAllowance" role="tabpanel">
-                                            <div class="row mb-3">
-                                                <label class="form-label fs-5">Loại chuyến xe <span class="text-danger">*</span></label>
-                                                <div class="col-md-3">
-                                                    <div class="form-check form-radio-primary mb-3">
-                                                        <input class="form-check-input" type="radio" name="shipment_type" value="1" id="shipment_type1" @checked(old('shipment_type', $shipment->shipment_type) == 1)>
-                                                        <label class="form-check-label" for="shipment_type1">
-                                                            Khách chạy theo chuyến
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="form-check form-radio-primary mb-3">
-                                                        <input class="form-check-input" type="radio" name="shipment_type" value="3" id="shipment_type3" @checked(old('shipment_type', $shipment->shipment_type) == 3)>
-                                                        <label class="form-check-label" for="shipment_type3">
-                                                            Xe nâng
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <div class="form-check form-radio-primary mb-3">
-                                                        <input class="form-check-input" type="radio" name="shipment_type" value="4" id="shipment_type4" @checked(old('shipment_type', $shipment->shipment_type) == 4)>
-                                                        <label class="form-check-label" for="shipment_type4">
-                                                            Xe đường dài bắc-nam
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
                                             <h5 class="mb-3 fs-5">Thông tin vận chuyển</h5>
                                             <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
-                                                    <select class="form-select" name="customer_id" required>
-                                                        <option value="">Chọn khách hàng</option>
-                                                        @foreach($customers as $id => $name)
-                                                            <option value="{{ $id }}" {{ old('customer_id', $shipment->customer_id) == $id ? 'selected' : '' }}>{{ $name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('customer_id')<span class="text-danger">{{ $message }}</span>@enderror
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Ngày chạy <span class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control" name="run_date" id="run_date" value="{{ old('run_date', $shipment->run_date ? $shipment->run_date->format('Y-m-d') : ($shipment->departure_time ? $shipment->departure_time->format('Y-m-d') : date('Y-m-d'))) }}" required>
+                                                    @error('run_date')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
+                                                    <input type="time" class="form-control" name="start_time" id="start_time" value="{{ old('start_time', $shipment->start_time ?? ($shipment->departure_time ? $shipment->departure_time->format('H:i') : '08:00')) }}" required inputmode="numeric" style="cursor:pointer;">
+                                                    @error('start_time')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label">Giờ kết thúc <span class="text-danger">*</span></label>
+                                                    <input type="time" class="form-control" name="end_time" id="end_time" value="{{ old('end_time', $shipment->end_time ?? ($shipment->estimated_arrival_time ? $shipment->estimated_arrival_time->format('H:i') : '17:30')) }}" required inputmode="numeric" style="cursor:pointer;">
+                                                    @error('end_time')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Vị trí đi <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="start_location" required id="start_location" value="{{ old('start_location', $shipment->start_location ?? $shipment->origin ?? 'Điểm bắt đầu') }}">
+                                                    @error('start_location')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Vị trí đến <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="end_location" required id="end_location" value="{{ old('end_location', $shipment->end_location ?? $shipment->destination ?? 'Điểm kết thúc') }}">
+                                                    @error('end_location')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Km bắt đầu <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control odometer-input" name="start_odometer" id="start_odometer" value="{{ old('start_odometer', $shipment->start_odometer ?? $shipment->distance ?? '0') }}" required>
+                                                    @error('start_odometer')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Km kết thúc <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control odometer-input" name="end_odometer" id="end_odometer" value="{{ old('end_odometer', $shipment->end_odometer ?? ($shipment->start_odometer + $shipment->distance ?? 0)) }}" required>
+                                                    @error('end_odometer')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Đơn giá tăng ca (VNĐ/giờ) <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="overtime_rate" id="overtime_rate" value="{{ old('overtime_rate', number_format($shipment->overtime_rate ?? 50000)) }}" required>
+                                                    <small class="text-muted">Đơn giá tăng ca cho tài xế</small>
+                                                    @error('overtime_rate')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Phí đậu xe</label>
+                                                    <input type="text" class="form-control parking-fee-input" name="parking_fee" value="{{ old('parking_fee', $shipment->parking_fee ?? '0') }}">
+                                                    @error('parking_fee')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                                                     <select class="form-select" name="status" required>
                                                         @foreach($shipmentStatus as $key => $value)
-                                                            <option value="{{ $key }}" {{ old('status', $shipment->status) == $key ? 'selected' : '' }}>{{ $value }}</option>
+                                                            <option value="{{ $key }}" {{ old('status', $shipment->status ?? 'completed') == $key ? 'selected' : '' }}>{{ $value }}</option>
                                                         @endforeach
                                                     </select>
+                                                    @error('status')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                @php
-                                                $departure_time = old('departure_time', $shipment?->departure_time);
-                                                $estimated_arrival_time = old('estimated_arrival_time', $shipment?->estimated_arrival_time);
-                                                @endphp
-                                                <div class="col-md-3">
-                                                    <label class="form-label">Thời gian khởi hành<span class="text-danger">*</span></label>
-                                                    <input type="date" class="form-control" name="departure_time"
-                                                           value="@formatDateForInput($departure_time)">
-                                                    @error('departure_time')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label class="form-label">Giờ khởi hành <span class="text-danger">*</span></label>
-                                                    <input type="time" class="form-control" name="start_time" id="start_time" value="{{ old('start_time', $shipment->start_time) }}" inputmode="numeric" style="cursor:pointer;">
-                                                    @error('start_time')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label class="form-label">Thời gian dự kiến đến<span class="text-danger">*</span></label>
-                                                    <input type="date" class="form-control" name="estimated_arrival_time"
-                                                    value="@formatDateForInput($estimated_arrival_time)">
-                                                    @error('estimated_arrival_time')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
-                                                <div class="col-md-3">
-                                                    <label class="form-label">Giờ đến</label>
-                                                    <input type="time" class="form-control" name="end_time" value="{{ old('end_time', $shipment->end_time) }}">
-                                                    @error('end_time')<span class="text-danger">{{ $message }}</span>@enderror
+                                                <div class="col-md-6">
+                                                    <label for=""></label>
+                                                    <div class="form-check form-check-secondary mb-3">
+                                                        <input class="form-check-input" 
+                                                        name="is_overtime_at_noon" 
+                                                        type="checkbox" 
+                                                        value="1" 
+                                                        id="is_overtime_at_noon"
+                                                        {{ old('is_overtime_at_noon', $shipment->is_overtime_at_noon ?? false) ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="is_overtime_at_noon">
+                                                            Có tăng ca trưa
+                                                        </label>
+                                                    </div>
+                                                    @error('is_overtime_at_noon')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
 
-
-
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $shipment->unit_price) }}">
-                                                    @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    <label class="form-label">Kết quả tính OT</label>
+                                                    <div class="bg-light p-3 rounded">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <small class="text-muted">Số giờ OT:</small><br>
+                                                                <strong id="overtime_hours_display">{{ number_format($shipment->overtime_hours ?? 0, 2) }} giờ</strong>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <small class="text-muted">Tổng chi phí OT:</small><br>
+                                                                <strong id="total_overtime_cost_display">{{ number_format($shipment->total_overtime_cost ?? 0) }} VNĐ</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mt-2">
+                                                            <div class="col-12">
+                                                                <small class="text-muted">
+                                                                    <i class="fas fa-info-circle me-1"></i>
+                                                                    OT được tính từ 17:30, +1h nếu có tăng ca trưa
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Số lượng chuyến</label>
-                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count) }}">
-                                                    @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Số KM</label>
-                                                    <input type="text" class="form-control" placeholder="Nhập số KM" name="distance" value="{{ old('distance', $shipment->distance) }}">
-                                                    @error('distance')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Khối lượng (kg)</label>
-                                                    <input type="text" class="form-control" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $shipment->cargo_weight) }}">
-                                                    @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                            </div>
-                                            <!-- Additional fields for origin and destination -->
-                                            <div class="origin-destination bg-light p-3 mb-2">
-                                                <div class="row mb-3">
-                                                    <div class="col-md-4">
-                                                        <label class="form-label">Điểm đi<span class="text-danger">*</span></label>
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đi" name="origin" value="{{ old('origin', $shipment->origin) }}" required>
-                                                        @error('origin')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label">Công ty</label>
-                                                        <input type="text" class="form-control" placeholder="Nhập công ty" name="company" value="{{ old('company', $shipment->company) }}">
-                                                        @error('company')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label">Điểm đến</label>
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 1" name="destination" value="{{ old('destination', $shipment->destination) }}">
-                                                        @error('destination')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-3">
-                                                    <div class="col-md-4">
-                                                        {{--  <label class="form-label">Điểm đi 2</label>  --}}
-                                                        <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 2" name="origin2" value="{{ old('origin2', $shipment->origin2) }}">
-                                                        @error('origin2')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <input type="text" class="form-control" placeholder="Nhập công ty" name="company2" value="{{ old('company2', $shipment->company2) }}">
-                                                        @error('company2')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 2" name="destination2" value="{{ old('destination2', $shipment->destination2) }}">
-                                                        @error('destination2')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                </div>
-                                                <div class="row mb-3">
-                                                    <div class="col-md-4">
-                                                        {{--  <label class="form-label">Điểm đi 3</label>  --}}
-                                                        <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 3" name="origin3" value="{{ old('origin3', $shipment->origin3) }}">
-                                                        @error('origin3')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <input type="text" class="form-control" placeholder="Nhập công ty" name="company3" value="{{ old('company3', $shipment->company3) }}">
-                                                        @error('company3')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 3" name="destination3" value="{{ old('destination3', $shipment->destination3) }}">
-                                                        @error('destination3')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    <label class="form-label">Chi tiết tính OT</label>
+                                                    <div class="bg-light p-3 rounded">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <small class="text-muted">Giờ làm việc:</small><br>
+                                                                <strong id="working_hours_display">{{ number_format(($shipment->overtime_hours ?? 0) - ($shipment->is_overtime_at_noon ? 1 : 0), 2) }} giờ</strong>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <small class="text-muted">Tăng ca trưa:</small><br>
+                                                                <strong id="noon_overtime_display">{{ $shipment->is_overtime_at_noon ? '1.00' : '0.00' }} giờ</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mt-2">
+                                                            <div class="col-12">
+                                                                <small class="text-muted">
+                                                                    <i class="fas fa-calculator me-1"></i>
+                                                                    Tổng OT = Giờ làm việc + Tăng ca trưa
+                                                                </small>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <!-- End -->
                                             <div class="row mb-3">
                                                 <div class="col-md-12">
-                                                    <label class="form-label">Ghi chú</label>
-                                                    <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="notes">{!! old('notes', $shipment->notes) !!}</textarea>
-                                                    @error('notes')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    <input type="hidden" name="calculated_overtime_hours" value="{{ $shipment->overtime_hours ?? 0 }}">
+                                                    <input type="hidden" name="calculated_total_overtime_cost" value="{{ $shipment->total_overtime_cost ?? 0 }}">
+                                                    <input type="hidden" name="working_hours" value="{{ ($shipment->overtime_hours ?? 0) - ($shipment->is_overtime_at_noon ? 1 : 0) }}">
+                                                    <input type="hidden" name="noon_overtime_hours" value="{{ $shipment->is_overtime_at_noon ? 1 : 0 }}">
                                                 </div>
                                             </div>
-                                            <hr>
-                                            <div class="mb-3">
-                                                <label class="form-label">Chi phí chuyến xe</label>
-                                                <div class="table-responsive">
-                                                    <table class="table table-bordered">
-                                                        <thead>
-                                                            <tr>
-                                                                @foreach($deductionTypes as $type)
-                                                                    <th>{{ $type->name }}</th>
-                                                                @endforeach
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                @foreach($deductionTypes as $type)
-                                                                    <td>
-                                                                        <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
-                                                                        @if($type->name === 'Ghi chú')
-                                                                            <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->notes : '') }}</textarea>
-                                                                        @else
-                                                                            <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->amount : '') }}">
-                                                                        @endif
-                                                                        @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
-                                                                    </td>
-                                                                @endforeach
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                            <hr>
                                             <div class="mb-3">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <label class="form-label mb-0">Danh sách hàng hóa</label>
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" id="addGoodBtn">
-                                                        <i class="fas fa-plus me-1"></i>Thêm hàng hóa
+                                                    <label class="form-label mb-0">Phí cầu đường</label>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="addTollFeeRow()">
+                                                        <i class="fas fa-plus me-1"></i>Thêm trạm
                                                     </button>
                                                 </div>
                                                 <div class="table-responsive">
-                                                    <table class="table table-sm" id="goodsTable">
+                                                    <table class="table table-sm" id="tollFeesTable">
                                                         <thead>
                                                             <tr>
-                                                                <th>Tên hàng hóa <span class="text-danger">*</span></th>
-                                                                <th>Mô tả</th>
-                                                                <th>Số lượng</th>
-                                                                <th>Trọng lượng (kg)</th>
-                                                                <th>Giá trị (VNĐ)</th>
-                                                                <th></th>
+                                                                <th>Tên trạm</th>
+                                                                <th>Mã giao dịch</th>
+                                                                <th>Số tiền</th>
+                                                                <th>Ghi chú</th>
+                                                                <th width="80"></th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            @if(count($shipment->goods) > 0)
-                                                                @foreach($shipment->goods as $i => $good)
+                                                            @if(count($shipment->tollFees) > 0)
+                                                                @foreach($shipment->tollFees as $i => $tollFee)
                                                                     <tr>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][name]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.name', $good->name) }}" required>
-                                                                            <div class="text-danger" id="error-goods-{{ $i }}-name">@error('goods.'.$i.'.name'){{ $message }}@enderror</div>
+                                                                            <input type="text" name="toll_fees[{{ $i }}][station_name]" class="form-control form-control-sm" value="{{ old('toll_fees.'.$i.'.station_name', $tollFee->station_name) }}" placeholder="Nhập tên trạm">
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][Ghi chú]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.Ghi chú', $good->notes) }}">
-                                                                            <div class="text-danger" id="error-goods-{{ $i }}-Ghi chú">@error('goods.'.$i.'.Ghi chú'){{ $message }}@enderror</div>
+                                                                            <input type="text" name="toll_fees[{{ $i }}][transaction_code]" class="form-control form-control-sm" value="{{ old('toll_fees.'.$i.'.transaction_code', $tollFee->transaction_code) }}" placeholder="Nhập mã giao dịch">
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.'.$i.'.quantity', $good->quantity) }}">
-                                                                            <div class="text-danger" id="error-goods-{{ $i }}-quantity">@error('goods.'.$i.'.quantity'){{ $message }}@enderror</div>
+                                                                            <input type="text" name="toll_fees[{{ $i }}][fee_amount]" class="form-control form-control-sm toll-fee-amount" value="{{ old('toll_fees.'.$i.'.fee_amount', $tollFee->fee_amount) }}" placeholder="Nhập số tiền">
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][weight]" class="form-control form-control-sm" min="0" value="{{ old('goods.'.$i.'.weight', $good->weight) }}">
-                                                                            <div class="text-danger" id="error-goods-{{ $i }}-weight">@error('goods.'.$i.'.weight'){{ $message }}@enderror</div>
+                                                                            <input type="text" name="toll_fees[{{ $i }}][notes]" class="form-control form-control-sm" value="{{ old('toll_fees.'.$i.'.notes', $tollFee->notes) }}" placeholder="Nhập ghi chú">
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.'.$i.'.unit', $good->unit) }}">
-                                                                            <div class="text-danger" id="error-goods-{{ $i }}-unit">@error('goods.'.$i.'.unit'){{ $message }}@enderror</div>
-                                                                        </td>
-                                                                        <td>
-                                                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeGoodRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
-                                                                            <input type="hidden" name="goods_rows[]" value="{{ $i }}">
+                                                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTollFeeRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
+                                                                            <input type="hidden" name="toll_fee_rows[]" value="{{ $i }}">
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach
                                                             @else
                                                                 <tr>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][name]" class="form-control form-control-sm" value="{{ old('goods.0.name') }}" required>
-                                                                        <div class="text-danger" id="error-goods-0-name">@error('goods.0.name'){{ $message }}@enderror</div>
+                                                                        <input type="text" name="toll_fees[0][station_name]" class="form-control form-control-sm" placeholder="Nhập tên trạm">
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][Ghi chú]" class="form-control form-control-sm" value="{{ old('goods.0.Ghi chú') }}">
-                                                                        <div class="text-danger" id="error-goods-0-Ghi chú">@error('goods.0.Ghi chú'){{ $message }}@enderror</div>
+                                                                        <input type="text" name="toll_fees[0][transaction_code]" class="form-control form-control-sm" placeholder="Nhập mã giao dịch">
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][quantity]" class="form-control form-control-sm" min="1" value="{{ old('goods.0.quantity') }}">
-                                                                        <div class="text-danger" id="error-goods-0-quantity">@error('goods.0.quantity'){{ $message }}@enderror</div>
+                                                                        <input type="text" name="toll_fees[0][fee_amount]" class="form-control form-control-sm toll-fee-amount" placeholder="Nhập số tiền">
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][weight]" class="form-control form-control-sm" min="0" value="{{ old('goods.0.weight') }}">
-                                                                        <div class="text-danger" id="error-goods-0-weight">@error('goods.0.weight'){{ $message }}@enderror</div>
+                                                                        <input type="text" name="toll_fees[0][notes]" class="form-control form-control-sm" placeholder="Nhập ghi chú">
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.0.unit') }}">
-                                                                        <div class="text-danger" id="error-goods-0-unit">@error('goods.0.unit'){{ $message }}@enderror</div>
-                                                                    </td>
-                                                                    <td>
-                                                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeGoodRow(this, 0)"><i class="ri-delete-bin-fill"></i></button>
-                                                                        <input type="hidden" name="goods_rows[]" value="0">
+                                                                        <input type="hidden" name="toll_fee_rows[]" value="0">
                                                                     </td>
                                                                 </tr>
                                                             @endif
@@ -336,23 +265,36 @@
                                                     </table>
                                                 </div>
                                             </div>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Ghi chú</label>
+                                                <textarea class="form-control" name="notes" rows="3" placeholder="Nhập ghi chú">{!! old('notes', $shipment->notes ?? 'Thuê xe - ' . ($shipment->cargo_description ?? 'Dịch vụ thuê xe')) !!}</textarea>
+                                                @error('notes')<span class="text-danger">{{ $message }}</span>@enderror
+                                            </div>
                                         </div>
                                         <div class="tab-pane" id="shipmentDetail" role="tabpanel">
                                             <div class="row mb-3">
                                                 <div class="col-md-2">
                                                     <div class="form-check form-check-secondary mb-3">
-                                                        <input class="form-check-input" name="is_car_rental" @checked($shipment->is_car_rental) type="checkbox" value="1" id="is_car_rental">
+                                                        <input class="form-check-input" 
+                                                        name="is_car_rental" 
+                                                        type="checkbox" 
+                                                        value="1" 
+                                                        id="is_car_rental"
+                                                        {{ old('is_car_rental', $shipment->is_car_rental ?? true) ? 'checked' : '' }}>
                                                         <label class="form-check-label" for="is_car_rental">
                                                             Xe HPL Thuê
                                                         </label>
                                                     </div>
+                                                    <!-- Hidden input để luôn gửi giá trị is_car_rental -->
+                                                    <input type="hidden" name="is_car_rental_value" id="is_car_rental_value" value="{{ old('is_car_rental', $shipment->is_car_rental ?? true) ? '1' : '0' }}">
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-5">
                                                     <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
                                                     <select class="form-select" name="vehicle_id" id="vehicles">
                                                         <option value="">Chọn phương tiện</option>
                                                         @foreach($vehicles as $vehicle)
-                                                            <option value="{{ (int)$vehicle->vehicle_id }}" @selected(old('vehicle_id', $shipment->vehicle_id) == (int)$vehicle->vehicle_id)>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
+                                                            <option value="{{ (int)$vehicle->vehicle_id }}" {{ old('vehicle_id', $shipment->vehicle_id ?? $shipment->vehicle->vehicle_id ?? '') == (int)$vehicle->vehicle_id ? 'selected' : '' }}>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}{{ $vehicle->is_car_rental ? ' (Thuê)' : '' }}</option>
                                                         @endforeach
                                                     </select>
                                                     @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
@@ -397,6 +339,7 @@
                                                                         'is_main_driver' => $isMainDriver
                                                                     ];
                                                                 }
+                                                            
                                                             @endphp
                                                             
                                                             @if(count($driversArray) > 0)
@@ -457,7 +400,7 @@
                                                                     </td>
                                                                     @foreach($personDeductionTypes as $type)
                                                                         <td>
-                                                                            <input type="text" name="drivers[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
+                                                                            <input type="text" name="drivers.0.deductions.{{ $type->id }}" class="form-control form-control-sm deduction-input" min="0">
                                                                             @error('drivers.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
                                                                     @endforeach
@@ -528,11 +471,36 @@
                                                                             @error('driverPXs.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
                                                                         <td>
-                                                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
+                                                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverPXRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
                                                                             <input type="hidden" name="driverPX_rows[]" value="{{ $i }}">
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach
+                                                            @else
+                                                                <tr>
+                                                                    <td>
+                                                                        <select name="driverPXs[0][user_id]" class="form-select form-select-sm" style="min-width: 180px;">
+                                                                            <option value="">Chọn nhân sự</option>
+                                                                            @foreach($userPXs as $id => $name)
+                                                                                <option value="{{ $id }}">{{ $name }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                        @error('driverPXs.0.user_id')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    </td>
+                                                                    @foreach($subPersonDeductionTypes as $type)
+                                                                        <td>
+                                                                            <input type="text" name="driverPXs[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
+                                                                            @error('driverPXs.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        </td>
+                                                                    @endforeach
+                                                                    <td>
+                                                                        <input type="text" name="driverPXs[0][deductions][Ghi chú]" class="form-control form-control-sm">
+                                                                        @error('driverPXs.0.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="hidden" name="driverPX_rows[]" value="0">
+                                                                    </td>
+                                                                </tr>
                                                             @endif
                                                             </tbody>
                                                         </table>
@@ -553,185 +521,108 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/shipment-form.js') }}"></script>
+<script src="{{ asset('js/car-rental-form.js') }}"></script>
 <script>
-    $(document).ready(function() {
-        // Function to format price inputs with VND formatting and 9-digit limit
-        function formatPriceInput(input) {
-            let value = input.val();
-            
-            // Remove non-numeric characters except commas
-            value = value.replace(/[^0-9,]/g, '');
-            
-            // Remove existing commas to work with clean number
-            value = value.replace(/,/g, '');
-            
-            // Limit to 9 digits
-            if (value.length > 9) {
-                value = value.substring(0, 9);
-            }
-            
-            // Format with commas
-            if (value) {
-                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            }
-            
-            input.val(value);
-        }
-        
-        // Format deduction inputs and unit inputs on keyup
-        $('.deduction-input, .unit-input').on('input', function () {
-            formatPriceInput($(this));
-        });
-        
-        // Initial formatting for deduction inputs and unit inputs
-        $('.deduction-input, .unit-input').each(function() {
-            let value = $(this).val();
-            if (value) {
-                // Remove existing formatting
-                value = value.replace(/,/g, '');
-                
-                // Handle decimal part if exists
-                if (value.includes('.')) {
-                    let parts = value.split('.');
-                    value = parts[0]; // Keep only integer part
-                }
-                
-                // Apply formatting
-                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-                $(this).val(value);
-            }
-        });
-        
-        // Make the formatPriceInput function globally available
-        window.formatPriceInput = function(input) {
-            formatPriceInput($(input));
-        };
-    });
-</script>
-<script>
-    // Khai báo các biến cần thiết
-    const goodsTable = document.querySelector('#goodsTable tbody');
-    let goodsCount = {{ count(old('goods', $shipment->goods ?? [])) ?: 1 }};
-    const personTable = document.querySelector('#personTable tbody');
-
-    const personPxTable = document.querySelector('#personPxTable tbody');
-    
-    // Lưu trữ dữ liệu cũ từ validation errors
-    window.laravelOld = @json(session()->getOldInput());
-    
-    // Khai báo các loại khấu trừ cho tài xế
-    const personDeductionTypes = [
-        @foreach($personDeductionTypes as $type)
-            { id: "{{ $type->id }}", name: "{{ $type->name }}" },
-        @endforeach
-    ];
-
-    const personPxDeductionTypes = [
-        @foreach($subPersonDeductionTypes as $type)
-            { id: "{{ $type->id }}", name: "{{ $type->name }}" },
-        @endforeach
-    ];
-    
-    // Gán danh sách người dùng vào biến toàn cục
-    window.users = {};
-    @if(!empty($users) && (is_array($users) || $users instanceof \Illuminate\Support\Collection))
-        @foreach($users as $id => $name)
-            window.users[{{ $id }}] = '{{ addslashes($name) }}';
-        @endforeach
-    @endif
-
-    window.userPXs = {};
-    @if(!empty($userPXs) && is_array($userPXs))
-        @foreach($userPXs as $id => $name)
-            window.userPXs[{{ $id }}] = '{{ addslashes($name) }}';
-        @endforeach
-    @endif
-    // Debug users data
-    console.log('Users type:', '{{ gettype($users) }}');
-    console.log('Users count:', {{ count($users) }});
-    console.log('Users is_array:', {{ is_array($users) ? 'true' : 'false' }});
-    console.log('Users is Collection:', {{ $users instanceof \Illuminate\Support\Collection ? 'true' : 'false' }});
-    console.log('Available users:', window.users);
-    @if(!empty($users))
-        console.log('Users data from PHP:', @json($users));
-    @endif
-    
-    // Khởi tạo driverRowCount từ số driver hiện có
-    const existingDriverRows = document.querySelectorAll('input[name="driver_rows[]"]');
-    if (existingDriverRows.length > 0) {
-        // Lấy index lớn nhất từ các driver hiện có
-        let maxIndex = 0;
-        existingDriverRows.forEach(input => {
-            const index = parseInt(input.value);
-            if (index > maxIndex) maxIndex = index;
-        });
-        window.driverRowCount = maxIndex;
-        console.log('Set driverRowCount to:', window.driverRowCount);
-    } else {
-        window.driverRowCount = 0;
-    }
-
-    // Form submission debug
-    document.querySelector('form').addEventListener('submit', function(e) {
-        console.log('Form data being submitted:');
-        
-        // Debug drivers data
-        const drivers = document.querySelectorAll('select[name*="drivers"][name*="user_id"]');
-        const driverRowInputs = document.querySelectorAll('input[name="driver_rows[]"]');
-        
-        console.log('Driver rows found:', driverRowInputs.length);
-        
-        drivers.forEach((select, index) => {
-            const userId = select.value;
-            const name = select.getAttribute('name');
-            const match = name.match(/drivers\[(\d+)\]/);
-            const rowIndex = match ? match[1] : index;
-            
-            const isMainDriverCheckbox = document.querySelector(`input[name="drivers[${rowIndex}][deductions][is_main_driver]"]`);
-            const isMainDriver = isMainDriverCheckbox ? isMainDriverCheckbox.checked : false;
-            
-            console.log(`Driver ${rowIndex}:`, {
-                user_id: userId,
-                is_main_driver: isMainDriver,
-                checkbox_element: isMainDriverCheckbox,
-                select_name: name
-            });
-        });
-        
-        // Debug driver_rows inputs
-        driverRowInputs.forEach((input, index) => {
-            console.log(`Driver row input ${index}:`, input.value);
-        });
-        
-        // Debug FormData được gửi
-        const formData = new FormData(this);
-        console.log('=== FormData Contents ===');
-        for (let [key, value] of formData.entries()) {
-            if (key.includes('driver')) {
-                console.log(`${key}: ${value}`);
-            }
-        }
-        
-        // Debug driver_row_indexes
-        const driverRowIndexes = Array.from(driverRowInputs).map(input => input.value).join(',');
-        console.log('driver_row_indexes:', driverRowIndexes);
-        
-        const hiddenDriverRowIndexes = document.querySelector('input[name="driver_row_indexes"]');
-        console.log('hidden driver_row_indexes:', hiddenDriverRowIndexes ? hiddenDriverRowIndexes.value : 'Not found');
-    });
-    
-    // Khởi tạo các sự kiện khi trang đã tải xong
+    // Set dữ liệu từ Blade template vào JavaScript
     document.addEventListener('DOMContentLoaded', function() {
-        // Khởi tạo form với số lượng driver ban đầu
-        initShipmentForm({{ count(old('drivers', $shipment->drivers ?? [])) }});
+        // Set personDeductionTypes
+        window.personDeductionTypes = [
+            @foreach($personDeductionTypes as $type)
+                { id: "{{ $type->id }}", name: "{{ $type->name }}" },
+            @endforeach
+        ];
+
+        // Set personPxDeductionTypes
+        window.personPxDeductionTypes = [
+            @foreach($subPersonDeductionTypes as $type)
+                { id: "{{ $type->id }}", name: "{{ $type->name }}" },
+            @endforeach
+        ];
         
-        // Thêm event listener cho nút thêm hàng hóa
-        document.getElementById('addGoodBtn').onclick = function() {
-            goodsCount = addGoodRow(goodsTable, goodsCount);
-        };
+        // Set users
+        window.users = {};
+        @if(!empty($users))
+            @foreach($users as $id => $name)
+                window.users[{{ $id }}] = '{{ addslashes($name) }}';
+            @endforeach
+        @endif
+
+        // Set userPXs
+        window.userPXs = {};
+        @if(!empty($userPXs))
+            @foreach($userPXs as $id => $name)
+                window.userPXs[{{ $id }}] = '{{ addslashes($name) }}';
+            @endforeach
+        @endif
         
-        // Thêm event listener cho nút thêm người
+        // Set vehicles
+        window.vehicles = [
+            @foreach($vehicles as $vehicle)
+                {
+                    vehicle_id: {{ $vehicle->vehicle_id }},
+                    plate_number: '{{ addslashes($vehicle->plate_number) }}',
+                    is_car_rental: {{ $vehicle->is_car_rental ? 'true' : 'false' }},
+                    vehicleType: {
+                        name: '{{ addslashes($vehicle->vehicleType->name) }}'
+                    }
+                },
+            @endforeach
+        ];
+        
+        // Set goodsCount
+        window.goodsCount = {{ count(old('goods', [])) ?: 1 }};
+        
+        // Set laravelOld
+        window.laravelOld = @json(session()->getOldInput());
+        
+        console.log('Car rental form data initialized:', {
+            personDeductionTypes: window.personDeductionTypes,
+            personPxDeductionTypes: window.personPxDeductionTypes,
+            users: window.users,
+            userPXs: window.userPXs,
+            vehicles: window.vehicles,
+            goodsCount: window.goodsCount
+        });
+        
+        // Khởi tạo tollFeeRowIndex từ số toll fees hiện có để tránh ghi đè
+        const existingTollFees = {{ count($shipment->tollFees) }};
+        if (typeof window.tollFeeRowIndex !== 'undefined') {
+            window.tollFeeRowIndex = Math.max(window.tollFeeRowIndex, existingTollFees);
+        } else {
+            window.tollFeeRowIndex = existingTollFees;
+        }
+        
+        console.log('Initialized tollFeeRowIndex:', window.tollFeeRowIndex, 'Existing toll fees:', existingTollFees);
+        
+        // Xử lý checkbox is_car_rental khi trang load
+        const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
+        if (isCarRentalCheckbox && isCarRentalCheckbox.checked) {
+            // Nếu checkbox được checked, ẩn phần tài xế
+            const driverSection = document.getElementById('drivers');
+            if (driverSection) {
+                driverSection.style.display = 'none';
+                
+                // Bỏ required và disable tất cả các trường tài xế
+                const driverFields = driverSection.querySelectorAll('select[name*="[user_id]"], input[name*="[allowance]"], input[name*="[deduction]"]');
+                driverFields.forEach(field => {
+                    field.removeAttribute('required');
+                    field.disabled = true;
+                });
+            }
+            
+            // Cập nhật danh sách xe chỉ hiển thị xe thuê
+            if (window.vehicles && Array.isArray(window.vehicles)) {
+                // Gọi function từ car-rental-form.js
+                if (typeof updateVehicleList === 'function') {
+                    updateVehicleList(true);
+                }
+            }
+        }
+        
+        // Thêm event listener cho nút thêm tài xế
+        const personTable = document.querySelector('#personTable tbody');
+        const personDeductionTypes = window.personDeductionTypes || [];
+        
         document.getElementById('addPersonBtn').onclick = function() {
             // Kiểm tra số lượng user trước khi thêm
             const selectedIds = getSelectedUserIds(personTable, 'driver');
@@ -751,7 +642,7 @@
                 return false;
             }
 
-            if (currentRows > 3) {
+            if (currentRows >= 3) {
                 Swal.fire({
                     title: 'Không thể thêm',
                     text: 'Chỉ thêm được tối đa 3 tài xế',
@@ -779,13 +670,16 @@
         };
         
         // Thêm event listener cho nút thêm lơ xe
+        const personPxTable = document.querySelector('#personPxTable tbody');
+        const personPxDeductionTypes = window.personPxDeductionTypes || [];
+        
         document.getElementById('addPersonPxBtn').onclick = function() {
-            // Kiểm tra số lượng user trước khi thêm
-            const selectedIds = getSelectedUserIds(personPxTable, 'driverPXs');
+            // Kiểm tra số lượng user PX trước khi thêm
+            const selectedIds = getSelectedUserIds(personPxTable, 'driverPX');
             const totalUserPXs = Object.keys(window.userPXs).length;
-            const currentRows = Array.from(personPxTable.querySelectorAll('tbody tr')).length;
+            const currentRows = personPxTable.querySelectorAll('tr').length;
             
-            console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUserPXs, 'Current Rows:', currentRows);
+            console.log('Button click - Selected IDs:', selectedIds.length, 'Total User PXs:', totalUserPXs, 'Current Rows:', currentRows);
             
             // Kiểm tra số lượng hàng hiện tại với tổng số users
             if (currentRows >= totalUserPXs) {
@@ -798,7 +692,7 @@
                 return false;
             }
 
-            if (currentRows > 3) {
+            if (currentRows >= 3) {
                 Swal.fire({
                     title: 'Không thể thêm',
                     text: 'Chỉ thêm được tối đa 3 lơ xe',
@@ -824,64 +718,211 @@
             // Nếu còn người dùng khả dụng, thêm hàng mới
             addDriverPXRow(personPxTable, personPxDeductionTypes, window.userPXs);
         };
-        
-        // Kiểm tra và cập nhật trạng thái nút thêm nhân sự dựa trên số lượng người dùng khả dụng
-        updateAddPersonButtonState();
-        
-        // Định dạng tất cả các trường số khi trang được tải
-        formatAllNumericInputs();
-        
-        // Kiểm tra và chuyển đến tab có lỗi nếu có
-        handleFormErrors();
-        
-        // Xử lý checkbox "Xe HPL Thuê"
-        const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
-        const driverSection = document.getElementById('drivers');
-        
-        function toggleDriverSections() {
-            if (!isCarRentalCheckbox || !driverSection) {
-                return; // Exit if elements don't exist
-            }
-            
-            const isChecked = isCarRentalCheckbox.checked;
-            if (isChecked) {
-                // Nếu là xe thuê, ẩn phần tài xế
-                driverSection.style.display = 'none';
-            } else {
-                // Nếu không phải xe thuê, hiện phần tài xế
-                driverSection.style.display = 'block';
-            }
-        }
-        
-        // Thêm event listener cho checkbox
-        if (isCarRentalCheckbox) {
-            isCarRentalCheckbox.addEventListener('change', toggleDriverSections);
-            // Chạy lần đầu khi trang load
-            toggleDriverSections();
-        }
-        
-        // Xử lý submit form
-        document.getElementById('shipmentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (validateShipmentForm(this)) {
-                prepareFormBeforeSubmit(this);
-                this.submit();
-            }
-        });
-    });
-
-    document.getElementById('avatarInput')?.addEventListener('change', function(event) {
-        const file = event.target.files[0];
-    
-        if (file) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                document.getElementById('avatarPreview').src = e.target.result;
-            }
-            
-            reader.readAsDataURL(file);
-        }
     });
 </script>
+<script>
+    $(document).ready(function() {
+        // Function to format price inputs with VND formatting and 9-digit limit
+        function formatPriceInput(input) {
+            let value = input.val();
+            
+            // Remove non-numeric characters and handle decimal part
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // If there's a decimal part, handle it
+            if (value.includes('.')) {
+                // Split into integer and decimal parts
+                let parts = value.split('.');
+                // If decimal part is .00, remove it completely
+                if (parts[1] === '00' || parts[1] === '0') {
+                    value = parts[0];
+                } else {
+                    // Otherwise keep only integer part
+                    value = parts[0];
+                }
+            }
+            
+            // Limit to 9 digits
+            if (value.length > 9) {
+                value = value.substring(0, 9);
+            }
+            
+            // Format with commas
+            if (value) {
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+            
+            input.val(value);
+        }
+        
+        // Function to format odometer inputs with comma formatting
+        function formatOdometerInput(input) {
+            let value = input.val();
+            
+            // Remove non-numeric characters and decimal part
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // Handle decimal part - if it's .00 or .0, remove it completely
+            if (value.includes('.')) {
+                let parts = value.split('.');
+                if (parts[1] === '00' || parts[1] === '0') {
+                    value = parts[0]; // Remove decimal part completely
+                } else {
+                    value = parts[0]; // Keep only integer part
+                }
+            }
+            
+            // Format with commas
+            if (value) {
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+            
+            input.val(value);
+        }
+        
+        // Function to format parking fee input with VND formatting
+        function formatParkingFeeInput(input) {
+            let value = input.val();
+            
+            // Remove non-numeric characters and decimal part
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // Handle decimal part - if it's .00 or .0, remove it completely
+            if (value.includes('.')) {
+                let parts = value.split('.');
+                if (parts[1] === '00' || parts[1] === '0') {
+                    value = parts[0]; // Remove decimal part completely
+                } else {
+                    value = parts[0]; // Keep only integer part
+                }
+            }
+            
+            // Format with commas
+            if (value) {
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+            
+            input.val(value);
+        }
+        
+        // Format deduction inputs and unit inputs on keyup
+        $('.deduction-input, .unit-input').on('input', function () {
+            formatPriceInput($(this));
+        });
+        
+        // Format odometer inputs on keyup
+        $('.odometer-input').on('input', function () {
+            formatOdometerInput($(this));
+        });
+        
+        // Format parking fee input on keyup
+        $('.parking-fee-input').on('input', function () {
+            formatParkingFeeInput($(this));
+        });
+        
+        // Initial formatting for deduction inputs and unit inputs
+        $('.deduction-input, .unit-input').each(function() {
+            let value = $(this).val();
+            if (value) {
+                // Remove existing formatting
+                value = value.replace(/,/g, '');
+                
+                // Handle decimal part if exists
+                if (value.includes('.')) {
+                    let parts = value.split('.');
+                    // If decimal part is .00, remove it completely
+                    if (parts[1] === '00' || parts[1] === '0') {
+                        value = parts[0];
+                    } else {
+                        // Otherwise keep only integer part
+                        value = parts[0];
+                    }
+                }
+                
+                // Limit to 9 digits
+                if (value.length > 9) {
+                    value = value.substring(0, 9);
+                }
+                
+                // Apply formatting
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                $(this).val(value);
+            }
+        });
+        
+        // Initial formatting for odometer inputs
+        $('.odometer-input').each(function() {
+            let value = $(this).val();
+            if (value) {
+                // Remove existing formatting
+                value = value.replace(/,/g, '');
+                
+                // Handle decimal part - if it's .00 or .0, remove it completely
+                if (value.includes('.')) {
+                    let parts = value.split('.');
+                    if (parts[1] === '00' || parts[1] === '0') {
+                        value = parts[0]; // Remove decimal part completely
+    } else {
+                        value = parts[0]; // Keep only integer part
+                    }
+                }
+                
+                // Apply formatting
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                $(this).val(value);
+            }
+        });
+        
+        // Initial formatting for parking fee input
+        $('.parking-fee-input').each(function() {
+            let value = $(this).val();
+            if (value) {
+                // Remove existing formatting
+                value = value.replace(/,/g, '');
+                
+                // Handle decimal part - if it's .00 or .0, remove it completely
+                if (value.includes('.')) {
+                    let parts = value.split('.');
+                    if (parts[1] === '00' || parts[1] === '0') {
+                        value = parts[0]; // Remove decimal part completely
+                    } else {
+                        value = parts[0]; // Keep only integer part
+                    }
+                }
+                
+                // Apply formatting
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                $(this).val(value);
+            }
+        });
+        
+        // Make the format functions globally available
+        window.formatPriceInput = function(input) {
+            formatPriceInput($(input));
+        };
+        
+        window.formatOdometerInput = function(input) {
+            formatOdometerInput($(input));
+        };
+        
+        window.formatParkingFeeInput = function(input) {
+            formatParkingFeeInput($(input));
+        };
+    });
+</script>
+@endpush
+
+@push('styles')
+<style>
+    /* Hiệu ứng highlight cho input có lỗi */
+    .highlight-error {
+        animation: highlight-error-animation 1.5s ease;
+    }
+    
+    @keyframes highlight-error-animation {
+        0% { background-color: rgba(255, 0, 0, 0.1); }
+        50% { background-color: rgba(255, 0, 0, 0.2); }
+        100% { background-color: transparent; }
+    }
+</style>
 @endpush

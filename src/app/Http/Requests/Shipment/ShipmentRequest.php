@@ -238,6 +238,7 @@ class ShipmentRequest extends FormRequest
             'estimated_arrival_time' => 'required|' . $this->getSystemDateFormatRule() . '|after_or_equal:departure_time',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
+            'run_date' => 'nullable|date',
             'shipment_type' => 'required|integer|in:1,2,3,4',
             'is_car_rental' => 'nullable|boolean',
             'notes' => 'nullable|string',
@@ -246,6 +247,8 @@ class ShipmentRequest extends FormRequest
             'cargo_weight' => 'nullable|numeric|min:0',
             'trip_count' => 'nullable|numeric|min:0',
             'unit_price' => 'required|numeric|min:0',
+            'overtime_rate' => 'nullable|numeric|min:0',
+            'is_overtime_at_noon' => 'nullable|boolean',
             // Chi phí chuyến hàng
             'deductions' => 'array',
             'deductions.*' => 'nullable', // Cho phép cả numeric và string cho "Ghi chú"
@@ -293,7 +296,10 @@ class ShipmentRequest extends FormRequest
             'estimated_arrival_time' => 'Thời gian dự kiến đến',
             'start_time' => 'Giờ khởi hành',
             'end_time' => 'Giờ đến',
+            'run_date' => 'Ngày chạy',
             'shipment_type' => 'Loại chuyến xe',
+            'overtime_rate' => 'Đơn giá tăng ca',
+            'is_overtime_at_noon' => 'Tăng ca trưa',
             'is_car_rental' => 'Xe HPL Thuê',
             'notes' => 'Ghi chú',
             'status' => 'Trạng thái',

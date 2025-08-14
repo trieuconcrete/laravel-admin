@@ -66,7 +66,8 @@ class Shipment extends Model
         'end_odometer',
         'overtime_rate',
         'total_overtime_cost',
-        'parking_fee'
+        'parking_fee',
+        'is_overtime_at_noon'
     ];
 
     /**
@@ -96,6 +97,7 @@ class Shipment extends Model
         'overtime_rate' => 'decimal:2',
         'total_overtime_cost' => 'decimal:2',
         'parking_fee' => 'decimal:2',
+        'is_overtime_at_noon' => 'boolean',
     ];
 
     /**
