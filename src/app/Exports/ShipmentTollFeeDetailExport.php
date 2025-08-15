@@ -114,10 +114,52 @@ class ShipmentTollFeeDetailExport implements WithTitle, WithStyles, ShouldAutoSi
 
         foreach ($this->tollFeesByDate as $date => $tollFees) {
             foreach ($tollFees as $tollFee) {
-                // Get vehicle plate number from shipment on this date
-                $shipmentOnDate = $this->shipments->firstWhere('run_date', $date);
-                $plateNumber = $shipmentOnDate && $shipmentOnDate->vehicle ? 
-                              $shipmentOnDate->vehicle->plate_number : 'N/A';
+                // Get vehicle plate number from toll fee's shipment relationship
+                $plateNumber = 'N/A';
+                
+                // Method 1: Use tollFee->shipment relationship if available
+                if ($tollFee->shipment_id) {
+                    $shipment = $this->shipments->firstWhere('id', $tollFee->shipment_id);
+                    if ($shipment && $shipment->vehicle) {
+                        $plateNumber = $shipment->vehicle->plate_number ?? 'N/A';
+                    }
+                }
+                
+                // Method 2: Fallback to finding shipment by date
+                if ($plateNumber === 'N/A') {
+                    $shipmentOnDate = $this->shipments->firstWhere('run_date', $date);
+                    if ($shipmentOnDate && $shipmentOnDate->vehicle) {
+                        $plateNumber = $shipmentOnDate->vehicle->plate_number ?? 'N/A';
+                    }
+                }
+                
+                // Method 3: Fallback to different date format
+                if ($plateNumber === 'N/A') {
+                    $formattedDate = \Carbon\Carbon::parse($date)->format('Y-m-d');
+                    $shipmentByFormattedDate = $this->shipments->firstWhere('run_date', $formattedDate);
+                    if ($shipmentByFormattedDate && $shipmentByFormattedDate->vehicle) {
+                        $plateNumber = $shipmentByFormattedDate->vehicle->plate_number ?? 'N/A';
+                    }
+                }
+                
+                // Method 4: Last resort - use any vehicle from the car rental
+                if ($plateNumber === 'N/A') {
+                    $anyShipmentWithVehicle = $this->shipments->first(function ($shipment) {
+                        return $shipment->vehicle && $shipment->vehicle->plate_number;
+                    });
+                    if ($anyShipmentWithVehicle) {
+                        $plateNumber = $anyShipmentWithVehicle->vehicle->plate_number;
+                    }
+                }
+                
+                // Debug log to check vehicle lookup results
+                \Illuminate\Support\Facades\Log::info('TollFee Detail Export - Vehicle lookup result:', [
+                    'date' => $date,
+                    'tollFee_id' => $tollFee->id ?? 'unknown',
+                    'tollFee_shipment_id' => $tollFee->shipment_id ?? 'null',
+                    'final_plate_number' => $plateNumber,
+                    'method_used' => $plateNumber !== 'N/A' ? 'found' : 'not_found'
+                ]);
 
                 $sheet->setCellValue('A' . $row, $stt);
                 $sheet->setCellValue('B' . $row, Carbon::parse($date)->format('d/m/Y'));

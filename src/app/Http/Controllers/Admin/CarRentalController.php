@@ -1261,7 +1261,15 @@ class CarRentalController extends Controller
             if (!$tollFeesByDate->has($dateKey)) {
                 $tollFeesByDate->put($dateKey, collect());
             }
-            $tollFeesByDate->get($dateKey)->push(...$shipment->tollFees);
+            
+            // Add shipment reference to each toll fee for vehicle lookup
+            foreach ($shipment->tollFees as $tollFee) {
+                // Ensure shipment_id is set for vehicle lookup
+                if (!$tollFee->shipment_id) {
+                    $tollFee->shipment_id = $shipment->id;
+                }
+                $tollFeesByDate->get($dateKey)->push($tollFee);
+            }
         }
 
         $month = now()->format('m/Y');
