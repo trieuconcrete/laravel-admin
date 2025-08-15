@@ -61,7 +61,7 @@
                     <div class="card-body">
                         <div class="table-responsive table-card">
                             <table class="table table-hover align-middle table-nowrap mb-0">
-                                <thead class="table-light">
+                                <thead class="table-light text-uppercase">
                                     <tr>
                                         <th>Thao tác</th>
                                         <th>Khách hàng</th>

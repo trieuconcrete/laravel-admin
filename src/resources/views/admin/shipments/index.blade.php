@@ -87,29 +87,8 @@
                 </div>
             </div>
 
-            <div class="row mb-3 pb-1">
-                <div class="col-12">
-                    <div class="d-flex align-items-lg-center flex-lg-row flex-column">
-                        <div class="flex-grow-1">
-                        </div>
-                        <div class="mt-3 mt-lg-0">
-                            <div class="row g-3 mb-0 align-items-center">
-                                <div class="col-auto">
-                                    <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary">
-                                        <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe 
-                                    </a>
-                                </div>
-                                <!--end col-->
-                            </div>
-                            <!--end row-->
-                        </div>
-                    </div><!-- end card header -->
-                </div>
-                <!--end col-->
-            </div>
-
             <!-- Filter Section -->
-            <div class="row mb-4">
+            <div class="row mt-4 mb-4">
                 <div class="col">
                     <form action="{{ route('admin.shipments.index') }}" method="GET">
                         <div class="row g-3">
@@ -118,6 +97,14 @@
                                     <option value="">Tất cả trạng thái</option>
                                     @foreach($shipmentStatus as $key => $value)
                                         <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>{{ $value }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" name="shipment_type">
+                                    <option value="">Tất cả chuyến xe</option>
+                                    @foreach($shipmentTypes as $key => $value)
+                                        <option value="{{ $key }}" {{ request('shipment_type') == $key ? 'selected' : '' }}>{{ $value }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -133,15 +120,20 @@
                                     <input type="date" class="form-control" id="endDateFilter" name="estimated_arrival_time" value="@formatDateForInput(request('estimated_arrival_time'))">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="input-group">
                                     <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm mã chuyến, tuyến, tài xế..." value="{{ request('keyword') }}">
                                 </div>
                             </div>
-                            <div class="col-md-2">
-                                <button class="btn btn-outline-primary w-100" type="submit">
-                                    <i class="fas fa-filter me-2"></i>Tìm kiếm
+                        </div>
+                        <div class="row mt-4">
+                            <div class="col-md-12 text-center">
+                                <button class="btn btn-info me-2" type="submit">
+                                    <i class="ri-search-line me-1"></i>Tìm kiếm
                                 </button>
+                                <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary">
+                                    <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe 
+                                </a>
                             </div>
                         </div>
                     </form>
@@ -152,10 +144,11 @@
                 <div class="card-body p-0">
                     <div class="table-responsive mt-4 mt-xl-0">
                         <table class="table table-hover table-striped align-middle table-nowrap mb-0">
-                            <thead class="table-light">
+                            <thead class="table-light text-uppercase">
                                 <tr>
                                     <th>Thao tác</th>
                                     <th>Trạng thái</th>
+                                    <th>Loại CX</th>
                                     <th>Khách hàng</th>
                                     <th>Tuyến đường</th>
                                     <th>Tài xế</th>
@@ -170,7 +163,11 @@
                                 <tr>
                                     <td>
                                         <div class="btn-group">
-                                            <a href="{{ route('admin.shipments.edit', $shipment) }}" class="btn btn-sm btn-outline-primary ">Chi tiết</a>
+                                            @if ($shipment->shipment_type == 2)
+                                                <a href="{{ route('admin.car-rental.edit-vehicle-log', $shipment->id) }}" class="btn btn-sm btn-outline-primary ">Chi tiết</a>
+                                            @else
+                                                <a href="{{ route('admin.shipments.edit', $shipment) }}" class="btn btn-sm btn-outline-primary ">Chi tiết</a>
+                                            @endif
                                             <button type="button"
                                                     class="btn btn-sm btn-outline-danger delete-shipment-btn"
                                                     data-shipment-id="{{ $shipment->id }}">
@@ -187,6 +184,7 @@
                                         </div>
                                     </td>
                                     <td><span class="badge {{ $shipment->statusBadgeClass }}">{{ $shipment->status_label }}</span></td>
+                                    <td> {{ $shipment->getShipmentTypeLabelAttribute() }}</td>
                                     <td>
                                         @if($shipment->customer)
                                         <a href="{{ route('admin.customers.show', optional($shipment->customer)->id) }}" class="text-primary" target="_blank">

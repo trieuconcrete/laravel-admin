@@ -58,7 +58,7 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
-                            <thead class="table-light">
+                            <thead class="table-light text-uppercase">
                                 <tr>
                                     <th>Thao tác</th>
                                     <th>Mã HD</th>

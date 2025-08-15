@@ -1,5 +1,5 @@
 @extends('admin.layout')
-@section('title', 'Quản lý xe vận tải')
+@section('title', 'Quản lý xe')
 @section('content')
 
 <div class="container-fluid">
@@ -61,8 +61,8 @@
                                 </div>
                             </div>
                             <div class="col-md-2">
-                                <button class="btn btn-outline-primary w-100">
-                                    <i class="fas fa-filter me-2"></i>Tìm kiếm
+                                <button class="btn btn-info w-100">
+                                    <i class="ri-search-line me-1"></i>Tìm kiếm
                                 </button>
                             </div>
                         </div>
@@ -75,7 +75,7 @@
                 <div class="card-body">
                     <div class="table-responsive table-card">
                         <table class="table table-hover align-middle table-nowrap mb-0">
-                            <thead class="table-light">
+                            <thead class="table-light text-uppercase">
                                 <tr>
                                     <th>Thao tác</th>
                                     <th>Biển số</th>
