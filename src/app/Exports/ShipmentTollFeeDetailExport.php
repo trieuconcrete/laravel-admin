@@ -3,7 +3,7 @@
 namespace App\Exports;
 
 use App\Models\CarRental;
-use App\Models\Setting;
+use App\Facades\Setting;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
@@ -55,8 +55,8 @@ class ShipmentTollFeeDetailExport implements WithTitle, WithStyles, ShouldAutoSi
         $vietnameseMonth = $monthDate->format('m/Y');
 
         // Get company settings
-        $companyName = Setting::getValue('company_name', 'CÔNG TY CỔ PHẦN VẬN TẢI HPL');
-        $companyAddress = Setting::getValue('company_address', '');
+        $companyName = Setting::get('company_name', 'CÔNG TY CỔ PHẦN VẬN TẢI HPL');
+        $companyAddress = Setting::get('company_address', '');
 
         // Header content
         $sheet->mergeCells('A1:G1');

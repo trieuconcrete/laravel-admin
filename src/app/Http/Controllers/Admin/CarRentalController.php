@@ -219,6 +219,20 @@ class CarRentalController extends Controller
                 }
             }
             
+            // Xử lý loại bỏ dấu phẩy từ car rental deductions
+            if (!empty($data['deductions'])) {
+                foreach ($data['deductions'] as $key => &$value) {
+                    if (is_string($value) && is_numeric($key)) {
+                        $value = str_replace(',', '', $value);
+                    }
+                }
+            }
+            
+            // Xử lý loại bỏ dấu phẩy từ unit_price_for_car_rental
+            if (!empty($data['unit_price_for_car_rental'])) {
+                $data['unit_price_for_car_rental'] = str_replace(',', '', $data['unit_price_for_car_rental']);
+            }
+            
             // Clean toll fee amounts
             if (!empty($data['toll_fees'])) {
                 foreach ($data['toll_fees'] as &$tollFee) {
@@ -257,7 +271,12 @@ class CarRentalController extends Controller
                 'toll_fees.*.station_name' => 'nullable|string|max:255',
                 'toll_fees.*.transaction_code' => 'nullable|string|max:255',
                 'toll_fees.*.fee_amount' => 'nullable|numeric|min:0',
-                'toll_fees.*.notes' => 'nullable|string'
+                'toll_fees.*.notes' => 'nullable|string',
+                'deduction_type_ids' => 'nullable|array',
+                'deduction_type_ids.*' => 'nullable|exists:shipment_deduction_types,id',
+                'deductions' => 'nullable|array',
+                'deductions.*' => 'nullable|numeric|min:0',
+                'unit_price_for_car_rental' => 'nullable|numeric|min:0'
             ])->validate();
 
             $validated['overtime_rate'] = $validated['overtime_rate'] ?? 50000;
@@ -357,7 +376,8 @@ class CarRentalController extends Controller
                 'total_overtime_cost' => $totalOvertimeCost,
                 'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
                 'parking_fee' => $validated['parking_fee'],
-                'notes' => $validated['notes']
+                'notes' => $validated['notes'],
+                'unit_price_for_car_rental' => $validated['is_car_rental_value'] ? $validated['unit_price_for_car_rental'] : null
             ];
 
             $shipment = \App\Models\Shipment::create($shipmentData);
@@ -496,6 +516,38 @@ class CarRentalController extends Controller
                 }
             }
 
+            // Lưu car rental deductions (chỉ khi là xe thuê)
+            if (!empty($validated['deduction_type_ids']) && !empty($validated['deductions']) && ($validated['is_car_rental_value'] ?? false)) {
+                Log::info('Store: Processing car rental deductions:', [
+                    'deduction_type_ids' => $validated['deduction_type_ids'],
+                    'deductions' => $validated['deductions']
+                ]);
+                
+                foreach ($validated['deduction_type_ids'] as $index => $deductionTypeId) {
+                    if (isset($validated['deductions'][$deductionTypeId]) && !empty($validated['deductions'][$deductionTypeId])) {
+                        $amount = str_replace(',', '', $validated['deductions'][$deductionTypeId]);
+                        $parsedAmount = (float)$amount;
+                        
+                        if ($parsedAmount > 0) {
+                            $carRentalDeduction = \App\Models\ShipmentDeduction::create([
+                                'shipment_id' => $shipment->id,
+                                'shipment_deduction_type_id' => (int)$deductionTypeId,
+                                'amount' => $parsedAmount,
+                                'user_id' => null, // Không có user cụ thể cho car rental deductions
+                                'is_main_driver' => false,
+                                'notes' => null
+                            ]);
+                            
+                            Log::info('Store: Created car rental deduction:', [
+                                'deduction_id' => $carRentalDeduction->id,
+                                'type_id' => $deductionTypeId,
+                                'amount' => $parsedAmount
+                            ]);
+                        }
+                    }
+                }
+            }
+
             DB::commit();
 
             // Redirect về trang edit car-rental với tab "Nhật ký lộ trình xe"
@@ -582,6 +634,25 @@ class CarRentalController extends Controller
             $shipmentDeductions = \App\Models\ShipmentDeduction::where('shipment_id', $shipment->id)
                 ->pluck('amount', 'shipment_deduction_type_id');
             
+            // Lấy car rental deductions (chỉ khi là xe thuê)
+            $carRentalDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_CAR_RENTAL_EXPENSE)
+                ->where('status', 'active')
+                ->orderBy('order', 'asc')
+                ->get();
+            
+            $carRentalDeductions = \App\Models\ShipmentDeduction::where('shipment_id', $shipment->id)
+                ->whereNull('user_id') // Không có user cụ thể
+                ->whereIn('shipment_deduction_type_id', $carRentalDeductionTypes->pluck('id'))
+                ->get();
+            
+            // Debug log để xem car rental deductions được load
+            Log::info('Car rental deductions loaded:', [
+                'shipment_id' => $shipment->id,
+                'car_rental_deduction_type_ids' => $carRentalDeductionTypes->pluck('id')->toArray(),
+                'car_rental_deductions_count' => $carRentalDeductions->count(),
+                'car_rental_deductions_data' => $carRentalDeductions->toArray()
+            ]);
+            
             // Lấy driver deductions - dựa vào user_id và không có deduction type cụ thể
             $driverDeductions = \App\Models\ShipmentDeduction::where('shipment_id', $shipment->id)
                 ->whereNotNull('user_id')
@@ -633,7 +704,9 @@ class CarRentalController extends Controller
                 'deductionTypes',
                 'shipmentDeductions',
                 'driverDeductions',
-                'driverPXDeductions'
+                'driverPXDeductions',
+                'carRentalDeductionTypes',
+                'carRentalDeductions'
             ));
         } catch (\Exception $e) {
             Log::error('Failed to get shipment for editing', ['error' => $e->getMessage()]);
@@ -674,6 +747,15 @@ class CarRentalController extends Controller
             $data['max_distance'] = str_replace(',', '', $data['max_distance'] ?? '');
             $data['over_distance_fee_per_km'] = str_replace(',', '', $data['over_distance_fee_per_km'] ?? '');
             
+            // Clean deductions data - remove commas from numeric values
+            if (!empty($data['deductions'])) {
+                foreach ($data['deductions'] as $key => &$value) {
+                    if (is_string($value) && is_numeric(str_replace(',', '', $value))) {
+                        $value = str_replace(',', '', $value);
+                    }
+                }
+            }
+            
             // Xử lý loại bỏ dấu phẩy từ driver deductions
             if (!empty($data['drivers'])) {
                 foreach ($data['drivers'] as &$driver) {
@@ -708,6 +790,11 @@ class CarRentalController extends Controller
                 }
             }
             
+            // Clean unit_price_for_car_rental if it exists
+            if (!empty($data['unit_price_for_car_rental'])) {
+                $data['unit_price_for_car_rental'] = str_replace(',', '', $data['unit_price_for_car_rental']);
+            }
+            
             $validated = validator($data, [
                 'car_rental_id' => 'required|exists:car_rentals,id',
                 'vehicle_id' => 'required|exists:vehicles,vehicle_id',
@@ -736,7 +823,12 @@ class CarRentalController extends Controller
                 'toll_fees.*.station_name' => 'nullable|string|max:255',
                 'toll_fees.*.transaction_code' => 'nullable|string|max:255',
                 'toll_fees.*.fee_amount' => 'nullable|numeric|min:0',
-                'toll_fees.*.notes' => 'nullable|string'
+                'toll_fees.*.notes' => 'nullable|string',
+                'deduction_type_ids' => 'nullable|array',
+                'deduction_type_ids.*' => 'nullable|exists:shipment_deduction_types,id',
+                'deductions' => 'nullable|array',
+                'deductions.*' => 'nullable|numeric|min:0',
+                'unit_price_for_car_rental' => 'nullable|numeric|min:0',
             ])->validate();
             
             $validated['overtime_rate'] = $validated['overtime_rate'] ?? 50000;
@@ -841,7 +933,8 @@ class CarRentalController extends Controller
                 'total_overtime_cost' => $totalOvertimeCost,
                 'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
                 'parking_fee' => $validated['parking_fee'],
-                'notes' => $validated['notes']
+                'notes' => $validated['notes'],
+                'unit_price_for_car_rental' => $validated['is_car_rental_value'] ? $validated['unit_price_for_car_rental'] : null
             ];
             $shipment->update($shipmentData);
             
@@ -853,142 +946,93 @@ class CarRentalController extends Controller
                 'updated_data' => $shipmentData
             ]);
 
-            // Xóa toàn bộ driver deductions cũ và lưu lại danh sách mới
-            $shipment->shipmentDeductions()->whereNotNull('user_id')->delete();
-            Log::info('Deleted old driver deductions for shipment:', ['shipment_id' => $shipment->id]);
-            
-            // Debug log để xem is_car_rental_value
-            Log::info('Processing driver deductions - is_car_rental_value:', [
-                'is_car_rental_value' => $validated['is_car_rental_value'] ?? 'not_set',
-                'is_car_rental_value_type' => gettype($validated['is_car_rental_value'] ?? 'not_set'),
-                'drivers_data' => $validated['drivers'] ?? 'not_set',
-                'should_process_drivers' => !($validated['is_car_rental_value'] ?? false)
-            ]);
-            
-            if (!empty($validated['drivers']) && !($validated['is_car_rental_value'] ?? false)) {
-                Log::info('Processing drivers data:', ['drivers' => $validated['drivers']]);
-                
-                // Debug log chi tiết từng driver
-                foreach ($validated['drivers'] as $index => $person) {
-                    Log::info("Driver {$index} data:", [
-                        'person' => $person,
-                        'has_deductions' => isset($person['deductions']),
-                        'deductions_count' => isset($person['deductions']) ? count($person['deductions']) : 0,
-                        'deductions_keys' => isset($person['deductions']) ? array_keys($person['deductions']) : [],
-                        'is_main_driver_value' => $person['deductions']['is_main_driver'] ?? 'not_set',
-                        'notes_value' => $person['deductions']['Ghi chú'] ?? 'not_set'
-                    ]);
+            // Xóa toàn bộ deductions cũ và lưu lại danh sách mới
+            $shipment->shipmentDeductions()->delete();
+            Log::info('Deleted old deductions for shipment:', ['shipment_id' => $shipment->id]);
+
+            // Lưu driver deductions (gộp cả format mới và cũ)
+            if (!empty($validated['drivers']) && is_array($validated['drivers']) && !($validated['is_car_rental_value'] ?? false)) {
+                // Thu thập tất cả driver deductions từ format cũ (drivers_X_deductions_Y)
+                $driverDeductionsFromOldFormat = [];
+                foreach ($data as $key => $value) {
+                    if (preg_match('/^drivers_(\d+)_deductions_(\d+)$/', $key, $matches)) {
+                        $driverIndex = $matches[1];
+                        $deductionTypeId = $matches[2];
+                        if (!isset($driverDeductionsFromOldFormat[$driverIndex])) {
+                            $driverDeductionsFromOldFormat[$driverIndex] = [];
+                        }
+                        $driverDeductionsFromOldFormat[$driverIndex][$deductionTypeId] = $value;
+                    }
                 }
                 
-                foreach ($validated['drivers'] as $person) {
-                    // Kiểm tra user_id có tồn tại và là số nguyên dương
-                    if (isset($person['user_id']) && is_numeric($person['user_id']) && (int)$person['user_id'] > 0) {
-                        $user_id = (int)$person['user_id'];
-                        Log::info('Processing driver:', ['user_id' => $user_id, 'driver_data' => $person]);
+                Log::info('Processing driver deductions:', [
+                    'drivers' => $validated['drivers'],
+                    'old_format_deductions' => $driverDeductionsFromOldFormat
+                ]);
+                
+                foreach ($validated['drivers'] as $driverIndex => $driver) {
+                    if (!empty($driver['user_id'])) {
+                        $userId = $driver['user_id'];
+                        $deductions = $driver['deductions'] ?? [];
                         
-                        // Luôn tạo một driver deduction cơ bản để đánh dấu driver này
-                        $basicDriverType = \App\Models\ShipmentDeductionType::where('type', 'driver')->first();
-                        if ($basicDriverType) {
-                            // Lấy is_main_driver từ deductions array
-                            $isMainDriver = false;
-                            if (isset($person['deductions']['is_main_driver'])) {
-                                $isMainDriver = (bool) $person['deductions']['is_main_driver'];
-                                Log::info('is_main_driver value:', [
-                                    'raw_value' => $person['deductions']['is_main_driver'],
-                                    'converted' => $isMainDriver
-                                ]);
+                        // Merge deductions từ format cũ vào
+                        if (isset($driverDeductionsFromOldFormat[$driverIndex])) {
+                            foreach ($driverDeductionsFromOldFormat[$driverIndex] as $typeId => $amount) {
+                                // Chỉ merge nếu chưa có trong format mới
+                                if (!isset($deductions[$typeId])) {
+                                    $deductions[$typeId] = $amount;
+                                }
                             }
-                            
-                            $basicDriverDeduction = \App\Models\ShipmentDeduction::create([
-                                'user_id' => $user_id,
-                                'shipment_id' => $shipment->id,
-                                'shipment_deduction_type_id' => $basicDriverType->id,
-                                'amount' => 0, // Không có amount cho driver cơ bản
-                                'is_main_driver' => $isMainDriver,
-                                'notes' => $person['deductions']['Ghi chú'] ?? null
-                            ]);
-                            
-                            Log::info('Created basic driver deduction:', [
-                                'deduction_id' => $basicDriverDeduction->id,
-                                'type_id' => $basicDriverType->id,
-                                'user_id' => $user_id,
-                                'is_main_driver' => $isMainDriver
-                            ]);
                         }
                         
-                        if (!empty($person['deductions'])) {
-                            // Extract notes from deductions array if it exists
-                            $notes = null;
-                            if (isset($person['deductions']['Ghi chú'])) {
-                                $notes = $person['deductions']['Ghi chú'];
-                                unset($person['deductions']['Ghi chú']); // Remove notes from deductions array
-                            }
-
-                            $isMainDriver = false;
-                            if (isset($person['deductions']['is_main_driver'])) {
-                                $isMainDriver = (bool) $person['deductions']['is_main_driver'];
-                                unset($person['deductions']['is_main_driver']); // Remove is_main_driver from deductions array
-                            }
-                            
-                            Log::info('Processing deductions for driver:', [
-                                'user_id' => $user_id,
-                                'deductions_after_cleanup' => $person['deductions'],
-                                'deductions_count' => count($person['deductions']),
-                                'deductions_keys' => array_keys($person['deductions'])
-                            ]);
-                            
-                            foreach ($person['deductions'] as $deduction_type_id => $amount) {
-                                Log::info('Processing deduction:', [
-                                    'deduction_type_id' => $deduction_type_id,
-                                    'amount' => $amount,
-                                    'type_id_is_numeric' => is_numeric($deduction_type_id),
-                                    'type_id_gt_0' => is_numeric($deduction_type_id) && (int)$deduction_type_id > 0
-                                ]);
+                        // Xử lý is_main_driver và notes
+                        $isMainDriver = (bool) ($deductions['is_main_driver'] ?? false);
+                        $notes = $deductions['Ghi chú'] ?? null;
+                        
+                        // Tạo basic driver deduction
+                        $basicDeduction = \App\Models\ShipmentDeduction::create([
+                            'user_id' => $userId,
+                            'shipment_id' => $shipment->id,
+                            'shipment_deduction_type_id' => null, // Không có type cụ thể
+                            'amount' => 0, // Không có amount cụ thể
+                            'is_main_driver' => $isMainDriver,
+                            'notes' => $notes
+                        ]);
+                        
+                        Log::info('Created basic driver deduction:', [
+                            'deduction_id' => $basicDeduction->id,
+                            'user_id' => $userId,
+                            'is_main_driver' => $isMainDriver,
+                            'notes' => $notes
+                        ]);
+                        
+                        // Xử lý tất cả deductions (đã merge từ cả 2 format)
+                        foreach ($deductions as $deductionTypeId => $amount) {
+                            if (is_numeric($deductionTypeId) && (int)$deductionTypeId > 0 && !empty($amount)) {
+                                $cleanAmount = str_replace(',', '', $amount);
+                                $parsedAmount = (float)$cleanAmount;
                                 
-                                // Kiểm tra deduction_type_id và amount có hợp lệ
-                                if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0) {
-                                    // Xử lý amount - loại bỏ dấu phẩy và parse số
-                                    $cleanAmount = is_string($amount) ? str_replace(',', '', $amount) : $amount;
-                                    $parsedAmount = (float)$cleanAmount;
-                                    
-                                    Log::info('Amount processing:', [
-                                        'original_amount' => $amount,
-                                        'clean_amount' => $cleanAmount,
-                                        'parsed_amount' => $parsedAmount
-                                    ]);
-                                    
-                                    $deduction = \App\Models\ShipmentDeduction::create([
-                                        'user_id' => $user_id,
+                                if ($parsedAmount > 0) {
+                                    $driverDeduction = \App\Models\ShipmentDeduction::create([
+                                        'user_id' => $userId,
                                         'shipment_id' => $shipment->id,
-                                        'shipment_deduction_type_id' => (int)$deduction_type_id ?? null,
+                                        'shipment_deduction_type_id' => (int)$deductionTypeId,
                                         'amount' => $parsedAmount,
-                                        'notes' => $notes, // Add notes field
-                                        'is_main_driver' => $isMainDriver
+                                        'is_main_driver' => false,
+                                        'notes' => null
                                     ]);
-                                        
+                                    
                                     Log::info('Created driver deduction:', [
-                                        'deduction_id' => $deduction->id,
-                                        'user_id' => $user_id,
-                                        'type_id' => $deduction_type_id,
-                                        'amount' => $parsedAmount,
-                                        'is_main_driver' => $isMainDriver,
-                                        'notes' => $notes
-                                    ]);
-                                } else {
-                                    Log::warning('Skipped invalid deduction:', [
-                                        'deduction_type_id' => $deduction_type_id,
-                                        'amount' => $amount,
-                                        'reason' => 'Invalid deduction_type_id or amount'
+                                        'deduction_id' => $driverDeduction->id,
+                                        'user_id' => $userId,
+                                        'type_id' => $deductionTypeId,
+                                        'amount' => $parsedAmount
                                     ]);
                                 }
                             }
-                        } else {
-                            Log::info('No deductions found for driver:', ['user_id' => $user_id]);
                         }
                     }
                 }
-            } else {
-                Log::info('No drivers data to process or is_car_rental = true');
             }
 
             // Xóa và cập nhật lại các phụ cấp tài xế phụ cấp (chỉ khi không phải xe thuê)
@@ -1037,6 +1081,38 @@ class CarRentalController extends Controller
                 Log::info('No driver PX data to process or is_car_rental = true');
             }
 
+            // Lưu car rental deductions (chỉ khi là xe thuê)
+            if (!empty($validated['deduction_type_ids']) && !empty($validated['deductions']) && ($validated['is_car_rental_value'] ?? false)) {
+                Log::info('Store: Processing car rental deductions:', [
+                    'deduction_type_ids' => $validated['deduction_type_ids'],
+                    'deductions' => $validated['deductions']
+                ]);
+                
+                foreach ($validated['deduction_type_ids'] as $index => $deductionTypeId) {
+                    if (isset($validated['deductions'][$deductionTypeId]) && !empty($validated['deductions'][$deductionTypeId])) {
+                        $amount = str_replace(',', '', $validated['deductions'][$deductionTypeId]);
+                        $parsedAmount = (float)$amount;
+                        
+                        if ($parsedAmount > 0) {
+                            $carRentalDeduction = \App\Models\ShipmentDeduction::create([
+                                'shipment_id' => $shipment->id,
+                                'shipment_deduction_type_id' => (int)$deductionTypeId,
+                                'amount' => $parsedAmount,
+                                'user_id' => null, // Không có user cụ thể cho car rental deductions
+                                'is_main_driver' => false,
+                                'notes' => null
+                            ]);
+                            
+                            Log::info('Store: Created car rental deduction:', [
+                                'deduction_id' => $carRentalDeduction->id,
+                                'type_id' => $deductionTypeId,
+                                'amount' => $parsedAmount
+                            ]);
+                        }
+                    }
+                }
+            }
+            
             // Xóa toàn bộ toll_fees cũ và lưu lại danh sách mới
             $shipment->tollFees()->delete();
             if (!empty($validated['toll_fees'])) {
@@ -1159,10 +1235,24 @@ class CarRentalController extends Controller
         // Get shipments instead of vehicle logs (Issue #180 implementation)
         $shipments = \App\Models\Shipment::where('car_rental_id', $car_rental_id)
             ->where('shipment_type', \App\Models\Shipment::SHIPMENT_TYPE_MONTHLY_RENTAL)
-            ->where('is_car_rental', true)
+            // ->where('is_car_rental', true) // Removed to match edit view logic - get all shipments for car rental
             ->with(['driver', 'vehicle', 'tollFees'])
             ->orderBy('run_date', 'asc')
             ->get();
+            
+        // Debug log to check shipments count
+        Log::info('Download vehicle log - Shipments loaded:', [
+            'car_rental_id' => $car_rental_id,
+            'shipments_count' => $shipments->count(),
+            'shipments_data' => $shipments->map(function($shipment) {
+                return [
+                    'id' => $shipment->id,
+                    'run_date' => $shipment->run_date,
+                    'is_car_rental' => $shipment->is_car_rental,
+                    'shipment_type' => $shipment->shipment_type
+                ];
+            })->toArray()
+        ]);
 
         // Group toll fees by run_date for easy access
         $tollFeesByDate = collect();
@@ -1208,6 +1298,11 @@ class CarRentalController extends Controller
             ->orderBy('order', 'asc')
             ->get();
             
+        $carRentalDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_CAR_RENTAL_EXPENSE)
+            ->where('status', 'active')
+            ->orderBy('order', 'asc')
+            ->get();
+            
         $personDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_DRIVER)
             ->where('status', 'active')
             ->orderBy('order', 'asc')
@@ -1239,7 +1334,8 @@ class CarRentalController extends Controller
             'deductionTypes', 
             'personDeductionTypes', 
             'subPersonDeductionTypes', 
-            'userPXs'
+            'userPXs',
+            'carRentalDeductionTypes'
         ));
     }
 }

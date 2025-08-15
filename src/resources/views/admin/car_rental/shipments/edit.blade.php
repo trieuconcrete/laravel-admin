@@ -507,6 +507,49 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <!-- Chi phí chuyến xe - chỉ hiển thị khi is_car_rental = true -->
+                                            <div id="carRentalCosts" class="mb-3" style="display: {{ $shipment->is_car_rental ? 'block' : 'none' }};">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
+                                                        <small class="text-muted">Chi phí HPL trả cho đối tác cho thuê xe</small>
+                                                        <input type="text" class="form-control unit-input number" placeholder="Nhập giá chuyến" name="unit_price_for_car_rental" value="{{ old('unit_price_for_car_rental', $shipment->unit_price_for_car_rental ?? '') }}">
+                                                        @error('unit_price_for_car_rental')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="mb-3">
+                                                    <label class="form-label fs-5">Chi phí chuyến xe</label> 
+                                                    <small class="text-muted">Chi phí HPL trả cho đối tác cho thuê xe</small>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    @foreach($carRentalDeductionTypes ?? [] as $type)
+                                                                        <th>{{ $type->name }}</th>
+                                                                    @endforeach
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    @foreach($carRentalDeductionTypes ?? [] as $type)
+                                                                        <td>
+                                                                            <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
+                                                                            @if($type->name === 'Ghi chú')
+                                                                                <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, $carRentalDeductions->where('shipment_deduction_type_id', $type->id)->first()->amount ?? '') }}</textarea>
+                                                                            @else
+                                                                                <input type="text" class="form-control form-control-sm deduction-input number" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, $carRentalDeductions->where('shipment_deduction_type_id', $type->id)->first()->amount ?? '') }}">
+                                                                            @endif
+                                                                            @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
+                                                                        </td>
+                                                                    @endforeach
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -596,6 +639,9 @@
         
         // Xử lý checkbox is_car_rental khi trang load
         const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
+        console.log('Checkbox is_car_rental found:', isCarRentalCheckbox);
+        console.log('Checkbox checked state:', isCarRentalCheckbox ? isCarRentalCheckbox.checked : 'not found');
+        
         if (isCarRentalCheckbox && isCarRentalCheckbox.checked) {
             // Nếu checkbox được checked, ẩn phần tài xế
             const driverSection = document.getElementById('drivers');
@@ -610,6 +656,14 @@
                 });
             }
             
+            // Hiển thị phần chi phí chuyến xe
+            const carRentalCosts = document.getElementById('carRentalCosts');
+            console.log('carRentalCosts element found:', carRentalCosts);
+            if (carRentalCosts) {
+                carRentalCosts.style.display = 'block';
+                console.log('carRentalCosts display set to block');
+            }
+            
             // Cập nhật danh sách xe chỉ hiển thị xe thuê
             if (window.vehicles && Array.isArray(window.vehicles)) {
                 // Gọi function từ car-rental-form.js
@@ -617,6 +671,53 @@
                     updateVehicleList(true);
                 }
             }
+        }
+        
+        // Thêm event listener cho checkbox is_car_rental
+        if (isCarRentalCheckbox) {
+            isCarRentalCheckbox.addEventListener('change', function() {
+                const driverSection = document.getElementById('drivers');
+                const carRentalCosts = document.getElementById('carRentalCosts');
+                const isCarRentalValue = document.getElementById('is_car_rental_value');
+                
+                if (this.checked) {
+                    // Xe HPL thuê - ẩn phần tài xế, hiển thị chi phí chuyến xe
+                    if (driverSection) {
+                        driverSection.style.display = 'none';
+                        const driverFields = driverSection.querySelectorAll('select[name*="[user_id]"], input[name*="[allowance]"], input[name*="[deduction]"]');
+                        driverFields.forEach(field => {
+                            field.removeAttribute('required');
+                            field.disabled = true;
+                        });
+                    }
+                    
+                    if (carRentalCosts) {
+                        carRentalCosts.style.display = 'block';
+                    }
+                    
+                    if (isCarRentalValue) {
+                        isCarRentalValue.value = '1';
+                    }
+                } else {
+                    // Xe thường - hiển thị phần tài xế, ẩn chi phí chuyến xe
+                    if (driverSection) {
+                        driverSection.style.display = 'block';
+                        const driverFields = driverSection.querySelectorAll('select[name*="[user_id]"]');
+                        driverFields.forEach(field => {
+                            field.setAttribute('required', 'required');
+                            field.disabled = false;
+                        });
+                    }
+                    
+                    if (carRentalCosts) {
+                        carRentalCosts.style.display = 'none';
+                    }
+                    
+                    if (isCarRentalValue) {
+                        isCarRentalValue.value = '0';
+                    }
+                }
+            });
         }
         
         // Thêm event listener cho nút thêm tài xế
