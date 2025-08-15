@@ -129,7 +129,7 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Đơn giá tăng ca (VNĐ/giờ) <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="overtime_rate" id="overtime_rate" value="50,000" required>
+                                                    <input type="text" class="form-control number" name="overtime_rate" id="overtime_rate" value="50,000" required>
                                                     <small class="text-muted">Đơn giá tăng ca cho tài xế</small>
                                                 </div>
                                                 <div class="col-md-6">
