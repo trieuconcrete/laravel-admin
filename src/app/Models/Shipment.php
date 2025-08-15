@@ -128,6 +128,13 @@ class Shipment extends Model
     const SHIPMENT_TYPE_CRANE = 3;         // Xe nâng
     const SHIPMENT_TYPE_LONG_DISTANCE = 4; // Xe đường dài bắc-nam
 
+    public static $shipmentTypes = [
+        '1' => 'Khách chạy theo chuyến',
+        '2' => 'Khách thuê xe tháng',
+        '3' => 'Xe nâng',
+        '4' => 'Xe đường dài bắc-nam',
+    ];
+
     public static function getStatuses()
     {
         return [
@@ -260,6 +267,14 @@ class Shipment extends Model
     public function scopeOfStatus($query, $status)
     {
         return $query->where('status', $status);
+    }
+
+    /**
+     * Scope để lọc shipment theo chuyến xe
+     */
+    public function scopeShipmentType($query, $shipmentType)
+    {
+        return $query->where('shipment_type', $shipmentType);
     }
 
     /**
