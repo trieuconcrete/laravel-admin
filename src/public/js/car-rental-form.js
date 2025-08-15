@@ -366,13 +366,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Format number input cho overtime_rate
-    if (overtimeRateInput) {
-        overtimeRateInput.addEventListener('input', function() {
-            let value = this.value;
-            value = value.replace(/[^0-9]/g, '');
-            this.value = parseInt(value).toLocaleString('vi-VN');
-        });
-    }
+    // if (overtimeRateInput) {
+    //     overtimeRateInput.addEventListener('input', function() {
+    //         let value = this.value;
+    //         value = value.replace(/[^0-9]/g, '');
+    //         this.value = parseInt(value).toLocaleString('vi-VN');
+    //     });
+    // }
     
     // Chạy tính toán lần đầu
     calculateOvertime();
