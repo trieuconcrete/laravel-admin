@@ -22,7 +22,7 @@
                     <input type="hidden" name="car_rental_id" value="{{ $carRental->id }}">
                 @endif
                 <!-- Hidden field for is_car_rental value -->
-                <input type="hidden" id="is_car_rental_value" name="is_car_rental_value" value="0">
+                <input type="hidden" id="is_car_rental_value" name="is_car_rental_value" value="1">
                 <div class="row mb-3 pb-1">
                     <div class="row mb-3 pb-1">
                         <div class="col-12">
@@ -68,35 +68,35 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-4">
                                                     <label class="form-label">Ngày chạy <span class="text-danger">*</span></label>
-                                                    <input type="date" class="form-control" name="run_date" id="run_date" required>
+                                                    <input type="date" class="form-control" name="run_date" id="run_date" value="{{ old('run_date') }}" required>
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
-                                                    <input type="time" class="form-control" name="start_time" id="start_time" required inputmode="numeric" style="cursor:pointer;">
+                                                    <input type="time" class="form-control" name="start_time" id="start_time" value="{{ old('start_time') }}" required inputmode="numeric" style="cursor:pointer;">
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label class="form-label">Giờ kết thúc <span class="text-danger">*</span></label>
-                                                    <input type="time" class="form-control" name="end_time" id="end_time" required inputmode="numeric" style="cursor:pointer;">
+                                                    <input type="time" class="form-control" name="end_time" id="end_time" value="{{ old('end_time') }}" required inputmode="numeric" style="cursor:pointer;">
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Vị trí đi <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="start_location" required id="start_location">
+                                                    <input type="text" class="form-control" name="start_location" value="{{ old('start_location') }}" required id="start_location">
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Vị trí đến <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="end_location" required id="end_location">
+                                                    <input type="text" class="form-control" name="end_location" value="{{ old('end_location') }}" required id="end_location">
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Km bắt đầu <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control odometer-input" name="start_odometer" id="start_odometer" required>
+                                                    <input type="text" class="form-control odometer-input" name="start_odometer" id="start_odometer" value="{{ old('start_odometer') }}" required>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Km kết thúc <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control odometer-input" name="end_odometer" id="end_odometer" required>
+                                                    <input type="text" class="form-control odometer-input" name="end_odometer" id="end_odometer" value="{{ old('end_odometer') }}" required>
                                                 </div>
                                             </div>
 
@@ -104,11 +104,11 @@
                                                 <div class="col-md-6">
                                                     <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                                                     <select class="form-select" name="status" required>
-                                                        <option value="pending">Tạo mới</option>
-                                                        <option value="in_transit">Đang vận chuyển</option>
-                                                        <option value="cancelled">Đã hủy</option>
-                                                        <option value="delayed">Bị trễ</option>
-                                                        <option value="completed">Hoàn thành</option>
+                                                        <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>Tạo mới</option>
+                                                        <option value="in_transit" {{ old('status') == 'in_transit' ? 'selected' : '' }}>Đang vận chuyển</option>
+                                                        <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
+                                                        <option value="delayed" {{ old('status') == 'delayed' ? 'selected' : '' }}>Bị trễ</option>
+                                                        <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Hoàn thành</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-6">
@@ -118,7 +118,8 @@
                                                         name="is_overtime_at_noon" 
                                                         type="checkbox" 
                                                         value="1" 
-                                                        id="is_overtime_at_noon">
+                                                        id="is_overtime_at_noon"
+                                                        {{ old('is_overtime_at_noon') ? 'checked' : '' }}>
                                                         <label class="form-check-label" for="is_overtime_at_noon">
                                                             Có tăng ca trưa
                                                         </label>
@@ -129,12 +130,12 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Đơn giá tăng ca (VNĐ/giờ) <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control number" name="overtime_rate" id="overtime_rate" value="50,000" required>
+                                                    <input type="text" class="form-control number" name="overtime_rate" id="overtime_rate" value="{{ old('overtime_rate', '50,000') }}" required>
                                                     <small class="text-muted">Đơn giá tăng ca cho tài xế</small>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Phí đậu xe</label>
-                                                    <input type="text" class="form-control parking-fee-input" name="parking_fee">
+                                                    <input type="text" class="form-control parking-fee-input" name="parking_fee" value="{{ old('parking_fee') }}">
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
@@ -221,8 +222,10 @@
 
                                             <div class="mb-3">
                                                 <label class="form-label">Ghi chú</label>
-                                                <textarea class="form-control" name="notes" rows="3"></textarea>
+                                                <textarea class="form-control" name="notes" rows="3">{{ old('notes') }}</textarea>
                                             </div>
+                                            
+                                            
                                         </div>
                                         <div class="tab-pane" id="shipmentDetail" role="tabpanel">
                                             <div class="row mb-3">
@@ -231,9 +234,9 @@
                                                         <input class="form-check-input" 
                                                         name="is_car_rental" 
                                                         type="checkbox" 
-                                                        value="0" 
+                                                        value="1" 
                                                         id="is_car_rental"
-                                                        {{--  checked  --}}
+                                                        {{ old('is_car_rental') ? 'checked' : '' }}
                                                         >
                                                         <label class="form-check-label" for="is_car_rental">
                                                             Xe HPL Thuê
@@ -440,6 +443,48 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <!-- Chi phí chuyến xe - chỉ hiển thị khi is_car_rental = true -->
+                                            <div id="carRentalCosts" class="mb-3" style="display: none;">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
+                                                        <small class="text-muted">Chi phí HPL trả cho đối tác cho thuê xe</small>
+                                                        <input type="text" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price_for_car_rental" value="{{ old('unit_price_for_car_rental') }}">
+                                                        @error('unit_price_for_car_rental')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="mb-3">
+                                                    <label class="form-label fs-5">Chi phí chuyến xe</label> 
+                                                    <small class="text-muted">Chi phí HPL trả cho đối tác cho thuê xe</small>
+                                                    <div class="table-responsive">
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                                <tr>
+                                                                    @foreach($carRentalDeductionTypes ?? [] as $type)
+                                                                        <th>{{ $type->name }}</th>
+                                                                    @endforeach
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    @foreach($carRentalDeductionTypes ?? [] as $type)
+                                                                        <td>
+                                                                            <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
+                                                                            @if($type->name === 'Ghi chú')
+                                                                                <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, '') }}</textarea>
+                                                                            @else
+                                                                                <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, '') }}">
+                                                                            @endif
+                                                                            @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
+                                                                        </td>
+                                                                    @endforeach
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -502,9 +547,19 @@
             goodsCount: window.goodsCount
         });
         
+        // Debug carRentalDeductionTypes
+        console.log('carRentalDeductionTypes from Blade:', @json($carRentalDeductionTypes ?? []));
+        
         // Xử lý checkbox is_car_rental khi trang load
         const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
-        if (isCarRentalCheckbox && isCarRentalCheckbox.checked) {
+        console.log('Checkbox is_car_rental found:', isCarRentalCheckbox);
+        console.log('Checkbox checked state:', isCarRentalCheckbox ? isCarRentalCheckbox.checked : 'not found');
+        
+        // Kiểm tra old value từ Laravel
+        const isCarRentalOldValue = {{ old('is_car_rental') ? 'true' : 'false' }};
+        console.log('Old is_car_rental value:', isCarRentalOldValue);
+        
+        if ((isCarRentalCheckbox && isCarRentalCheckbox.checked) || isCarRentalOldValue) {
             // Nếu checkbox được checked, ẩn phần tài xế
             const driverSection = document.getElementById('drivers');
             if (driverSection) {
@@ -517,6 +572,61 @@
                     field.disabled = true;
                 });
             }
+            
+            // Hiển thị phần chi phí chuyến xe
+            const carRentalCosts = document.getElementById('carRentalCosts');
+            console.log('carRentalCosts element found:', carRentalCosts);
+            if (carRentalCosts) {
+                carRentalCosts.style.display = 'block';
+                console.log('carRentalCosts display set to block');
+            }
+        }
+        
+        // Thêm event listener cho checkbox is_car_rental
+        if (isCarRentalCheckbox) {
+            isCarRentalCheckbox.addEventListener('change', function() {
+                const driverSection = document.getElementById('drivers');
+                const carRentalCosts = document.getElementById('carRentalCosts');
+                const isCarRentalValue = document.getElementById('is_car_rental_value');
+                
+                if (this.checked) {
+                    // Xe HPL thuê - ẩn phần tài xế, hiển thị chi phí chuyến xe
+                    if (driverSection) {
+                        driverSection.style.display = 'none';
+                        const driverFields = driverSection.querySelectorAll('select[name*="[user_id]"], input[name*="[allowance]"], input[name*="[deduction]"]');
+                        driverFields.forEach(field => {
+                            field.removeAttribute('required');
+                            field.disabled = true;
+                        });
+                    }
+                    
+                    if (carRentalCosts) {
+                        carRentalCosts.style.display = 'block';
+                    }
+                    
+                    if (isCarRentalValue) {
+                        isCarRentalValue.value = '1';
+                    }
+                } else {
+                    // Xe thường - hiển thị phần tài xế, ẩn chi phí chuyến xe
+                    if (driverSection) {
+                        driverSection.style.display = 'block';
+                        const driverFields = driverSection.querySelectorAll('select[name*="[user_id]"]');
+                        driverFields.forEach(field => {
+                            field.setAttribute('required', 'required');
+                            field.disabled = false;
+                        });
+                    }
+                    
+                    if (carRentalCosts) {
+                        carRentalCosts.style.display = 'none';
+                    }
+                    
+                    if (isCarRentalValue) {
+                        isCarRentalValue.value = '0';
+                    }
+                }
+            });
         }
     });
 </script>
