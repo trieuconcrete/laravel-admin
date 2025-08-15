@@ -354,11 +354,11 @@
                         <div class="card-body">
                             <div class="table-responsive table-card">
                                 <table class="table table-hover align-middle table-nowrap mb-0">
-                                    <thead class="table-light">
+                                    <thead class="table-light text-uppercase">
                                         <tr>
                                             <th>Thao tác</th>
                                             <th>Mã NV</th>
-                                            <th>Họ và tên</th>
+                                            <th>Họ tên</th>
                                             <th>Bộ phận</th>
                                             <th>Lương cơ bản</th>
                                             <th>Phụ cấp</th>

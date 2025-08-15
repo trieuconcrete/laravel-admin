@@ -29,6 +29,9 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
         if (!empty($filters['status'])) {
             $query->ofStatus($filters['status']);
         }
+        if (!empty($filters['shipment_type'])) {
+            $query->shipmentType($filters['shipment_type']);
+        }
         
         if (!empty($filters['departure_time']) && empty($filters['estimated_arrival_time'])) {
             $query->where('departure_time', '>=', $filters['departure_time']);

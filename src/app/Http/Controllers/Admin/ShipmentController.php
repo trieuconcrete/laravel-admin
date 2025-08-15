@@ -38,6 +38,7 @@ class ShipmentController extends Controller
     {
         $filters = [
             'status' => $request->input('status'),
+            'shipment_type' => $request->input('shipment_type'),
             'departure_time' => $request->input('departure_time'),
             'estimated_arrival_time' => $request->input('estimated_arrival_time'),
             'keyword' => $request->input('keyword'),
@@ -45,8 +46,9 @@ class ShipmentController extends Controller
         // Use getList instead of list to avoid PHP reserved keyword conflict
         $shipments = $this->shipmentService->getList($filters, perPage: 15);
         $shipmentStatus = Shipment::$statuses;
+        $shipmentTypes = Shipment::$shipmentTypes;
 
-        return view('admin.shipments.index', compact('shipments', 'shipmentStatus'));
+        return view('admin.shipments.index', compact('shipments', 'shipmentStatus', 'shipmentTypes'));
     }
 
     /**
@@ -185,6 +187,7 @@ class ShipmentController extends Controller
             ->toArray();
             
         $shipmentStatus = Shipment::$statuses;
+        $shipmentTypes = Shipment::$shipmentTypes;
         
         // Chuẩn bị dữ liệu cho form edit
         $shipmentDeductions = $shipment->shipmentDeductions()->whereNull('user_id')->get()->keyBy('shipment_deduction_type_id');

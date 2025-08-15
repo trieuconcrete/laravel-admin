@@ -14,8 +14,15 @@
     @endif
     <div class="row">
         <div class="col">
-            <form action="{{ route('admin.shipments.store') }}" method="POST" enctype="multipart/form-data" id="shipmentForm">
+            <form action="{{ isset($carRental) ? route('admin.car-rental.store-vehicle-log') : route('admin.shipments.store') }}" method="POST" enctype="multipart/form-data" id="shipmentForm">
                 @csrf
+                <!-- Hidden field for customer_id when coming from car-rental -->
+                @if(isset($carRental))
+                    <input type="hidden" name="customer_id" value="{{ $carRental->customer_id }}">
+                    <input type="hidden" name="car_rental_id" value="{{ $carRental->id }}">
+                @endif
+                <!-- Hidden field for is_car_rental value -->
+                <input type="hidden" id="is_car_rental_value" name="is_car_rental_value" value="0">
                 <div class="row mb-3 pb-1">
                     <div class="row mb-3 pb-1">
                         <div class="col-12">
@@ -85,25 +92,14 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Km bắt đầu <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="start_odometer" id="start_odometer" required>
+                                                    <input type="text" class="form-control odometer-input" name="start_odometer" id="start_odometer" required>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Km kết thúc <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="end_odometer" id="end_odometer" required>
+                                                    <input type="text" class="form-control odometer-input" name="end_odometer" id="end_odometer" required>
                                                 </div>
                                             </div>
 
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Đơn giá tăng ca (VNĐ/giờ)</label>
-                                                    <input type="text" class="form-control" value="50,000">
-                                                    <small class="text-muted">Đơn giá cố định: 50,000 VNĐ/giờ</small>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Phí đậu xe</label>
-                                                    <input type="text" class="form-control" name="parking_fee">
-                                                </div>
-                                            </div>
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
@@ -127,6 +123,74 @@
                                                             Có tăng ca trưa
                                                         </label>
                                                     </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Đơn giá tăng ca (VNĐ/giờ) <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control number" name="overtime_rate" id="overtime_rate" value="50,000" required>
+                                                    <small class="text-muted">Đơn giá tăng ca cho tài xế</small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Phí đậu xe</label>
+                                                    <input type="text" class="form-control parking-fee-input" name="parking_fee">
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Kết quả tính OT</label>
+                                                    <div class="bg-light p-3 rounded">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <small class="text-muted">Số giờ OT:</small><br>
+                                                                <strong id="overtime_hours_display">0.00 giờ</strong>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <small class="text-muted">Tổng chi phí OT:</small><br>
+                                                                <strong id="total_overtime_cost_display">0 VNĐ</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mt-2">
+                                                            <div class="col-12">
+                                                                <small class="text-muted">
+                                                                    <i class="fas fa-info-circle me-1"></i>
+                                                                    OT được tính từ 17:30, +1h nếu có tăng ca trưa
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Chi tiết tính OT</label>
+                                                    <div class="bg-light p-3 rounded">
+                                                        <div class="row">
+                                                            <div class="col-6">
+                                                                <small class="text-muted">Giờ làm việc:</small><br>
+                                                                <strong id="working_hours_display">0.00 giờ</strong>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <small class="text-muted">Tăng ca trưa:</small><br>
+                                                                <strong id="noon_overtime_display">0.00 giờ</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mt-2">
+                                                            <div class="col-12">
+                                                                <small class="text-muted">
+                                                                    <i class="fas fa-calculator me-1"></i>
+                                                                    Tổng OT = Giờ làm việc + Tăng ca trưa
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <div class="col-md-12">
+                                                    <input type="hidden" name="calculated_overtime_hours" value="0">
+                                                    <input type="hidden" name="calculated_total_overtime_cost" value="0">
+                                                    <input type="hidden" name="working_hours" value="0">
+                                                    <input type="hidden" name="noon_overtime_hours" value="0">
                                                 </div>
                                             </div>
 
@@ -167,8 +231,10 @@
                                                         <input class="form-check-input" 
                                                         name="is_car_rental" 
                                                         type="checkbox" 
-                                                        value="1" 
-                                                        id="is_car_rental">
+                                                        value="0" 
+                                                        id="is_car_rental"
+                                                        {{--  checked  --}}
+                                                        >
                                                         <label class="form-check-label" for="is_car_rental">
                                                             Xe HPL Thuê
                                                         </label>
@@ -338,11 +404,36 @@
                                                                             @error('driverPXs.'.$i.'.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
                                                                         <td>
-                                                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
-                                                                            <input type="hidden" name="driver_rows[]" value="{{ $i }}">
+                                                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeDriverPXRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
+                                                                            <input type="hidden" name="driverPX_rows[]" value="{{ $i }}">
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach
+                                                            @else
+                                                                <tr>
+                                                                    <td>
+                                                                        <select name="driverPXs[0][user_id]" class="form-select form-select-sm" style="min-width: 180px;">
+                                                                            <option value="">Chọn nhân sự</option>
+                                                                            @foreach($userPXs as $id => $name)
+                                                                                <option value="{{ $id }}">{{ $name }}</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                        @error('driverPXs.0.user_id')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    </td>
+                                                                    @foreach($subPersonDeductionTypes as $type)
+                                                                        <td>
+                                                                            <input type="text" name="driverPXs[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
+                                                                            @error('driverPXs.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
+                                                                        </td>
+                                                                    @endforeach
+                                                                    <td>
+                                                                        <input type="text" name="driverPXs[0][deductions][Ghi chú]" class="form-control form-control-sm">
+                                                                        @error('driverPXs.0.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="hidden" name="driverPX_rows[]" value="0">
+                                                                    </td>
+                                                                </tr>
                                                             @endif
                                                             </tbody>
                                                         </table>
@@ -363,7 +454,72 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('js/shipment-form.js') }}"></script>
+<script src="{{ asset('js/car-rental-form.js') }}"></script>
+<script>
+    // Set dữ liệu từ Blade template vào JavaScript
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set personDeductionTypes
+        window.personDeductionTypes = [
+            @foreach($personDeductionTypes as $type)
+                { id: "{{ $type->id }}", name: "{{ $type->name }}" },
+            @endforeach
+        ];
+
+        // Set personPxDeductionTypes
+        window.personPxDeductionTypes = [
+            @foreach($subPersonDeductionTypes as $type)
+                { id: "{{ $type->id }}", name: "{{ $type->name }}" },
+            @endforeach
+        ];
+        
+        // Set users
+        window.users = {};
+        @if(!empty($users))
+            @foreach($users as $id => $name)
+                window.users[{{ $id }}] = '{{ addslashes($name) }}';
+            @endforeach
+        @endif
+
+        // Set userPXs
+        window.userPXs = {};
+        @if(!empty($userPXs))
+            @foreach($userPXs as $id => $name)
+                window.userPXs[{{ $id }}] = '{{ addslashes($name) }}';
+            @endforeach
+        @endif
+        
+        // Set goodsCount
+        window.goodsCount = {{ count(old('goods', [])) ?: 1 }};
+        
+        // Set laravelOld
+        window.laravelOld = @json(session()->getOldInput());
+        
+        console.log('Car rental form data initialized:', {
+            personDeductionTypes: window.personDeductionTypes,
+            personPxDeductionTypes: window.personPxDeductionTypes,
+            users: window.users,
+            userPXs: window.userPXs,
+            goodsCount: window.goodsCount
+        });
+        
+        // Xử lý checkbox is_car_rental khi trang load
+        const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
+        if (isCarRentalCheckbox && isCarRentalCheckbox.checked) {
+            // Nếu checkbox được checked, ẩn phần tài xế
+            const driverSection = document.getElementById('drivers');
+            if (driverSection) {
+                driverSection.style.display = 'none';
+                
+                // Bỏ required và disable tất cả các trường tài xế
+                const driverFields = driverSection.querySelectorAll('select[name*="[user_id]"], input[name*="[allowance]"], input[name*="[deduction]"]');
+                driverFields.forEach(field => {
+                    field.removeAttribute('required');
+                    field.disabled = true;
+                });
+            }
+        }
+    });
+</script>
 <script>
     $(document).ready(function() {
         // Function to format price inputs with VND formatting and 9-digit limit
@@ -399,9 +555,69 @@
             input.val(value);
         }
         
+        // Function to format odometer inputs with comma formatting
+        function formatOdometerInput(input) {
+            let value = input.val();
+            
+            // Remove non-numeric characters and decimal part
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // Handle decimal part - if it's .00 or .0, remove it completely
+            if (value.includes('.')) {
+                let parts = value.split('.');
+                if (parts[1] === '00' || parts[1] === '0') {
+                    value = parts[0]; // Remove decimal part completely
+                } else {
+                    value = parts[0]; // Keep only integer part
+                }
+            }
+            
+            // Format with commas
+            if (value) {
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+            
+            input.val(value);
+        }
+        
+        // Function to format parking fee input with VND formatting
+        function formatParkingFeeInput(input) {
+            let value = input.val();
+            
+            // Remove non-numeric characters and decimal part
+            value = value.replace(/[^0-9.]/g, '');
+            
+            // Handle decimal part - if it's .00 or .0, remove it completely
+            if (value.includes('.')) {
+                let parts = value.split('.');
+                if (parts[1] === '00' || parts[1] === '0') {
+                    value = parts[0]; // Remove decimal part completely
+                } else {
+                    value = parts[0]; // Keep only integer part
+                }
+            }
+            
+            // Format with commas
+            if (value) {
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+            
+            input.val(value);
+        }
+        
         // Format deduction inputs and unit inputs on keyup
         $('.deduction-input, .unit-input').on('input', function () {
             formatPriceInput($(this));
+        });
+        
+        // Format odometer inputs on keyup
+        $('.odometer-input').on('input', function () {
+            formatOdometerInput($(this));
+        });
+        
+        // Format parking fee input on keyup
+        $('.parking-fee-input').on('input', function () {
+            formatParkingFeeInput($(this));
         });
         
         // Initial formatting for deduction inputs and unit inputs
@@ -434,62 +650,69 @@
             }
         });
         
-        // Make the formatPriceInput function globally available
+        // Initial formatting for odometer inputs
+        $('.odometer-input').each(function() {
+            let value = $(this).val();
+            if (value) {
+                // Remove existing formatting
+                value = value.replace(/,/g, '');
+                
+                // Handle decimal part - if it's .00 or .0, remove it completely
+                if (value.includes('.')) {
+                    let parts = value.split('.');
+                    if (parts[1] === '00' || parts[1] === '0') {
+                        value = parts[0]; // Remove decimal part completely
+                    } else {
+                        value = parts[0]; // Keep only integer part
+                    }
+                }
+                
+                // Apply formatting
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                $(this).val(value);
+            }
+        });
+        
+        // Initial formatting for parking fee input
+        $('.parking-fee-input').each(function() {
+            let value = $(this).val();
+            if (value) {
+                // Remove existing formatting
+                value = value.replace(/,/g, '');
+                
+                // Handle decimal part - if it's .00 or .0, remove it completely
+                if (value.includes('.')) {
+                    let parts = value.split('.');
+                    if (parts[1] === '00' || parts[1] === '0') {
+                        value = parts[0]; // Remove decimal part completely
+                    } else {
+                        value = parts[0]; // Keep only integer part
+                    }
+                }
+                
+                // Apply formatting
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                $(this).val(value);
+            }
+        });
+        
+        // Make the format functions globally available
         window.formatPriceInput = function(input) {
             formatPriceInput($(input));
         };
-    });
-</script>
-<script>
-    // Khai báo các biến cần thiết
-    const goodsTable = document.querySelector('#goodsTable tbody');
-    let goodsCount = {{ count(old('goods', [])) ?: 1 }};
-    const personTable = document.querySelector('#personTable tbody');
-    const personPxTable = document.querySelector('#personPxTable tbody');
-    
-    // Lưu trữ dữ liệu cũ từ validation errors
-    window.laravelOld = @json(session()->getOldInput());
-    
-    // Khai báo các loại khấu trừ cho tài xế
-    const personDeductionTypes = [
-        @foreach($personDeductionTypes as $type)
-            { id: "{{ $type->id }}", name: "{{ $type->name }}" },
-        @endforeach
-    ];
-
-    const personPxDeductionTypes = [
-        @foreach($subPersonDeductionTypes as $type)
-            { id: "{{ $type->id }}", name: "{{ $type->name }}" },
-        @endforeach
-    ];
-    
-    // Gán danh sách người dùng vào biến toàn cục
-    // Đảm bảo users là một object với id làm key
-    window.users = {};
-    @if(!empty($users) && is_array($users))
-        @foreach($users as $id => $name)
-            window.users[{{ $id }}] = '{{ addslashes($name) }}';
-        @endforeach
-    @endif
-
-    window.userPXs = {};
-    @if(!empty($userPXs) && is_array($userPXs))
-        @foreach($userPXs as $id => $name)
-            window.userPXs[{{ $id }}] = '{{ addslashes($name) }}';
-        @endforeach
-    @endif
-    
-    console.log('Available users:', window.users);
-    
-    // Khởi tạo các sự kiện khi trang đã tải xong
-    document.addEventListener('DOMContentLoaded', function() {
-        // Khởi tạo form với số lượng driver ban đầu
-        initShipmentForm({{ count(old('drivers', [])) ?: 1 }});
         
-        // Cập nhật trạng thái nút thêm tài xế
-        updateAddPersonButtonState();
+        window.formatOdometerInput = function(input) {
+            formatOdometerInput($(input));
+        };
         
-        // Thêm event listener cho nút thêm người
+        window.formatParkingFeeInput = function(input) {
+            formatParkingFeeInput($(input));
+        };
+        
+        // Thêm event listener cho nút thêm tài xế
+        const personTable = document.querySelector('#personTable tbody');
+        const personDeductionTypes = window.personDeductionTypes || [];
+        
         document.getElementById('addPersonBtn').onclick = function() {
             // Kiểm tra số lượng user trước khi thêm
             const selectedIds = getSelectedUserIds(personTable, 'driver');
@@ -509,7 +732,7 @@
                 return false;
             }
 
-            if (currentRows > 3) {
+            if (currentRows >= 3) {
                 Swal.fire({
                     title: 'Không thể thêm',
                     text: 'Chỉ thêm được tối đa 3 tài xế',
@@ -537,13 +760,16 @@
         };
         
         // Thêm event listener cho nút thêm lơ xe
+        const personPxTable = document.querySelector('#personPxTable tbody');
+        const personPxDeductionTypes = window.personPxDeductionTypes || [];
+        
         document.getElementById('addPersonPxBtn').onclick = function() {
-            // Kiểm tra số lượng user trước khi thêm
-            const selectedIds = getSelectedUserIds(personPxTable, 'driverPXs');
+            // Kiểm tra số lượng user PX trước khi thêm
+            const selectedIds = getSelectedUserIds(personPxTable, 'driverPX');
             const totalUserPXs = Object.keys(window.userPXs).length;
-            const currentRows = personPxTable.querySelectorAll('tbody tr').length;
+            const currentRows = personPxTable.querySelectorAll('tr').length;
             
-            console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUserPXs, 'Current Rows:', currentRows);
+            console.log('Button click - Selected IDs:', selectedIds.length, 'Total User PXs:', totalUserPXs, 'Current Rows:', currentRows);
             
             // Kiểm tra số lượng hàng hiện tại với tổng số users
             if (currentRows >= totalUserPXs) {
@@ -556,7 +782,7 @@
                 return false;
             }
 
-            if (currentRows > 3) {
+            if (currentRows >= 3) {
                 Swal.fire({
                     title: 'Không thể thêm',
                     text: 'Chỉ thêm được tối đa 3 lơ xe',
@@ -582,120 +808,7 @@
             // Nếu còn người dùng khả dụng, thêm hàng mới
             addDriverPXRow(personPxTable, personPxDeductionTypes, window.userPXs);
         };
-        
-        // Kiểm tra và cập nhật trạng thái nút thêm nhân sự dựa trên số lượng người dùng khả dụng
-        updateAddPersonButtonState();
-        
-        // Định dạng tất cả các trường số khi trang được tải
-        formatAllNumericInputs();
-        
-        // Kiểm tra và chuyển đến tab có lỗi nếu có
-        handleFormErrors();
-        
-        // Xử lý checkbox "Xe HPL Thuê"
-        const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
-        const driverSection = document.getElementById('drivers');
-        
-        function toggleDriverSections() {
-            if (!isCarRentalCheckbox || !driverSection) {
-                return; // Exit if elements don't exist
-            }
-            
-            const isChecked = isCarRentalCheckbox.checked;
-            if (isChecked) {
-                // Nếu là xe thuê, ẩn phần tài xế
-                driverSection.style.display = 'none';
-            } else {
-                // Nếu không phải xe thuê, hiện phần tài xế
-                driverSection.style.display = 'block';
-            }
-        }
-        
-        // Thêm event listener cho checkbox
-        if (isCarRentalCheckbox) {
-            isCarRentalCheckbox.addEventListener('change', toggleDriverSections);
-            // Chạy lần đầu khi trang load
-            toggleDriverSections();
-        }
-        
-        // Xử lý submit form
-        document.getElementById('shipmentForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (validateShipmentForm()) {
-                prepareFormBeforeSubmit();
-                this.submit();
-            }
-        });
     });
-
-    document.getElementById('avatarInput')?.addEventListener('change', function(event) {
-        const file = event.target.files[0];
-    
-        if (file) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                document.getElementById('avatarPreview').src = e.target.result;
-            }
-            
-            reader.readAsDataURL(file);
-        }
-    });
-
-    // Toll Fee Management Functions
-    let tollFeeRowIndex = 0;
-    let editTollFeeRowIndex = 0;
-
-    // Add toll fee row to create form
-    function addTollFeeRow() {
-        const tbody = $('#tollFeesTable tbody');
-        const row = `
-            <tr data-index="${tollFeeRowIndex}">
-                <td>
-                    <input type="text" class="form-control form-control-sm" name="toll_fees[${tollFeeRowIndex}][station_name]" placeholder="Tên trạm" required>
-                </td>
-                <td>
-                    <input type="text" class="form-control form-control-sm" name="toll_fees[${tollFeeRowIndex}][transaction_code]" placeholder="Mã giao dịch" required>
-                </td>
-                <td>
-                    <input type="text" class="form-control form-control-sm toll-fee-amount" name="toll_fees[${tollFeeRowIndex}][fee_amount]" placeholder="Số tiền" required>
-                </td>
-                <td>
-                    <input type="text" class="form-control form-control-sm" name="toll_fees[${tollFeeRowIndex}][notes]" placeholder="Ghi chú">
-                </td>
-                <td>
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeTollFeeRow(${tollFeeRowIndex})">
-                        <i class="ri-delete-bin-line"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
-        tbody.append(row);
-        tollFeeRowIndex++;
-        
-        // Initialize number formatting for new row
-        initializeTollFeeFormatting();
-    }
-
-    // Remove toll fee row from create form
-    function removeTollFeeRow(index) {
-        $(`#tollFeesTable tbody tr[data-index="${index}"]`).remove();
-    }
-
-    // Initialize number formatting for toll fee amounts in create form
-    function initializeTollFeeFormatting() {
-        $('.toll-fee-amount').off('input').on('input', function() {
-            let value = $(this).val();
-            value = value.replace(/[^0-9.]/g, '');
-            
-            let parts = value.split('.');
-            let integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            let decimalPart = parts[1] !== undefined ? '.' + parts[1].slice(0, 2) : '';
-            
-            $(this).val(integerPart + decimalPart);
-        });
-    }
-
 </script>
 @endpush
 

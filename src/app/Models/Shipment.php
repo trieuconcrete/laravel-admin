@@ -67,7 +67,8 @@ class Shipment extends Model
         'end_odometer',
         'overtime_rate',
         'total_overtime_cost',
-        'parking_fee'
+        'parking_fee',
+        'is_overtime_at_noon'
     ];
 
     /**
@@ -98,6 +99,7 @@ class Shipment extends Model
         'overtime_rate' => 'decimal:2',
         'total_overtime_cost' => 'decimal:2',
         'parking_fee' => 'decimal:2',
+        'is_overtime_at_noon' => 'boolean',
     ];
 
     /**
@@ -125,6 +127,13 @@ class Shipment extends Model
     const SHIPMENT_TYPE_MONTHLY_RENTAL = 2; // Khách thuê xe tháng
     const SHIPMENT_TYPE_CRANE = 3;         // Xe nâng
     const SHIPMENT_TYPE_LONG_DISTANCE = 4; // Xe đường dài bắc-nam
+
+    public static $shipmentTypes = [
+        '1' => 'Khách chạy theo chuyến',
+        '2' => 'Khách thuê xe tháng',
+        '3' => 'Xe nâng',
+        '4' => 'Xe đường dài bắc-nam',
+    ];
 
     public static function getStatuses()
     {
@@ -258,6 +267,14 @@ class Shipment extends Model
     public function scopeOfStatus($query, $status)
     {
         return $query->where('status', $status);
+    }
+
+    /**
+     * Scope để lọc shipment theo chuyến xe
+     */
+    public function scopeShipmentType($query, $shipmentType)
+    {
+        return $query->where('shipment_type', $shipmentType);
     }
 
     /**
