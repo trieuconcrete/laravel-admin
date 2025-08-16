@@ -20,6 +20,7 @@ class CarRental extends Model
     protected $fillable = [
         'customer_id',
         'status',
+        'type',
         'description',
         'notes',
         'total_money',
@@ -76,7 +77,7 @@ class CarRental extends Model
     public static function getStatuses(): array
     {
         return [
-            self::STATUS_PENDING => 'Chờ duyệt',
+            self::STATUS_PENDING => 'Tạo mới',
             self::STATUS_APPROVED => 'Đã duyệt',
             self::STATUS_REJECTED => 'Từ chối',
             self::STATUS_COMPLETED => 'Hoàn thành',
@@ -134,11 +135,11 @@ class CarRental extends Model
     public function getStatusColorAttribute(): string
     {
         return match($this->status) {
-            self::STATUS_PENDING => 'warning',
+            self::STATUS_PENDING => 'secondary',
             self::STATUS_APPROVED => 'success',
-            self::STATUS_REJECTED => 'danger',
+            self::STATUS_REJECTED => 'warning',
             self::STATUS_COMPLETED => 'info',
-            self::STATUS_CANCELLED => 'secondary',
+            self::STATUS_CANCELLED => 'danger',
             default => 'primary',
         };
     }

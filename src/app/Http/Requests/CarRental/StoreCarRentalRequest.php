@@ -40,7 +40,7 @@ class StoreCarRentalRequest extends FormRequest
             'description' => 'nullable|string',
             'notes' => 'nullable|string',
             'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240',
-            'monthly_rental_fee' => 'nullable|numeric|min:0|max:1000000000'
+            'monthly_rental_fee' => 'required|numeric|min:0|max:1000000000'
         ];
     }
 

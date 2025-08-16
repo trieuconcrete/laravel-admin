@@ -64,9 +64,9 @@
                                 <thead class="table-light text-uppercase">
                                     <tr>
                                         <th>Thao tác</th>
+                                        <th>Trạng thái</th>
                                         <th>Khách hàng</th>
                                         <th>Tổng tiền</th>
-                                        <th>Trạng thái</th>
                                         <th>Ngày tạo</th>
                                         <th>Tải file</th>
                                     </tr>
@@ -92,11 +92,9 @@
                                                     </form>
                                                 </div>
                                             </td>
+                                            <td><span class="badge bg-{{ $carRental->getStatusColorAttribute() }}">{{ $carRental->getStatusLabelAttribute() }}</span></td>
                                             <td>{{ optional($carRental->customer)->name }}</td>
                                             <td>{{ number_format($carRental->total_amount_with_vat) }}</td>
-                                            <td><span
-                                                    class="badge bg-{{ $carRental->getStatusColorAttribute() }}">{{ $carRental->getStatusLabelAttribute() }}</span>
-                                            </td>
                                             <td>@formatDate($carRental->created_at)</td>
                                             <td><a href="{{ $carRental->file }}" class="" target="_blank">File thuê
                                                     xe excel</a></td>
@@ -116,115 +114,131 @@
 
     <!-- Add Car Rental Modal -->
     <div class="modal fade" id="addCarRentalModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Thêm thuê xe</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <hr>
-                <form id="add-car-rental-form" enctype="multipart/form-data" action="{{ route('admin.car-rental.store') }}"
-                    method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Khách hàng <span class="text-danger">*</span></label>
-                                <select class="form-select" name="customer_id">
-                                    <option value="">Chọn khách hàng</option>
-                                    @foreach ($customers as $key => $customer)
-                                        <option value="{{ $key }}">{{ $customer }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="text-danger error" data-field="customer_id"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                                <select class="form-select" name="status">
-                                    <option value="">Chọn trạng thái</option>
-                                    @foreach ($carRentalstatuses as $val => $label)
-                                        <option value="{{ $val }}">{{ $label }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="text-danger error" data-field="status"></div>
+                <form id="add-car-rental-form" enctype="multipart/form-data" action="{{ route('admin.car-rental.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label class="form-label fs-5">Loại thuê xe <span class="text-danger">*</span></label>
+                        <div class="col-md-6">
+                            <div class="form-check form-radio-primary mb-3">
+                                <input class="form-check-input" type="radio" name="type" value="1" id="type1" {{ old('type', '1') == '1' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="type1">
+                                    Thuê nguyên xe tính theo chuyến
+                                </label>
                             </div>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-4">
-                                    <label class="form-label">Phí thuê xe theo tháng</label>
-                                    <input type="text" class="form-control number" name="monthly_rental_fee">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-4">
-                                    <label class="form-label">Phí tăng ca/giờ</label>
-                                    <input type="text" class="form-control number" name="overtime_fee_per_hour">
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-radio-primary mb-3">
+                                <input class="form-check-input" type="radio" name="type" value="2" id="type2" {{ old('type') == '2' ? 'checked' : '' }}>
+                                <label class="form-check-label" for="type2">
+                                    Thuê xe theo kiểu khoáng
+                                </label>
                             </div>
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-4">
-                                    <label class="form-label">Số km tối đa</label>
-                                    <input type="text" class="form-control number" name="max_distance">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-4">
-                                    <label class="form-label">Phí theo km chạy vượt</label>
-                                    <input type="text" class="form-control number" name="over_distance_fee_per_km">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Mô tả dịch vụ</label>
-                            <textarea class="form-control" rows="3" placeholder="Nhập Mô tả dịch vụ"
-                                name="description"></textarea>
-                            <div class="text-danger error" data-field="description"></div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Ghi chú</label>
-                            <textarea class="form-control" rows="3" placeholder="Nhập ghi chú" name="notes"></textarea>
-                            <div class="text-danger error" data-field="notes"></div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-4">
-                                    <label class="form-label">Số hóa đơn</label>
-                                    <input type="text" class="form-control" name="invoice_number">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-4">
-                                    <label class="form-label">Số bảng kê</label>
-                                    <input type="text" class="form-control" name="statement_number">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-4">
-                                    <label class="form-label">Đơn vị tiền tệ</label>
-                                    <input type="text" class="form-control" name="currency">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Upload File thuê xe</label>
-                            <input type="file" class="form-control" name="file">
-                            <div class="text-danger error" data-field="file"></div>
-                        </div>
-
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Tạo </button>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Khách hàng <span class="text-danger">*</span></label>
+                            <select class="form-select" name="customer_id">
+                                <option value="">Chọn khách hàng</option>
+                                @foreach ($customers as $key => $customer)
+                                    <option value="{{ $key }}">{{ $customer }}</option>
+                                @endforeach
+                            </select>
+                            <div class="text-danger error" data-field="customer_id"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                            <select class="form-select" name="status">
+                                @foreach ($carRentalstatuses as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <div class="text-danger error" data-field="status"></div>
+                        </div>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Phí thuê xe theo tháng <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control number" name="monthly_rental_fee">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Phí tăng ca/giờ</label>
+                                <input type="text" class="form-control number" name="overtime_fee_per_hour">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Số km tối đa</label>
+                                <input type="text" class="form-control number" name="max_distance">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Phí theo km chạy vượt</label>
+                                <input type="text" class="form-control number" name="over_distance_fee_per_km">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả dịch vụ</label>
+                        <textarea class="form-control" rows="3" placeholder="Nhập Mô tả dịch vụ"
+                            name="description"></textarea>
+                        <div class="text-danger error" data-field="description"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ghi chú</label>
+                        <textarea class="form-control" rows="3" placeholder="Nhập ghi chú" name="notes"></textarea>
+                        <div class="text-danger error" data-field="notes"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-4">
+                                <label class="form-label">Số hóa đơn</label>
+                                <input type="text" class="form-control" name="invoice_number">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-4">
+                                <label class="form-label">Số bảng kê</label>
+                                <input type="text" class="form-control" name="statement_number">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-4">
+                                <label class="form-label">Đơn vị tiền tệ</label>
+                                <input type="text" class="form-control" name="currency">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Upload File thuê xe</label>
+                        <input type="file" class="form-control" name="file">
+                        <div class="text-danger error" data-field="file"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Tạo </button>
+                </div>
                 </form>
             </div>
         </div>
