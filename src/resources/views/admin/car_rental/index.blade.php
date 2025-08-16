@@ -38,6 +38,13 @@
                                     </div>
                                 </div>
                                 <div class="col-md-3">
+                                    <select class="form-select" id="typeFilter" name="type">
+                                        <option value="">Chọ loại thuê xe</option>
+                                        <option value="1" @selected(request()->type == 1)>Thê xe theo chuyến</option>
+                                        <option value="2" @selected(request()->type == 2)>Thê xe kiễu khoáng</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
                                     <select class="form-select" id="statusFilter" name="status">
                                         <option value="">Tất cả trạng thái</option>
                                         @foreach ($carRentalstatuses as $val => $label)
@@ -48,7 +55,8 @@
                                     </select>
                                 </div>
                                 <div class="col-md-2">
-                                    <button class="btn btn-outline-primary w-100">
+                                    <button class="btn btn-info w-100">
+                                        <i class="ri-search-line me-1"></i>
                                         Tìm kiếm
                                     </button>
                                 </div>
@@ -67,6 +75,7 @@
                                         <th>Trạng thái</th>
                                         <th>Khách hàng</th>
                                         <th>Tổng tiền</th>
+                                        <th>Loại</th>
                                         <th>Ngày tạo</th>
                                         <th>Tải file</th>
                                     </tr>
@@ -95,9 +104,13 @@
                                             <td><span class="badge bg-{{ $carRental->getStatusColorAttribute() }}">{{ $carRental->getStatusLabelAttribute() }}</span></td>
                                             <td>{{ optional($carRental->customer)->name }}</td>
                                             <td>{{ number_format($carRental->total_amount_with_vat) }}</td>
+                                            <td>{{ $carRental->getTypeLabelAttribute() }}</td>
                                             <td>@formatDate($carRental->created_at)</td>
-                                            <td><a href="{{ $carRental->file }}" class="" target="_blank">File thuê
-                                                    xe excel</a></td>
+                                            <td>
+                                                @if ($carRental->file)
+                                                    <a href="{{ $carRental->file }}" class="" target="_blank">Tải Excel</a>
+                                                @endif
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
