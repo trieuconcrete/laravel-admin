@@ -386,4 +386,13 @@ class CarRental extends Model
     {
         return $this->over_distance_fee_per_km ?? self::OVER_DISTANCE_FEE_PER_KM_DEFAULT;
     }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return match($this->type) {
+            1 => 'Chuyến',
+            2 => 'Khoáng',
+            default => 'Không xác định',
+        };
+    }
 }

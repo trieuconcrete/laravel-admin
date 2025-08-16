@@ -44,8 +44,20 @@ class CarRentalController extends Controller
 
     public function index(Request $request)
     {
+        $filters = $request->only(['type', 'status', 'keyword']);
         $customers = $this->customerRepository->all()->pluck('name', 'id');
-        $carRentals = CarRental::with('customer')->paginate(10);
+        $query = CarRental::with('customer')->orderBy('created_at', 'DESC');
+        /** search vehicle type */
+        if (!empty($filters['type'])) {
+            $query->where('type', $filters['type']);
+        }
+
+        /** search status */
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        $carRentals = $query->paginate(10);
+
         $carRentalstatuses = CarRental::getStatuses();
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
 

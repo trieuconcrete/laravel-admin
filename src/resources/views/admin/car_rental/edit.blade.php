@@ -38,7 +38,25 @@
                             <form action="{{ route('admin.car-rental.update', $carRental->id) }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 @method('PUT')
-                               
+                               <div class="row mb-3">
+                                    <label class="form-label fs-5">Loại thuê xe <span class="text-danger">*</span></label>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-radio-primary mb-3">
+                                            <input class="form-check-input" type="radio" name="type" value="1" id="type1" @checked(old('type', $carRental->type) == 1)>
+                                            <label class="form-check-label" for="type1">
+                                                Thuê nguyên xe tính theo chuyến
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-radio-primary mb-3">
+                                            <input class="form-check-input" type="radio" name="type" value="2" id="type2" @checked(old('type', $carRental->type) == 2)>
+                                            <label class="form-check-label" for="type2">
+                                                Thuê xe theo kiểu khoáng
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
 
                                 <div class="row mb-4">
                                     <div class="col-md-6">
@@ -69,7 +87,7 @@
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-4">
-                                            <label class="form-label">Phí thuê xe theo tháng</label>
+                                            <label class="form-label">Phí thuê xe theo tháng <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control number" name="monthly_rental_fee" value="{{ old('monthly_rental_fee', number_format($carRental->monthly_rental_fee)) }}">
                                             @error('monthly_rental_fee')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
