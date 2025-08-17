@@ -1,5 +1,5 @@
 @extends('admin.layout')
-
+@section('title', 'Chi tiết thuê xe')
 @section('content')
 <div class="container-fluid">
     <div class="row">
@@ -8,17 +8,28 @@
                 <div class="col-12">
                     <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                         <div class="flex-grow-1">
-                            <h4 class="fs-16 mb-1">Chi tiết thuê xe</h4>
                         </div>
-                </div>
+                        <div class="mt-3 mt-lg-0">
+                            <div class="row g-3 mb-0 align-items-center">
+                                <div class="col-auto">
+                                    <a href="{{ route('admin.car-rental.download-vehicle-log', ['car_rental_id' => $carRental->id]) }}" class="btn btn-outline-primary me-2">
+                                        <i class="las la-file-invoice align-middle"></i> Xuất bảng kê
+                                    </a>
+                                    <button type="button" class="btn btn-secondary"><i class="las la-calculator align-middle"></i> Tổng kết công nợ</button>
+                                </div>
+                                <!--end col-->
+                            </div>
+                            <!--end row-->
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row mb-3 pb-1">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-body">
+                        <div class="card-header">
                             <!-- Nav tabs -->
-                            <ul class="nav nav-tabs mb-3" role="tablist">
+                            <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0" role="tablist">
                                 <li class="nav-item">
                                     <a class="nav-link {{ session('active_tab') !== 'vehicle-logs' ? 'active' : '' }}" data-bs-toggle="tab" href="#rental-info" role="tab">
                                         Thông tin thuê xe
@@ -30,159 +41,191 @@
                                     </a>
                                 </li>
                             </ul>
-
+                        </div>
+                        <div class="card-body">
                             <!-- Tab panes -->
                             <div class="tab-content">
                                 <!-- Rental Info Tab -->
                                 <div class="tab-pane {{ session('active_tab') !== 'vehicle-logs' ? 'active' : '' }}" id="rental-info" role="tabpanel">
-                            <form action="{{ route('admin.car-rental.update', $carRental->id) }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                @method('PUT')
-                               <div class="row mb-3">
-                                    <label class="form-label fs-5">Loại thuê xe <span class="text-danger">*</span></label>
-                                    <div class="col-md-6">
-                                        <div class="form-check form-radio-primary mb-3">
-                                            <input class="form-check-input" type="radio" name="type" value="1" id="type1" @checked(old('type', $carRental->type) == 1)>
-                                            <label class="form-check-label" for="type1">
-                                                Thuê nguyên xe tính theo chuyến
-                                            </label>
+                                    <form action="{{ route('admin.car-rental.update', $carRental->id) }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        @method('PUT')
+                                    <div class="row mb-3">
+                                            <label class="form-label fs-5">Loại thuê xe <span class="text-danger">*</span></label>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-radio-primary mb-3">
+                                                    <input class="form-check-input" type="radio" name="type" value="1" id="type1" @checked(old('type', $carRental->type) == 1)>
+                                                    <label class="form-check-label" for="type1">
+                                                        Thuê nguyên xe tính theo chuyến
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-check form-radio-primary mb-3">
+                                                    <input class="form-check-input" type="radio" name="type" value="2" id="type2" @checked(old('type', $carRental->type) == 2)>
+                                                    <label class="form-check-label" for="type2">
+                                                        Thuê xe theo kiểu khoáng
+                                                    </label>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check form-radio-primary mb-3">
-                                            <input class="form-check-input" type="radio" name="type" value="2" id="type2" @checked(old('type', $carRental->type) == 2)>
-                                            <label class="form-check-label" for="type2">
-                                                Thuê xe theo kiểu khoáng
-                                            </label>
+
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <label class="form-label">Khách hàng <span class="text-danger">*</span></label>
+                                                <select class="form-select" name="customer_id">
+                                                    <option value="">Chọn khách hàng</option>
+                                                    @foreach ($customers as $key => $customer)
+                                                    <option value="{{ $key }}" {{ $key == $carRental->customer_id ? 'selected' : '' }}>
+                                                        {{ $customer }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="text-danger error" data-field="customer_id"></div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                                <select class="form-select" name="status">
+                                                    <option value="">Chọn trạng thái</option>
+                                                    @foreach ($carRentalstatuses as $val => $label)
+                                                    <option value="{{ $val }}" {{ $val == $carRental->status ? 'selected' : '' }}>
+                                                        {{ $label }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="text-danger error" data-field="status"></div>
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
 
-                                <div class="row mb-4">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Khách hàng <span class="text-danger">*</span></label>
-                                        <select class="form-select" name="customer_id">
-                                            <option value="">Chọn khách hàng</option>
-                                            @foreach ($customers as $key => $customer)
-                                            <option value="{{ $key }}" {{ $key == $carRental->customer_id ? 'selected' : '' }}>
-                                                {{ $customer }}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="text-danger error" data-field="customer_id"></div>
-                                    </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Phí thuê xe theo tháng <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control number" name="monthly_rental_fee" value="{{ old('monthly_rental_fee', number_format($carRental->monthly_rental_fee)) }}">
+                                                    @error('monthly_rental_fee')
+                                                    <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Số km tối đa</label>
+                                                    <input type="text" class="form-control number" name="max_distance" value="{{ old('max_distance', number_format($carRental->max_distance)) }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control date-input" name="start_date" required value="{{ old('start_date', $carRental->start_date) }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
+                                                    <input type="date" class="form-control date-input" name="end_date" value="{{ old('end_date', $carRental->end_date) }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Điểm đi</label>
+                                                    <input type="text" class="form-control" name="departure_point" placeholder="Nhập điểm đi" value="{{ old('departure_point', $carRental->departure_point) }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Điểm đến</label>
+                                                    <input type="text" class="form-control" name="destination_point" placeholder="Nhập điểm đến" value="{{ old('destination_point', $carRental->destination_point) }}">
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                    <div class="col-md-6">
-                                        <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                                        <select class="form-select" name="status">
-                                            <option value="">Chọn trạng thái</option>
-                                            @foreach ($carRentalstatuses as $val => $label)
-                                            <option value="{{ $val }}" {{ $val == $carRental->status ? 'selected' : '' }}>
-                                                {{ $label }}</option>
-                                            @endforeach
-                                        </select>
-                                        <div class="text-danger error" data-field="status"></div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Phí tăng ca/giờ</label>
+                                                    <input type="text" class="form-control number" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', number_format($carRental->overtime_fee_per_hour)) }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Phí theo km chạy vượt</label>
+                                                    <input type="text" class="form-control number" name="over_distance_fee_per_km" value="{{ old('over_distance_fee_per_km', number_format($carRental->over_distance_fee_per_km)) }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tên hàng hóa</label>
+                                            <input class="form-control" placeholder="Nhập tên hàng hóa" name="product_name" value="{{ old('product_name', $carRental->product_name) }}"></input>
+                                        </div>
                                         <div class="mb-4">
-                                            <label class="form-label">Phí thuê xe theo tháng <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control number" name="monthly_rental_fee" value="{{ old('monthly_rental_fee', number_format($carRental->monthly_rental_fee)) }}">
-                                            @error('monthly_rental_fee')
+                                            <label class="form-label">Mô tả dịch vụ</label>
+                                            <textarea class="form-control" rows="3" placeholder="Nhập Mô tả dịch vụ" name="description" value="{{ old('description', $carRental->description) }}">{{ $carRental->description }}</textarea>
+                                            @error('description')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                             @enderror
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
+
                                         <div class="mb-4">
-                                            <label class="form-label">Phí tăng ca/giờ</label>
-                                            <input type="text" class="form-control number" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', number_format($carRental->overtime_fee_per_hour)) }}">
+                                            <label class="form-label">Ghi chú</label>
+                                            <textarea class="form-control" rows="3" placeholder="Nhập Mô tả dịch vụ" name="notes" value="{{ old('notes', $carRental->notes) }}">{{ $carRental->notes }}</textarea>
+                                            @error('notes')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                            @enderror
                                         </div>
-                                    </div>
-                                </div>
 
-                                <div class="row">
-                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Số hóa đơn</label>
+                                                    <input type="text" class="form-control" name="invoice_number" value="{{ old('invoice_number', $carRental->invoice_number) }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Số bảng kê</label>
+                                                    <input type="text" class="form-control" name="statement_number" value="{{ old('statement_number', $carRental->statement_number) }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Hợp đồng số</label>
+                                                    <input type="text" class="form-control" name="contract_number" value="{{ old('contract_number', $carRental->contract_number) }}">
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="mb-4">
-                                            <label class="form-label">Số km tối đa</label>
-                                            <input type="text" class="form-control number" name="max_distance" value="{{ old('max_distance', number_format($carRental->max_distance)) }}">
+                                            <label class="block text-gray-700">File thuê xe</label>
+                                            <input type="file" name="file" class="form-control mt-1 border p-2 rounded">
+                                            @if (!empty($carRental->file))
+                                            <div class="mt-2">
+                                                <label class="block text-gray-600">Tệp hiện tại:</label>
+                                                <a href="{{ asset('storage/uploads/car_rentals/' . $carRental->file) }}" target="_blank" class="text-blue-600 underline">
+                                                    {{ $carRental->file }}
+                                                </a>
+                                            </div>
+                                            @endif
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-4">
-                                            <label class="form-label">Phí theo km chạy vượt</label>
-                                            <input type="text" class="form-control number" name="over_distance_fee_per_km" value="{{ old('over_distance_fee_per_km', number_format($carRental->over_distance_fee_per_km)) }}">
+
+                                        <hr>
+
+                                        <div>
+                                            <button type="submit" class="btn rounded-pill btn-secondary waves-effect">Save</button>
                                         </div>
-                                    </div>
+                                    </form>
                                 </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label">Mô tả dịch vụ</label>
-                                    <textarea class="form-control" rows="3" placeholder="Nhập Mô tả dịch vụ" name="description" value="{{ old('description', $carRental->description) }}">{{ $carRental->description }}</textarea>
-                                    @error('description')
-                                    <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="form-label">Ghi chú</label>
-                                    <textarea class="form-control" rows="3" placeholder="Nhập Mô tả dịch vụ" name="notes" value="{{ old('notes', $carRental->notes) }}">{{ $carRental->notes }}</textarea>
-                                    @error('notes')
-                                    <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                    @enderror
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="mb-4">
-                                            <label class="form-label">Số hóa đơn</label>
-                                            <input type="text" class="form-control" name="invoice_number" value="{{ old('invoice_number', $carRental->invoice_number) }}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-4">
-                                            <label class="form-label">Số bảng kê</label>
-                                            <input type="text" class="form-control" name="statement_number" value="{{ old('statement_number', $carRental->statement_number) }}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-4">
-                                            <label class="form-label">Đơn vị tiền tệ</label>
-                                            <input type="text" class="form-control" name="currency" value="{{ old('currency', $carRental->currency) }}">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-4">
-                                    <label class="block text-gray-700">File thuê xe</label>
-                                    <input type="file" name="file" class="form-control mt-1 border p-2 rounded">
-                                    @if (!empty($carRental->file))
-                                    <div class="mt-2">
-                                        <label class="block text-gray-600">Tệp hiện tại:</label>
-                                        <a href="{{ asset('storage/uploads/car_rentals/' . $carRental->file) }}" target="_blank" class="text-blue-600 underline">
-                                            {{ $carRental->file }}
-                                        </a>
-                                    </div>
-                                    @endif
-                                </div>
-
-                                <hr>
-
-                                <div>
-                                    <button type="submit" class="btn rounded-pill btn-secondary waves-effect">Save</button>
-                                </div>
-                            </form>
-                        </div>
 
                                 <!-- Vehicle Logs Tab -->
                                 <div class="tab-pane {{ session('active_tab') === 'vehicle-logs' ? 'active' : '' }}" id="vehicle-logs" role="tabpanel">
                                     <div class="d-flex justify-content-between align-items-center mb-4">
                                         <h5 class="card-title mb-0">Danh sách Nhật ký lộ trình xe</h5>
                                         <div>
-                                            <a href="{{ route('admin.car-rental.download-vehicle-log', ['car_rental_id' => $carRental->id]) }}" class="btn btn-success me-2">
+                                            {{-- <a href="{{ route('admin.car-rental.download-vehicle-log', ['car_rental_id' => $carRental->id]) }}" class="btn btn-success me-2">
                                                 <i class="ri-download-2-line align-bottom me-1"></i> Download nhật ký
-                                            </a>
+                                            </a> --}}
                                             <a  href="{{ route('admin.car-rental.shipment-create', parameters: $carRental->id) }}" class="btn btn-primary">
                                                 <i class="ri-add-line align-bottom me-1"></i> Thêm nhật ký
                                             </a>

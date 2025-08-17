@@ -40,8 +40,8 @@
                                 <div class="col-md-3">
                                     <select class="form-select" id="typeFilter" name="type">
                                         <option value="">Chọ loại thuê xe</option>
-                                        <option value="1" @selected(request()->type == 1)>Thê xe theo chuyến</option>
-                                        <option value="2" @selected(request()->type == 2)>Thê xe kiễu khoáng</option>
+                                        <option value="1" @selected(request()->type == 1)>Thuê xe theo chuyến</option>
+                                        <option value="2" @selected(request()->type == 2)>Thuê xe kiễu khoáng</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -177,6 +177,20 @@
                             <div class="text-danger error" data-field="status"></div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control date-input" name="start_date" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control date-input" name="end_date">
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="row">
                         <div class="col-md-6">
@@ -187,8 +201,8 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-4">
-                                <label class="form-label">Phí tăng ca/giờ</label>
-                                <input type="text" class="form-control number" name="overtime_fee_per_hour">
+                                <label class="form-label">Số km tối đa</label>
+                                <input type="text" class="form-control number" name="max_distance">
                             </div>
                         </div>
                     </div>
@@ -196,8 +210,23 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-4">
-                                <label class="form-label">Số km tối đa</label>
-                                <input type="text" class="form-control number" name="max_distance">
+                                <label class="form-label">Điểm đi</label>
+                                <input type="text" class="form-control" name="departure_point" placeholder="Nhập điểm đi">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Điểm đến</label>
+                                <input type="text" class="form-control" name="destination_point" placeholder="Nhập điểm đến">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label class="form-label">Phí tăng ca/giờ</label>
+                                <input type="text" class="form-control number" name="overtime_fee_per_hour">
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -206,6 +235,11 @@
                                 <input type="text" class="form-control number" name="over_distance_fee_per_km">
                             </div>
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Tên hàng hóa</label>
+                        <input class="form-control" placeholder="Nhập tên hàng hóa"name="product_name"></input>
                     </div>
 
                     <div class="mb-3">
@@ -236,8 +270,8 @@
                         </div>
                         <div class="col-md-4">
                             <div class="mb-4">
-                                <label class="form-label">Đơn vị tiền tệ</label>
-                                <input type="text" class="form-control" name="currency">
+                                <label class="form-label">Hợp đồng số</label>
+                                <input type="text" class="form-control" name="contract_number">
                             </div>
                         </div>
                     </div>

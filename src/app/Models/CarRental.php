@@ -32,6 +32,12 @@ class CarRental extends Model
         'invoice_number',
         'statement_number',
         'currency',
+        'start_date',
+        'end_date',
+        'departure_point',
+        'destination_point',
+        'product_name',
+        'contract_number'
     ];
 
     const OVERTIME_FEE_PER_HOUR_DEFAULT = 50000; // Default value for overtime fee per hour
