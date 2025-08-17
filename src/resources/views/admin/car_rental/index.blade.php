@@ -77,7 +77,7 @@
                                         <th>Tổng tiền</th>
                                         <th>Loại</th>
                                         <th>Ngày tạo</th>
-                                        <th>Tải file</th>
+                                        <th>File báo giá</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -108,7 +108,7 @@
                                             <td>@formatDate($carRental->created_at)</td>
                                             <td>
                                                 @if ($carRental->file)
-                                                    <a href="{{ $carRental->file }}" class="" target="_blank">Tải Excel</a>
+                                                    <a href="{{ $carRental->file }}" class="" target="_blank">Tải báo giá</a>
                                                 @endif
                                             </td>
                                         </tr>
@@ -187,7 +187,7 @@
                         <div class="col-md-6">
                             <div class="mb-4">
                                 <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control date-input" name="end_date">
+                                <input type="date" class="form-control date-input" name="end_date" required>
                             </div>
                         </div>
                     </div>
@@ -196,7 +196,7 @@
                         <div class="col-md-6">
                             <div class="mb-4">
                                 <label class="form-label">Phí thuê xe theo tháng <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control number" name="monthly_rental_fee">
+                                <input type="text" class="form-control number" name="monthly_rental_fee" required>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -277,7 +277,7 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Upload File thuê xe</label>
+                        <label class="form-label">File báo giá</label>
                         <input type="file" class="form-control" name="file">
                         <div class="text-danger error" data-field="file"></div>
                     </div>
