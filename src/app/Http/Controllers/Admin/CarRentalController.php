@@ -80,6 +80,9 @@ class CarRentalController extends Controller
      */
     public function store(StoreCarRentalRequest $request)
     {
+        if ($request->fails()) {
+            return back()->with('error', $request->errors());
+        }   
         DB::beginTransaction();
         try {
             $this->carRentalService->create($request->all());

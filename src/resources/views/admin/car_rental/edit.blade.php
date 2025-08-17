@@ -198,7 +198,7 @@
                                         </div>
 
                                         <div class="mb-4">
-                                            <label class="block text-gray-700">File thuê xe</label>
+                                            <label class="block text-gray-700">File báo giá</label>
                                             <input type="file" name="file" class="form-control mt-1 border p-2 rounded">
                                             @if (!empty($carRental->file))
                                             <div class="mt-2">
