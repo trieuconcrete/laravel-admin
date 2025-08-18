@@ -41,7 +41,7 @@
                                     <select class="form-select" id="typeFilter" name="type">
                                         <option value="">Chọ loại thuê xe</option>
                                         <option value="1" @selected(request()->type == 1)>Thuê xe theo chuyến</option>
-                                        <option value="2" @selected(request()->type == 2)>Thuê xe kiễu khoáng</option>
+                                        <option value="2" @selected(request()->type == 2)>Thuê xe kiểu khoáng</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
