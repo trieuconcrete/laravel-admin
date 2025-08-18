@@ -121,12 +121,12 @@
                                                     @enderror
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label class="form-label">Giờ khởi hành <span class="text-danger">*</span></label>
+                                                    <label class="form-label">Giờ khởi hành</label>
                                                     <input type="time" class="form-control" name="start_time" id="start_time" value="{{ old('start_time', $shipment->start_time) }}" inputmode="numeric" style="cursor:pointer;">
                                                     @error('start_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label class="form-label">Thời gian dự kiến đến<span class="text-danger">*</span></label>
+                                                    <label class="form-label">Thời gian dự kiến đến</label>
                                                     <input type="date" class="form-control" name="estimated_arrival_time"
                                                     value="@formatDateForInput($estimated_arrival_time)">
                                                     @error('estimated_arrival_time')
@@ -150,7 +150,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Số lượng chuyến</label>
-                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count) }}">
+                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count ?? 1) }}">
                                                     @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
@@ -266,7 +266,7 @@
                                                     <table class="table table-sm" id="goodsTable">
                                                         <thead>
                                                             <tr>
-                                                                <th>Tên hàng hóa <span class="text-danger">*</span></th>
+                                                                <th>Tên hàng hóa</th>
                                                                 <th>Mô tả</th>
                                                                 <th>Số lượng</th>
                                                                 <th>Trọng lượng (kg)</th>
@@ -279,7 +279,7 @@
                                                                 @foreach($shipment->goods as $i => $good)
                                                                     <tr>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][name]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.name', $good->name) }}" required>
+                                                                            <input type="text" name="goods[{{ $i }}][name]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.name', $good->name) }}">
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-name">@error('goods.'.$i.'.name'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
@@ -307,7 +307,7 @@
                                                             @else
                                                                 <tr>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][name]" class="form-control form-control-sm" value="{{ old('goods.0.name') }}" required>
+                                                                        <input type="text" name="goods[0][name]" class="form-control form-control-sm" value="{{ old('goods.0.name') }}">
                                                                         <div class="text-danger" id="error-goods-0-name">@error('goods.0.name'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>

@@ -39,6 +39,7 @@ class StoreCarRentalRequest extends FormRequest
             'status' => 'required',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
+            'end_working_hour' => 'nullable|string',
             'monthly_rental_fee' => 'required|numeric|min:0|max:1000000000',
             'description' => 'nullable|string',
             'notes' => 'nullable|string',

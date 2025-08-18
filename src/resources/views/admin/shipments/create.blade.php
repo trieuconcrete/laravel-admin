@@ -122,12 +122,12 @@
                                                     @error('departure_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label class="form-label">Giờ khởi hành <span class="text-danger">*</span></label>
+                                                    <label class="form-label">Giờ khởi hành</label>
                                                     <input type="time" class="form-control" name="start_time" id="start_time" value="{{ old('start_time') }}" inputmode="numeric" style="cursor:pointer;">
                                                     @error('start_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label class="form-label">Thời gian dự kiến đến<span class="text-danger">*</span></label>
+                                                    <label class="form-label">Thời gian dự kiến đến</label>
                                                     <input type="date" class="form-control date-input" name="estimated_arrival_time" value="@formatDateForInput($arrivalDateValue)" required autocomplete="off">
                                                     @error('estimated_arrival_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
@@ -145,7 +145,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Số lượng chuyến</label>
-                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count') }}">
+                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', 1) }}">
                                                     @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
@@ -262,7 +262,7 @@
                                                     <table class="table table-sm" id="goodsTable">
                                                         <thead>
                                                             <tr>
-                                                                <th>Tên hàng hóa <span class="text-danger">*</span></th>
+                                                                <th>Tên hàng hóa</th>
                                                                 <th>Mô tả</th>
                                                                 <th>Số lượng</th>
                                                                 <th>Trọng lượng (kg)</th>
@@ -279,7 +279,7 @@
                                                                 @foreach($goods as $i => $good)
                                                                     <tr>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][name]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.name', $good['name'] ?? '') }}" required>
+                                                                            <input type="text" name="goods[{{ $i }}][name]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.name', $good['name'] ?? '') }}">
                                                                             @error('goods.'.$i.'.name')<span class="text-danger">{{ $message }}</span>@enderror
                                                                         </td>
                                                                         <td>
