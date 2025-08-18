@@ -156,14 +156,16 @@ class ShipmentService
             // 3. Lưu danh sách hàng hóa (ShipmentGood)
             if (!empty($data['goods'])) {
                 foreach ($data['goods'] as $good) {
-                    ShipmentGood::create([
-                        'shipment_id' => $shipment->id,
-                        'name' => $good['name'],
-                        'quantity' => $good['quantity'],
-                        'unit' => $good['unit'],
-                        'notes' => $good['notes'] ?? null,
-                        'weight' => $good['weight'] ?? null,
-                    ]);
+                    if ($good['name']) {
+                        ShipmentGood::create([
+                            'shipment_id' => $shipment->id,
+                            'name' => $good['name'],
+                            'quantity' => $good['quantity'],
+                            'unit' => $good['unit'],
+                            'notes' => $good['notes'] ?? null,
+                            'weight' => $good['weight'] ?? null,
+                        ]);
+                    }
                 }
             }
 
@@ -310,14 +312,16 @@ class ShipmentService
             
             if (!empty($data['goods'])) {
                 foreach ($data['goods'] as $good) {
-                    ShipmentGood::create([
-                        'shipment_id' => $shipment->id,
-                        'name' => $good['name'],
-                        'quantity' => $good['quantity'],
-                        'unit' => $good['unit'],
-                        'notes' => $good['notes'] ?? null,
-                        'weight' => $good['weight'] ?? null,
-                    ]);
+                    if ($good['name']) {
+                        ShipmentGood::create([
+                            'shipment_id' => $shipment->id,
+                            'name' => $good['name'],
+                            'quantity' => $good['quantity'],
+                            'unit' => $good['unit'],
+                            'notes' => $good['notes'] ?? null,
+                            'weight' => $good['weight'] ?? null,
+                        ]);
+                    }
                 }
             }
             

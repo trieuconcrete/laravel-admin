@@ -636,13 +636,15 @@ function validateShipmentForm(form) {
     const origin = form.querySelector('input[name="origin"]')?.value;
     // const destination = form.querySelector('input[name="destination"]')?.value;
     const departureTime = form.querySelector('input[name="departure_time"]')?.value;
-    const estimatedArrivalTime = form.querySelector('input[name="estimated_arrival_time"]')?.value;
+    // const estimatedArrivalTime = form.querySelector('input[name="estimated_arrival_time"]')?.value;
+    const estimatedArrivalTime = true; // Tạm thời bỏ qua kiểm tra thời gian dự kiến đến để dễ dàng test form
     const startTime = form.querySelector('input[name="start_time"]')?.value;
     const endTime = form.querySelector('input[name="end_time"]')?.value;
     
     // Kiểm tra xem có ít nhất một hàng hóa hay không
     const goodsNameInputs = form.querySelectorAll('input[name^="goods["][name$="][name]"]');
-    const hasGoods = goodsNameInputs.length > 0 && Array.from(goodsNameInputs).some(input => input.value.trim() !== '');
+    // const hasGoods = goodsNameInputs.length > 0 && Array.from(goodsNameInputs).some(input => input.value.trim() !== '');
+    const hasGoods = true; // Tạm thời bỏ qua kiểm tra hàng hóa để dễ dàng test form
     
     // Kiểm tra các trường ở tab thông tin vận chuyển
     if (!customerId || !origin || !departureTime || !estimatedArrivalTime || !hasGoods) {
@@ -688,14 +690,14 @@ function validateShipmentForm(form) {
         // const unitValue = unitInput ? unitInput.value.trim() : '';
         
         // Kiểm tra tên hàng hóa
-        if (nameValue === '') {
-            goodsErrorMessage = 'Tên hàng hóa không được để trống!';
-            goodsErrorField = input;
-            goodsValid = false;
-            // Hiển thị lỗi trực tiếp trong trường
-            document.getElementById(`error-goods-${rowIndex}-name`).textContent = goodsErrorMessage;
-            return;
-        }
+        // if (nameValue === '') {
+        //     goodsErrorMessage = 'Tên hàng hóa không được để trống!';
+        //     goodsErrorField = input;
+        //     goodsValid = false;
+        //     // Hiển thị lỗi trực tiếp trong trường
+        //     document.getElementById(`error-goods-${rowIndex}-name`).textContent = goodsErrorMessage;
+        //     return;
+        // }
         
         // Kiểm tra số lượng
         // if (quantityValue === '' || parseInt(quantityValue) < 1) {
