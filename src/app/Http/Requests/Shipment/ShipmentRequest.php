@@ -241,7 +241,7 @@ class ShipmentRequest extends FormRequest
             'company2' => 'nullable|string|max:255',
             'company3' => 'nullable|string|max:255',
             'departure_time' => 'required|' . $this->getSystemDateFormatRule(),
-            'estimated_arrival_time' => 'required|' . $this->getSystemDateFormatRule() . '|after_or_equal:departure_time',
+            'estimated_arrival_time' => 'nullable|' . $this->getSystemDateFormatRule() . '|after_or_equal:departure_time',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
             'run_date' => 'nullable|date',
@@ -261,7 +261,7 @@ class ShipmentRequest extends FormRequest
             'deductions.*' => 'nullable', // Cho phép cả numeric và string cho "Ghi chú"
             // Hàng hóa
             'goods' => 'array',
-            'goods.*.name' => 'required|string|max:255',
+            'goods.*.name' => 'nullable|string|max:255',
             'goods.*.quantity' => 'nullable|integer|min:0',
             'goods.*.unit' => 'nullable|numeric|min:0',
             'goods.*.notes' => 'nullable|string|max:255',
