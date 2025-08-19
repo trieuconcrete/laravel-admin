@@ -403,4 +403,105 @@ class CarRental extends Model
             default => 'Không xác định',
         };
     }
+
+    /**
+     * Tính tổng công nợ của khách hàng (tổng tiền phải trả)
+     * 
+     * @return array
+     */
+    public function calculateTotalDebt(): array
+    {
+        // Lấy thông tin cơ bản
+        $monthlyRentalFee = $this->monthly_rental_fee ?? 0;
+        
+        // Tính tổng phí làm thêm giờ từ shipments
+        $totalOvertimeCost = $this->shipments()->sum('total_overtime_cost') ?? 0;
+        
+        // Tính tổng phí cầu đường từ shipments
+        $totalTollFees = 0;
+        foreach ($this->shipments as $shipment) {
+            $totalTollFees += $shipment->tollFees->sum('fee_amount') ?? 0;
+        }
+        
+        // Tính tổng phí bãi xe từ shipments
+        $totalParkingFees = $this->shipments()->sum('parking_fee') ?? 0;
+        
+        // Tính tổng km đã chạy từ shipments
+        $totalDistance = $this->shipments()->sum('distance') ?? 0;
+        
+        // Tính phí vượt giới hạn km
+        $overDistanceFee = 0;
+        $maxDistance = $this->max_distance;
+        $overDistanceFeePerKm = $this->over_distance_fee_per_km ?? self::OVER_DISTANCE_FEE_PER_KM_DEFAULT;
+
+        if ($maxDistance && $maxDistance > 0 && $totalDistance > $maxDistance) {
+            $overDistanceFee = ($totalDistance - $maxDistance) * $overDistanceFeePerKm;
+        }
+        
+        // Tính subtotal (tổng trước thuế)
+        $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFees + $totalParkingFees + $overDistanceFee;
+        
+        // Tính thuế VAT (mặc định 8%)
+        $vatRate = 0.08; // Có thể thay đổi thành field trong database sau
+        $vatAmount = $subtotal * $vatRate;
+        
+        // Tính tổng cộng sau thuế
+        $totalWithVat = $subtotal + $vatAmount;
+        
+        // Tính số tiền đã thanh toán (nếu có)
+        $paidAmount = 0; // Cần implement payment tracking sau
+        
+        // Tính công nợ còn lại
+        $remainingDebt = $totalWithVat - $paidAmount;
+        
+        return [
+            'monthly_rental_fee' => $monthlyRentalFee,
+            'total_overtime_cost' => $totalOvertimeCost,
+            'total_toll_fees' => $totalTollFees,
+            'total_parking_fees' => $totalParkingFees,
+            'total_distance' => $totalDistance,
+            'over_distance_fee' => $overDistanceFee,
+            'subtotal' => $subtotal,
+            'vat_rate' => $vatRate,
+            'vat_amount' => $vatAmount,
+            'total_with_vat' => $totalWithVat,
+            'paid_amount' => $paidAmount,
+            'remaining_debt' => $remainingDebt,
+            'currency' => $this->currency ?? 'VNĐ',
+            'calculation_date' => now()->format('Y-m-d H:i:s'),
+        ];
+    }
+
+    /**
+     * Get total debt attribute
+     *
+     * @return float
+     */
+    public function getTotalDebtAttribute(): float
+    {
+        $calculation = $this->calculateTotalDebt();
+        return $calculation['remaining_debt'];
+    }
+
+    /**
+     * Get paid amount attribute
+     *
+     * @return float
+     */
+    public function getPaidAmountAttribute(): float
+    {
+        $calculation = $this->calculateTotalDebt();
+        return $calculation['paid_amount'];
+    }
+
+    /**
+     * Get remaining debt attribute
+     *
+     * @return float
+     */
+    public function getRemainingDebtAttribute(): float
+    {
+        $calculation = $this->calculateTotalDebt();
+        return $calculation['remaining_debt'];
+    }
 }

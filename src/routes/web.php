@@ -76,6 +76,8 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::delete('car-rental/shipment/{shipmentId}/destroy-vehicle-log-from-shipment', [CarRentalController::class, 'destroyCarRentalVehicleLogFromShipment'])->name('car-rental.destroy-vehicle-log-from-shipment');
     
     Route::get('car-rental/{car_rental_id}/download-vehicle-log', [CarRentalController::class, 'downloadVehicleLog'])->name('car-rental.download-vehicle-log');
+    Route::get('car-rental/{id}/debt-summary', [CarRentalController::class, 'showDebtSummary'])->name('car-rental.debt-summary');
+    Route::get('car-rental/{id}/export-debt-summary', [CarRentalController::class, 'exportDebtSummary'])->name('car-rental.export-debt-summary');
     Route::resource('shipments', ShipmentController::class);
     
     // Shipment Report routes

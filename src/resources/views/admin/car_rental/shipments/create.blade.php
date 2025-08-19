@@ -69,6 +69,7 @@
                                                 <div class="col-md-4">
                                                     <label class="form-label">Ngày chạy <span class="text-danger">*</span></label>
                                                     <input type="date" class="form-control" name="run_date" id="run_date" value="{{ old('run_date') }}" required>
+                                                    @error('run_date')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
@@ -156,7 +157,7 @@
                                                             <div class="col-12">
                                                                 <small class="text-muted">
                                                                     <i class="fas fa-info-circle me-1"></i>
-                                                                    OT được tính từ 17:30, +1h nếu có tăng ca trưa
+                                                                    OT được tính từ <span id="end_working_hour_display">{{ $carRental->end_working_hour ? \Carbon\Carbon::parse($carRental->end_working_hour)->format('H:i') : '17:30' }}</span>, +1h nếu có tăng ca trưa
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -628,6 +629,70 @@
                 }
             });
         }
+        
+        // Function để tính toán và hiển thị OT
+        function calculateAndDisplayOT() {
+            const startTime = document.getElementById('start_time').value;
+            const endTime = document.getElementById('end_time').value;
+            const runDate = document.getElementById('run_date').value;
+            const overtimeRate = document.getElementById('overtime_rate').value.replace(/,/g, '') || 50000;
+            const isOvertimeAtNoon = document.getElementById('is_overtime_at_noon').checked;
+            
+            if (startTime && endTime && runDate) {
+                // Lấy end_working_hour từ car rental (fallback về 17:30)
+                const endWorkingHour = '{{ $carRental->end_working_hour ? \Carbon\Carbon::parse($carRental->end_working_hour)->format('H:i') : "17:30" }}';
+                
+                // Cập nhật hiển thị end_working_hour (format H:i)
+                const endWorkingHourDisplay = document.getElementById('end_working_hour_display');
+                if (endWorkingHourDisplay) {
+                    // Format thời gian về dạng H:i (bỏ giây nếu có)
+                    const formattedTime = endWorkingHour.split(':').slice(0, 2).join(':');
+                    endWorkingHourDisplay.textContent = formattedTime;
+                }
+                
+                // Tính toán OT
+                const startDateTime = new Date(runDate + ' ' + startTime);
+                const endDateTime = new Date(runDate + ' ' + endTime);
+                const overtimeStart = new Date(runDate + ' ' + endWorkingHour);
+                
+                let overtimeHours = 0;
+                if (endDateTime > overtimeStart) {
+                    const effectiveStart = startDateTime > overtimeStart ? startDateTime : overtimeStart;
+                    overtimeHours = (endDateTime - effectiveStart) / (1000 * 60 * 60); // Convert to hours
+                }
+                
+                // Thêm tăng ca trưa
+                if (isOvertimeAtNoon) {
+                    overtimeHours += 1;
+                }
+                
+                const totalOvertimeCost = overtimeHours * overtimeRate;
+                const workingHours = overtimeHours - (isOvertimeAtNoon ? 1 : 0);
+                const noonOvertime = isOvertimeAtNoon ? 1 : 0;
+                
+                // Cập nhật hiển thị
+                document.getElementById('overtime_hours_display').textContent = overtimeHours.toFixed(2) + ' giờ';
+                document.getElementById('total_overtime_cost_display').textContent = totalOvertimeCost.toLocaleString() + ' VNĐ';
+                document.getElementById('working_hours_display').textContent = workingHours.toFixed(2) + ' giờ';
+                document.getElementById('noon_overtime_display').textContent = noonOvertime.toFixed(2) + ' giờ';
+                
+                // Cập nhật hidden fields
+                document.querySelector('input[name="calculated_overtime_hours"]').value = overtimeHours;
+                document.querySelector('input[name="calculated_total_overtime_cost"]').value = totalOvertimeCost;
+                document.querySelector('input[name="working_hours"]').value = workingHours;
+                document.querySelector('input[name="noon_overtime_hours"]').value = noonOvertime;
+            }
+        }
+        
+        // Thêm event listeners cho các trường thời gian
+        document.getElementById('start_time').addEventListener('change', calculateAndDisplayOT);
+        document.getElementById('end_time').addEventListener('change', calculateAndDisplayOT);
+        document.getElementById('run_date').addEventListener('change', calculateAndDisplayOT);
+        document.getElementById('overtime_rate').addEventListener('input', calculateAndDisplayOT);
+        document.getElementById('is_overtime_at_noon').addEventListener('change', calculateAndDisplayOT);
+        
+        // Tính toán ban đầu
+        calculateAndDisplayOT();
     });
 </script>
 <script>
