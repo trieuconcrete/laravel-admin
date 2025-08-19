@@ -22,6 +22,7 @@ use App\Http\Requests\CarRental\UpdateCarRentalRequest;
 use App\Repositories\Interface\VehicleRepositoryInterface as VehicleRepository;
 use App\Repositories\Interface\CustomerRepositoryInterface as CustomerRepository;
 use App\Models\Customer;
+use App\Models\Shipment;
 
 class CarRentalController extends Controller
 {
@@ -46,7 +47,7 @@ class CarRentalController extends Controller
     {
         $filters = $request->only(['type', 'status', 'keyword']);
         $customers = $this->customerRepository->all()->pluck('name', 'id');
-        $query = CarRental::with('customer')->orderBy('created_at', 'DESC');
+        $query = CarRental::with(['customer', 'shipmentReports'])->orderBy('created_at', 'DESC');
         /** search vehicle type */
         if (!empty($filters['type'])) {
             $query->where('type', $filters['type']);
@@ -98,7 +99,7 @@ class CarRentalController extends Controller
 
     public function show($id)
     {
-        $carRental = CarRental::with(['carRentalVehicles'])->findOrFail($id);
+        $carRental = CarRental::with(['carRentalVehicles', 'shipmentReports'])->findOrFail($id);
         if (request()->ajax()) {
             return view('admin.car_rental.partials.detail', compact('carRental'))->render();
         }
@@ -107,7 +108,7 @@ class CarRentalController extends Controller
 
     public function edit($id)
     {
-        $carRental = CarRental::findOrFail($id);
+        $carRental = CarRental::with('shipmentReports')->findOrFail($id);
         $customers = $this->customerRepository->all()->pluck('name', 'id');
         $vehicles = Vehicle::with('vehicleType')->where('status', Vehicle::STATUS_ACTIVE)->get();
         $carRentalstatuses = CarRental::getStatuses();
@@ -1498,7 +1499,7 @@ class CarRentalController extends Controller
         // Lấy thông tin cơ bản
         $monthlyRentalFee = $carRental->monthly_rental_fee ?? 0;
         $overDistanceFeePerKm = $carRental->over_distance_fee_per_km ?? 0;
-        $vatRate = $carRental->vat_rate ?? 10; // Default 10%
+        $vatRate = $carRental->vat_rate ?? 8; // Default 10%
         
         // Tính tổng các chi phí từ shipments
         $totalOvertimeCost = $shipments->sum('overtime_cost') ?? 0;
@@ -1590,5 +1591,303 @@ class CarRentalController extends Controller
             Log::error('Failed to export debt summary', ['error' => $e->getMessage()]);
             return back()->with('error', 'Không thể export tổng kết công nợ: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Tổng kết công nợ theo khoảng thời gian
+     *
+     * @param CarRental $carRental
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function summarizeReport(CarRental $carRental, Request $request)
+    {
+        try {
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            $userId = auth('admin')->id();
+            
+            // Validate dates
+            if (!$startDate || !$endDate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng cung cấp ngày bắt đầu và kết thúc'
+                ], 400);
+            }
+            
+            // Get shipments based on car rental type
+            $shipmentType = $carRental->type == 1 ? 21 : 22; // 21: thuê nguyên xe, 22: thuê kiểu khoáng
+            
+            $shipments = Shipment::where('car_rental_id', $carRental->id)
+                ->where('shipment_type', Shipment::SHIPMENT_TYPE_MONTHLY_RENTAL)
+                ->whereBetween('run_date', [$startDate, $endDate])
+                ->get();
+            
+            if ($shipments->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có dữ liệu chuyến hàng trong khoảng thời gian này'
+                ], 400);
+            }
+            
+            // Calculate summary data
+            $summary = $this->calculateDebtSummary($carRental, $shipments, $startDate, $endDate);
+            
+            // Tìm hoặc tạo báo cáo
+            $period = date('Y-m', strtotime($startDate));
+            if ($startDate != $endDate && date('Y-m', strtotime($startDate)) != date('Y-m', strtotime($endDate))) {
+                $period = date('Y-m', strtotime($startDate)) . ' - ' . date('Y-m', strtotime($endDate));
+            }
+            
+            // Kiểm tra xem có báo cáo nào đã tồn tại với car_rental_id này không
+            $existingReport = \App\Models\ShipmentReport::where('car_rental_id', $carRental->id)
+                ->where('monthly', $period)
+                ->first();
+                
+            if ($existingReport) {
+                // Cập nhật báo cáo đã tồn tại
+                $existingReport->update([
+                    'total_amount' => $summary['total_with_vat'],
+                    'statement_start_date' => $startDate,
+                    'statement_end_date' => $endDate,
+                    'shipment_type' => $carRental->type == 1 ? 21 : 22,
+                    'updated_by' => $userId,
+                    'is_finalized' => true
+                ]);
+                $report = $existingReport;
+            } else {
+                // Kiểm tra xem có báo cáo nào đã tồn tại với customer_id, monthly, shipment_type giống nhau không
+                $conflictingReport = \App\Models\ShipmentReport::where('customer_id', $carRental->customer_id)
+                    ->where('monthly', $period)
+                    ->where('shipment_type', $carRental->type == 1 ? 21 : 22)
+                    ->whereNull('car_rental_id')
+                    ->first();
+                    
+                if ($conflictingReport) {
+                    // Cập nhật báo cáo đã tồn tại để thêm car_rental_id
+                    $conflictingReport->update([
+                        'car_rental_id' => $carRental->id,
+                        'total_amount' => $summary['total_with_vat'],
+                        'statement_start_date' => $startDate,
+                        'statement_end_date' => $endDate,
+                        'updated_by' => $userId,
+                        'is_finalized' => true
+                    ]);
+                    $report = $conflictingReport;
+                } else {
+                    // Tạo báo cáo mới
+                    $report = \App\Models\ShipmentReport::create([
+                        'customer_id' => $carRental->customer_id,
+                        'monthly' => $period,
+                        'shipment_type' => $carRental->type == 1 ? 21 : 22,
+                        'statement_start_date' => $startDate,
+                        'statement_end_date' => $endDate,
+                        'car_rental_id' => $carRental->id,
+                        'total_amount' => $summary['total_with_vat'],
+                        'created_by' => $userId,
+                        'updated_by' => $userId,
+                        'is_finalized' => true
+                    ]);
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Tổng kết công nợ thành công',
+                'data' => [
+                    'period' => $period,
+                    'total_amount' => $summary['total_with_vat'],
+                    'formatted_amount' => number_format($summary['total_with_vat'], 0, ',', '.'),
+                    'shipment_count' => $shipments->count(),
+                    'report_id' => $report->id,
+                    'created_at' => $report->created_at->format('d/m/Y H:i'),
+                    'updated_at' => $report->updated_at->format('d/m/Y H:i')
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error summarizing car rental debt', [
+                'car_rental_id' => $carRental->id,
+                'start_date' => $request->input('start_date'),
+                'end_date' => $request->input('end_date'),
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi khi tổng kết công nợ: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Xuất Excel tổng kết công nợ
+     *
+     * @param CarRental $carRental
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportSummary(CarRental $carRental, Request $request)
+    {
+        try {
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            
+            // Get shipments based on car rental type
+            $shipmentType = $carRental->type == 1 ? 21 : 22; // 21: thuê nguyên xe, 22: thuê kiểu khoáng
+            
+            $shipments = Shipment::where('car_rental_id', $carRental->id)
+                ->where('shipment_type', $shipmentType)
+                ->whereBetween('run_date', [$startDate, $endDate])
+                ->get();
+            
+            if ($shipments->isEmpty()) {
+                return back()->with('error', 'Không có dữ liệu chuyến hàng trong khoảng thời gian này');
+            }
+            
+            // Calculate summary data
+            $summary = $this->calculateDebtSummary($carRental, $shipments, $startDate, $endDate);
+            
+            // Tìm hoặc tạo báo cáo
+            $period = date('Y-m', strtotime($startDate));
+            if ($startDate != $endDate && date('Y-m', strtotime($startDate)) != date('Y-m', strtotime($endDate))) {
+                $period = date('Y-m', strtotime($startDate)) . ' - ' . date('Y-m', strtotime($endDate));
+            }
+            
+            // Kiểm tra xem có báo cáo nào đã tồn tại với car_rental_id này không
+            $report = \App\Models\ShipmentReport::where('car_rental_id', $carRental->id)
+                ->where('monthly', $period)
+                ->first();
+                
+            if (!$report) {
+                // Kiểm tra xem có báo cáo nào đã tồn tại với customer_id, monthly, shipment_type giống nhau không
+                $conflictingReport = \App\Models\ShipmentReport::where('customer_id', $carRental->customer_id)
+                    ->where('monthly', $period)
+                    ->where('shipment_type', $carRental->type == 1 ? 21 : 22)
+                    ->whereNull('car_rental_id')
+                    ->first();
+                    
+                if ($conflictingReport) {
+                    // Cập nhật báo cáo đã tồn tại để thêm car_rental_id
+                    $conflictingReport->update([
+                        'car_rental_id' => $carRental->id,
+                        'total_amount' => $summary['total_with_vat'],
+                        'statement_start_date' => $startDate,
+                        'statement_end_date' => $endDate,
+                        'updated_by' => auth('admin')->id(),
+                        'is_finalized' => true
+                    ]);
+                    $report = $conflictingReport;
+                } else {
+                    // Tạo báo cáo mới
+                    $report = \App\Models\ShipmentReport::create([
+                        'customer_id' => $carRental->customer_id,
+                        'monthly' => $period,
+                        'shipment_type' => $carRental->type == 1 ? 21 : 22,
+                        'statement_start_date' => $startDate,
+                        'statement_end_date' => $endDate,
+                        'car_rental_id' => $carRental->id,
+                        'total_amount' => $summary['total_with_vat'],
+                        'created_by' => auth('admin')->id(),
+                        'updated_by' => auth('admin')->id(),
+                        'is_finalized' => true
+                    ]);
+                }
+            }
+            
+            $fileName = 'Tong_ket_cong_no_' . $carRental->id . '_' . date('Ymd') . '.xlsx';
+            
+            return Excel::download(new \App\Exports\DebtSummaryExport($carRental, $summary, $shipments), $fileName);
+        } catch (\Exception $e) {
+            Log::error('Error exporting car rental debt summary', [
+                'car_rental_id' => $carRental->id,
+                'start_date' => $request->input('start_date'),
+                'end_date' => $request->input('end_date'),
+                'error' => $e->getMessage()
+            ]);
+            
+            return back()->with('error', 'Đã xảy ra lỗi khi xuất tổng kết công nợ: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Tính toán tổng kết công nợ
+     *
+     * @param CarRental $carRental
+     * @param Collection $shipments
+     * @param string $startDate
+     * @param string $endDate
+     * @return array
+     */
+    private function calculateDebtSummary($carRental, $shipments, $startDate, $endDate)
+    {
+        $summary = [];
+        
+        // Thông tin cơ bản
+        $summary['filter_start_date'] = $startDate;
+        $summary['filter_end_date'] = $endDate;
+        $summary['calculation_date'] = now()->format('d/m/Y H:i');
+        $summary['currency'] = 'VND';
+        
+        // Tính toán các chi phí
+        if ($carRental->type == 2) { // Thuê xe theo kiểu khoáng
+            // Tính số tháng
+            $start = \Carbon\Carbon::parse($startDate);
+            $end = \Carbon\Carbon::parse($endDate);
+            $months = $start->diffInMonths($end) + 1;
+            
+            $summary['monthly_rental_fee'] = $carRental->monthly_rental_fee ?? 0;
+            $summary['total_months'] = $months;
+            $summary['monthly_total'] = $summary['monthly_rental_fee'] * $months;
+        } else { // Thuê nguyên xe tính theo chuyến
+            $summary['monthly_rental_fee'] = 0;
+            $summary['total_months'] = 0;
+            $summary['monthly_total'] = 0;
+        }
+        
+        // Tổng chi phí tăng ca
+        $summary['total_overtime_cost'] = $shipments->sum('overtime_cost') ?? 0;
+        
+        // Tổng phí cầu đường
+        $tollFees = 0;
+        foreach ($shipments as $shipment) {
+            $tollFees += $shipment->tollFees->sum('fee_amount') ?? 0;
+        }
+        $summary['total_toll_fees'] = $tollFees;
+        
+        // Tổng phí đỗ xe
+        $summary['total_parking_fees'] = $shipments->sum('parking_fee') ?? 0;
+        
+        // Tổng quãng đường
+        $summary['total_distance'] = $shipments->sum('distance') ?? 0;
+        
+        // Phí vượt quãng đường
+        $summary['over_distance_fee'] = 0;
+        if ($carRental->type == 2 && $carRental->max_distance > 0) {
+            $maxDistance = $carRental->max_distance * $months;
+            if ($summary['total_distance'] > $maxDistance) {
+                $overDistance = $summary['total_distance'] - $maxDistance;
+                $summary['over_distance_fee'] = $overDistance * ($carRental->over_distance_fee_per_km ?? 0);
+            }
+        }
+        
+        // Tổng cộng (chưa VAT)
+        $summary['subtotal'] = $summary['monthly_total'] + 
+                              $summary['total_overtime_cost'] + 
+                              $summary['total_toll_fees'] + 
+                              $summary['total_parking_fees'] + 
+                              $summary['over_distance_fee'];
+        
+        // VAT
+        $summary['vat_rate'] = $carRental->customer->vat_rate ?? 8; // Default 8%
+        $summary['vat_amount'] = $summary['subtotal'] * ($summary['vat_rate'] / 100);
+        
+        // Tổng cộng (có VAT)
+        $summary['total_with_vat'] = $summary['subtotal'] + $summary['vat_amount'];
+        
+        // Đã thanh toán và còn nợ
+        $summary['paid_amount'] = 0; // Tạm thời để 0, cần phát triển thêm tính năng theo dõi thanh toán
+        $summary['remaining_debt'] = $summary['total_with_vat'] - $summary['paid_amount'];
+        
+        return $summary;
     }
 }
