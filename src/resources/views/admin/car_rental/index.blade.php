@@ -88,6 +88,7 @@
                                                 <div class="btn-group">
                                                     <a href="{{ route('admin.car-rental.edit', $carRental) }}"
                                                         class="btn btn-sm btn-outline-primary ">Chi tiết</a>
+                                                    @if ($carRental->status == \App\Models\CarRental::STATUS_APPROVED)
                                                     <button type="button"
                                                         class="btn btn-sm btn-outline-secondary summarize-debt-btn"
                                                         data-car-rental-id="{{ $carRental->id }}"
@@ -97,6 +98,7 @@
                                                         <i class="las la-calculator me-1"></i>
                                                         Tổng kết công nợ
                                                     </button>
+                                                    @endif
                                                     <button type="button"
                                                         class="btn btn-sm btn-outline-danger delete-car-rental-btn"
                                                         data-car-rental-id="{{ $carRental->id }}">
@@ -112,7 +114,13 @@
                                                 </div>
                                             </td>
                                             <td><span class="badge bg-{{ $carRental->getStatusColorAttribute() }}">{{ $carRental->getStatusLabelAttribute() }}</span></td>
-                                            <td>{{ optional($carRental->customer)->name }}</td>
+                                            <td>
+                                                 @if($carRental->customer)
+                                                    <a href="{{ route('admin.customers.show', parameters: optional($carRental->customer)->id) }}" class="text-primary" target="_blank">
+                                                        {{ $carRental->customer->name ?? '' }}
+                                                    </a>
+                                                @endif
+                                            </td>
                                             <td>{{ number_format($carRental->total_amount_with_vat) }}</td>
                                             <td>{{ $carRental->getTypeLabelAttribute() }}</td>
                                             <td>
