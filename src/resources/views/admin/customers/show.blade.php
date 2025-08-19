@@ -24,7 +24,7 @@
                                         <div class="col-md-4">
                                             <div class="text-center">
                                                 <div class="fs-4 fw-bold text-primary" id="totalReported">-</div>
-                                                <div class="text-muted">Tổng bảng kê</div>
+                                                <div class="text-muted">Tổng công nợ</div>
                                                 <small class="text-info d-none" id="refundNote">(*) Có điều chỉnh</small>
                                             </div>
                                         </div>
@@ -236,27 +236,25 @@
                                         <select class="form-control" name="shipment_type" id="shipment_type">
                                             <option value="">Tất cả loại chuyến xe</option>
                                             <option value="1">Khách chạy theo chuyến</option>
-                                            <option value="2">Khách chạy theo tháng</option>
                                             <option value="3">Xe nâng</option>
                                             <option value="4">Xe đường dài bắc-nam</option>
                                         </select>
                                     </div>
                                 </div>
-                                
                             </div>
 
                             <div class="row mb-5 mt-5">
                                 <div class="col-md-12 text-center">
                                     <button type="button" id="searchShipments" class="btn btn-info me-2">
-                                        <i class="ri-search-line"></i>Tìm kiếm chuyến xe
+                                        <i class="ri-search-line me-1"></i>Tìm chuyến xe
                                     </button>
                                     <button type="button" id="summarizeReport"
                                         class="btn btn-secondary me-2">
                                         <i class="las la-calculator align-middle me-1"></i>
-                                        Tổng kết bảng kê
+                                        Tổng kết công nợ
                                     </button>
                                     <button type="button" id="exportInvoice" class="btn btn-outline-primary">
-                                        <i class="las la-file-invoice align-middle me-2"></i> Xuất bảng kê
+                                        <i class="las la-file-invoice align-middle me-1"></i> Xuất bảng kê
                                     </button>
                                 </div>
                             </div>
