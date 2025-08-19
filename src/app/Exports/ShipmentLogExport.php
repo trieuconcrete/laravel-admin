@@ -187,7 +187,10 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
                     
                     $startTime = Carbon::parse($runDate . ' ' . $startTimeOnly);
                     $endTime = Carbon::parse($runDate . ' ' . $endTimeOnly);
-                    $overtimeStart = Carbon::parse($runDate . ' 17:30:00');
+                    
+                    // Sử dụng end_working_hour từ car rental thay vì cố định 17:30
+                    $endWorkingHour = $this->carRental->end_working_hour ?? '17:30';
+                    $overtimeStart = Carbon::parse($runDate . ' ' . $endWorkingHour . ':00');
                     
                     if ($endTime->greaterThan($overtimeStart)) {
                         $effectiveStart = $startTime->greaterThan($overtimeStart) ? $startTime : $overtimeStart;
