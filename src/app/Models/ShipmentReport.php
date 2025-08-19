@@ -16,6 +16,7 @@ class ShipmentReport extends Model
         'statement_start_date',
         'statement_end_date',
         'customer_id',
+        'car_rental_id',
         'total_amount',
         'created_by',
         'updated_by',
@@ -38,6 +39,14 @@ class ShipmentReport extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    /**
+     * Quan hệ với thuê xe
+     */
+    public function carRental()
+    {
+        return $this->belongsTo(CarRental::class);
     }
 
     /**
@@ -167,6 +176,54 @@ class ShipmentReport extends Model
                 'updated_by' => $userId,
                 'is_finalized' => true
             ]
+        );
+    }
+    
+    /**
+     * Tạo hoặc cập nhật báo cáo cho thuê xe
+     * 
+     * @param int $customerId ID khách hàng
+     * @param string $period Kỳ báo cáo (tháng hoặc khoảng thời gian)
+     * @param float $totalAmount Tổng số tiền
+     * @param int|null $userId ID người dùng tạo/cập nhật báo cáo
+     * @param array $metadata Dữ liệu bổ sung (car_rental_id, start_date, end_date, type)
+     * @return ShipmentReport
+     */
+    public static function createOrUpdateReport($customerId, $period, $totalAmount, $userId = null, $metadata = [])
+    {
+        $data = [
+            'total_amount' => $totalAmount,
+            'updated_by' => $userId,
+            'is_finalized' => true
+        ];
+        
+        // Thêm metadata nếu có
+        if (!empty($metadata['car_rental_id'])) {
+            $data['car_rental_id'] = $metadata['car_rental_id'];
+        }
+        
+        if (!empty($metadata['start_date'])) {
+            $data['statement_start_date'] = $metadata['start_date'];
+        }
+        
+        if (!empty($metadata['end_date'])) {
+            $data['statement_end_date'] = $metadata['end_date'];
+        }
+        
+        if (isset($metadata['type'])) {
+            // Chuyển đổi từ car_rental.type sang shipment_type
+            $data['shipment_type'] = $metadata['type'] == 1 ? 21 : 22; // 21: thuê nguyên xe, 22: thuê kiểu khoáng
+        }
+        
+        // Nếu đã có created_by thì giữ nguyên, nếu không thì gán userId
+        $data['created_by'] = $userId;
+        
+        return self::updateOrCreate(
+            [
+                'customer_id' => $customerId,
+                'monthly' => $period
+            ],
+            $data
         );
     }
 } 

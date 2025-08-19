@@ -78,6 +78,11 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::get('car-rental/{car_rental_id}/download-vehicle-log', [CarRentalController::class, 'downloadVehicleLog'])->name('car-rental.download-vehicle-log');
     Route::get('car-rental/{id}/debt-summary', [CarRentalController::class, 'showDebtSummary'])->name('car-rental.debt-summary');
     Route::get('car-rental/{id}/export-debt-summary', [CarRentalController::class, 'exportDebtSummary'])->name('car-rental.export-debt-summary');
+    
+    // Car rental tổng kết công nợ routes
+    Route::post('car-rental/{carRental}/summarize-report', [CarRentalController::class, 'summarizeReport'])->name('car-rental.summarize-report');
+    Route::get('car-rental/{carRental}/export-summary', [CarRentalController::class, 'exportSummary'])->name('car-rental.export-summary');
+    
     Route::resource('shipments', ShipmentController::class);
     
     // Shipment Report routes
@@ -114,6 +119,10 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
         Route::post('/bulk-delete', [ShipmentDeductionTypeController::class, 'bulkDelete'])->name('bulk-delete');
         Route::post('/bulk-update-status', [ShipmentDeductionTypeController::class, 'bulkUpdateStatus'])->name('bulk-update-status');
     });
+    
+    // API routes inside admin
+    Route::get('/api/vehicles/by-car-rental', [VehicleController::class, 'getByCarRental'])
+        ->name('api.vehicles.by-car-rental');
 });
 
 
@@ -190,7 +199,3 @@ Route::get('/debug/debt', function () {
         ]
     ];
 });
-
-
-Route::get('/api/vehicles/by-car-rental', [VehicleController::class, 'getByCarRental'])
-    ->name('api.vehicles.by-car-rental');

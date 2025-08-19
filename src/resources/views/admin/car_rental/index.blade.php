@@ -76,6 +76,7 @@
                                         <th>Khách hàng</th>
                                         <th>Tổng tiền</th>
                                         <th>Loại</th>
+                                        <th>Tổng kết công nợ</th>
                                         <th>Ngày tạo</th>
                                         <th>File báo giá</th>
                                     </tr>
@@ -87,6 +88,15 @@
                                                 <div class="btn-group">
                                                     <a href="{{ route('admin.car-rental.edit', $carRental) }}"
                                                         class="btn btn-sm btn-outline-primary ">Chi tiết</a>
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-outline-secondary summarize-debt-btn"
+                                                        data-car-rental-id="{{ $carRental->id }}"
+                                                        data-car-rental-type="{{ $carRental->type }}"
+                                                        data-start-date="{{ $carRental->start_date }}"
+                                                        data-end-date="{{ $carRental->end_date }}">
+                                                        <i class="las la-calculator me-1"></i>
+                                                        Tổng kết công nợ
+                                                    </button>
                                                     <button type="button"
                                                         class="btn btn-sm btn-outline-danger delete-car-rental-btn"
                                                         data-car-rental-id="{{ $carRental->id }}">
@@ -105,6 +115,19 @@
                                             <td>{{ optional($carRental->customer)->name }}</td>
                                             <td>{{ number_format($carRental->total_amount_with_vat) }}</td>
                                             <td>{{ $carRental->getTypeLabelAttribute() }}</td>
+                                            <td>
+                                                @if($carRental->shipmentReports && $carRental->shipmentReports->count() > 0)
+                                                    <span class="badge bg-success">
+                                                        <i class="las la-check me-1"></i>
+                                                        Đã tổng kết ({{ $carRental->shipmentReports->count() }})
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-secondary">
+                                                        <i class="las la-clock me-1"></i>
+                                                        Chưa tổng kết
+                                                    </span>
+                                                @endif
+                                            </td>
                                             <td>@formatDate($carRental->created_at)</td>
                                             <td>
                                                 @if ($carRental->file)
@@ -306,6 +329,40 @@
         </div>
     </div>
 
+    <!-- Modal Tổng kết công nợ -->
+    <div class="modal fade" id="debtSummaryModal" tabindex="-1" aria-labelledby="debtSummaryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="debtSummaryModalLabel">Xác nhận tổng kết công nợ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="debtSummaryForm">
+                        <div class="mb-3">
+                            <label for="reportStartDate" class="form-label">Từ ngày</label>
+                            <input type="text" class="form-control" readonly id="reportStartDate" name="start_date">
+                        </div>
+                        <div class="mb-3">
+                            <label for="reportEndDate" class="form-label">Đến ngày</label>
+                            <input type="text" class="form-control" readonly id="reportEndDate" name="end_date">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Loại tổng kết</label>
+                            <input type="text" class="form-control" readonly id="reportType">
+                        </div>
+                        <input type="hidden" id="carRentalId">
+                        <input type="hidden" id="carRentalType">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="submitSummarize">Tổng kết</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     @include('admin.modals.loading_modal')
 @endsection
 
@@ -404,6 +461,108 @@
                                 }
                             }
                         });
+                    });
+                }
+            });
+        });
+
+        // Tổng kết công nợ
+        $('.summarize-debt-btn').click(function() {
+            const carRentalId = $(this).data('car-rental-id');
+            const carRentalType = $(this).data('car-rental-type');
+            const startDate = $(this).data('start-date');
+            const endDate = $(this).data('end-date');
+
+            // Hiển thị modal tổng kết
+            $('#debtSummaryModal').modal('show');
+            
+            // Cập nhật thông tin trong modal
+            $('#debtSummaryModal #carRentalId').val(carRentalId);
+            $('#debtSummaryModal #carRentalType').val(carRentalType);
+            $('#debtSummaryModal #reportStartDate').val(startDate);
+            $('#debtSummaryModal #reportEndDate').val(endDate);
+            $('#debtSummaryModal #reportType').val(carRentalType == 1 ? 'Thuê nguyên xe tính theo chuyến' : 'Thuê xe theo kiểu khoáng');
+        });
+
+        // Xử lý khi nhấn nút tổng kết
+        $('#submitSummarize').click(function() {
+            const startDate = $('#reportStartDate').val();
+            const endDate = $('#reportEndDate').val();
+            const carRentalId = $('#carRentalId').val();
+
+            if (!startDate || !endDate) {
+                Swal.fire({
+                    title: "Lỗi",
+                    text: "Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc",
+                    icon: "error"
+                });
+                return;
+            }
+
+            // Hiển thị loading
+            Swal.fire({
+                title: "Đang xử lý...",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Gọi API tổng kết công nợ
+            $.ajax({
+                url: `/admin/car-rental/${carRentalId}/summarize-report`,
+                method: "POST",
+                data: {
+                    start_date: startDate,
+                    end_date: endDate,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    Swal.close();
+                    
+                    if (response.success) {
+                        // Đóng modal tổng kết
+                        $('#debtSummaryModal').modal('hide');
+                        
+                        // Hiển thị thông báo thành công
+                        Swal.fire({
+                            title: "Thành công!",
+                            text: "Đã tổng kết công nợ thành công",
+                            icon: "success",
+                            confirmButtonText: "Xuất Excel",
+                            showCancelButton: true,
+                            cancelButtonText: "Đóng"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Chuyển đến trang xuất Excel
+                                window.open(
+                                    `/admin/car-rental/${carRentalId}/export-summary?start_date=${startDate}&end_date=${endDate}`,
+                                    '_blank'
+                                );
+                            }
+                            // Reload trang để hiển thị trạng thái mới
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: "Lỗi",
+                            text: response.message || "Đã xảy ra lỗi khi tổng kết công nợ",
+                            icon: "error"
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    Swal.close();
+                    
+                    let errorMessage = "Đã xảy ra lỗi khi tổng kết công nợ";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMessage = xhr.responseJSON.message;
+                    }
+                    
+                    Swal.fire({
+                        title: "Lỗi",
+                        text: errorMessage,
+                        icon: "error"
                     });
                 }
             });
