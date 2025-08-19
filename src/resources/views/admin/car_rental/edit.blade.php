@@ -12,26 +12,23 @@
                         <div class="mt-3 mt-lg-0">
                             <div class="row g-3 mb-0 align-items-center">
                                 <div class="col-auto">
-                                    <a href="{{ route('admin.car-rental.download-vehicle-log', ['car_rental_id' => $carRental->id]) }}" class="btn btn-outline-primary me-2">
-                                        <i class="las la-file-invoice align-middle"></i> 
-                                        @if($carRental->type == 2)
-                                            Xuất xe thuê theo kiểu khoáng
-                                        @else
-                                            Xuất thuê nguyên xe tính theo chuyến
-                                        @endif
-                                    </a>
-                                    <button type="button" id="summarizeReport" class="btn btn-secondary position-relative">
-                                        <i class="las la-calculator align-middle me-1"></i> Tổng kết công nợ
-                                        @if($carRental->shipmentReports && $carRental->shipmentReports->count() > 0)
-                                            <span class="badge bg-success ms-1">
-                                                <i class="las la-check align-middle"></i> Đã từng tổng kết
-                                            </span>
-                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                                {{ $carRental->shipmentReports->count() }}
-                                                <span class="visually-hidden">báo cáo đã tổng kết</span>
-                                            </span>
-                                        @endif
-                                    </button>
+                                    @if ($carRental->status == \App\Models\CarRental::STATUS_APPROVED)
+                                        <a href="{{ route('admin.car-rental.download-vehicle-log', ['car_rental_id' => $carRental->id]) }}" class="btn btn-outline-primary me-2">
+                                            <i class="las la-file-invoice align-middle"></i> Xuất bảng kê
+                                        </a>
+                                        <button type="button" id="summarizeReport" class="btn btn-secondary position-relative">
+                                            <i class="las la-calculator align-middle me-1"></i> Tổng kết công nợ
+                                            @if($carRental->shipmentReports && $carRental->shipmentReports->count() > 0)
+                                                <span class="badge bg-success ms-1">
+                                                    <i class="las la-check align-middle"></i> Đã từng tổng kết
+                                                </span>
+                                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                                    {{ $carRental->shipmentReports->count() }}
+                                                    <span class="visually-hidden">báo cáo đã tổng kết</span>
+                                                </span>
+                                            @endif
+                                        </button>
+                                    @endif
                                 </div>
                                 <!--end col-->
                             </div>
@@ -51,11 +48,13 @@
                                         Thông tin thuê xe
                                     </a>
                                 </li>
+                                @if ($carRental->status == \App\Models\CarRental::STATUS_APPROVED)
                                 <li class="nav-item">
                                     <a class="nav-link {{ session('active_tab') === 'vehicle-logs' ? 'active' : '' }}" data-bs-toggle="tab" href="#vehicle-logs" role="tab">
                                         Nhật ký lộ trình xe
                                     </a>
                                 </li>
+                                @endif
                             </ul>
                         </div>
                         <div class="card-body">
@@ -70,7 +69,7 @@
                                             <label class="form-label fs-5">Loại thuê xe <span class="text-danger">*</span></label>
                                             <div class="col-md-6">
                                                 <div class="form-check form-radio-primary mb-3">
-                                                    <input class="form-check-input" type="radio" name="type" value="1" id="type1" @checked(old('type', $carRental->type) == 1)>
+                                                    <input class="form-check-input" @disabled($carRental->shipmentReports && $carRental->shipmentReports->count() > 0) type="radio" name="type" value="1" id="type1" @checked(old('type', $carRental->type) == 1)>
                                                     <label class="form-check-label" for="type1">
                                                         Thuê nguyên xe tính theo chuyến
                                                     </label>
@@ -78,7 +77,7 @@
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="form-check form-radio-primary mb-3">
-                                                    <input class="form-check-input" type="radio" name="type" value="2" id="type2" @checked(old('type', $carRental->type) == 2)>
+                                                    <input class="form-check-input" @disabled($carRental->shipmentReports && $carRental->shipmentReports->count() > 0) type="radio" name="type" value="2" id="type2" @checked(old('type', $carRental->type) == 2)>
                                                     <label class="form-check-label" for="type2">
                                                         Thuê xe theo kiểu khoáng
                                                     </label>
@@ -89,7 +88,10 @@
                                         <div class="row mb-4">
                                             <div class="col-md-6">
                                                 <label class="form-label">Khách hàng <span class="text-danger">*</span></label>
-                                                <select class="form-select" name="customer_id">
+                                                @if ($carRental->shipmentReports && $carRental->shipmentReports->count() > 0)
+                                                    <input type="hidden" name="customer_id" value="{{ $carRental->customer_id }}">
+                                                @endif
+                                                <select class="form-select" name="customer_id" @disabled($carRental->shipmentReports && $carRental->shipmentReports->count() > 0)>
                                                     <option value="">Chọn khách hàng</option>
                                                     @foreach ($customers as $key => $customer)
                                                     <option value="{{ $key }}" {{ $key == $carRental->customer_id ? 'selected' : '' }}>
