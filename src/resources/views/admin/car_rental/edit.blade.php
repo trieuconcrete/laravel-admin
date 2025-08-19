@@ -13,9 +13,16 @@
                             <div class="row g-3 mb-0 align-items-center">
                                 <div class="col-auto">
                                     <a href="{{ route('admin.car-rental.download-vehicle-log', ['car_rental_id' => $carRental->id]) }}" class="btn btn-outline-primary me-2">
-                                        <i class="las la-file-invoice align-middle"></i> Xuất bảng kê
+                                        <i class="las la-file-invoice align-middle"></i> 
+                                        @if($carRental->type == 2)
+                                            Xuất xe thuê theo kiểu khoáng
+                                        @else
+                                            Xuất thuê nguyên xe tính theo chuyến
+                                        @endif
                                     </a>
-                                    <button type="button" class="btn btn-secondary"><i class="las la-calculator align-middle"></i> Tổng kết công nợ</button>
+                                    {{--  <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#debtSummaryModal">
+                                        <i class="las la-calculator align-middle"></i> Tổng kết công nợ
+                                    </button>  --}}
                                 </div>
                                 <!--end col-->
                             </div>
@@ -1030,6 +1037,186 @@ $(document).ready(function() {
     });
 });
 
+// Debt Summary Modal Functions
+{{--  $(document).ready(function() {
+    // Khi mở modal, điền thông tin cơ bản
+    $('#debtSummaryModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget);
+        const modal = $(this);
+        
+        // Điền thông tin khách hàng và loại thuê xe
+        modal.find('#debtCustomerName').val('{{ $carRental->customer->name ?? "N/A" }}');
+        modal.find('#debtRentalType').val('{{ $carRental->type == 1 ? "Thuê nguyên xe tính theo chuyến" : ($carRental->type == 2 ? "Thuê xe theo kiểu khoáng" : "N/A") }}');
+        
+        // Điền ngày mặc định
+        modal.find('#debtStartDate').val('{{ $carRental->start_date ?? "" }}');
+        modal.find('#debtEndDate').val('{{ $carRental->end_date ?? "" }}');
+    });
+    
+    // Xử lý nút tính toán công nợ
+    $('#calculateDebtBtn').on('click', function() {
+        const startDate = $('#debtStartDate').val();
+        const endDate = $('#debtEndDate').val();
+        const notes = $('#debtNotes').val();
+        
+        if (!startDate || !endDate) {
+            Swal.fire({
+                title: 'Lỗi!',
+                text: 'Vui lòng chọn khoảng thời gian!',
+                icon: 'error',
+                confirmButtonText: 'Đóng'
+            });
+            return;
+        }
+        
+        if (new Date(startDate) > new Date(endDate)) {
+            Swal.fire({
+                title: 'Lỗi!',
+                text: 'Ngày bắt đầu không thể lớn hơn ngày kết thúc!',
+                icon: 'error',
+                confirmButtonText: 'Đóng'
+            });
+            return;
+        }
+        
+        // Hiển thị loading
+        $(this).prop('disabled', true).html('<i class="las la-spinner la-spin align-middle"></i> Đang tính toán...');
+        
+        // Gọi API tính toán công nợ
+        $.ajax({
+            url: '{{ route("admin.car-rental.debt-summary", $carRental->id) }}',
+            method: 'GET',
+            data: {
+                start_date: startDate,
+                end_date: endDate,
+                notes: notes,
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(response) {
+                // Hiển thị kết quả trong modal thứ 2
+                $('#debtSummaryResult').html(response);
+                $('#debtSummaryModal').modal('hide');
+                $('#debtSummaryResultModal').modal('show');
+                
+                // Reset button
+                $('#calculateDebtBtn').prop('disabled', false).html('<i class="las la-calculator align-middle"></i> Tính toán công nợ');
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    title: 'Lỗi!',
+                    text: 'Không thể tính toán công nợ: ' + (xhr.responseJSON?.message || 'Lỗi không xác định'),
+                    icon: 'error',
+                    confirmButtonText: 'Đóng'
+                });
+                
+                // Reset button
+                $('#calculateDebtBtn').prop('disabled', false).html('<i class="las la-calculator align-middle"></i> Tính toán công nợ');
+            }
+        });
+    });
+    
+    // Xử lý nút xuất Excel
+    $(document).on('click', '#exportDebtSummaryBtn', function() {
+        const startDate = $('#debtStartDate').val();
+        const endDate = $('#debtEndDate').val();
+        const notes = $('#debtNotes').val();
+        
+        // Tạo URL export với parameters
+        const exportUrl = '{{ route("admin.car-rental.export-debt-summary", $carRental->id) }}' + 
+                         '?start_date=' + encodeURIComponent(startDate) + 
+                         '&end_date=' + encodeURIComponent(endDate) + 
+                         '&notes=' + encodeURIComponent(notes);
+        
+        // Download file
+        window.location.href = exportUrl;
+    });
+});  --}}
+
 
 </script>
 @endpush
+{{--  
+<!-- Debt Summary Modal -->
+<div class="modal fade" id="debtSummaryModal" tabindex="-1" aria-labelledby="debtSummaryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="debtSummaryModalLabel">Tổng kết công nợ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="debtSummaryForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Khách hàng</label>
+                            <input type="text" class="form-control" id="debtCustomerName" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Loại thuê xe</label>
+                            <input type="text" class="form-label" id="debtRentalType" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Từ ngày <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="debtStartDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Đến ngày <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="debtEndDate" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label class="form-label">Ghi chú (tùy chọn)</label>
+                            <textarea class="form-control" id="debtNotes" rows="3" placeholder="Nhập ghi chú nếu cần..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="las la-info-circle"></i>
+                        <strong>Lưu ý:</strong> Hệ thống sẽ tính toán tổng công nợ dựa trên:
+                        <ul class="mb-0 mt-2">
+                            <li>Phí thuê xe theo tháng</li>
+                            <li>Chi phí tăng ca trong khoảng thời gian</li>
+                            <li>Phí cầu đường và phí đỗ xe</li>
+                            <li>Phí vượt quãng đường (nếu có)</li>
+                            <li>Thuế VAT</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="calculateDebtBtn">
+                    <i class="las la-calculator align-middle"></i> Tính toán công nợ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Debt Summary Result Modal -->
+<div class="modal fade" id="debtSummaryResultModal" tabindex="-1" aria-labelledby="debtSummaryResultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="debtSummaryResultModalLabel">Kết quả tổng kết công nợ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="debtSummaryResult">
+                    <!-- Kết quả sẽ được load ở đây -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-success" id="exportDebtSummaryBtn">
+                    <i class="las la-file-excel align-middle"></i> Xuất Excel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>  --}}

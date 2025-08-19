@@ -47,7 +47,7 @@ class ShipmentService
      * - Thời gian tính OT dựa trên giờ kết thúc thực tế, không phải default 17:30
      * - Thêm tăng ca trưa 1h nếu có chọn checkbox "Có tăng ca trưa"
      */
-    private function calculateOvertime($runDate, $startTime, $endTime, $overtimeRate, $isOvertimeAtNoon = false)
+    private function calculateOvertime($runDate, $startTime, $endTime, $overtimeRate, $isOvertimeAtNoon = false, $carRentalId = null)
     {
         $startDateTime = \Carbon\Carbon::parse($runDate . ' ' . $startTime);
         $endDateTime = \Carbon\Carbon::parse($runDate . ' ' . $endTime);
@@ -55,9 +55,18 @@ class ShipmentService
         // Tính tổng thời gian làm việc
         $totalWorkingHours = $startDateTime->floatDiffInRealHours($endDateTime);
         
-        // Tính OT dựa trên giờ kết thúc thực tế (không phải 17:30 cố định)
+        // Tính OT dựa trên end_working_hour từ car rental, fallback về 17:30 nếu không có
         $overtimeHours = 0;
-        $overtimeStart = \Carbon\Carbon::parse($runDate . ' 17:30');
+        $endWorkingHour = '17:30'; // Default fallback
+        
+        if ($carRentalId) {
+            $carRental = \App\Models\CarRental::find($carRentalId);
+            if ($carRental && $carRental->end_working_hour) {
+                $endWorkingHour = $carRental->end_working_hour;
+            }
+        }
+        
+        $overtimeStart = \Carbon\Carbon::parse($runDate . ' ' . $endWorkingHour);
         
         if ($endDateTime->greaterThan($overtimeStart)) {
             $effectiveStart = $startDateTime->greaterThan($overtimeStart) ? $startDateTime : $overtimeStart;
@@ -112,7 +121,7 @@ class ShipmentService
                 'unit_price' => $data['unit_price'] ?? null,
                 'overtime_rate' => $data['overtime_rate'] ?? 50000,
                 'is_overtime_at_noon' => $data['is_overtime_at_noon'] ?? false,
-                'created_by' => auth()->id(),
+                'created_by' => auth('admin')->id(),
                 'unit_price_for_car_rental' => $data['unit_price_for_car_rental'] ?? null,
             ];
 
@@ -120,7 +129,15 @@ class ShipmentService
 
             // Tính toán OT mới theo yêu cầu issue #180
             if (!empty($data['start_time']) && !empty($data['end_time']) && !empty($data['run_date'])) {
-                $overtimeData = $this->calculateOvertime($data['run_date'], $data['start_time'], $data['end_time'], $data['overtime_rate'], $data['is_overtime_at_noon'] ?? false);
+                $carRentalId = $data['car_rental_id'] ?? null;
+                $overtimeData = $this->calculateOvertime(
+                    $data['run_date'], 
+                    $data['start_time'], 
+                    $data['end_time'], 
+                    $data['overtime_rate'], 
+                    $data['is_overtime_at_noon'] ?? false,
+                    $carRentalId
+                );
                 $shipment->update($overtimeData);
             }
 
@@ -267,7 +284,15 @@ class ShipmentService
         return DB::transaction(function () use ($shipment, $data) {
             // Tính toán OT mới theo yêu cầu issue #180
             if (!empty($data['start_time']) && !empty($data['end_time']) && !empty($data['run_date'])) {
-                $overtimeData = $this->calculateOvertime($data['run_date'], $data['start_time'], $data['end_time'], $data['overtime_rate'], $data['is_overtime_at_noon'] ?? false);
+                $carRentalId = $data['car_rental_id'] ?? null;
+                $overtimeData = $this->calculateOvertime(
+                    $data['run_date'], 
+                    $data['start_time'], 
+                    $data['end_time'], 
+                    $data['overtime_rate'], 
+                    $data['is_overtime_at_noon'] ?? false,
+                    $carRentalId
+                );
                 $data = array_merge($data, $overtimeData);
             }
 
