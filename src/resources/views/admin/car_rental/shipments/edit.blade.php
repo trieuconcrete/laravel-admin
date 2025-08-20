@@ -141,7 +141,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Phí đậu xe</label>
-                                                    <input type="text" class="form-control parking-fee-input" name="parking_fee" value="{{ old('parking_fee', $shipment->parking_fee ?? '0') }}">
+                                                    <input type="text" class="form-control number" name="parking_fee" value="{{ old('parking_fee', $shipment->parking_fee ?? '0') }}">
                                                     @error('parking_fee')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
@@ -1042,31 +1042,6 @@
             input.val(value);
         }
         
-        // Function to format parking fee input with VND formatting
-        function formatParkingFeeInput(input) {
-            let value = input.val();
-            
-            // Remove non-numeric characters and decimal part
-            value = value.replace(/[^0-9.]/g, '');
-            
-            // Handle decimal part - if it's .00 or .0, remove it completely
-            if (value.includes('.')) {
-                let parts = value.split('.');
-                if (parts[1] === '00' || parts[1] === '0') {
-                    value = parts[0]; // Remove decimal part completely
-                } else {
-                    value = parts[0]; // Keep only integer part
-                }
-            }
-            
-            // Format with commas
-            if (value) {
-                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            }
-            
-            input.val(value);
-        }
-        
         // Format deduction inputs and unit inputs on keyup
         $('.deduction-input, .unit-input').on('input', function () {
             formatPriceInput($(this));
@@ -1075,11 +1050,6 @@
         // Format odometer inputs on keyup
         $('.odometer-input').on('input', function () {
             formatOdometerInput($(this));
-        });
-        
-        // Format parking fee input on keyup
-        $('.parking-fee-input').on('input', function () {
-            formatParkingFeeInput($(this));
         });
         
         // Initial formatting for deduction inputs and unit inputs
@@ -1165,10 +1135,6 @@
         
         window.formatOdometerInput = function(input) {
             formatOdometerInput($(input));
-        };
-        
-        window.formatParkingFeeInput = function(input) {
-            formatParkingFeeInput($(input));
         };
     });
 </script>

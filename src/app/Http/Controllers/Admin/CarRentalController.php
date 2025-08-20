@@ -319,6 +319,8 @@ class CarRentalController extends Controller
 
             $validated['overtime_rate'] = $validated['overtime_rate'] ?? 50000;
             $validated['parking_fee'] = isset($validated['parking_fee']) ? abs((float)$validated['parking_fee']) : 0;
+            $validated['weighing_fee'] = isset($validated['weighing_fee']) ? abs((float)$validated['weighing_fee']) : 0;
+            $validated['testing_surcharge'] = isset($validated['testing_surcharge']) ? abs((float)$validated['testing_surcharge']) : 0;
 
             // Tính toán thời gian và quãng đường
             $startDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['start_time']);
