@@ -88,7 +88,7 @@
                                                 <div class="btn-group">
                                                     <a href="{{ route('admin.car-rental.edit', $carRental) }}"
                                                         class="btn btn-sm btn-outline-primary ">Chi tiết</a>
-                                                    @if ($carRental->status == \App\Models\CarRental::STATUS_APPROVED)
+                                                    {{--  @if ($carRental->status == \App\Models\CarRental::STATUS_APPROVED)
                                                     <button type="button"
                                                         class="btn btn-sm btn-outline-secondary summarize-debt-btn"
                                                         data-car-rental-id="{{ $carRental->id }}"
@@ -98,7 +98,7 @@
                                                         <i class="las la-calculator me-1"></i>
                                                         Tổng kết công nợ
                                                     </button>
-                                                    @endif
+                                                    @endif  --}}
                                                     <button type="button"
                                                         class="btn btn-sm btn-outline-danger delete-car-rental-btn"
                                                         data-car-rental-id="{{ $carRental->id }}">
@@ -127,7 +127,7 @@
                                                 @if($carRental->shipmentReports && $carRental->shipmentReports->count() > 0)
                                                     <span class="badge bg-success">
                                                         <i class="las la-check me-1"></i>
-                                                        Đã tổng kết ({{ $carRental->shipmentReports->count() }})
+                                                        Đã tổng kết
                                                     </span>
                                                 @else
                                                     <span class="badge bg-secondary">

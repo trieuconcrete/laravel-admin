@@ -176,16 +176,22 @@
                                         </div>
 
                                         <div class="row">
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <div class="mb-4">
                                                     <label class="form-label">Giờ bắt đầu làm việc trong ngày</label>
                                                     <input type="time" class="form-control" name="start_working_hour" value="{{ old('start_working_hour', $carRental->start_working_hour ?? '07:30') }}">
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
+                                            <div class="col-md-4">
                                                 <div class="mb-4">
                                                     <label class="form-label">Giờ kết thúc làm việc trong ngày</label>
                                                     <input type="time" class="form-control" name="end_working_hour" value="{{ old('end_working_hour', $carRental->end_working_hour ?? '17:00') }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Phí tăng ca/giờ</label>
+                                                    <input type="text" class="form-control number" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', number_format($carRental->overtime_fee_per_hour)) }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -291,6 +297,8 @@
                                                 @php
                                                     $totalOvertimeCost = 0;
                                                     $totalOvertimeHours = 0;
+                                                    $totalMorningOT = 0;
+                                                    $totalAfternoonOT = 0;
                                                     $totalTollFees = 0;
                                                     $totalParkingFees = 0;
                                                     $totalWeighingFees = 0;
@@ -302,6 +310,57 @@
                                                     @php
                                                         $totalOvertimeCost += $shipment->total_overtime_cost ?? 0;
                                                         $totalOvertimeHours += $shipment->overtime_hours ?? 0;
+                                                        
+                                                        // Tính OT buổi sáng và buổi chiều
+                                                        if ($shipment->start_time && $shipment->end_time) {
+                                                            try {
+                                                                // Parse start time - handle both H:i:s and H:i formats
+                                                                $startTimeStr = $shipment->start_time;
+                                                                if (strlen($startTimeStr) > 5) {
+                                                                    $startTimeStr = substr($startTimeStr, 0, 5);
+                                                                }
+                                                                
+                                                                // Parse end time - handle both H:i:s and H:i formats
+                                                                $endTimeStr = $shipment->end_time;
+                                                                if (strlen($endTimeStr) > 5) {
+                                                                    $endTimeStr = substr($endTimeStr, 0, 5);
+                                                                }
+                                                                
+                                                                $startTime = \Carbon\Carbon::createFromFormat('H:i', $startTimeStr);
+                                                                $endTime = \Carbon\Carbon::createFromFormat('H:i', $endTimeStr);
+                                                                
+                                                                // Parse working hours
+                                                                $startWorkingStr = $carRental->start_working_hour ?? '07:00';
+                                                                $endWorkingStr = $carRental->end_working_hour ?? '17:30';
+                                                                
+                                                                // Handle working hours format
+                                                                if (strlen($startWorkingStr) > 5) {
+                                                                    $startWorkingStr = substr($startWorkingStr, 0, 5);
+                                                                }
+                                                                if (strlen($endWorkingStr) > 5) {
+                                                                    $endWorkingStr = substr($endWorkingStr, 0, 5);
+                                                                }
+                                                                
+                                                                $startWorking = \Carbon\Carbon::createFromFormat('H:i', $startWorkingStr);
+                                                                $endWorking = \Carbon\Carbon::createFromFormat('H:i', $endWorkingStr);
+                                                                
+                                                                if ($startTime->lessThan($startWorking)) {
+                                                                    $totalMorningOT += $startWorking->floatDiffInRealHours($startTime);
+                                                                }
+                                                                
+                                                                if ($endTime->greaterThan($endWorking)) {
+                                                                    $totalAfternoonOT += $endTime->floatDiffInRealHours($endWorking);
+                                                                }
+                                                            } catch (\Exception $e) {
+                                                                // If parsing fails, skip overtime calculation
+                                                                \Log::warning('Failed to parse time for OT calculation', [
+                                                                    'shipment_id' => $shipment->id,
+                                                                    'start_time' => $shipment->start_time,
+                                                                    'end_time' => $shipment->end_time,
+                                                                    'error' => $e->getMessage()
+                                                                ]);
+                                                            }
+                                                        }
                                                         
                                                         // Tính tổng phí cầu đường
                                                         if (isset($shipment->tollFees) && $shipment->tollFees->count() > 0) {
@@ -320,9 +379,102 @@
                                                     <tr>
                                                         <td>{{ $shipment->vehicle->vehicleType->name ?? 'N/A' }} - {{ $shipment->vehicle->plate_number ?? 'N/A' }}</td>
                                                         <td class="text-center">{{ $shipment->run_date ? \Carbon\Carbon::parse($shipment->run_date)->format('Y-m-d') : '' }}</td>
-                                                        <td class="text-center">{{ $shipment->start_time ? \Carbon\Carbon::createFromFormat('H:i:s', $shipment->start_time)->format('H:i') : '' }} - {{ $shipment->end_time ? \Carbon\Carbon::createFromFormat('H:i:s', $shipment->end_time)->format('H:i') : '' }}</td>
+                                                        <td class="text-center">
+                                                            @if($shipment->start_time && $shipment->end_time)
+                                                                @php
+                                                                    try {
+                                                                        // Parse start time - handle both H:i:s and H:i formats
+                                                                        $startTimeStr = $shipment->start_time;
+                                                                        if (strlen($startTimeStr) > 5) {
+                                                                            $startTimeStr = substr($startTimeStr, 0, 5);
+                                                                        }
+                                                                        
+                                                                        // Parse end time - handle both H:i:s and H:i formats
+                                                                        $endTimeStr = $shipment->end_time;
+                                                                        if (strlen($endTimeStr) > 5) {
+                                                                            $endTimeStr = substr($endTimeStr, 0, 5);
+                                                                        }
+                                                                        
+                                                                        $startTime = \Carbon\Carbon::createFromFormat('H:i', $startTimeStr);
+                                                                        $endTime = \Carbon\Carbon::createFromFormat('H:i', $endTimeStr);
+                                                                        
+                                                                        echo $startTime->format('H:i') . ' - ' . $endTime->format('H:i');
+                                                                    } catch (\Exception $e) {
+                                                                        echo 'N/A';
+                                                                    }
+                                                                @endphp
+                                                            @else
+                                                                N/A
+                                                            @endif
+                                                        </td>
                                                         <td class="text-center">{{ $shipment->origin }} -> {{ $shipment->destination }}</td>
-                                                        <td>{{ number_format($shipment->overtime_hours, 1) }} giờ</td>
+                                                        <td>
+                                                            @if($shipment->overtime_hours > 0)
+                                                                <div class="text-center">
+                                                                    <span class="fw-bold">{{ number_format($shipment->overtime_hours, 1) }} giờ</span>
+                                                                    <br><small class="text-muted">
+                                                                        @php
+                                                                            try {
+                                                                                // Parse start time - handle both H:i:s and H:i formats
+                                                                                $startTimeStr = $shipment->start_time;
+                                                                                if (strlen($startTimeStr) > 5) {
+                                                                                    $startTimeStr = substr($startTimeStr, 0, 5);
+                                                                                }
+                                                                                
+                                                                                // Parse end time - handle both H:i:s and H:i formats
+                                                                                $endTimeStr = $shipment->end_time;
+                                                                                if (strlen($endTimeStr) > 5) {
+                                                                                    $endTimeStr = substr($endTimeStr, 0, 5);
+                                                                                }
+                                                                                
+                                                                                $startTime = \Carbon\Carbon::createFromFormat('H:i', $startTimeStr);
+                                                                                $endTime = \Carbon\Carbon::createFromFormat('H:i', $endTimeStr);
+                                                                                
+                                                                                // Parse working hours
+                                                                                $startWorkingStr = $carRental->start_working_hour ?? '07:00';
+                                                                                $endWorkingStr = $carRental->end_working_hour ?? '17:30';
+                                                                                
+                                                                                // Handle working hours format
+                                                                                if (strlen($startWorkingStr) > 5) {
+                                                                                    $startWorkingStr = substr($startWorkingStr, 0, 5);
+                                                                                }
+                                                                                if (strlen($endWorkingStr) > 5) {
+                                                                                    $endWorkingStr = substr($endWorkingStr, 0, 5);
+                                                                                }
+                                                                                
+                                                                                $startWorking = \Carbon\Carbon::createFromFormat('H:i', $startWorkingStr);
+                                                                                $endWorking = \Carbon\Carbon::createFromFormat('H:i', $endWorkingStr);
+                                                                                
+                                                                                $morningOT = 0;
+                                                                                $afternoonOT = 0;
+                                                                                
+                                                                                if ($startTime->lessThan($startWorking)) {
+                                                                                    $morningOT = $startWorking->floatDiffInRealHours($startTime);
+                                                                                }
+                                                                                
+                                                                                if ($endTime->greaterThan($endWorking)) {
+                                                                                    $afternoonOT = $endTime->floatDiffInRealHours($endWorking);
+                                                                                }
+                                                                            } catch (\Exception $e) {
+                                                                                $morningOT = 0;
+                                                                                $afternoonOT = 0;
+                                                                            }
+                                                                        @endphp
+                                                                        
+                                                                        @if($morningOT > 0)
+                                                                            <i class="las la-sunrise text-warning"></i> Sáng: {{ number_format($morningOT, 1) }}h
+                                                                        @endif
+                                                                        
+                                                                        @if($afternoonOT > 0)
+                                                                            @if($morningOT > 0)<br>@endif
+                                                                            <i class="las la-sunset text-warning"></i> Chiều: {{ number_format($afternoonOT, 1) }}h
+                                                                        @endif
+                                                                    </small>
+                                                                </div>
+                                                            @else
+                                                                <span class="text-muted">0 giờ</span>
+                                                            @endif
+                                                        </td>
                                                         <td>{{ number_format($shipment->overtime_rate) }}</td>
                                                         <td>{{ number_format($shipment->total_overtime_cost) }}</td>
                                                         <td>{{ number_format($shipment->start_odometer) }}</td>
@@ -489,8 +641,19 @@
                                 
                                 <tr class="py-1">
                                     <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
-                                        - Phát sinh phí tăng ca ({{ number_format($totalOvertimeHours, 2) }} giờ x 50.000 VND):
+                                        - Phát sinh phí tăng ca ({{ number_format($totalOvertimeHours, 2) }} giờ x {{ number_format($carRental->overtime_fee_per_hour ?? 50000) }} VND):
                                         <span class="fw-bold text-warning">{{ number_format($totalOvertimeCost, 0, ',', '.') }} VNĐ</span>
+                                        @if($totalOvertimeHours > 0)
+                                            <br><small class="text-muted">
+                                                <i class="las la-sun me-1"></i>Giờ làm việc: {{ $carRental->start_working_hour ?? '07:00' }} - {{ $carRental->end_working_hour ?? '17:30' }}
+                                                @if($totalMorningOT > 0)
+                                                    <br><i class="las la-sunrise text-warning me-1"></i>OT buổi sáng: {{ number_format($totalMorningOT, 1) }} giờ
+                                                @endif
+                                                @if($totalAfternoonOT > 0)
+                                                    <br><i class="las la-sunset text-warning me-1"></i>OT buổi chiều: {{ number_format($totalAfternoonOT, 1) }} giờ
+                                                @endif
+                                            </small>
+                                        @endif
                                     </td>
                                 </tr>
                                 <tr class="py-1">
