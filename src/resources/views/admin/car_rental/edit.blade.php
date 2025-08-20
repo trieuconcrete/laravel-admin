@@ -125,6 +125,10 @@
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Phí tăng ca/giờ</label>
+                                                    <input type="text" class="form-control number" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', number_format($carRental->overtime_fee_per_hour)) }}">
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="row">
@@ -174,14 +178,14 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-4">
-                                                    <label class="form-label">Giờ kết thúc làm việc trong ngày</label>
-                                                    <input type="time" class="form-control" name="end_working_hour" value="{{ old('end_working_hour', $carRental->end_working_hour ?? '17:00') }}">
+                                                    <label class="form-label">Giờ bắt đầu làm việc trong ngày</label>
+                                                    <input type="time" class="form-control" name="start_working_hour" value="{{ old('start_working_hour', $carRental->start_working_hour ?? '07:30') }}">
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-4">
-                                                    <label class="form-label">Phí tăng ca/giờ</label>
-                                                    <input type="text" class="form-control number" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', number_format($carRental->overtime_fee_per_hour)) }}">
+                                                    <label class="form-label">Giờ kết thúc làm việc trong ngày</label>
+                                                    <input type="time" class="form-control" name="end_working_hour" value="{{ old('end_working_hour', $carRental->end_working_hour ?? '17:00') }}">
                                                 </div>
                                             </div>
                                         </div>

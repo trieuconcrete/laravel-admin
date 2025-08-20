@@ -157,7 +157,7 @@
                                                             <div class="col-12">
                                                                 <small class="text-muted">
                                                                     <i class="fas fa-info-circle me-1"></i>
-                                                                    OT được tính từ <span id="end_working_hour_display">{{ $carRental->end_working_hour ? \Carbon\Carbon::parse($carRental->end_working_hour)->format('H:i') : '17:30' }}</span>, +1h nếu có tăng ca trưa
+                                                                    OT được tính từ số giờ tăng ca sau giờ làm, +1h nếu có tăng ca trưa
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -168,7 +168,7 @@
                                                     <div class="bg-light p-3 rounded">
                                                         <div class="row">
                                                             <div class="col-6">
-                                                                <small class="text-muted">Giờ làm việc:</small><br>
+                                                                <small class="text-muted">Tăng ca sau giờ làm việc:</small><br>
                                                                 <strong id="working_hours_display">0.00 giờ</strong>
                                                             </div>
                                                             <div class="col-6">
@@ -180,7 +180,7 @@
                                                             <div class="col-12">
                                                                 <small class="text-muted">
                                                                     <i class="fas fa-calculator me-1"></i>
-                                                                    Tổng OT = Giờ làm việc + Tăng ca trưa
+                                                                    Tổng OT = Tăng ca sau giờ làm việc + Tăng ca trưa
                                                                 </small>
                                                             </div>
                                                         </div>
