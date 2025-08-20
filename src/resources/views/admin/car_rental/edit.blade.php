@@ -502,11 +502,6 @@
                                 </tr>
                                 <tr class="py-1">
                                     <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
-                                        - Phí bãi xe:
-                                    </td>
-                                </tr>
-                                <tr class="py-1">
-                                    <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                         - Phí cân xe:
                                         <span class="fw-bold text-secondary">{{ number_format($totalWeighingFees, 0, ',', '.') }} VNĐ</span>
                                     </td>
