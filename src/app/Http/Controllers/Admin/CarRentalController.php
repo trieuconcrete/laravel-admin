@@ -1875,8 +1875,9 @@ class CarRentalController extends Controller
                               $summary['total_overtime_cost'] + 
                               $summary['total_toll_fees'] + 
                               $summary['total_parking_fees'] + 
-                              $summary['over_distance_fee'];
+                              $summary['over_distance_fee'] + $carRental->monthly_rental_fee;
         
+        // dd($summary);
         // VAT
         $summary['vat_rate'] = $carRental->customer->vat_rate ?? 8; // Default 8%
         $summary['vat_amount'] = $summary['subtotal'] * ($summary['vat_rate'] / 100);
