@@ -295,6 +295,7 @@
                                                     $totalParkingFees = 0;
                                                     $totalWeighingFees = 0;
                                                     $totalTestingSurcharge = 0;
+                                                    $totalTollFeesWithoutVat = 0;
                                                 @endphp
                                                 @if (!$carRentalVehicleLogs->isEmpty())
                                                     @foreach($carRentalVehicleLogs as $shipment)
@@ -309,8 +310,11 @@
                                                         
                                                         // Tính tổng phí đậu xe
                                                         $totalParkingFees += $shipment->parking_fee ?? 0;
+                                                        // Tính tổng phí cân xe và phụ phí test
                                                         $totalWeighingFees += $shipment->weighing_fee ?? 0;
                                                         $totalTestingSurcharge += $shipment->testing_surcharge ?? 0;
+
+                                                        $totalTollFeesWithoutVat = ($totalTollFees + $totalParkingFees)/1.08; // Phí cầu đường và đậu xe đã bao gồm VAT 8%
                                                     @endphp
                                                     
                                                     <tr>
@@ -493,12 +497,12 @@
                                     <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                         - Phát sinh phụ phí cầu đường:
                                         <span class="fw-bold text-info">{{ number_format($totalTollFees, 0, ',', '.') }} VNĐ</span>
+                                        <small class="text-muted">(Phí cầu đường + phí đậu xe)/1.08</small>
                                     </td>
                                 </tr>
                                 <tr class="py-1">
                                     <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                         - Phí bãi xe:
-                                        <span class="fw-bold text-secondary">{{ number_format($totalParkingFees, 0, ',', '.') }} VNĐ</span>
                                     </td>
                                 </tr>
                                 <tr class="py-1">
@@ -529,12 +533,12 @@
                                 <tr class="border-top py-1">
                                     <td class="text-start fw-bold py-1" style="padding: 0.25rem 0.5rem;">
                                         <i class="ri-calculator-line text-dark me-2"></i>Tổng cộng (chưa thuế VAT):
-                                        <span class="fw-bold text-danger">{{ number_format(($carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFees + $totalParkingFees + $totalWeighingFees + $totalTestingSurcharge + ($carRental->over_distance_fee ?? 0), 0, ',', '.') }} VNĐ</span>
+                                        <span class="fw-bold text-danger">{{ number_format(($carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFeesWithoutVat + $totalWeighingFees + $totalTestingSurcharge + ($carRental->over_distance_fee ?? 0), 0, ',', '.') }} VNĐ</span>
                                     </td>
                                 </tr>
                                 
                                 @php
-                                    $subtotal = ($carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFees + $totalParkingFees + $totalWeighingFees + $totalTestingSurcharge + ($carRental->over_distance_fee ?? 0);
+                                    $subtotal = ($carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFeesWithoutVat + $totalWeighingFees + $totalTestingSurcharge + ($carRental->over_distance_fee ?? 0);
                                     $vatAmount = $subtotal * 0.08;
                                     $totalWithVat = $subtotal + $vatAmount;
                                 @endphp
