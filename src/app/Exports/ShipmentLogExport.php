@@ -344,7 +344,7 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
         $summaryRow++;
         
         // Subtotal (before VAT)
-        $subtotal = ($this->carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFees + $totalParkingFees + $overDistanceFee;
+        $subtotal = ($this->carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFees + $totalWeighingFee + $totalTestingSurcharge + $overDistanceFee;
         $sheet->setCellValue('A' . $summaryRow, 'Tổng cộng (chưa thuế VAT):');
         $sheet->setCellValue('D' . $summaryRow, number_format($subtotal, 0, ',', '.') . ' VNĐ');
         $sheet->getStyle('A' . $summaryRow . ':D' . $summaryRow)->getFont()->setBold(true);
