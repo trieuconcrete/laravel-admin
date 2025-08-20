@@ -95,9 +95,11 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
             'I13' => 'Km bắt đầu',
             'J13' => 'Km kết thúc',
             'K13' => 'Số km đi trong ngày',
-            'L13' => 'Phụ phí phí cầu',
+            'L13' => 'Phụ phí phí cầu đường',
             'M13' => 'Phí đậu xe',
-            'N13' => 'THỜI GIAN TĂNG CA'
+            'N13' => 'Phí cân xe',
+            'O13' => 'Phụ phí kiểm tra', 
+            'P13' => 'THỜI GIAN TĂNG CA'
         ];
 
         foreach ($headers as $cell => $value) {
