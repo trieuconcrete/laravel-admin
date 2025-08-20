@@ -22,3 +22,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Vehicles API routes
 Route::get('/vehicles/by-car-rental', [VehicleController::class, 'getByCarRental'])
     ->name('api.vehicles.by-car-rental');
+
+Route::get('/vehicles/get-driver-by-vehicle', [VehicleController::class, 'getDriverByVehicle']);
+

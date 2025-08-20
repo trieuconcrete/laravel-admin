@@ -12,7 +12,7 @@
                         <div class="mt-3 mt-lg-0">
                             <div class="row g-3 mb-0 align-items-center">
                                 <div class="col-auto">
-                                    @if ($carRental->status == \App\Models\CarRental::STATUS_APPROVED)
+                                    @if (in_array($carRental->status, [\App\Models\CarRental::STATUS_APPROVED, \App\Models\CarRental::STATUS_COMPLETED]))
                                         <a href="{{ route('admin.car-rental.download-vehicle-log', ['car_rental_id' => $carRental->id]) }}" class="btn btn-outline-primary me-2">
                                             <i class="las la-file-invoice align-middle"></i> Xuất bảng kê
                                         </a>
@@ -48,7 +48,7 @@
                                         Thông tin thuê xe
                                     </a>
                                 </li>
-                                @if ($carRental->status == \App\Models\CarRental::STATUS_APPROVED)
+                                @if (in_array($carRental->status, [\App\Models\CarRental::STATUS_APPROVED, \App\Models\CarRental::STATUS_COMPLETED]))
                                 <li class="nav-item">
                                     <a class="nav-link {{ session('active_tab') === 'vehicle-logs' ? 'active' : '' }}" data-bs-toggle="tab" href="#vehicle-logs" role="tab">
                                         Nhật ký lộ trình xe
@@ -65,7 +65,7 @@
                                     <form action="{{ route('admin.car-rental.update', $carRental->id) }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         @method('PUT')
-                                    <div class="row mb-3">
+                                        <div class="row mb-3">
                                             <label class="form-label fs-5">Loại thuê xe <span class="text-danger">*</span></label>
                                             <div class="col-md-6">
                                                 <div class="form-check form-radio-primary mb-3">
@@ -243,9 +243,7 @@
                                             </div>
                                             @endif
                                         </div>
-
                                         <hr>
-
                                         <div>
                                             <button type="submit" class="btn rounded-pill btn-secondary waves-effect">Save</button>
                                         </div>
@@ -257,12 +255,11 @@
                                     <div class="d-flex justify-content-between align-items-center mb-4">
                                         <h5 class="card-title mb-0">Danh sách Nhật ký lộ trình xe</h5>
                                         <div>
-                                            {{-- <a href="{{ route('admin.car-rental.download-vehicle-log', ['car_rental_id' => $carRental->id]) }}" class="btn btn-success me-2">
-                                                <i class="ri-download-2-line align-bottom me-1"></i> Download nhật ký
-                                            </a> --}}
-                                            <a  href="{{ route('admin.car-rental.shipment-create', parameters: $carRental->id) }}" class="btn btn-primary">
-                                                <i class="ri-add-line align-bottom me-1"></i> Thêm nhật ký
-                                            </a>
+                                            @if ($carRental->status == \App\Models\CarRental::STATUS_APPROVED)
+                                                <a href="{{ route('admin.car-rental.shipment-create', parameters: $carRental->id) }}" class="btn btn-primary">
+                                                    <i class="ri-add-line align-bottom me-1"></i> Thêm nhật ký
+                                                </a>
+                                            @endif
                                         </div>
                                     </div>
 
