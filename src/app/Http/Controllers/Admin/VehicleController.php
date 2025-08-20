@@ -219,4 +219,22 @@ class VehicleController extends Controller
             ], 500);
         }
     }
+
+    public function getDriverByVehicle(Request $request)
+    {
+        $vehicleId = $request->get('vehicle_id');
+        $vehicle = Vehicle::with('driver')->find($vehicleId);
+        
+        if ($vehicle && $vehicle->driver) {
+            return response()->json([
+                'success' => true,
+                'driver' => $vehicle->driver
+            ]);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'driver' => null
+        ]);
+    }
 }
