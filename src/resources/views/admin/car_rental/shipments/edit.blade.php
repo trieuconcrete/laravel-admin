@@ -107,20 +107,6 @@
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Đơn giá tăng ca (VNĐ/giờ) <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="overtime_rate" id="overtime_rate" value="{{ old('overtime_rate', number_format($shipment->overtime_rate ?? 50000)) }}" required>
-                                                    <small class="text-muted">Đơn giá tăng ca cho tài xế</small>
-                                                    @error('overtime_rate')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Phí đậu xe</label>
-                                                    <input type="text" class="form-control parking-fee-input" name="parking_fee" value="{{ old('parking_fee', $shipment->parking_fee ?? '0') }}">
-                                                    @error('parking_fee')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                            </div>
-
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
                                                     <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                                                     <select class="form-select" name="status" required>
                                                         @foreach($shipmentStatus as $key => $value)
@@ -143,6 +129,20 @@
                                                         </label>
                                                     </div>
                                                     @error('is_overtime_at_noon')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Đơn giá tăng ca (VNĐ/giờ) <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="overtime_rate" id="overtime_rate" value="{{ old('overtime_rate', number_format($shipment->overtime_rate ?? 50000)) }}" required>
+                                                    <small class="text-muted">Đơn giá tăng ca cho tài xế</small>
+                                                    @error('overtime_rate')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Phí đậu xe</label>
+                                                    <input type="text" class="form-control parking-fee-input" name="parking_fee" value="{{ old('parking_fee', $shipment->parking_fee ?? '0') }}">
+                                                    @error('parking_fee')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
 
@@ -263,6 +263,17 @@
                                                             @endif
                                                         </tbody>
                                                     </table>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Phí cân xe</label>
+                                                    <input type="text" class="form-control number" name="weighing_fee" value="{{ old('weighing_fee',$shipment->weighing_fee) }}" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Phụ phí test</label>
+                                                    <input type="text" class="form-control number" name="testing_surcharge" value="{{ old('testing_surcharge',$shipment->testing_surcharge) }}">
                                                 </div>
                                             </div>
 

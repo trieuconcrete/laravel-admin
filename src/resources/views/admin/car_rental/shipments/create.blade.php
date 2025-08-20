@@ -221,6 +221,17 @@
                                                 </div>
                                             </div>
 
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Phí cân xe</label>
+                                                    <input type="text" class="form-control number" name="weighing_fee" value="{{ old('weighing_fee') }}" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Phụ phí test</label>
+                                                    <input type="text" class="form-control number" name="testing_surcharge" value="{{ old('testing_surcharge') }}">
+                                                </div>
+                                            </div>
+
                                             <div class="mb-3">
                                                 <label class="form-label">Ghi chú</label>
                                                 <textarea class="form-control" name="notes" rows="3">{{ old('notes') }}</textarea>
