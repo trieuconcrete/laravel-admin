@@ -1136,7 +1136,7 @@ function addDriverPXRow(table, deductionTypes, users) {
     let html = `
         <td>
             <select name="driverPXs[${rowIndex}][user_id]" class="form-select form-select-sm" 
-                style="min-width: 180px;" required>
+                style="min-width: 180px;">
                 <option value="">Chọn nhân sự</option>`;
     
     // Thêm options cho users chưa được chọn

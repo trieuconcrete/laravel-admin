@@ -55,22 +55,37 @@ class ShipmentService
         // Tính tổng thời gian làm việc
         $totalWorkingHours = $startDateTime->floatDiffInRealHours($endDateTime);
         
-        // Tính OT dựa trên end_working_hour từ car rental, fallback về 17:30 nếu không có
-        $overtimeHours = 0;
+        // Lấy start_working_hour và end_working_hour từ car rental
+        $startWorkingHour = '07:00'; // Default fallback
         $endWorkingHour = '17:30'; // Default fallback
         
         if ($carRentalId) {
             $carRental = \App\Models\CarRental::find($carRentalId);
-            if ($carRental && $carRental->end_working_hour) {
-                $endWorkingHour = $carRental->end_working_hour;
+            if ($carRental) {
+                if ($carRental->start_working_hour) {
+                    $startWorkingHour = $carRental->start_working_hour;
+                }
+                if ($carRental->end_working_hour) {
+                    $endWorkingHour = $carRental->end_working_hour;
+                }
             }
         }
         
-        $overtimeStart = \Carbon\Carbon::parse($runDate . ' ' . $endWorkingHour);
+        $startWorkingDateTime = \Carbon\Carbon::parse($runDate . ' ' . $startWorkingHour);
+        $endWorkingDateTime = \Carbon\Carbon::parse($runDate . ' ' . $endWorkingHour);
         
-        if ($endDateTime->greaterThan($overtimeStart)) {
-            $effectiveStart = $startDateTime->greaterThan($overtimeStart) ? $startDateTime : $overtimeStart;
-            $overtimeHours = $endDateTime->floatDiffInRealHours($effectiveStart);
+        $overtimeHours = 0;
+        
+        // Tính OT buổi sáng (khi bắt đầu sớm hơn start_working_hour)
+        if ($startDateTime->lessThan($startWorkingDateTime)) {
+            $morningOvertime = $startWorkingDateTime->floatDiffInRealHours($startDateTime);
+            $overtimeHours += $morningOvertime;
+        }
+        
+        // Tính OT buổi chiều (khi kết thúc muộn hơn end_working_hour)
+        if ($endDateTime->greaterThan($endWorkingDateTime)) {
+            $afternoonOvertime = $endDateTime->floatDiffInRealHours($endWorkingDateTime);
+            $overtimeHours += $afternoonOvertime;
         }
         
         // Thêm tăng ca trưa 1h nếu có chọn checkbox

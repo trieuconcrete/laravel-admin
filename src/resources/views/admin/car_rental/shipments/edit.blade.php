@@ -107,20 +107,6 @@
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Đơn giá tăng ca (VNĐ/giờ) <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control" name="overtime_rate" id="overtime_rate" value="{{ old('overtime_rate', number_format($shipment->overtime_rate ?? 50000)) }}" required>
-                                                    <small class="text-muted">Đơn giá tăng ca cho tài xế</small>
-                                                    @error('overtime_rate')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Phí đậu xe</label>
-                                                    <input type="text" class="form-control parking-fee-input" name="parking_fee" value="{{ old('parking_fee', $shipment->parking_fee ?? '0') }}">
-                                                    @error('parking_fee')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                            </div>
-
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
                                                     <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                                                     <select class="form-select" name="status" required>
                                                         @foreach($shipmentStatus as $key => $value)
@@ -148,6 +134,20 @@
 
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
+                                                    <label class="form-label">Đơn giá tăng ca (VNĐ/giờ) <span class="text-danger">*</span></label>
+                                                    <input type="text" class="form-control" name="overtime_rate" id="overtime_rate" value="{{ old('overtime_rate', number_format($shipment->overtime_rate ?? 50000)) }}" required>
+                                                    <small class="text-muted">Đơn giá tăng ca cho tài xế</small>
+                                                    @error('overtime_rate')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Phí đậu xe</label>
+                                                    <input type="text" class="form-control parking-fee-input" name="parking_fee" value="{{ old('parking_fee', $shipment->parking_fee ?? '0') }}">
+                                                    @error('parking_fee')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
                                                     <label class="form-label">Kết quả tính OT</label>
                                                     <div class="bg-light p-3 rounded">
                                                         <div class="row">
@@ -164,7 +164,7 @@
                                                             <div class="col-12">
                                                                 <small class="text-muted">
                                                                     <i class="fas fa-info-circle me-1"></i>
-                                                                    OT được tính từ <span id="end_working_hour_display">{{ $carRental->end_working_hour ? \Carbon\Carbon::parse($carRental->end_working_hour)->format('H:i') : '17:30' }}</span>, +1h nếu có tăng ca trưa
+                                                                    OT được tính từ giờ làm việc: <span id="start_working_hour_display">{{ $carRental->start_working_hour ?? '07:00' }}</span> - <span id="end_working_hour_display">{{ $carRental->end_working_hour ?? '17:30' }}</span>
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -175,19 +175,29 @@
                                                     <div class="bg-light p-3 rounded">
                                                         <div class="row">
                                                             <div class="col-6">
-                                                                <small class="text-muted">Giờ làm việc:</small><br>
-                                                                <strong id="working_hours_display">{{ number_format(($shipment->overtime_hours ?? 0) - ($shipment->is_overtime_at_noon ? 1 : 0), 2) }} giờ</strong>
+                                                                <small class="text-muted">OT buổi sáng:</small><br>
+                                                                <strong id="morning_overtime_display">0.00 giờ</strong>
                                                             </div>
+                                                            <div class="col-6">
+                                                                <small class="text-muted">OT buổi chiều:</small><br>
+                                                                <strong id="afternoon_overtime_display">0.00 giờ</strong>
+                                                            </div>
+                                                        </div>
+                                                        <div class="row mt-2">
                                                             <div class="col-6">
                                                                 <small class="text-muted">Tăng ca trưa:</small><br>
                                                                 <strong id="noon_overtime_display">{{ $shipment->is_overtime_at_noon ? '1.00' : '0.00' }} giờ</strong>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <small class="text-muted">Tổng OT:</small><br>
+                                                                <strong id="total_overtime_display">{{ number_format($shipment->overtime_hours ?? 0, 2) }} giờ</strong>
                                                             </div>
                                                         </div>
                                                         <div class="row mt-2">
                                                             <div class="col-12">
                                                                 <small class="text-muted">
                                                                     <i class="fas fa-calculator me-1"></i>
-                                                                    Tổng OT = Giờ làm việc + Tăng ca trưa
+                                                                    Tổng OT = OT buổi sáng + OT buổi chiều + Tăng ca trưa
                                                                 </small>
                                                             </div>
                                                         </div>
@@ -198,7 +208,8 @@
                                                 <div class="col-md-12">
                                                     <input type="hidden" name="calculated_overtime_hours" value="{{ $shipment->overtime_hours ?? 0 }}">
                                                     <input type="hidden" name="calculated_total_overtime_cost" value="{{ $shipment->total_overtime_cost ?? 0 }}">
-                                                    <input type="hidden" name="working_hours" value="{{ ($shipment->overtime_hours ?? 0) - ($shipment->is_overtime_at_noon ? 1 : 0) }}">
+                                                    <input type="hidden" name="morning_overtime_hours" value="0">
+                                                    <input type="hidden" name="afternoon_overtime_hours" value="0">
                                                     <input type="hidden" name="noon_overtime_hours" value="{{ $shipment->is_overtime_at_noon ? 1 : 0 }}">
                                                 </div>
                                             </div>
@@ -263,6 +274,17 @@
                                                             @endif
                                                         </tbody>
                                                     </table>
+                                                </div>
+                                            </div>
+
+                                            <div class="row mb-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Phí cân xe</label>
+                                                    <input type="text" class="form-control number" name="weighing_fee" value="{{ old('weighing_fee',$shipment->weighing_fee) }}" required>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Phụ phí test</label>
+                                                    <input type="text" class="form-control number" name="testing_surcharge" value="{{ old('testing_surcharge',$shipment->testing_surcharge) }}">
                                                 </div>
                                             </div>
 
@@ -429,7 +451,7 @@
                                                         <table class="table table-sm" id="personPxTable">
                                                             <thead>
                                                                 <tr>
-                                                                    <th>Nhân sự <span class="text-danger">*</span></th>
+                                                                    <th>Nhân sự</th>
                                                                     @foreach($subPersonDeductionTypes as $type)
                                                                         <th>{{ $type->name }}</th>
                                                                     @endforeach
@@ -452,7 +474,7 @@
                                                                 @foreach($driverPXsArray as $i => $driver)
                                                                     <tr id="driver-row-{{ $i }}">
                                                                         <td>
-                                                                            <select name="driverPXs[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
+                                                                            <select name="driverPXs[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;">
                                                                                 <option value="">Chọn nhân sự</option>
                                                                                 @foreach($userPXs as $id => $name)
                                                                                     <option value="{{ $id }}" {{ old('driverPXs.'.$i.'.user_id', $driver['user_id']) == $id ? 'selected' : '' }}>{{ $name }}</option>
@@ -476,31 +498,7 @@
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach
-                                                            @else
-                                                                <tr>
-                                                                    <td>
-                                                                        <select name="driverPXs[0][user_id]" class="form-select form-select-sm" style="min-width: 180px;">
-                                                                            <option value="">Chọn nhân sự</option>
-                                                                            @foreach($userPXs as $id => $name)
-                                                                                <option value="{{ $id }}">{{ $name }}</option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                        @error('driverPXs.0.user_id')<div class="text-danger">{{ $message }}</div>@enderror
-                                                                    </td>
-                                                                    @foreach($subPersonDeductionTypes as $type)
-                                                                        <td>
-                                                                            <input type="text" name="driverPXs[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
-                                                                            @error('driverPXs.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
-                                                                        </td>
-                                                                    @endforeach
-                                                                    <td>
-                                                                        <input type="text" name="driverPXs[0][deductions][Ghi chú]" class="form-control form-control-sm">
-                                                                        @error('driverPXs.0.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
-                                                                    </td>
-                                                                    <td>
-                                                                        <input type="hidden" name="driverPX_rows[]" value="0">
-                                                                    </td>
-                                                                </tr>
+                                                            
                                                             @endif
                                                             </tbody>
                                                         </table>
@@ -722,67 +720,166 @@
         
         // Function để tính toán và hiển thị OT
         function calculateAndDisplayOT() {
-            const startTime = document.getElementById('start_time').value;
-            const endTime = document.getElementById('end_time').value;
-            const runDate = document.getElementById('run_date').value;
-            const overtimeRate = document.getElementById('overtime_rate').value.replace(/,/g, '') || 50000;
-            const isOvertimeAtNoon = document.getElementById('is_overtime_at_noon').checked;
+            const startTime = document.getElementById('start_time')?.value;
+            const endTime = document.getElementById('end_time')?.value;
+            const overtimeRateElement = document.getElementById('overtime_rate');
+            const overtimeRate = overtimeRateElement ? overtimeRateElement.value.replace(/,/g, '') || 50000 : 50000;
+            const isOvertimeAtNoonElement = document.getElementById('is_overtime_at_noon');
+            const isOvertimeAtNoon = isOvertimeAtNoonElement ? isOvertimeAtNoonElement.checked : false;
             
-            if (startTime && endTime && runDate) {
-                // Lấy end_working_hour từ car rental (fallback về 17:30)
-                const endWorkingHour = '{{ $carRental->end_working_hour ? \Carbon\Carbon::parse($carRental->end_working_hour)->format('H:i') : "17:30" }}';
-                
-                // Cập nhật hiển thị end_working_hour (format H:i)
-                const endWorkingHourDisplay = document.getElementById('end_working_hour_display');
-                if (endWorkingHourDisplay) {
-                    // Format thời gian về dạng H:i (bỏ giây nếu có)
-                    const formattedTime = endWorkingHour.split(':').slice(0, 2).join(':');
-                    endWorkingHourDisplay.textContent = formattedTime;
-                }
-                
-                // Tính toán OT
-                const startDateTime = new Date(runDate + ' ' + startTime);
-                const endDateTime = new Date(runDate + ' ' + endTime);
-                const overtimeStart = new Date(runDate + ' ' + endWorkingHour);
-                
-                let overtimeHours = 0;
-                if (endDateTime > overtimeStart) {
-                    const effectiveStart = startDateTime > overtimeStart ? startDateTime : overtimeStart;
-                    overtimeHours = (endDateTime - effectiveStart) / (1000 * 60 * 60); // Convert to hours
-                }
-                
-                // Thêm tăng ca trưa
-                if (isOvertimeAtNoon) {
-                    overtimeHours += 1;
-                }
-                
-                const totalOvertimeCost = overtimeHours * overtimeRate;
-                const workingHours = overtimeHours - (isOvertimeAtNoon ? 1 : 0);
-                const noonOvertime = isOvertimeAtNoon ? 1 : 0;
-                
-                // Cập nhật hiển thị
-                document.getElementById('overtime_hours_display').textContent = overtimeHours.toFixed(2) + ' giờ';
-                document.getElementById('total_overtime_cost_display').textContent = totalOvertimeCost.toLocaleString() + ' VNĐ';
-                document.getElementById('working_hours_display').textContent = workingHours.toFixed(2) + ' giờ';
-                document.getElementById('noon_overtime_display').textContent = noonOvertime.toFixed(2) + ' giờ';
-                
-                // Cập nhật hidden fields
-                document.querySelector('input[name="calculated_overtime_hours"]').value = overtimeHours;
-                document.querySelector('input[name="calculated_total_overtime_cost"]').value = totalOvertimeCost;
-                document.querySelector('input[name="working_hours"]').value = workingHours;
-                document.querySelector('input[name="noon_overtime_hours"]').value = noonOvertime;
+            console.log('calculateAndDisplayOT called with:', { startTime, endTime, overtimeRate, isOvertimeAtNoon });
+            
+            // Lấy start_working_hour và end_working_hour từ car rental
+            const startWorkingHour = '{{ $carRental->start_working_hour ? \Carbon\Carbon::parse($carRental->start_working_hour)->format('H:i') : "07:00" }}';
+            const endWorkingHour = '{{ $carRental->end_working_hour ? \Carbon\Carbon::parse($carRental->end_working_hour)->format('H:i') : "17:30" }}';
+            
+            console.log('Working hours:', { startWorkingHour, endWorkingHour });
+            
+            // Cập nhật hiển thị working hours (format H:i)
+            const startWorkingHourDisplay = document.getElementById('start_working_hour_display');
+            const endWorkingHourDisplay = document.getElementById('end_working_hour_display');
+            
+            if (startWorkingHourDisplay) {
+                const formattedStartTime = startWorkingHour.split(':').slice(0, 2).join(':');
+                startWorkingHourDisplay.textContent = formattedStartTime;
             }
+            
+            if (endWorkingHourDisplay) {
+                const formattedEndTime = endWorkingHour.split(':').slice(0, 2).join(':');
+                endWorkingHourDisplay.textContent = formattedEndTime;
+            }
+            
+            let overtimeHours = 0;
+            let morningOvertime = 0;
+            let afternoonOvertime = 0;
+            
+            // Tính OT buổi sáng (chỉ cần start_time)
+            if (startTime) {
+                // So sánh trực tiếp thời gian (HH:MM) không cần ngày
+                if (startTime < startWorkingHour) {
+                    // Chuyển đổi thời gian thành phút để tính toán chính xác
+                    const startMinutes = parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1]);
+                    const startWorkingMinutes = parseInt(startWorkingHour.split(':')[0]) * 60 + parseInt(startWorkingHour.split(':')[1]);
+                    
+                    morningOvertime = (startWorkingMinutes - startMinutes) / 60; // Convert to hours
+                    overtimeHours += morningOvertime;
+                    console.log('Morning OT calculated:', morningOvertime);
+                }
+            }
+            
+            // Tính OT buổi chiều (chỉ cần end_time)
+            if (endTime) {
+                // So sánh trực tiếp thời gian (HH:MM) không cần ngày
+                if (endTime > endWorkingHour) {
+                    // Chuyển đổi thời gian thành phút để tính toán chính xác
+                    const endMinutes = parseInt(endTime.split(':')[0]) * 60 + parseInt(endTime.split(':')[1]);
+                    const endWorkingMinutes = parseInt(endWorkingHour.split(':')[0]) * 60 + parseInt(endWorkingHour.split(':')[1]);
+                    
+                    afternoonOvertime = (endMinutes - endWorkingMinutes) / 60; // Convert to hours
+                    overtimeHours += afternoonOvertime;
+                    console.log('Afternoon OT calculated:', afternoonOvertime);
+                }
+            }
+            
+            // Thêm tăng ca trưa (không phụ thuộc vào thời gian)
+            if (isOvertimeAtNoon) {
+                overtimeHours += 1;
+                console.log('Noon OT added: 1 hour');
+            }
+            
+            const totalOvertimeCost = overtimeHours * overtimeRate;
+            
+            console.log('OT calculation results:', {
+                morningOvertime,
+                afternoonOvertime,
+                isOvertimeAtNoon,
+                overtimeHours,
+                totalOvertimeCost
+            });
+            
+            // Cập nhật hiển thị
+            const overtimeHoursDisplay = document.getElementById('overtime_hours_display');
+            const totalOvertimeCostDisplay = document.getElementById('total_overtime_cost_display');
+            const morningOvertimeDisplay = document.getElementById('morning_overtime_display');
+            const afternoonOvertimeDisplay = document.getElementById('afternoon_overtime_display');
+            const noonOvertimeDisplay = document.getElementById('noon_overtime_display');
+            const totalOvertimeDisplay = document.getElementById('total_overtime_display');
+            
+            if (overtimeHoursDisplay) overtimeHoursDisplay.textContent = overtimeHours.toFixed(2) + ' giờ';
+            if (totalOvertimeCostDisplay) totalOvertimeCostDisplay.textContent = totalOvertimeCost.toLocaleString() + ' VNĐ';
+            if (morningOvertimeDisplay) morningOvertimeDisplay.textContent = morningOvertime.toFixed(2) + ' giờ';
+            if (afternoonOvertimeDisplay) afternoonOvertimeDisplay.textContent = afternoonOvertime.toFixed(2) + ' giờ';
+            if (noonOvertimeDisplay) noonOvertimeDisplay.textContent = (isOvertimeAtNoon ? 1 : 0).toFixed(2) + ' giờ';
+            if (totalOvertimeDisplay) totalOvertimeDisplay.textContent = overtimeHours.toFixed(2) + ' giờ';
+            
+            // Cập nhật hidden fields
+            const calculatedOvertimeHours = document.querySelector('input[name="calculated_overtime_hours"]');
+            const calculatedTotalOvertimeCost = document.querySelector('input[name="calculated_total_overtime_cost"]');
+            const morningOvertimeHours = document.querySelector('input[name="morning_overtime_hours"]');
+            const afternoonOvertimeHours = document.querySelector('input[name="afternoon_overtime_hours"]');
+            const noonOvertimeHours = document.querySelector('input[name="noon_overtime_hours"]');
+            
+            if (calculatedOvertimeHours) calculatedOvertimeHours.value = overtimeHours;
+            if (calculatedTotalOvertimeCost) calculatedTotalOvertimeCost.value = totalOvertimeCost;
+            if (morningOvertimeHours) morningOvertimeHours.value = morningOvertime;
+            if (afternoonOvertimeHours) afternoonOvertimeHours.value = afternoonOvertime;
+            if (noonOvertimeHours) noonOvertimeHours.value = isOvertimeAtNoon ? 1 : 0;
+            
+            console.log('Display updated successfully');
         }
         
         // Thêm event listeners cho các trường thời gian
-        document.getElementById('start_time').addEventListener('change', calculateAndDisplayOT);
-        document.getElementById('end_time').addEventListener('change', calculateAndDisplayOT);
-        document.getElementById('run_date').addEventListener('change', calculateAndDisplayOT);
-        document.getElementById('overtime_rate').addEventListener('input', calculateAndDisplayOT);
-        document.getElementById('is_overtime_at_noon').addEventListener('change', calculateAndDisplayOT);
+        const startTimeInput = document.getElementById('start_time');
+        const endTimeInput = document.getElementById('end_time');
+        const overtimeRateInput = document.getElementById('overtime_rate');
+        const isOvertimeAtNoonInput = document.getElementById('is_overtime_at_noon');
+        
+        if (startTimeInput) {
+            startTimeInput.addEventListener('change', calculateAndDisplayOT);
+            startTimeInput.addEventListener('input', calculateAndDisplayOT);
+            console.log('Event listener added to start_time');
+        }
+        
+        if (endTimeInput) {
+            endTimeInput.addEventListener('change', calculateAndDisplayOT);
+            endTimeInput.addEventListener('input', calculateAndDisplayOT);
+            console.log('Event listener added to end_time');
+        }
+        
+        if (overtimeRateInput) {
+            overtimeRateInput.addEventListener('input', calculateAndDisplayOT);
+            console.log('Event listener added to overtime_rate');
+        }
+        
+        if (isOvertimeAtNoonInput) {
+            isOvertimeAtNoonInput.addEventListener('change', calculateAndDisplayOT);
+            console.log('Event listener added to is_overtime_at_noon');
+        }
         
         // Tính toán ban đầu
         calculateAndDisplayOT();
+        
+        // Format thời gian về H:i trước khi submit form
+        document.getElementById('shipmentForm').addEventListener('submit', function(e) {
+            const startTimeInput = document.getElementById('start_time');
+            const endTimeInput = document.getElementById('end_time');
+            
+            // Format start_time về H:i nếu có giây
+            if (startTimeInput && startTimeInput.value) {
+                const startTime = startTimeInput.value;
+                if (startTime.length > 5) {
+                    startTimeInput.value = startTime.substring(0, 5);
+                }
+            }
+            
+            // Format end_time về H:i nếu có giây
+            if (endTimeInput && endTimeInput.value) {
+                const endTime = endTimeInput.value;
+                if (endTime.length > 5) {
+                    endTimeInput.value = endTime.substring(0, 5);
+                }
+            }
+        });
         
         // Thêm event listener cho nút thêm tài xế
         const personTable = document.querySelector('#personTable tbody');

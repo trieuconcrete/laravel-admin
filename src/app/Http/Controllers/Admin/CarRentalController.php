@@ -205,6 +205,12 @@ class CarRentalController extends Controller
             $data['start_odometer'] = str_replace(',', '', $data['start_odometer']);
             $data['end_odometer'] = str_replace(',', '', $data['end_odometer']);
             $data['parking_fee'] = str_replace(',', '', $data['parking_fee']);
+            $data['weighing_fee'] = str_replace(',', '', $data['weighing_fee']);
+            $data['testing_surcharge'] = str_replace(',', '', $data['testing_surcharge']);
+
+            $data['overtime_rate'] = str_replace(',', '', $data['overtime_rate']);
+            $data['max_distance'] = str_replace(',', '', $data['max_distance'] ?? '');
+            $data['over_distance_fee_per_km'] = str_replace(',', '', $data['over_distance_fee_per_km'] ?? '');
             
             // Xử lý loại bỏ dấu phẩy từ driver deductions
             if (!empty($data['drivers'])) {
@@ -287,15 +293,17 @@ class CarRentalController extends Controller
                         }
                     }
                 ],
-                'start_time' => 'required|date_format:H:i',
-                'end_time' => 'required|date_format:H:i|after:start_time',
+                'start_time' => 'required|date_format:H:i,H:i:s',
+                'end_time' => 'required|date_format:H:i,H:i:s|after:start_time',
                 'start_location' => 'nullable|string|max:255',
                 'end_location' => 'nullable|string|max:255',
                 'start_odometer' => 'required|numeric|min:0',
                 'end_odometer' => 'required|numeric|gt:start_odometer',
-                'overtime_rate' => 'nullable|numeric|min:0',
+                'overtime_rate' => 'required|numeric|min:0',
                 'is_overtime_at_noon' => 'nullable|boolean',
                 'parking_fee' => 'nullable|numeric|min:0',
+                'weighing_fee' => 'nullable|numeric|min:0',
+                'testing_surcharge' => 'nullable|numeric|min:0',
                 'notes' => 'nullable|string',
                 'toll_fees' => 'nullable|array',
                 'toll_fees.*.station_name' => 'nullable|string|max:255',
@@ -317,25 +325,78 @@ class CarRentalController extends Controller
             $endDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['end_time']);
             $totalDistance = abs($validated['end_odometer'] - $validated['start_odometer']);
 
-            // Tính overtime_hours (sử dụng end_working_hour từ car rental thay vì cố định 17:30)
+            // Tính overtime_hours (sử dụng start_working_hour và end_working_hour từ car rental)
             $overtimeHours = 0;
             $overtimeRate = $validated['overtime_rate'] ?? 0;
             if ($overtimeRate > 0) {
-                // Lấy end_working_hour từ car rental, fallback về 17:30 nếu không có
+                // Lấy start_working_hour và end_working_hour từ car rental
                 $carRental = \App\Models\CarRental::find($validated['car_rental_id']);
+                $startWorkingHour = $carRental && $carRental->start_working_hour ? 
+                    $carRental->start_working_hour : '07:00';
                 $endWorkingHour = $carRental && $carRental->end_working_hour ? 
                     $carRental->end_working_hour : '17:30';
                 
-                $overtimeStart = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $endWorkingHour);
-                if ($endDateTime->greaterThan($overtimeStart)) {
-                    $effectiveStart = $startDateTime->greaterThan($overtimeStart) ? $startDateTime : $overtimeStart;
-                    $overtimeHours = abs($endDateTime->floatDiffInRealHours($effectiveStart));
+                Log::info('Overtime calculation setup:', [
+                    'start_time' => $validated['start_time'],
+                    'end_time' => $validated['end_time'],
+                    'start_working_hour' => $startWorkingHour,
+                    'end_working_hour' => $endWorkingHour,
+                    'run_date' => $validated['run_date']
+                ]);
+                
+                // Tính OT buổi sáng (khi bắt đầu sớm hơn start_working_hour)
+                if ($validated['start_time'] < $startWorkingHour) {
+                    // Chuyển đổi thời gian thành phút để tính toán
+                    $startTimeMinutes = $this->timeToMinutes($validated['start_time']);
+                    $startWorkingMinutes = $this->timeToMinutes($startWorkingHour);
+                    $morningOvertime = ($startWorkingMinutes - $startTimeMinutes) / 60;
+                    
+                    $overtimeHours += $morningOvertime;
+                    Log::info('Morning overtime calculated:', [
+                        'start_time' => $validated['start_time'],
+                        'start_working_hour' => $startWorkingHour,
+                        'morning_overtime' => $morningOvertime,
+                        'startTimeMinutes' => $startTimeMinutes,
+                        'startWorkingMinutes' => $startWorkingMinutes
+                    ]);
+                } else {
+                    Log::info('No morning overtime - start time is not before working hour');
                 }
                 
-                // Thêm tăng ca trưa 1h nếu có chọn checkbox (theo yêu cầu issue #180)
+                // Tính OT buổi chiều (khi kết thúc muộn hơn end_working_hour)
+                if ($validated['end_time'] > $endWorkingHour) {
+                    // Chuyển đổi thời gian thành phút để tính toán
+                    $endTimeMinutes = $this->timeToMinutes($validated['end_time']);
+                    $endWorkingMinutes = $this->timeToMinutes($endWorkingHour);
+                    $afternoonOvertime = ($endTimeMinutes - $endWorkingMinutes) / 60;
+                    
+                    $overtimeHours += $afternoonOvertime;
+                    Log::info('Afternoon overtime calculated:', [
+                        'end_time' => $validated['end_time'],
+                        'end_working_hour' => $endWorkingHour,
+                        'afternoon_overtime' => $afternoonOvertime,
+                        'endTimeMinutes' => $endTimeMinutes,
+                        'endWorkingMinutes' => $endWorkingMinutes
+                    ]);
+                } else {
+                    Log::info('No afternoon overtime - end time is not after working hour');
+                }
+                
+                // Thêm tăng ca trưa 1h nếu có chọn checkbox
                 if (!empty($validated['is_overtime_at_noon'])) {
                     $overtimeHours += 1;
+                    Log::info('Noon overtime added: 1 hour');
                 }
+                
+                Log::info('Total overtime calculation:', [
+                    'start_time' => $validated['start_time'],
+                    'end_time' => $validated['end_time'],
+                    'start_working_hour' => $startWorkingHour,
+                    'end_working_hour' => $endWorkingHour,
+                    'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
+                    'total_overtime_hours' => $overtimeHours,
+                    'final_overtime_hours' => $overtimeHours
+                ]);
             }
             $totalOvertimeCost = abs($overtimeRate * $overtimeHours);
 
@@ -411,6 +472,8 @@ class CarRentalController extends Controller
                 'total_overtime_cost' => $totalOvertimeCost,
                 'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
                 'parking_fee' => $validated['parking_fee'],
+                'weighing_fee' => $validated['weighing_fee'] ?? 0,
+                'testing_surcharge' => $validated['testing_surcharge'] ?? 0,
                 'notes' => $validated['notes'],
                 'unit_price_for_car_rental' => $validated['is_car_rental_value'] ? $validated['unit_price_for_car_rental'] : null
             ];
@@ -779,6 +842,9 @@ class CarRentalController extends Controller
             $data['start_odometer'] = str_replace(',', '', $data['start_odometer']);
             $data['end_odometer'] = str_replace(',', '', $data['end_odometer']);
             $data['parking_fee'] = str_replace(',', '', $data['parking_fee']);
+            $data['weighing_fee'] = str_replace(',', '', $data['weighing_fee'] ?? '');
+            $data['testing_surcharge'] = str_replace(',', '', $data['testing_surcharge'] ?? '');
+            $data['overtime_rate'] = str_replace(',', '', $data['overtime_rate']);
             $data['max_distance'] = str_replace(',', '', $data['max_distance'] ?? '');
             $data['over_distance_fee_per_km'] = str_replace(',', '', $data['over_distance_fee_per_km'] ?? '');
             
@@ -860,14 +926,15 @@ class CarRentalController extends Controller
                         }
                     }
                 ],
-                'start_time' => 'required|date_format:H:i',
-                'end_time' => 'required|date_format:H:i|after:start_time',
+                'start_time' => 'required|date_format:H:i,H:i:s',
+                'end_time' => 'required|date_format:H:i,H:i:s|after:start_time',
                 'start_location' => 'nullable|string|max:255',
                 'end_location' => 'nullable|string|max:255',
                 'start_odometer' => 'required|numeric|min:0',
                 'end_odometer' => 'required|numeric|gt:start_odometer',
-                'overtime_rate' => 'nullable|numeric|min:0',
-                'parking_fee' => 'nullable|numeric|min:0',
+                'weighing_fee' => 'nullable|numeric|min:0',
+                'testing_surcharge' => 'nullable|numeric|min:0',
+                'overtime_rate' => 'required|numeric|min:0',
                 'is_overtime_at_noon' => 'nullable|boolean',
                 'status' => 'required|in:pending,in_transit,cancelled,delayed,completed',
                 'notes' => 'nullable|string',
@@ -885,6 +952,8 @@ class CarRentalController extends Controller
             
             $validated['overtime_rate'] = $validated['overtime_rate'] ?? 50000;
             $validated['parking_fee'] = isset($validated['parking_fee']) ? abs((float)$validated['parking_fee']) : 0;
+            $validated['weighing_fee'] = isset($validated['weighing_fee']) ? abs((float)$validated['weighing_fee']) : 0;
+            $validated['testing_surcharge'] = isset($validated['testing_surcharge']) ? abs((float)$validated['testing_surcharge']) : 0;
 
             // Get vehicle và car rental để lấy thông tin
             $vehicle = \App\Models\Vehicle::findOrFail($validated['vehicle_id']);
@@ -943,25 +1012,78 @@ class CarRentalController extends Controller
             $startDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['start_time']);
             $endDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['end_time']);
             
-            // Tính overtime_hours (sử dụng end_working_hour từ car rental thay vì cố định 17:30)
+            // Tính overtime_hours (sử dụng start_working_hour và end_working_hour từ car rental)
             $overtimeHours = 0;
             $overtimeRate = $validated['overtime_rate'] ?? 0;
             if ($overtimeRate > 0) {
-                // Lấy end_working_hour từ car rental, fallback về 17:30 nếu không có
+                // Lấy start_working_hour và end_working_hour từ car rental
                 $carRental = \App\Models\CarRental::find($validated['car_rental_id']);
+                $startWorkingHour = $carRental && $carRental->start_working_hour ? 
+                    $carRental->start_working_hour : '07:00';
                 $endWorkingHour = $carRental && $carRental->end_working_hour ? 
                     $carRental->end_working_hour : '17:30';
                 
-                $overtimeStart = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $endWorkingHour);
-                if ($endDateTime->greaterThan($overtimeStart)) {
-                    $effectiveStart = $startDateTime->greaterThan($overtimeStart) ? $startDateTime : $overtimeStart;
-                    $overtimeHours = abs($endDateTime->floatDiffInRealHours($effectiveStart));
+                Log::info('Overtime calculation setup:', [
+                    'start_time' => $validated['start_time'],
+                    'end_time' => $validated['end_time'],
+                    'start_working_hour' => $startWorkingHour,
+                    'end_working_hour' => $endWorkingHour,
+                    'run_date' => $validated['run_date']
+                ]);
+                
+                // Tính OT buổi sáng (khi bắt đầu sớm hơn start_working_hour)
+                if ($validated['start_time'] < $startWorkingHour) {
+                    // Chuyển đổi thời gian thành phút để tính toán
+                    $startTimeMinutes = $this->timeToMinutes($validated['start_time']);
+                    $startWorkingMinutes = $this->timeToMinutes($startWorkingHour);
+                    $morningOvertime = ($startWorkingMinutes - $startTimeMinutes) / 60;
+                    
+                    $overtimeHours += $morningOvertime;
+                    Log::info('Morning overtime calculated:', [
+                        'start_time' => $validated['start_time'],
+                        'start_working_hour' => $startWorkingHour,
+                        'morning_overtime' => $morningOvertime,
+                        'startTimeMinutes' => $startTimeMinutes,
+                        'startWorkingMinutes' => $startWorkingMinutes
+                    ]);
+                } else {
+                    Log::info('No morning overtime - start time is not before working hour');
                 }
                 
-                // Thêm tăng ca trưa 1h nếu có chọn checkbox (theo yêu cầu issue #180)
+                // Tính OT buổi chiều (khi kết thúc muộn hơn end_working_hour)
+                if ($validated['end_time'] > $endWorkingHour) {
+                    // Chuyển đổi thời gian thành phút để tính toán
+                    $endTimeMinutes = $this->timeToMinutes($validated['end_time']);
+                    $endWorkingMinutes = $this->timeToMinutes($endWorkingHour);
+                    $afternoonOvertime = ($endTimeMinutes - $endWorkingMinutes) / 60;
+                    
+                    $overtimeHours += $afternoonOvertime;
+                    Log::info('Afternoon overtime calculated:', [
+                        'end_time' => $validated['end_time'],
+                        'end_working_hour' => $endWorkingHour,
+                        'afternoon_overtime' => $afternoonOvertime,
+                        'endTimeMinutes' => $endTimeMinutes,
+                        'endWorkingMinutes' => $endWorkingMinutes
+                    ]);
+                } else {
+                    Log::info('No afternoon overtime - end time is not after working hour');
+                }
+                
+                // Thêm tăng ca trưa 1h nếu có chọn checkbox
                 if (!empty($validated['is_overtime_at_noon'])) {
                     $overtimeHours += 1;
+                    Log::info('Noon overtime added: 1 hour');
                 }
+                
+                Log::info('Total overtime calculation:', [
+                    'start_time' => $validated['start_time'],
+                    'end_time' => $validated['end_time'],
+                    'start_working_hour' => $startWorkingHour,
+                    'end_working_hour' => $endWorkingHour,
+                    'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
+                    'total_overtime_hours' => $overtimeHours,
+                    'final_overtime_hours' => $overtimeHours
+                ]);
             }
             $totalOvertimeCost = abs($overtimeRate * $overtimeHours);
 
@@ -990,6 +1112,8 @@ class CarRentalController extends Controller
                 'total_overtime_cost' => $totalOvertimeCost,
                 'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
                 'parking_fee' => $validated['parking_fee'],
+                'weighing_fee' => $validated['weighing_fee'] ?? 0,
+                'testing_surcharge' => $validated['testing_surcharge'] ?? 0,
                 'notes' => $validated['notes'],
                 'unit_price_for_car_rental' => $validated['is_car_rental_value'] ? $validated['unit_price_for_car_rental'] : null
             ];
@@ -1505,6 +1629,8 @@ class CarRentalController extends Controller
         $totalOvertimeCost = $shipments->sum('overtime_cost') ?? 0;
         $totalTollFees = $shipments->sum(function($s) { return $s->tollFees->sum('fee_amount'); }) ?? 0;
         $totalParkingFees = $shipments->sum('parking_fee') ?? 0;
+        $totalWeighingFees = $shipments->sum('weighing_fee') ?? 0;
+        $totalTestingSurcharges = $shipments->sum('testing_surcharge') ?? 0;
         $totalDistance = $shipments->sum('distance') ?? 0;
         
         // Tính phí vượt quãng đường
@@ -1530,6 +1656,8 @@ class CarRentalController extends Controller
             'total_overtime_cost' => $totalOvertimeCost,
             'total_toll_fees' => $totalTollFees,
             'total_parking_fees' => $totalParkingFees,
+            'total_weighing_fees' => $totalWeighingFees,
+            'total_testing_surcharges' => $totalTestingSurcharges,
             'total_distance' => $totalDistance,
             'over_distance_fee' => $overDistanceFee,
             'subtotal' => $subtotal,
@@ -1856,6 +1984,8 @@ class CarRentalController extends Controller
         
         // Tổng phí đỗ xe
         $summary['total_parking_fees'] = $shipments->sum('parking_fee') ?? 0;
+        $summary['total_weighing_fees'] = $shipments->sum('weighing_fee') ?? 0;
+        $summary['total_testing_surcharges'] = $shipments->sum('testing_surcharge') ?? 0;
         
         // Tổng quãng đường
         $summary['total_distance'] = $shipments->sum('distance') ?? 0;
@@ -1875,8 +2005,11 @@ class CarRentalController extends Controller
                               $summary['total_overtime_cost'] + 
                               $summary['total_toll_fees'] + 
                               $summary['total_parking_fees'] + 
-                              $summary['over_distance_fee'];
+                              $summary['total_weighing_fees'] + 
+                              $summary['total_testing_surcharges'] + 
+                              $summary['over_distance_fee'] + $carRental->monthly_rental_fee;
         
+        // dd($summary);
         // VAT
         $summary['vat_rate'] = $carRental->customer->vat_rate ?? 8; // Default 8%
         $summary['vat_amount'] = $summary['subtotal'] * ($summary['vat_rate'] / 100);
@@ -1889,5 +2022,18 @@ class CarRentalController extends Controller
         $summary['remaining_debt'] = $summary['total_with_vat'] - $summary['paid_amount'];
         
         return $summary;
+    }
+
+    /**
+     * Chuyển đổi thời gian từ format H:i hoặc H:i:s thành số phút
+     * Ví dụ: "05:00" -> 300, "17:30" -> 1050
+     */
+    private function timeToMinutes($timeString)
+    {
+        $parts = explode(':', $timeString);
+        $hours = (int)$parts[0];
+        $minutes = (int)$parts[1];
+        
+        return ($hours * 60) + $minutes;
     }
 }

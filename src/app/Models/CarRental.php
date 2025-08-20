@@ -39,6 +39,7 @@ class CarRental extends Model
         'product_name',
         'contract_number',
         'end_working_hour',
+        'start_working_hour',
     ];
 
     const OVERTIME_FEE_PER_HOUR_DEFAULT = 50000; // Default value for overtime fee per hour
@@ -59,6 +60,7 @@ class CarRental extends Model
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
         'end_working_hour' => 'string',   // time  
+        'start_working_hour' => 'string', // time
     ];
 
     /**
