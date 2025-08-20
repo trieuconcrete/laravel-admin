@@ -205,7 +205,9 @@ class CarRentalController extends Controller
             $data['start_odometer'] = str_replace(',', '', $data['start_odometer']);
             $data['end_odometer'] = str_replace(',', '', $data['end_odometer']);
             $data['parking_fee'] = str_replace(',', '', $data['parking_fee']);
-            
+            $data['weighing_fee'] = str_replace(',', '', $data['weighing_fee']);
+            $data['testing_surcharge'] = str_replace(',', '', $data['testing_surcharge']);
+
             // Xử lý loại bỏ dấu phẩy từ driver deductions
             if (!empty($data['drivers'])) {
                 foreach ($data['drivers'] as &$driver) {
@@ -296,6 +298,8 @@ class CarRentalController extends Controller
                 'overtime_rate' => 'nullable|numeric|min:0',
                 'is_overtime_at_noon' => 'nullable|boolean',
                 'parking_fee' => 'nullable|numeric|min:0',
+                'weighing_fee' => 'nullable|numeric|min:0',
+                'testing_surcharge' => 'nullable|numeric|min:0',
                 'notes' => 'nullable|string',
                 'toll_fees' => 'nullable|array',
                 'toll_fees.*.station_name' => 'nullable|string|max:255',
@@ -411,6 +415,8 @@ class CarRentalController extends Controller
                 'total_overtime_cost' => $totalOvertimeCost,
                 'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
                 'parking_fee' => $validated['parking_fee'],
+                'weighing_fee' => $validated['weighing_fee'] ?? 0,
+                'testing_surcharge' => $validated['testing_surcharge'] ?? 0,
                 'notes' => $validated['notes'],
                 'unit_price_for_car_rental' => $validated['is_car_rental_value'] ? $validated['unit_price_for_car_rental'] : null
             ];
@@ -779,6 +785,8 @@ class CarRentalController extends Controller
             $data['start_odometer'] = str_replace(',', '', $data['start_odometer']);
             $data['end_odometer'] = str_replace(',', '', $data['end_odometer']);
             $data['parking_fee'] = str_replace(',', '', $data['parking_fee']);
+            $data['weighing_fee'] = str_replace(',', '', $data['weighing_fee'] ?? '');
+            $data['testing_surcharge'] = str_replace(',', '', $data['testing_surcharge'] ?? '');
             $data['max_distance'] = str_replace(',', '', $data['max_distance'] ?? '');
             $data['over_distance_fee_per_km'] = str_replace(',', '', $data['over_distance_fee_per_km'] ?? '');
             
@@ -868,6 +876,8 @@ class CarRentalController extends Controller
                 'end_odometer' => 'required|numeric|gt:start_odometer',
                 'overtime_rate' => 'nullable|numeric|min:0',
                 'parking_fee' => 'nullable|numeric|min:0',
+                'weighing_fee' => 'nullable|numeric|min:0',
+                'testing_surcharge' => 'nullable|numeric|min:0',
                 'is_overtime_at_noon' => 'nullable|boolean',
                 'status' => 'required|in:pending,in_transit,cancelled,delayed,completed',
                 'notes' => 'nullable|string',
@@ -885,6 +895,8 @@ class CarRentalController extends Controller
             
             $validated['overtime_rate'] = $validated['overtime_rate'] ?? 50000;
             $validated['parking_fee'] = isset($validated['parking_fee']) ? abs((float)$validated['parking_fee']) : 0;
+            $validated['weighing_fee'] = isset($validated['weighing_fee']) ? abs((float)$validated['weighing_fee']) : 0;
+            $validated['testing_surcharge'] = isset($validated['testing_surcharge']) ? abs((float)$validated['testing_surcharge']) : 0;
 
             // Get vehicle và car rental để lấy thông tin
             $vehicle = \App\Models\Vehicle::findOrFail($validated['vehicle_id']);
@@ -990,6 +1002,8 @@ class CarRentalController extends Controller
                 'total_overtime_cost' => $totalOvertimeCost,
                 'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
                 'parking_fee' => $validated['parking_fee'],
+                'weighing_fee' => $validated['weighing_fee'] ?? 0,
+                'testing_surcharge' => $validated['testing_surcharge'] ?? 0,
                 'notes' => $validated['notes'],
                 'unit_price_for_car_rental' => $validated['is_car_rental_value'] ? $validated['unit_price_for_car_rental'] : null
             ];
@@ -1505,6 +1519,8 @@ class CarRentalController extends Controller
         $totalOvertimeCost = $shipments->sum('overtime_cost') ?? 0;
         $totalTollFees = $shipments->sum(function($s) { return $s->tollFees->sum('fee_amount'); }) ?? 0;
         $totalParkingFees = $shipments->sum('parking_fee') ?? 0;
+        $totalWeighingFees = $shipments->sum('weighing_fee') ?? 0;
+        $totalTestingSurcharges = $shipments->sum('testing_surcharge') ?? 0;
         $totalDistance = $shipments->sum('distance') ?? 0;
         
         // Tính phí vượt quãng đường
@@ -1530,6 +1546,8 @@ class CarRentalController extends Controller
             'total_overtime_cost' => $totalOvertimeCost,
             'total_toll_fees' => $totalTollFees,
             'total_parking_fees' => $totalParkingFees,
+            'total_weighing_fees' => $totalWeighingFees,
+            'total_testing_surcharges' => $totalTestingSurcharges,
             'total_distance' => $totalDistance,
             'over_distance_fee' => $overDistanceFee,
             'subtotal' => $subtotal,
@@ -1856,6 +1874,8 @@ class CarRentalController extends Controller
         
         // Tổng phí đỗ xe
         $summary['total_parking_fees'] = $shipments->sum('parking_fee') ?? 0;
+        $summary['total_weighing_fees'] = $shipments->sum('weighing_fee') ?? 0;
+        $summary['total_testing_surcharges'] = $shipments->sum('testing_surcharge') ?? 0;
         
         // Tổng quãng đường
         $summary['total_distance'] = $shipments->sum('distance') ?? 0;
@@ -1875,6 +1895,8 @@ class CarRentalController extends Controller
                               $summary['total_overtime_cost'] + 
                               $summary['total_toll_fees'] + 
                               $summary['total_parking_fees'] + 
+                              $summary['total_weighing_fees'] + 
+                              $summary['total_testing_surcharges'] + 
                               $summary['over_distance_fee'] + $carRental->monthly_rental_fee;
         
         // dd($summary);

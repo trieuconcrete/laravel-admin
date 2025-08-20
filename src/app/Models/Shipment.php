@@ -68,6 +68,8 @@ class Shipment extends Model
         'overtime_rate',
         'total_overtime_cost',
         'parking_fee',
+        'weighing_fee', // Phí cân hàng
+        'testing_surcharge', // Phụ phí kiểm tra
         'is_overtime_at_noon'
     ];
 
