@@ -35,6 +35,40 @@ $(document).ready(function() {
         }
     });
 
+    // Format parking fee input on keyup
+    $('.number').on('input', function () {
+        formatParkingFeeInput($(this));
+    });
+
+    window.formatParkingFeeInput = function(input) {
+        formatParkingFeeInput($(input));
+    };
+
+    // Function to format parking fee input with VND formatting
+    function formatParkingFeeInput(input) {
+        let value = input.val();
+        
+        // Remove non-numeric characters and decimal part
+        value = value.replace(/[^0-9.]/g, '');
+        
+        // Handle decimal part - if it's .00 or .0, remove it completely
+        if (value.includes('.')) {
+            let parts = value.split('.');
+            if (parts[1] === '00' || parts[1] === '0') {
+                value = parts[0]; // Remove decimal part completely
+            } else {
+                value = parts[0]; // Keep only integer part
+            }
+        }
+        
+        // Format with commas
+        if (value) {
+            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        
+        input.val(value);
+    }
+
     // Cache elements
     const $rentalCheckbox = $('#is_car_rental');
     const $vehicleSelect = $('#vehicles');
