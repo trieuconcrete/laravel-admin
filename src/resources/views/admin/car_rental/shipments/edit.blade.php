@@ -280,7 +280,7 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Phí cân xe</label>
-                                                    <input type="text" class="form-control number" name="weighing_fee" value="{{ old('weighing_fee',$shipment->weighing_fee) }}" required>
+                                                    <input type="text" class="form-control number" name="weighing_fee" value="{{ old('weighing_fee',$shipment->weighing_fee) }}">
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Phụ phí test</label>
