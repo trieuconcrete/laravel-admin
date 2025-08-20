@@ -537,17 +537,8 @@
                             title: "Thành công!",
                             text: "Đã tổng kết công nợ thành công",
                             icon: "success",
-                            confirmButtonText: "Xuất Excel",
-                            showCancelButton: true,
-                            cancelButtonText: "Đóng"
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                // Chuyển đến trang xuất Excel
-                                window.open(
-                                    `/admin/car-rental/${carRentalId}/export-summary?start_date=${startDate}&end_date=${endDate}`,
-                                    '_blank'
-                                );
-                            }
+                            confirmButtonText: "Đóng"
+                        }).then(() => {
                             // Reload trang để hiển thị trạng thái mới
                             location.reload();
                         });
