@@ -282,6 +282,8 @@
                                                     <th>Tổng km</th>
                                                     <th>Phí cầu đường</th>
                                                     <th>Phí đậu xe</th>
+                                                    <th>Phí cân xe</th>
+                                                    <th>Phụ phí test</th>
                                                     <th>Thao tác</th>
                                                 </tr>
                                             </thead>
@@ -327,6 +329,8 @@
                                                             @endif
                                                         </td>
                                                         <td>{{ number_format($shipment->parking_fee) }}</td>
+                                                        <td>{{ number_format($shipment->weighing_fee) }}</td>
+                                                        <td>{{ number_format($shipment->testing_surcharge) }}</td>
                                                         <td>
                                                             <div class="d-flex gap-2">
                                                                 <a href="{{ route('admin.car-rental.edit-vehicle-log', $shipment->id) }}" class="btn btn-sm btn-primary">
