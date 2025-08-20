@@ -233,7 +233,7 @@
                         <div class="col-md-6">
                             <div class="mb-4">
                                 <label class="form-label">Phí tăng ca/giờ</label>
-                                <input type="text" class="form-control number" name="overtime_fee_per_hour">
+                                <input type="text" class="form-control number" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', '50000') }}">
                             </div>
                         </div>
                     </div>

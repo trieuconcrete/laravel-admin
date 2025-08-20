@@ -124,12 +124,6 @@
                                                     @enderror
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <div class="mb-4">
-                                                    <label class="form-label">Phí tăng ca/giờ</label>
-                                                    <input type="text" class="form-control number" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', number_format($carRental->overtime_fee_per_hour)) }}">
-                                                </div>
-                                            </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
@@ -659,7 +653,7 @@
                                 <tr class="py-1">
                                     <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
                                         - Phát sinh phụ phí cầu đường:
-                                        <span class="fw-bold text-info">{{ number_format($totalTollFees, 0, ',', '.') }} VNĐ</span>
+                                        <span class="fw-bold text-info">{{ number_format($totalTollFeesWithoutVat, 0, ',', '.') }} VNĐ</span>
                                         <small class="text-muted">(Phí cầu đường + phí đậu xe)/1.08</small>
                                     </td>
                                 </tr>
