@@ -273,27 +273,6 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Tải trọng (tấn)</label>
-                            <input type="number" step="0.1" class="form-control" name="capacity" id="capacity">
-                            <div class="text-danger error" data-field="capacity"></div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Năm sản xuất</label>
-                            <input type="number" class="form-control" name="manufactured_year" id="manufactured_year">
-                            <div class="text-danger error" data-field="manufactured_year"></div>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                            <select class="form-select" name="status">
-                                @foreach ($vehicleStatuses as $val => $label)
-                                    <option value="{{ $val }}">{{ $label }}</option>
-                                @endforeach
-                            </select>
-                            <div class="text-danger error" data-field="status"></div>
-                        </div>
                         <div class="col-md-6" id="driverSelect">
                             <label class="form-label">Tài xế </label>
                             <select class="form-select" name="driver_id">
@@ -303,6 +282,27 @@
                                 @endforeach
                             </select>
                             <div class="text-danger error" data-field="driver_id"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                            <select class="form-select" name="status">
+                                @foreach ($vehicleStatuses as $val => $label)
+                                    <option value="{{ $val }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <div class="text-danger error" data-field="status"></div>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Tải trọng (tấn)</label>
+                            <input type="number" step="0.1" class="form-control" name="capacity" id="capacity">
+                            <div class="text-danger error" data-field="capacity"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Năm sản xuất</label>
+                            <input type="number" class="form-control" name="manufactured_year" id="manufactured_year">
+                            <div class="text-danger error" data-field="manufactured_year"></div>
                         </div>
                     </div>
                     <hr>

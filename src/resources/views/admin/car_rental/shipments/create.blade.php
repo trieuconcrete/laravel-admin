@@ -73,11 +73,11 @@
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
-                                                    <input type="time" class="form-control" name="start_time" id="start_time" value="{{ old('start_time') }}" required inputmode="numeric" style="cursor:pointer;">
+                                                    <input type="time" class="form-control" name="start_time" id="start_time" value="{{ old('start_time', $carRental->start_working_hour) }}" required inputmode="numeric" style="cursor:pointer;">
                                                 </div>
                                                 <div class="col-md-4">
                                                     <label class="form-label">Giờ kết thúc <span class="text-danger">*</span></label>
-                                                    <input type="time" class="form-control" name="end_time" id="end_time" value="{{ old('end_time') }}" required inputmode="numeric" style="cursor:pointer;">
+                                                    <input type="time" class="form-control" name="end_time" id="end_time" value="{{ old('end_time', $carRental->end_working_hour) }}" required inputmode="numeric" style="cursor:pointer;">
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
