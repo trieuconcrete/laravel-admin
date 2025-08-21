@@ -74,7 +74,7 @@
                                         <th>Thao tác</th>
                                         <th>Trạng thái</th>
                                         <th>Khách hàng</th>
-                                        <th>Tổng tiền</th>
+                                        <th>Thành tiền(VAT)</th>
                                         <th>Loại</th>
                                         <th>Tổng kết công nợ</th>
                                         <th>Ngày tạo</th>
