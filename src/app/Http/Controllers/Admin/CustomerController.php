@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Customer\StoreCustomerRequest;
+use App\Models\Payment;
 use App\Models\Customer;
-use App\Services\CustomerService;
-use App\Services\TransactionPaymentService;
-use App\Exports\InvoiceExport;
-use Maatwebsite\Excel\Facades\Excel;
+use App\Models\CarRental;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
+use App\Exports\InvoiceExport;
+use App\Models\ShipmentReport;
+use App\Services\CustomerService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Services\TransactionPaymentService;
+use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Repositories\Interface\CustomerRepositoryInterface as CustomerRepository;
-use App\Models\Transaction;
-use App\Models\Payment;
-use App\Models\ShipmentReport;
 
 /**
  * Summary of __construct
@@ -131,17 +132,24 @@ class CustomerController extends Controller
             ->distinct()
             ->orderBy('monthly', 'desc')
             ->get();
-        
 
-        
-
-        
         // Load all transactions by default
         try {
             $perPage = 10;
             $transactions = $this->transactionPaymentService->getCustomerTransactions($customer, [], $perPage);
             $activeTab = $request->input('active_tab', 'monthlyReport');
             $filters = [];
+            $query = CarRental::with(['customer', 'shipmentReports'])->where('customer_id', $customer->id)->orderBy('created_at', 'DESC');
+            /** search vehicle type */
+            if (!empty($filters['type'])) {
+                $query->where('type', $filters['type']);
+            }
+
+            /** search status */
+            if (!empty($filters['status'])) {
+                $query->where('status', $filters['status']);
+            }
+            $carRentals = $query->paginate($perPage);
             
             return view('admin.customers.show', compact(
                 'customer', 
@@ -153,7 +161,8 @@ class CustomerController extends Controller
                 'paymentStatuses',
                 'filters',
                 'customerStatusActives',
-                'shipmentMonthlyReports'
+                'shipmentMonthlyReports',
+                'carRentals'
             ));
         } catch (\Exception $e) {
             Log::error('Error loading default transactions', ['error' => $e->getMessage(), 'customer_id' => $customer->id]);
