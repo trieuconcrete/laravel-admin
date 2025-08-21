@@ -109,7 +109,7 @@
                                                         <option value="in_transit" {{ old('status') == 'in_transit' ? 'selected' : '' }}>Đang vận chuyển</option>
                                                         <option value="cancelled" {{ old('status') == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
                                                         <option value="delayed" {{ old('status') == 'delayed' ? 'selected' : '' }}>Bị trễ</option>
-                                                        <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>Hoàn thành</option>
+                                                        <option value="completed" {{ old('status') == 'completed' ? 'selected' : 'selected' }}>Hoàn thành</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-6">
