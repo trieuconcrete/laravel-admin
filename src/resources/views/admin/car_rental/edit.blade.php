@@ -678,19 +678,23 @@
                                         @endif
                                     </td>
                                 </tr>
-                                
-                                <tr class="border-top py-1">
-                                    <td class="text-start fw-bold py-1" style="padding: 0.25rem 0.5rem;">
-                                        <i class="ri-calculator-line text-dark me-2"></i>Tổng cộng (chưa thuế VAT):
-                                        <span class="fw-bold text-danger">{{ number_format(($carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFeesWithoutVat + $totalWeighingFees + $totalTestingSurcharge + ($carRental->over_distance_fee ?? 0), 0, ',', '.') }} VNĐ</span>
-                                    </td>
-                                </tr>
-                                
                                 @php
-                                    $subtotal = ($carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFeesWithoutVat + $totalWeighingFees + $totalTestingSurcharge + ($carRental->over_distance_fee ?? 0);
+                                    if ($carRental->type == 1) {
+                                        // Thuê nguyên xe tính theo chuyến
+                                        $subtotal = ($carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFeesWithoutVat + $totalWeighingFees + $totalTestingSurcharge + ($carRental->over_distance_fee ?? 0);
+                                    } else {
+                                        // Thuê xe theo kiểu khoáng
+                                        $subtotal = ($carRental->monthly_rental_fee ?? 0);
+                                    }
                                     $vatAmount = $subtotal * 0.08;
                                     $totalWithVat = $subtotal + $vatAmount;
                                 @endphp
+                                <tr class="border-top py-1">
+                                    <td class="text-start fw-bold py-1" style="padding: 0.25rem 0.5rem;">
+                                        <i class="ri-calculator-line text-dark me-2"></i>Tổng cộng (chưa thuế VAT):
+                                        <span class="fw-bold text-danger">{{ number_format($subtotal, 0, ',', '.') }} VNĐ</span>
+                                    </td>
+                                </tr>
                                 
                                 <tr class="py-1">
                                     <td class="text-start py-1" style="padding: 0.25rem 0.5rem;">
