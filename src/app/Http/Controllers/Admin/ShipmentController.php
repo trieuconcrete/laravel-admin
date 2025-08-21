@@ -15,18 +15,21 @@ use App\Models\ShipmentDeductionType;
 use App\Enum\UserStatus;
 use App\Models\Position;
 use Illuminate\Support\Facades\DB;
+use App\Repositories\Interface\VehicleRepositoryInterface as VehicleRepository;
 
 class ShipmentController extends Controller
 {
     protected $shipmentService;
+    protected $vehicleRepository;
 
     /**
      * Summary of __construct
      * @param \App\Services\ShipmentService $shipmentService
      */
-    public function __construct(ShipmentService $shipmentService)
+    public function __construct(ShipmentService $shipmentService, VehicleRepository $vehicleRepository)
     {
         $this->shipmentService = $shipmentService;
+        $this->vehicleRepository = $vehicleRepository;
     }
 
     /**
@@ -58,7 +61,7 @@ class ShipmentController extends Controller
     public function create()
     {
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
-        $vehicles = Vehicle::with(['vehicleType', 'driver'])->where('status', Vehicle::STATUS_ACTIVE)->get();
+        $vehicles = $this->vehicleRepository->getVehiclesByIsCarRental(false);
         
         // Get drivers (tài xế)  
         $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
@@ -140,7 +143,7 @@ class ShipmentController extends Controller
         $shipment->load(['vehicle', 'goods', 'shipmentDeductions']);
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
         // Load tất cả vehicles, không filter theo carRental để có thể chọn bất kỳ xe nào
-        $vehicles = Vehicle::with(['vehicleType', 'driver'])->where('status', Vehicle::STATUS_ACTIVE)->get();
+        $vehicles = $this->vehicleRepository->getVehiclesByIsCarRental(optional($shipment->vehicle)->is_car_rental);
         $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
             ->where('status', UserStatus::ACTIVE)
             ->whereHas('position', function ($query) {
