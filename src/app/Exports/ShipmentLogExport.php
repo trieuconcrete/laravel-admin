@@ -110,7 +110,7 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
         }
 
         // Auto-size columns
-        foreach (range('A', 'N') as $column) {
+        foreach (range('A', 'P') as $column) {
             $sheet->getColumnDimension($column)->setAutoSize(true);
         }
 
@@ -120,7 +120,9 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->getColumnDimension('K')->setWidth(20);  // Số km đi trong ngày
         $sheet->getColumnDimension('L')->setWidth(15);  // Phụ phí phí cầu
         $sheet->getColumnDimension('M')->setWidth(12);  // Phí đậu xe
-        $sheet->getColumnDimension('N')->setWidth(20);  // THỜI GIAN TĂNG CA
+        $sheet->getColumnDimension('N')->setWidth(12);  // Phí cân xe
+        $sheet->getColumnDimension('O')->setWidth(15);  // Phụ phí kiểm tra
+        $sheet->getColumnDimension('P')->setWidth(20);  // THỜI GIAN TĂNG CA
         
         // Add data rows starting from row 14
         $row = 14;
@@ -128,6 +130,7 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
         $totalDistance = 0;
         $totalTollFees = 0;
         $totalParkingFees = 0;
+        $totalTollFeesWithVAT = 0;
         $totalOvertimeHours = 0;
         $totalWeighingFee = 0;
         $totalTestingSurcharge = 0;
@@ -136,7 +139,7 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
             // Calculate toll fees for this shipment (same as edit view)
             $shipmentTollFees = isset($shipment->tollFees) && $shipment->tollFees->count() > 0 
                 ? $shipment->tollFees->sum('fee_amount') 
-                : 0;
+                : null;
             
             $sheet->setCellValue('A' . $row, $index + 1);
             $sheet->setCellValue('B' . $row, Carbon::parse($shipment->run_date)->format('d/m/Y'));
@@ -169,7 +172,9 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
             $sheet->setCellValue('K' . $row, number_format($shipment->actual_distance ?? 0));
             $sheet->setCellValue('L' . $row, number_format($shipmentTollFees));
             $sheet->setCellValue('M' . $row, number_format($shipment->parking_fee ?? 0));
-            
+            $sheet->setCellValue('N' . $row, number_format($shipment->weighing_fee ?? 0));
+            $sheet->setCellValue('O' . $row, number_format($shipment->testing_surcharge ?? 0));
+
             // Calculate overtime time range
             $overtimeTimeRange = '';
             if ($shipment->overtime_hours > 0) {
@@ -226,7 +231,7 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
                     $overtimeTimeRange = '';
                 }
             }
-            $sheet->setCellValue('N' . $row, $overtimeTimeRange);
+            $sheet->setCellValue('P' . $row, $overtimeTimeRange);
             
             // Accumulate totals (using same logic as edit view)
             $totalOvertimeCost += $shipment->total_overtime_cost ?? 0;
@@ -245,7 +250,7 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
             
             $row++;
         }
-        $totalTollFees = ($totalTollFees + $totalParkingFees) / 1.08;
+        $totalTollFeesWithVAT = ($totalTollFees + $totalParkingFees) / 1.08;
         
         // Add totals row
         $sheet->setCellValue('A' . $row, 'TỔNG CỘNG');
@@ -257,21 +262,23 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->setCellValue('H' . $row, number_format($totalOvertimeCost));
         $sheet->setCellValue('K' . $row, number_format($totalDistance));
         $sheet->setCellValue('L' . $row, number_format($totalTollFees));
-        // $sheet->setCellValue('M' . $row, number_format($totalParkingFees));
-        
+        $sheet->setCellValue('M' . $row, number_format($totalParkingFees));
+        $sheet->setCellValue('N' . $row, number_format($totalWeighingFee));
+        $sheet->setCellValue('O' . $row, number_format($totalTestingSurcharge));
+
         // Style totals row
-        $sheet->getStyle('A' . $row . ':N' . $row)->getFont()->setBold(true);
-        $sheet->getStyle('A' . $row . ':N' . $row)->getFill()
+        $sheet->getStyle('A' . $row . ':P' . $row)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $row . ':P' . $row)->getFill()
             ->setFillType(Fill::FILL_SOLID)
             ->getStartColor()->setARGB('FFCCCCCC');
 
         // Apply borders to data table
-        $tableRange = 'A13:N' . $row;
+        $tableRange = 'A13:P' . $row;
         $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
             ->setBorderStyle(Border::BORDER_THIN);
 
         // Center align numeric columns
-        $numericColumns = ['A', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
+        $numericColumns = ['A', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O'];
         foreach ($numericColumns as $col) {
             $sheet->getStyle($col . '14:' . $col . $row)
                 ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
@@ -311,7 +318,7 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Toll fees
         $sheet->setCellValue('A' . $summaryRow, 'Phát sinh phụ phí cầu đường:');
-        $sheet->setCellValue('D' . $summaryRow, number_format($totalTollFees, 0, ',', '.') . ' VNĐ');
+        $sheet->setCellValue('D' . $summaryRow, number_format($totalTollFeesWithVAT, 0, ',', '.') . ' VNĐ');
         $sheet->getStyle('D' . $summaryRow)->getFont()->setBold(true);
         $summaryRow++;
         
@@ -321,15 +328,15 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
         // $sheet->getStyle('D' . $summaryRow)->getFont()->setBold(true);
         // $summaryRow++;
 
-        // Testing surcharge
-        $sheet->setCellValue('A' . $summaryRow, 'Phát sinh phí kiểm tra:');
-        $sheet->setCellValue('D' . $summaryRow, number_format($totalTestingSurcharge, 0, ',', '.') . ' VNĐ');
-        $sheet->getStyle('D' . $summaryRow)->getFont()->setBold(true);
-        $summaryRow++;
-
         // Weighing fee
         $sheet->setCellValue('A' . $summaryRow, 'Phát sinh phí cân:');
         $sheet->setCellValue('D' . $summaryRow, number_format($totalWeighingFee, 0, ',', '.') . ' VNĐ');
+        $sheet->getStyle('D' . $summaryRow)->getFont()->setBold(true);
+        $summaryRow++;
+
+        // Testing surcharge
+        $sheet->setCellValue('A' . $summaryRow, 'Phát sinh phí kiểm tra:');
+        $sheet->setCellValue('D' . $summaryRow, number_format($totalTestingSurcharge, 0, ',', '.') . ' VNĐ');
         $sheet->getStyle('D' . $summaryRow)->getFont()->setBold(true);
         $summaryRow++;
         
@@ -346,7 +353,7 @@ class ShipmentLogExport implements WithTitle, WithStyles, ShouldAutoSize
         $summaryRow++;
         
         // Subtotal (before VAT)
-        $subtotal = ($this->carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFees + $totalWeighingFee + $totalTestingSurcharge + $overDistanceFee;
+        $subtotal = ($this->carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFeesWithVAT + $totalWeighingFee + $totalTestingSurcharge + $overDistanceFee;
         $sheet->setCellValue('A' . $summaryRow, 'Tổng cộng (chưa thuế VAT):');
         $sheet->setCellValue('D' . $summaryRow, number_format($subtotal, 0, ',', '.') . ' VNĐ');
         $sheet->getStyle('A' . $summaryRow . ':D' . $summaryRow)->getFont()->setBold(true);

@@ -1434,7 +1434,8 @@ class CarRentalController extends Controller
         $shipments = \App\Models\Shipment::where('car_rental_id', $carRental->id)
             ->where('shipment_type', \App\Models\Shipment::SHIPMENT_TYPE_MONTHLY_RENTAL)
             ->with(['driver', 'vehicle', 'tollFees'])
-            ->orderBy('run_date', 'asc')
+            // ->orderBy('run_date', 'asc')
+            ->latest('created_at')
             ->get();
             
         // Debug log to check shipments count
@@ -1959,23 +1960,17 @@ class CarRentalController extends Controller
         $summary['currency'] = 'VND';
         
         // Tính toán các chi phí
-        if ($carRental->type == 2) { // Thuê xe theo kiểu khoáng
-            // Tính số tháng
-            $start = \Carbon\Carbon::parse($startDate);
-            $end = \Carbon\Carbon::parse($endDate);
-            $months = $start->diffInMonths($end) + 1;
-            
-            $summary['monthly_rental_fee'] = $carRental->monthly_rental_fee ?? 0;
-            $summary['total_months'] = $months;
-            $summary['monthly_total'] = $summary['monthly_rental_fee'] * $months;
-        } else { // Thuê nguyên xe tính theo chuyến
-            $summary['monthly_rental_fee'] = 0;
-            $summary['total_months'] = 0;
-            $summary['monthly_total'] = 0;
-        }
+        // Tính số tháng
+        $start = \Carbon\Carbon::parse($startDate);
+        $end = \Carbon\Carbon::parse($endDate);
+        // $months = $start->diffInMonths($end) + 1;
+        
+        $summary['monthly_rental_fee'] = $carRental->monthly_rental_fee ?? 0;
+        // $summary['total_months'] = $months;
+        // $summary['monthly_total'] = $summary['monthly_rental_fee'] * $months;
         
         // Tổng chi phí tăng ca
-        $summary['total_overtime_cost'] = $shipments->sum('overtime_cost') ?? 0;
+        $summary['total_overtime_cost'] = $shipments->sum('total_overtime_cost') ?? 0;
         
         // Tổng phí cầu đường
         $tollFees = 0;
@@ -1986,6 +1981,8 @@ class CarRentalController extends Controller
         
         // Tổng phí đỗ xe
         $summary['total_parking_fees'] = $shipments->sum('parking_fee') ?? 0;
+        $summary['total_parking_fees_without_vat'] = ($summary['total_parking_fees'] + $summary['total_toll_fees'])/1.08 ?? 0;
+
         $summary['total_weighing_fees'] = $shipments->sum('weighing_fee') ?? 0;
         $summary['total_testing_surcharges'] = $shipments->sum('testing_surcharge') ?? 0;
         
@@ -1994,24 +1991,23 @@ class CarRentalController extends Controller
         
         // Phí vượt quãng đường
         $summary['over_distance_fee'] = 0;
-        if ($carRental->type == 2 && $carRental->max_distance > 0) {
-            $maxDistance = $carRental->max_distance * $months;
+        if ($carRental->type == 1 && $carRental->max_distance > 0) {
+            $maxDistance = $carRental->max_distance;
             if ($summary['total_distance'] > $maxDistance) {
+                // dd($maxDistance);
                 $overDistance = $summary['total_distance'] - $maxDistance;
-                $summary['over_distance_fee'] = $overDistance * ($carRental->over_distance_fee_per_km ?? 0);
+                $summary['over_distance_fee'] = (int) $overDistance * (int)($carRental->over_distance_fee_per_km ?? 0);
             }
         }
         
         // Tổng cộng (chưa VAT)
-        $summary['subtotal'] = $summary['monthly_total'] + 
+        $summary['subtotal'] = $carRental->monthly_rental_fee + 
                               $summary['total_overtime_cost'] + 
-                              $summary['total_toll_fees'] + 
-                              $summary['total_parking_fees'] + 
+                              $summary['total_parking_fees_without_vat'] + 
                               $summary['total_weighing_fees'] + 
                               $summary['total_testing_surcharges'] + 
-                              $summary['over_distance_fee'] + $carRental->monthly_rental_fee;
+                              $summary['over_distance_fee'];
         
-        // dd($summary);
         // VAT
         $summary['vat_rate'] = $carRental->customer->vat_rate ?? 8; // Default 8%
         $summary['vat_amount'] = $summary['subtotal'] * ($summary['vat_rate'] / 100);

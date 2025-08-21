@@ -245,7 +245,7 @@ class CarRental extends Model
         $totalParkingFees = $vehicleLogs->sum('parking_fee') ?? 0;
         
         // Tính tổng km đã chạy
-        $totalDistance = $this->carRentalVehicleLogs()->sum('total_distance');
+        $totalDistance = $this->shipments()->sum('actual_distance');
         
         // Tính phí vượt giới hạn km
         $overDistanceFee = 0;
@@ -320,7 +320,7 @@ class CarRental extends Model
      */
     public function getOverDistanceFeeAttribute(): float
     {
-        $totalDistance = $this->carRentalVehicleLogs()->sum('total_distance');
+        $totalDistance = $this->shipments()->get()->sum('actual_distance');
         $maxDistance = $this->max_distance;
         $overDistanceFeePerKm = $this->over_distance_fee_per_km ?? self::OVER_DISTANCE_FEE_PER_KM_DEFAULT;
 
@@ -382,7 +382,7 @@ class CarRental extends Model
      */
     public function getTotalDistanceAttribute(): float
     {
-        return $this->carRentalVehicleLogs()->sum('total_distance');
+        return $this->shipments()->get()->sum('actual_distance');
     }
 
     /**
@@ -392,7 +392,7 @@ class CarRental extends Model
      */
     public function getTotalOvertimeHoursAttribute(): float
     {
-        return $this->carRentalVehicleLogs()->sum('overtime_hours');
+        return $this->shipments()->sum('overtime_hours');
     }
 
     /**
