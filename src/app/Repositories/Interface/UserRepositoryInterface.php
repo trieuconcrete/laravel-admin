@@ -26,4 +26,6 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * @return \Illuminate\Pagination\LengthAwarePaginator
      */
     public function getUsersWithFilters(array $filters = [], ?int $perPage = 10);
+
+    public function getAvailableDrivers($vehicleId);
 }

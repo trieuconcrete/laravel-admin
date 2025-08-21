@@ -44,10 +44,7 @@ class VehicleController extends Controller
         $vehicles = $this->vehicleService->getFilteredVehicles($filters);
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
         $vehicleStatuses = Vehicle::getStatuses();
-        $drivers = $this->userRepository->getUserByConditions([
-            'role' => User::ROLE_DRIVER,
-            'status' => UserStatus::ACTIVE
-        ])->pluck('full_name', 'id');
+        $drivers = $this->userRepository->getAvailableDrivers()->pluck('full_name', 'id');
         
         // Get car rental customers for modal
         $carRentalCustomers = \App\Models\Customer::where('type', Customer::TYPE_CARRENTAL)
@@ -125,11 +122,8 @@ class VehicleController extends Controller
     {
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
         $vehicleStatuses = Vehicle::getStatuses();
-        $drivers = $this->userRepository->getUserByConditions([
-            'role' => User::ROLE_DRIVER,
-            'status' => UserStatus::ACTIVE
-        ])->pluck('full_name', 'id');
-        
+        $drivers = $this->userRepository->getAvailableDrivers($vehicle->vehicle_id)->pluck('full_name', 'id');
+
         // Get car rental customers
         $carRentalCustomers = \App\Models\Customer::where('type', Customer::TYPE_CARRENTAL)
             ->where('is_active', true)
