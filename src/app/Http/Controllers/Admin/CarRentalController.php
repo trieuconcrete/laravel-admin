@@ -2001,12 +2001,19 @@ class CarRentalController extends Controller
         }
         
         // Tổng cộng (chưa VAT)
-        $summary['subtotal'] = $carRental->monthly_rental_fee + 
-                              $summary['total_overtime_cost'] + 
-                              $summary['total_parking_fees_without_vat'] + 
-                              $summary['total_weighing_fees'] + 
-                              $summary['total_testing_surcharges'] + 
-                              $summary['over_distance_fee'];
+        if ($carRental->type == 2) {
+            // Nếu là thuê xe kiểu khoáng, không tính monthly_rental_fee
+            $summary['subtotal'] = $carRental->monthly_rental_fee;
+        } else {
+            // Nếu là thuê nguyên xe tính theo chuyến
+            $summary['subtotal'] = $carRental->monthly_rental_fee + 
+                                  $summary['total_overtime_cost'] + 
+                                  $summary['total_parking_fees_without_vat'] + 
+                                  $summary['total_toll_fees'] + 
+                                  $summary['total_weighing_fees'] + 
+                                  $summary['total_testing_surcharges'] + 
+                                  $summary['over_distance_fee'];
+        }
         
         // VAT
         $summary['vat_rate'] = $carRental->customer->vat_rate ?? 8; // Default 8%

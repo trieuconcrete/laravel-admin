@@ -687,7 +687,13 @@
                                 </tr>
                                 
                                 @php
-                                    $subtotal = ($carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFeesWithoutVat + $totalWeighingFees + $totalTestingSurcharge + ($carRental->over_distance_fee ?? 0);
+                                    if ($carRental->type == 1) {
+                                        // Thuê nguyên xe tính theo chuyến
+                                        $subtotal = ($carRental->monthly_rental_fee ?? 0) + $totalOvertimeCost + $totalTollFeesWithoutVat + $totalWeighingFees + $totalTestingSurcharge + ($carRental->over_distance_fee ?? 0);
+                                    } else {
+                                        // Thuê xe theo kiểu khoáng
+                                        $subtotal = ($carRental->monthly_rental_fee ?? 0);
+                                    }
                                     $vatAmount = $subtotal * 0.08;
                                     $totalWithVat = $subtotal + $vatAmount;
                                 @endphp
