@@ -26,16 +26,20 @@ use App\Models\Shipment;
 
 class CarRentalController extends Controller
 {
+    protected $carRentalService;
+    protected $customerRepository;
+    protected $vehicleRepository;
     /**
      * Summary of __construct
      * @param \App\Services\CarRentalService $carRentalService
      * @param \App\Repositories\Interface\CustomerRepositoryInterface $customerRepository
      */
-    public function __construct(
-        protected CarRentalService $carRentalService,
-        protected CustomerRepository $customerRepository,
-        protected VehicleRepository $vehicleRepository
-    ) {}
+    public function __construct(CarRentalService $carRentalService, CustomerRepository $customerRepository, VehicleRepository $vehicleRepository) 
+    {
+        $this->carRentalService = $carRentalService;
+        $this->customerRepository = $customerRepository;
+        $this->vehicleRepository = $vehicleRepository;
+    }
 
     // /**
     //  * Summary of index
@@ -61,8 +65,9 @@ class CarRentalController extends Controller
 
         $carRentalstatuses = CarRental::getStatuses();
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
+        $vehicles = $this->vehicleRepository->getVehiclesByIsCarRental(false);
 
-        return view('admin.car_rental.index', compact('carRentals', 'carRentalstatuses', 'customers', 'vehicleTypes'));
+        return view('admin.car_rental.index', compact('carRentals', 'carRentalstatuses', 'customers', 'vehicleTypes', 'vehicles'));
     }
 
     /**
@@ -99,18 +104,19 @@ class CarRentalController extends Controller
 
     public function show($id)
     {
-        $carRental = CarRental::with(['carRentalVehicles', 'shipmentReports'])->findOrFail($id);
+        $carRental = CarRental::with(['vehicle', 'carRentalVehicles', 'shipmentReports'])->findOrFail($id);
         if (request()->ajax()) {
             return view('admin.car_rental.partials.detail', compact('carRental'))->render();
         }
 
-        return abort(404);    }
+        return abort(404);
+    }
 
     public function edit($id)
     {
-        $carRental = CarRental::with('shipmentReports')->findOrFail($id);
+        $carRental = CarRental::with('vehicle', 'carRentalVehicles', 'shipmentReports')->findOrFail($id);
         $customers = $this->customerRepository->all()->pluck('name', 'id');
-        $vehicles = Vehicle::with('vehicleType')->where('status', Vehicle::STATUS_ACTIVE)->get();
+        $vehicles = $this->vehicleRepository->getVehiclesByIsCarRental(false);
         $carRentalstatuses = CarRental::getStatuses();
         $carRentalVehicles = $carRental->carRentalVehicles;
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
@@ -137,7 +143,6 @@ class CarRentalController extends Controller
             ->select('id', 'full_name', 'employee_code')
             ->get();
 
-            // dd($carRentalVehicleLogs);
         return view('admin.car_rental.edit', compact(
             'carRental',
             'customers',
@@ -1506,7 +1511,7 @@ class CarRentalController extends Controller
         // Lấy thông tin car rental để có customer_id
         $carRental = CarRental::with('customer')->findOrFail($id);
         
-        $vehicles = Vehicle::with(['vehicleType', 'driver'])->where('status', Vehicle::STATUS_ACTIVE)->get();
+        $vehicles = $this->vehicleRepository->getVehiclesByIsCarRental(false);
         
         // Get customers data
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');

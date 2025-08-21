@@ -232,8 +232,13 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-4">
-                                <label class="form-label">Phí tăng ca/giờ</label>
-                                <input type="text" class="form-control number" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', '50000') }}">
+                                <label class="form-label">Phương tiện</label>
+                                <select class="form-select" name="vehicle_id" id="vehicles">
+                                    <option value="">Chọn phương tiện</option>
+                                    @foreach($vehicles as $vehicle)
+                                        <option value="{{ (int)$vehicle->vehicle_id }}" {{ old('vehicle_id') == (int)$vehicle->vehicle_id ? 'selected' : '' }}>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -269,36 +274,24 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="mb-4">
-                                <label class="form-label">Giờ bắt đầu làm việc trong ngày</label>
+                                <label class="form-label">Giờ bắt đầu làm việc</label>
                                 <input type="time" class="form-control" name="start_working_hour" value="07:30">
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="mb-4">
-                                <label class="form-label">Giờ kết thúc làm việc trong ngày</label>
+                                <label class="form-label">Giờ kết thúc làm việc</label>
                                 <input type="time" class="form-control" name="end_working_hour" value="17:00">
                             </div>
                         </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Tên hàng hóa</label>
-                        <input class="form-control" placeholder="Nhập tên hàng hóa"name="product_name"></input>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Mô tả dịch vụ</label>
-                        <textarea class="form-control" rows="3" placeholder="Nhập Mô tả dịch vụ"
-                            name="description"></textarea>
-                        <div class="text-danger error" data-field="description"></div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Ghi chú</label>
-                        <textarea class="form-control" rows="3" placeholder="Nhập ghi chú" name="notes"></textarea>
-                        <div class="text-danger error" data-field="notes"></div>
+                        <div class="col-md-4">
+                            <div class="mb-4">
+                                <label class="form-label">Phí tăng ca/giờ</label>
+                                <input type="text" class="form-control number" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', '50000') }}">
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
@@ -320,6 +313,24 @@
                                 <input type="text" class="form-control" name="contract_number">
                             </div>
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Tên hàng hóa</label>
+                        <input class="form-control" placeholder="Nhập tên hàng hóa"name="product_name"></input>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả dịch vụ</label>
+                        <textarea class="form-control" rows="3" placeholder="Nhập Mô tả dịch vụ"
+                            name="description"></textarea>
+                        <div class="text-danger error" data-field="description"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Ghi chú</label>
+                        <textarea class="form-control" rows="3" placeholder="Nhập ghi chú" name="notes"></textarea>
+                        <div class="text-danger error" data-field="notes"></div>
                     </div>
 
                     <div class="mb-3">

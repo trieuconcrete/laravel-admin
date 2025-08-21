@@ -124,6 +124,17 @@
                                                     @enderror
                                                 </div>
                                             </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Phương tiện</label>
+                                                    <select class="form-select" name="vehicle_id" id="vehicles">
+                                                        <option value="">Chọn phương tiện</option>
+                                                        @foreach($vehicles as $vehicle)
+                                                            <option value="{{ (int)$vehicle->vehicle_id }}" @selected($carRental->vehicle_id == (int)$vehicle->vehicle_id)>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
@@ -172,13 +183,13 @@
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="mb-4">
-                                                    <label class="form-label">Giờ bắt đầu làm việc trong ngày</label>
+                                                    <label class="form-label">Giờ bắt đầu làm việc</label>
                                                     <input type="time" class="form-control" name="start_working_hour" value="{{ old('start_working_hour', $carRental->start_working_hour ?? '07:30') }}">
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="mb-4">
-                                                    <label class="form-label">Giờ kết thúc làm việc trong ngày</label>
+                                                    <label class="form-label">Giờ kết thúc làm việc</label>
                                                     <input type="time" class="form-control" name="end_working_hour" value="{{ old('end_working_hour', $carRental->end_working_hour ?? '17:00') }}">
                                                 </div>
                                             </div>
@@ -186,6 +197,27 @@
                                                 <div class="mb-4">
                                                     <label class="form-label">Phí tăng ca/giờ</label>
                                                     <input type="text" class="form-control number" name="overtime_fee_per_hour" value="{{ old('overtime_fee_per_hour', number_format($carRental->overtime_fee_per_hour)) }}">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Số hóa đơn</label>
+                                                    <input type="text" class="form-control" name="invoice_number" value="{{ old('invoice_number', $carRental->invoice_number) }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Số bảng kê</label>
+                                                    <input type="text" class="form-control" name="statement_number" value="{{ old('statement_number', $carRental->statement_number) }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-4">
+                                                    <label class="form-label">Hợp đồng số</label>
+                                                    <input type="text" class="form-control" name="contract_number" value="{{ old('contract_number', $carRental->contract_number) }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -208,27 +240,6 @@
                                             @error('notes')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                             @enderror
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-4">
-                                                <div class="mb-4">
-                                                    <label class="form-label">Số hóa đơn</label>
-                                                    <input type="text" class="form-control" name="invoice_number" value="{{ old('invoice_number', $carRental->invoice_number) }}">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="mb-4">
-                                                    <label class="form-label">Số bảng kê</label>
-                                                    <input type="text" class="form-control" name="statement_number" value="{{ old('statement_number', $carRental->statement_number) }}">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <div class="mb-4">
-                                                    <label class="form-label">Hợp đồng số</label>
-                                                    <input type="text" class="form-control" name="contract_number" value="{{ old('contract_number', $carRental->contract_number) }}">
-                                                </div>
-                                            </div>
                                         </div>
 
                                         <div class="mb-4">

@@ -271,7 +271,7 @@
                                                     <select class="form-select" name="vehicle_id" id="vehicles">
                                                         <option value="">Chọn phương tiện</option>
                                                         @foreach($vehicles as $vehicle)
-                                                            <option value="{{ (int)$vehicle->vehicle_id }}" {{ old('vehicle_id') == (int)$vehicle->vehicle_id ? 'selected' : '' }}>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
+                                                            <option value="{{ (int)$vehicle->vehicle_id }}" @selected($vehicle->vehicle_id == $carRental->vehicle_id)>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
                                                         @endforeach
                                                     </select>
                                                     @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
@@ -794,6 +794,7 @@
 </script>
 <script>
     $(document).ready(function() {
+        // $('#vehicles').trigger('change');
         // Function to format price inputs with VND formatting and 9-digit limit
         function formatPriceInput(input) {
             let value = input.val();
