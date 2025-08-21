@@ -1,5 +1,5 @@
 @extends('admin.layout')
-@section('title', 'Sửa chuyến')
+@section('title', 'Chi tiết chuyến xe')
 @section('content')
 
 <div class="container-fluid">
@@ -22,7 +22,6 @@
                         <div class="col-12">
                             <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                                 <div class="flex-grow-1">
-                                    <h4 class="fs-16 mb-1">Chi tiết chuyến xe</h4>
                                 </div>
                                 <div class="mt-3 mt-lg-0">
                                     <div class="row g-3 mb-0 align-items-center">

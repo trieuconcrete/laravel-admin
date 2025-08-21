@@ -88,10 +88,13 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
-                                                    <select class="form-select" name="customer_id" required>
+                                                    @if (request('customer_id'))
+                                                        <input type="hidden" name="customer_id" value="{{ request('customer_id') }}">
+                                                    @endif
+                                                    <select class="form-select" name="customer_id" required @disabled(request('customer_id'))>
                                                         <option value="">Chọn khách hàng</option>
                                                         @foreach($customers as $id => $name)
-                                                            <option value="{{ $id }}" {{ old('customer_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                                            <option value="{{ $id }}" @selected($id == request('customer_id'))>{{ $name }}</option>
                                                         @endforeach
                                                     </select>
                                                     @error('customer_id')<span class="text-danger">{{ $message }}</span>@enderror
