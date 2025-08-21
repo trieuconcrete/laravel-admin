@@ -58,4 +58,11 @@ class VehicleRepository extends BaseRepository implements VehicleRepositoryInter
 
         return $query->paginate($this->getPaginationLimit());
     }
+
+    public function getVehiclesByIsCarRental($isCarRental)
+    {
+        return Vehicle::with(['driver', 'vehicleType', 'documents', 'customer'])
+            ->where('is_car_rental', $isCarRental)
+            ->get();
+    }
 }

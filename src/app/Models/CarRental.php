@@ -19,6 +19,7 @@ class CarRental extends Model
      */
     protected $fillable = [
         'customer_id',
+        'vehicle_id',
         'status',
         'type',
         'description',
@@ -101,6 +102,14 @@ class CarRental extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    /**
+     * Quan hệ với phương tiện
+     */
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class, 'vehicle_id', 'vehicle_id');
     }
 
     /**
