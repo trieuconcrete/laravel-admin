@@ -58,10 +58,12 @@
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'generalInfo' ? 'active' : '' }}" id="nav-overview-tab" data-bs-toggle="tab" data-bs-target="#generalInfo"
                             type="button" role="tab" aria-controls="generalInfo" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'generalInfo' ? 'true' : 'false' }}">Thông tin</button>
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'active' : '' }}" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#monthlyReport"
-                            type="button" role="tab" aria-controls="monthlyReport" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'true' : 'false' }}">Bảng kê</button>
+                            type="button" role="tab" aria-controls="monthlyReport" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'true' : 'false' }}">Chuyến xe</button>
+                        <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'carRental' ? 'active' : '' }}" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#carRental"
+                            type="button" role="tab" aria-controls="carRental" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'carRental' ? 'true' : 'false' }}">Thuê xe</button>
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'active' : '' }}" id="nav-transactions-tab" data-bs-toggle="tab"
                             data-bs-target="#transactions" type="button" role="tab" aria-controls="transactions"
-                            aria-selected="{{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'true' : 'false' }}">Giao dịch</button>
+                            aria-selected="{{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'true' : 'false' }}">Thanh toán</button>
                     </div>
                     <!-- Tab Content -->
                     <div class="tab-content p-3 border border-top-0 rounded-bottom">
@@ -248,14 +250,17 @@
                                     <button type="button" id="searchShipments" class="btn btn-info me-2">
                                         <i class="ri-search-line me-1"></i>Tìm chuyến xe
                                     </button>
+                                    <button type="button" id="exportInvoice" class="btn btn-outline-primary">
+                                        <i class="las la-file-invoice align-middle me-1"></i> Xuất bảng kê
+                                    </button>
                                     <button type="button" id="summarizeReport"
                                         class="btn btn-secondary me-2">
                                         <i class="las la-calculator align-middle me-1"></i>
                                         Tổng kết công nợ
                                     </button>
-                                    <button type="button" id="exportInvoice" class="btn btn-outline-primary">
-                                        <i class="las la-file-invoice align-middle me-1"></i> Xuất bảng kê
-                                    </button>
+                                    <a href="{{ route('admin.shipments.create') . '?customer_id=' . $customer->id }}" class="btn btn-primary">
+                                        <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe
+                                    </a>
                                 </div>
                             </div>
                             <div class="table-responsive">
@@ -324,20 +329,28 @@
                             </div>
                         </div>
 
+                        <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'carRental' ? 'show active' : '' }}" id="carRental">
+                            {{-- <div class="d-flex justify-content-between mb-3">
+                                <h6>Danh sách thuê xe</h6>
+                                <button class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target=""><i class="ri-add-circle-line align-middle me-1"></i>Thêm thuê xe</button>
+                            </div> --}}
+                            @include('admin.customers.partials.car-rental', ['carRentals' => $carRentals])
+                        </div>
+
                         <!-- Transactions Tab -->
                         <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'show active' : '' }}" id="transactions">
 
                             <div class="d-flex justify-content-between mb-3">
-                                <h6>Lịch sử giao dịch</h6>
-                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#transactionModal"><i class="fas fa-plus me-1"></i>Thêm giao
-                                    dịch</button>
+                                <h6>Lịch sử thanh toán</h6>
+                                <button class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#transactionModal"><i class="ri-add-circle-line align-middle me-1"></i>Thêm thanh toán</button>
                             </div>
 
                             <!-- Search Form -->
                             <div class="card mb-3">
                                 <div class="card-header bg-light">
-                                    <h6 class="mb-0">Tìm kiếm giao dịch</h6>
+                                    <h6 class="mb-0">Tìm kiếm thanh toán</h6>
                                 </div>
                                 <div class="card-body">
                                     <form id="transactionSearchForm" method="GET"
