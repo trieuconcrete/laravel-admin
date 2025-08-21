@@ -56,7 +56,7 @@ class VehicleRepository extends BaseRepository implements VehicleRepositoryInter
             });
         }
 
-        return $query->paginate($this->getPaginationLimit());
+        return $query->orderBy('updated_at', 'desc')->paginate($this->getPaginationLimit());
     }
 
     public function getVehiclesByIsCarRental($isCarRental)

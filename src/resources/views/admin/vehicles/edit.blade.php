@@ -110,22 +110,18 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Tải trọng (tấn)</label>
-                                        <input type="number" step="0.1" class="form-control" name="capacity" id="capacity" value="{{ old('address', $vehicle->capacity) }}">
-                                        @error('capacity')
+                                    <div class="col-md-6" id="driverSelect">
+                                        <label class="form-label">Tài xế </label>
+                                        <select class="form-select" name="driver_id">
+                                            <option value="">Chọn tài xế</option>
+                                            @foreach ($drivers as $key => $driver)
+                                                <option value="{{ $key }}" @selected(old('driver_id', $vehicle->driver_id) == $key)>{{ $driver }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('driver_id')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Năm sản xuất</label>
-                                        <input type="number" class="form-control" name="manufactured_year" id="manufactured_year" value="{{ old('address', $vehicle->manufactured_year) }}">
-                                        @error('manufactured_year')
-                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="row mb-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                                         <select class="form-select" name="status">
@@ -137,15 +133,19 @@
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
-                                    <div class="col-md-6" id="driverSelect">
-                                        <label class="form-label">Tài xế </label>
-                                        <select class="form-select" name="driver_id">
-                                            <option value="">Chọn tài xế</option>
-                                            @foreach ($drivers as $key => $driver)
-                                                <option value="{{ $key }}" {{ old('driver_id', $vehicle->driver_id) == $key ? 'selected' : '' }}>{{ $driver }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error('driver_id')
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Tải trọng (tấn)</label>
+                                        <input type="number" step="0.1" class="form-control" name="capacity" id="capacity" value="{{ old('address', $vehicle->capacity) }}">
+                                        @error('capacity')
+                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Năm sản xuất</label>
+                                        <input type="number" class="form-control" name="manufactured_year" id="manufactured_year" value="{{ old('address', $vehicle->manufactured_year) }}">
+                                        @error('manufactured_year')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                         @enderror
                                     </div>
