@@ -243,6 +243,7 @@ class Shipment extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+
     public function goods()
     {
         return $this->hasMany(ShipmentGood::class);
@@ -539,10 +540,66 @@ class Shipment extends Model
      */
     public function shipmentDeductionTypeExpense()
     {
-        return  $this->shipmentDeductions()->whereHas('shipmentDeductionType', function($query) {
-            $query->where('type', ShipmentDeductionType::TYPE_EXPENSE)
-                ->where('status', 'active');
+        return $this->hasMany(ShipmentDeduction::class)
+            ->whereHas('shipmentDeductionType', function($query) {
+                $query->where('type', ShipmentDeductionType::TYPE_EXPENSE)
+                    ->where('status', ShipmentDeductionType::STATUS_ACTIVE);
         });
+    }
+
+    /**
+     * PHỤ THU KẾT HỢP
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<ShipmentDeduction, Shipment>
+     */
+    public function shipmentDeductionTypeExpenseCombinedSurchar()
+    {
+        return $this->hasMany(ShipmentDeduction::class)
+            ->whereHas('shipmentDeductionType', function($query) {
+                $query->where('type', ShipmentDeductionType::TYPE_EXPENSE)
+                    ->where('name', 'PHỤ THU KẾT HỢP')
+                    ->where('status', ShipmentDeductionType::STATUS_ACTIVE);
+        });
+    }
+
+    /**
+     * BỐC XẾP
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<ShipmentDeduction, Shipment>
+     */
+    public function shipmentDeductionTypeExpenseCargoHandling()
+    {
+        return $this->hasMany(ShipmentDeduction::class)
+            ->whereHas('shipmentDeductionType', function($query) {
+                $query->where('type', ShipmentDeductionType::TYPE_EXPENSE)
+                    ->where('name', 'BỐC XẾP')
+                    ->where('status', ShipmentDeductionType::STATUS_ACTIVE);
+        });
+    }
+
+    /**
+     * Lấy tổng chi phí phát sinh (expense)
+     * @return float
+     */
+    public function getTotalExpenseDeductionsAttribute()
+    {
+        return $this->shipmentDeductionTypeExpense()->sum('amount');
+    }
+
+    /**
+     * Lấy tổng tiền PHỤ THU KẾT HỢP
+     * @return float
+     */
+    public function getTotalCombinedSurchargeAttribute()
+    {
+        return $this->shipmentDeductionTypeExpenseCombinedSurchar()->sum('amount');
+    }
+
+    /**
+     * Lấy tổng tiền Bốc 
+     * @return float
+     */
+    public function getTotalCombinedCargoHandlingAttribute()
+    {
+        return $this->shipmentDeductionTypeExpenseCargoHandling()->sum('amount');
     }
 
     /**

@@ -544,6 +544,7 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const carRentalEditRoute = "{{ route('admin.car-rental.edit-vehicle-log', ':id') }}";
             // Handle active tab from URL parameter or controller variable
             const urlParams = new URLSearchParams(window.location.search);
             const activeTabParam = urlParams.get('active_tab');
@@ -638,16 +639,23 @@
                             // Add rows for each shipment
                             data.data.forEach(shipment => {
                                 const row = document.createElement('tr');
+                                console.log('Shipment type:', shipment.shipment_type);
 
                                 // Update totals
                                 totalTrips += parseInt(shipment.trip_count) || 0;
                                 totalWeight += parseFloat(shipment.cargo_weight) || 0;
                                 totalCombinedFees += parseFloat(shipment.combined_fees) || 0;
                                 grandTotal += parseFloat(shipment.total_amount) || 0;
-
+                                let shipmentLink;
+                                if (shipment.shipment_type == 2) {
+                                    // Giả sử bạn đã định nghĩa carRentalEditRoute trong blade
+                                    shipmentLink = `<a href="${carRentalEditRoute.replace(':id', shipment.id)}">${shipment.shipment_code}</a>`;
+                                } else {
+                                    shipmentLink = `<a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a>`;
+                                }
                                 // Format the row HTML
                                 row.innerHTML = `
-                                <td><a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a></td>
+                                <td>${shipmentLink}</td>
                                 <td>${shipment.departure_time}</td>
                                 <td>${shipment.origin}</td>
                                 <td>${shipment.destination}</td>
@@ -1049,9 +1057,16 @@
                     totalWeight += parseFloat(shipment.cargo_weight) || 0;
                     totalCombinedFees += parseFloat(shipment.combined_fees) || 0;
                     grandTotal += parseFloat(shipment.total_amount) || 0;
+                    let shipmentLink;
+                    if (shipment.shipment_type == 2) {
+                        // Giả sử bạn đã định nghĩa carRentalEditRoute trong blade
+                        shipmentLink = `<a href="${carRentalEditRoute.replace(':id', shipment.id)}">${shipment.shipment_code}</a>`;
+                    } else {
+                        shipmentLink = `<a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a>`;
+                    }
 
                     row.innerHTML = `
-                        <td><a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a></td>
+                        <td>${shipmentLink}</td>
                         <td>${shipment.departure_time}</td>
                         <td>${shipment.origin}</td>
                         <td>${shipment.destination}</td>
@@ -1162,7 +1177,8 @@
                                     statement_start_date: startDate,
                                     statement_end_date: endDate,
                                     shipment_type: parseInt(shipmentType),
-                                    customer_id: customerId
+                                    customer_id: customerId,
+                                    month: monthSelect ? monthSelect.value : ''
                                 })
                             })
                                 .then(response => response.json())
@@ -1275,7 +1291,8 @@
                                     const params = new URLSearchParams({
                                         statement_start_date: startDate,
                                         statement_end_date: endDate,
-                                        shipment_type: shipmentType
+                                        shipment_type: shipmentType,
+                                        month: monthSelect ? monthSelect.value : ''
                                     });
 
                                     const downloadUrl = `{{ route('admin.shipment-reports.export', $customer) }}?${params.toString()}`;

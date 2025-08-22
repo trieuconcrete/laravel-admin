@@ -74,7 +74,8 @@ class CustomerService
                 'total_amount' => $totalAmount,
                 'notes' => $shipment->notes,
                 'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : 'N/A',
-                'status' => $shipment->status
+                'status' => $shipment->status,
+                'shipment_type' => $shipment->shipment_type
             ];
         });
     }
