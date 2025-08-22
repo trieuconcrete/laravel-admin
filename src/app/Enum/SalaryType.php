@@ -63,4 +63,14 @@ enum SalaryType: int
     {
         return $this === self::COMMISSION_SALARY;
     }
+
+    /**
+     * Get options for select dropdown
+     *
+     * @return array
+     */
+    public static function options(): array
+    {
+        return self::getTypes();
+    }
 } 

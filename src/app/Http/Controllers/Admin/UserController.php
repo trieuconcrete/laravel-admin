@@ -186,7 +186,7 @@ class UserController extends Controller
             'shipments', 'shipmentsInMonth', 'selectedMonth', 'salaryBase', 'totalAllowance', 
             'insuranceDeduction', 'totalSalary', 'salaryDetails',
             'requests', 'totalOtherDeduction', 'totalBonus', 'totalPenalty', 'totalPaid',
-            'paymentStatusData'
+            'paymentStatusData', 'salaryType', 'totalTripValue', 'commissionAmount'
         ));
     }
 
