@@ -208,12 +208,18 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $lastHeaderColumn = $this->getColumnLetter($totalColumns);
         
         // Calculate the notes column letter (after all deduction columns)
-        $notesColumnLetter = $this->getColumnLetter(count($baseHeaders) + count($deductionTypeNames));
+        // Base headers: 11 cột (A-K), Deduction types: 12 cột (L-W), Notes: cột X (24)
+        $notesColumnLetter = $this->getColumnLetter($totalColumns);
         
         // Debug logging for column letters
         Log::info('SalaryExport Column Letters', [
             'lastHeaderColumn' => $lastHeaderColumn,
-            'notesColumnLetter' => $notesColumnLetter
+            'notesColumnLetter' => $notesColumnLetter,
+            'totalColumns' => $totalColumns,
+            'baseHeadersCount' => count($baseHeaders),
+            'deductionTypeNamesCount' => count($deductionTypeNames),
+            'notesHeaderCount' => count($notesHeader),
+            'calculation' => 'notesColumnLetter = getColumnLetter(' . $totalColumns . ') = ' . $notesColumnLetter
         ]);
         
         // Update the title cell merge to match the actual number of columns
@@ -412,6 +418,17 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
                 // Validate notes column letter before using
                 if (preg_match('/^[A-Z]+$/', $notesColumnLetter)) {
                     $sheet->setCellValue($notesColumnLetter . $row, $shipment->notes);
+                    
+                    // Debug log cho shipment 57
+                    if ($shipment->id == 57) {
+                        Log::info('Debug Notes Column Mapping', [
+                            'shipment_id' => $shipment->id,
+                            'notesColumnLetter' => $notesColumnLetter,
+                            'notes_value' => $shipment->notes,
+                            'cell_address' => $notesColumnLetter . $row,
+                            'deductionColumns' => $deductionColumns
+                        ]);
+                    }
                 } else {
                     Log::error('Invalid notes column letter in data loop', [
                         'notesColumnLetter' => $notesColumnLetter,
@@ -522,7 +539,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         // Add TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY row
         $totalSalaryRow = $row++;
         
-        // Calculate total salary: commission + deductions
+        // Calculate total salary: commission + user-specific deductions only
         // Tính tổng giá trị chuyến xe: sum(unit_price * trip_count)
         $totalTripValue = 0;
         foreach ($this->shipments as $shipment) {
@@ -533,7 +550,38 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         
         $commissionRate = 0.12;
         $commissionSalary = $totalTripValue * $commissionRate;
-        $totalSalary = $commissionSalary + $totalDeductions;
+        
+        // Tính tổng trợ cấp của user (sum(ShipmentDeduction.user_id == user_id))
+        // $userSpecificDeductions = 0;
+        // foreach ($deductionColumns as $deductionName => $column) {
+        //     $deductionType = $this->deductionTypes->firstWhere('name', $deductionName);
+        //     if ($deductionType && $deductionType->type !== 'expense') {
+        //         $columnSum = 0;
+        //         for ($i = 9; $i <= $lastDataRow; $i++) { // Start from row 9 (data rows)
+        //             $cellValue = $sheet->getCell($column . $i)->getValue();
+        //             if (is_numeric($cellValue)) {
+        //                 $columnSum += $cellValue;
+        //             }
+        //         }
+        //         $userSpecificDeductions += $columnSum;
+        //     }
+        // }
+
+        $userSpecificDeductions = ShipmentDeduction::where('user_id', $this->user->id)->sum('amount');
+        
+        // TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY = (12% của sum(THÀNH TIỀN)) + Tổng trợ cấp của user
+        $totalSalary = $commissionSalary + $userSpecificDeductions;
+        
+        // Debug log
+        Log::info('Debug TotalSalary Calculation', [
+            'totalTripValue' => $totalTripValue,
+            'commissionRate' => $commissionRate,
+            'commissionSalary' => $commissionSalary,
+            'userSpecificDeductions' => $userSpecificDeductions,
+            'totalSalary' => $totalSalary,
+            'calculation' => 'TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY = (' . $commissionSalary . ') + (' . $userSpecificDeductions . ') = ' . $totalSalary,
+            'formula' => '(12% của sum(THÀNH TIỀN)) + Tổng trợ cấp của user'
+        ]);
         
         $sheet->setCellValue('A' . $totalSalaryRow, 'TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY:');
         $sheet->mergeCells('A' . $totalSalaryRow . ':J' . $totalSalaryRow);
@@ -613,22 +661,9 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         // Add empty cell in notes column for the penalty row
         $sheet->setCellValue($notesColumnLetter . $penaltyRow, '');
         
-        // Calculate total before insurance
-        // Tính tổng giá trị chuyến xe: sum(unit_price * trip_count)
-        $totalTripValue = 0;
-        foreach ($this->shipments as $shipment) {
-            $unitPrice = $shipment->unit_price ?? 0;
-            $tripCount = $shipment->trip_count ?? 1;
-            $totalTripValue += ($unitPrice * $tripCount);
-        }
-        
-        $commissionRate = 0.12;
-        $commissionSalary = $totalTripValue * $commissionRate;
-        $totalBeforeInsurance = ($commissionSalary + $totalDeductions + $totalTypeBonus) - ($totalTypeSalary + $totalTypePenalty);
-        
-        // Add TRỪ BHXH row
+        // TRỪ BHXH (10%): 10% của (TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY)
         $insuranceRow = $row++;
-        $insuranceDeduction = $totalBeforeInsurance * (Constants::TAX_IN_VAT/100); // 10% of total
+        $insuranceDeduction = $totalSalary * 0.10; // 10% của totalSalary
         $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (10%):');
         $sheet->mergeCells('A' . $insuranceRow . ':J' . $insuranceRow);
         $sheet->getStyle('A' . $insuranceRow)->getFont()->setBold(true);
@@ -636,9 +671,21 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->setCellValue('K' . $insuranceRow, $insuranceDeduction);
         $sheet->getStyle('K' . $insuranceRow)->getNumberFormat()->setFormatCode('#,##0');
         
-        // Add TỔNG LƯƠNG CÒN LẠI row
+        // TỔNG LƯƠNG CÒN LẠI: (TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY) - (TRỪ BHXH + TRỪ PHẠT + TRỪ ỨNG LƯƠNG)
         $remainingSalaryRow = $row++;
-        $totalSalaryRemaining = $totalBeforeInsurance - $insuranceDeduction;
+        $totalSalaryRemaining = $totalSalary - ($insuranceDeduction + $totalTypePenalty + $totalTypeSalary);
+        
+        // Debug log cho BHXH và Tổng lương còn lại
+        Log::info('Debug Final Calculation', [
+            'totalSalary' => $totalSalary,
+            'insuranceDeduction' => $insuranceDeduction,
+            'totalTypePenalty' => $totalTypePenalty,
+            'totalTypeSalary' => $totalTypeSalary,
+            'totalSalaryRemaining' => $totalSalaryRemaining,
+            'bhxh_calculation' => '10% của ' . $totalSalary . ' = ' . $insuranceDeduction,
+            'remaining_calculation' => $totalSalary . ' - (' . $insuranceDeduction . ' + ' . $totalTypePenalty . ' + ' . $totalTypeSalary . ') = ' . $totalSalaryRemaining
+        ]);
+        
         $sheet->setCellValue('A' . $remainingSalaryRow, 'TỔNG LƯƠNG CÒN LẠI:');
         $sheet->mergeCells('A' . $remainingSalaryRow . ':J' . $remainingSalaryRow);
         $sheet->getStyle('A' . $remainingSalaryRow)->getFont()->setBold(true);

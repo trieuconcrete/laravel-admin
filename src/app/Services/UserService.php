@@ -283,11 +283,12 @@ class UserService
         }
         
         // Calculate insurance deduction (10% of total: salary base + allowances)
-        $totalBeforeInsurance = ($salaryBase + $totalAllowance + $totalBonus) - ($totalOtherDeduction + $totalPenalty);
+        $totalBeforeInsurance = ($salaryBase + $totalAllowance + $totalBonus) - ( $totalPenalty);
         $insuranceDeduction = $totalBeforeInsurance * (Constants::TAX_IN_VAT/100); // 10% of total
         
+        // dd($totalBeforeInsurance, $insuranceDeduction, $salaryBase,$totalAllowance,$totalBonus, $totalOtherDeduction, $totalPenalty);
         // Calculate total salary - updated formula
-        $totalSalary = $totalBeforeInsurance - $insuranceDeduction;
+        $totalSalary = $totalBeforeInsurance - ($insuranceDeduction + $totalOtherDeduction);
         
         return [
             'shipments' => $shipments,
