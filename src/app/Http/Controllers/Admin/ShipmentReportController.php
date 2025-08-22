@@ -139,6 +139,7 @@ class ShipmentReportController extends Controller
                     'total_amount' => $this->calculateTotalAmount($shipment, $currentShipmentType),
                     'notes' => $shipment->notes,
                     'status' => $shipment->status,
+                    'shipment_type' => $shipment->shipment_type,
                 ];
             });
 

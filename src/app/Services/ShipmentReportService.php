@@ -40,6 +40,7 @@ class ShipmentReportService
                 $totalAmount = $shipments->sum(function ($shipment) use ($shipmentType) {
                     return $this->calculateAmount($shipment, $shipmentType);
                 });
+                $vatAmount = $totalAmount * 0.08; // Assuming 8% VAT
 
                 // Kiểm tra xem đã có báo cáo cho loại này với khoảng thời gian này chưa
                 $existingReport = ShipmentReport::where('customer_id', $customerId)
@@ -52,7 +53,7 @@ class ShipmentReportService
                     // Cập nhật báo cáo hiện có
                     $report = $existingReport;
                     $report->update([
-                        'total_amount' => $totalAmount,
+                        'total_amount' => $totalAmount + $vatAmount,
                         'is_finalized' => true,
                         'updated_by' => Auth::id(),
                     ]);
@@ -62,7 +63,7 @@ class ShipmentReportService
                         'customer_id' => $customerId,
                         'monthly' => $monthly,
                         'shipment_type' => $shipmentType,
-                        'total_amount' => $totalAmount,
+                        'total_amount' => $totalAmount + $vatAmount,
                         'statement_start_date' => $startDate,
                         'statement_end_date' => $endDate,
                         'is_finalized' => true,
@@ -82,7 +83,7 @@ class ShipmentReportService
                 'success' => true,
                 'data' => [
                     'reports' => $reports,
-                    'total_amount' => $totalAmount,
+                    'total_amount' => $totalAmount + $vatAmount,
                     'shipment_count' => $totalShipmentCount,
                     'start_date' => $startDate,
                     'end_date' => $endDate,
@@ -113,12 +114,13 @@ class ShipmentReportService
                 ->where('shipment_type', $shipmentType)
                 ->whereBetween('departure_time', [$startDate, $endDate])
                 ->where('status', 'completed')
-                ->with(['customer', 'vehicle.vehicleType', 'driver'])
+                ->with(['customer', 'vehicle', 'vehicle.vehicleType', 'driver'])
                 ->get()
                 ->map(function ($shipment) use ($shipmentType) {
                     return [
                         'id' => $shipment->id,
                         'shipment_code' => $shipment->shipment_code,
+                        'vehicle_plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : '',
                         'departure_time' => $shipment->departure_time->format('d/m/Y'),
                         'origin' => $shipment->origin,
                         'destination' => $shipment->destination,
@@ -129,6 +131,9 @@ class ShipmentReportService
                         'cargo_weight' => $shipment->cargo_weight ?? 0,
                         'combined_fees' => $shipment->shipmentExtraFee->sum('amount'),
                         'total_amount' => $this->calculateAmount($shipment, $shipmentType),
+                        'total_expense_deductions' => $shipment->total_expense_deductions,
+                        'total_combined_surcharge' => $shipment->total_combined_surcharge, // phụ thu kết hợp
+                        'total_cargo_handling' => $shipment->total_cargo_handling, // bốc xếp
                         'notes' => $shipment->notes,
                         'status' => $shipment->status,
                         'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : '',
@@ -170,15 +175,15 @@ class ShipmentReportService
     {
         switch ($shipmentType) {
             case 1:
-                return PerTripShipmentExport::class;
+                return PerTripShipmentExport::class; // Chuyến xe theo chuyến
             case 2:
-                return MonthlyRentalShipmentExport::class;
+                return MonthlyRentalShipmentExport::class; // Thuê xe theo tháng
             case 3:
-                return CraneShipmentExport::class;
+                return CraneShipmentExport::class; // Xe nâng
             case 4:
-                return LongDistanceShipmentExport::class;
+                return LongDistanceShipmentExport::class; // Xe đường dài
             default:
-                return PerTripShipmentExport::class;
+                return PerTripShipmentExport::class; // Chuyến xe theo chuyến
         }
     }
 
@@ -189,12 +194,13 @@ class ShipmentReportService
     {
         switch ($shipmentType) {
             case 3: // Xe nâng
-                return ($shipment->crane_price ?? 0) * ($shipment->trip_count ?? 1);
+                $totalAmount = ($shipment->crane_price ?? 0) * ($shipment->trip_count ?? 1);
             case 4: // Xe đường dài
-                return ($shipment->unit_price ?? 0) * ($shipment->distance ?? 0);
+                $totalAmount = ($shipment->unit_price ?? 0) * ($shipment->distance ?? 0);
             default: // Các loại khác
-                return ($shipment->unit_price ?? 0) * ($shipment->trip_count ?? 1);
+                $totalAmount = ($shipment->unit_price ?? 0) * ($shipment->trip_count ?? 1);
         }
+        return $totalAmount + $shipment->total_expense_deductions;
     }
 
     /**
