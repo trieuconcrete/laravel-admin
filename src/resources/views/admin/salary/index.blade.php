@@ -26,6 +26,70 @@
         </div>
     </div>
 
+    <!-- Salary Type Overview -->
+    <div class="row mb-4">
+        <div class="col-lg-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar-sm mx-auto mb-3">
+                        <div class="avatar-title bg-primary-subtle text-primary fs-24 rounded">
+                            <i class="ri-user-line"></i>
+                        </div>
+                    </div>
+                    <h5 class="card-title mb-1">Tài xế lương cơ bản</h5>
+                    <p class="text-muted mb-2">Số lượng: {{ $basicSalaryCount ?? 0 }}</p>
+                    <h4 class="text-primary mb-0">{{ number_format($averageSalary ?? 0) }} ₫</h4>
+                    <small class="text-muted">Lương trung bình</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar-sm mx-auto mb-3">
+                        <div class="avatar-title bg-success-subtle text-success fs-24 rounded">
+                            <i class="ri-money-dollar-circle-line"></i>
+                        </div>
+                    </div>
+                    <h5 class="card-title mb-1">Tài xế lương doanh số</h5>
+                    <p class="text-muted mb-2">Số lượng: {{ $commissionSalaryCount ?? 0 }}</p>
+                    <h4 class="text-success mb-0">{{ number_format($totalCommission ?? 0) }} ₫</h4>
+                    <small class="text-muted">Tổng commission</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar-sm mx-auto mb-3">
+                        <div class="avatar-title bg-info-subtle text-info fs-24 rounded">
+                            <i class="ri-route-line"></i>
+                        </div>
+                    </div>
+                    <h5 class="card-title mb-1">Tổng chuyến xe</h5>
+                    <p class="text-muted mb-2">Đã hoàn thành</p>
+                    <h4 class="text-info mb-0">{{ number_format($totalTrips ?? 0) }}</h4>
+                    <small class="text-muted">Trong kỳ lương</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="avatar-sm mx-auto mb-3">
+                        <div class="avatar-title bg-warning-subtle text-warning fs-24 rounded">
+                            <i class="ri-calculator-line"></i>
+                        </div>
+                    </div>
+                    <h5 class="card-title mb-1">Tổng giá trị</h5>
+                    <p class="text-muted mb-2">Chuyến xe</p>
+                    <h4 class="text-warning mb-0">{{ number_format($totalTripValue ?? 0) }} ₫</h4>
+                    <small class="text-muted">Đã vận chuyển</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Charts & Statistics -->
     <div class="row mb-4">
         <div class="col-lg-4 mb-4">
@@ -40,6 +104,8 @@
                                 <tr>
                                     <th>Bộ phận</th>
                                     <th>Số người</th>
+                                    <th>Lương cơ bản</th>
+                                    <th>Lương doanh số</th>
                                     <th>Tổng lương</th>
                                 </tr>
                             </thead>
@@ -49,12 +115,27 @@
                                 <tr>
                                     <td>{{ $dept['name'] }}</td>
                                     <td>{{ $dept['count'] }}</td>
+                                    <td>
+                                        @if(isset($dept['basic_salary']) && $dept['basic_salary'] > 0)
+                                            <span class="text-primary">{{ number_format($dept['basic_salary'], 0, ',', '.') }} ₫</span>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if(isset($dept['commission_salary']) && $dept['commission_salary'] > 0)
+                                            <span class="text-success">{{ number_format($dept['commission_salary'], 0, ',', '.') }} ₫</span>
+                                            <small class="d-block text-muted">{{ number_format($dept['total_trips'] ?? 0) }} chuyến</small>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
                                     <td>{{ number_format($dept['total_salary'], 0, ',', '.') }} ₫</td>
                                 </tr>
                                 @endif
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="text-center">Không có dữ liệu bộ phận</td>
+                                    <td colspan="5" class="text-center">Không có dữ liệu bộ phận</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -360,12 +441,15 @@
                                             <th>Mã NV</th>
                                             <th>Họ tên</th>
                                             <th>Bộ phận</th>
+                                            <th>Loại lương</th>
                                             <th>Lương cơ bản</th>
                                             <th>Phụ cấp</th>
                                             <th>Chi phí chuyến xe</th>
                                             <th>Thưởng</th>
+                                            <th>Chuyến xe</th>
                                             <th>Phạt</th>
                                             <th>Ứng lương</th>
+                                            {{--  <th>Tổng giá trị</th>  --}}
                                             <th>Tổng trước BHXH</th>
                                             <th>BHXH (10%)</th>
                                             <th>Tổng lương</th>
@@ -385,12 +469,46 @@
                                             <td>{{ $salary['employee_code'] }}</td>
                                             <td>{{ $salary['name'] }}</td>
                                             <td>{{ $salary['department'] }}</td>
-                                            <td>{{ number_format($salary['base_salary']) }} ₫</td>
+                                            <td>
+                                                @if($salary['salary_type'] == 1)
+                                                    <span class="badge bg-primary">Lương cơ bản</span>
+                                                @elseif($salary['salary_type'] == 2)
+                                                    <span class="badge bg-success">Lương doanh số</span>
+                                                @else
+                                                    <span class="badge bg-secondary">Không xác định</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($salary['salary_type'] == 2)
+                                                    <span class="text-success fw-bold">{{ number_format($salary['base_salary']) }} ₫</span>
+                                                    <small class="d-block text-muted">(12% × {{ number_format($salary['total_trip_value']) }} ₫)</small>
+                                                @else
+                                                    {{ number_format($salary['base_salary']) }} ₫
+                                                @endif
+                                            </td>
                                             <td>{{ number_format($salary['allowance']) }} ₫</td>
                                             <td>{{ number_format($salary['total_expenses']) }} ₫</td>
                                             <td>{{ number_format($salary['bonus']) }} ₫</td>
+                                            <td>
+                                                @if($salary['salary_type'] == 2)
+                                                    <span class="text-info">{{ number_format($salary['trip_count']) }}</span>
+                                                    <small class="d-block text-muted">chuyến xe</small>
+                                                @else
+                                                    <span class="text-muted">0</span>
+                                                    <small class="d-block text-muted">không áp dụng</small>
+                                                @endif
+                                            </td>
                                             <td>{{ number_format($salary['penalty']) }} ₫</td>
                                             <td>{{ number_format($salary['other_deduction']) }} ₫</td>
+                                            {{--  <td>
+                                                @if($salary['salary_type'] == 2)
+                                                    <span class="text-warning">{{ number_format($salary['total_trip_value']) }} ₫</span>
+                                                    <small class="d-block text-muted">tổng giá trị</small>
+                                                @else
+                                                    <span class="text-muted">0 ₫</span>
+                                                    <small class="d-block text-muted">không áp dụng</small>
+                                                @endif
+                                            </td>  --}}
                                             <td>{{ number_format($salary['total_salary']) }} ₫</td>
                                             <td>{{ number_format($salary['insurance']) }} ₫</td>
                                             <td>{{ number_format($salary['total']) }} ₫</td>
@@ -406,8 +524,9 @@
                                         </tr>
                                         {{--  @empty
                                         <tr>
-                                            <td colspan="14" class="text-center">Không có dữ liệu lương</td>
-                                        </tr>  --}}
+                                            <td colspan="17" class="text-center">Không có dữ liệu lương</td>
+                                        </tr>
+                                        @endforelse  --}}
                                         @endforeach
                                     </tbody>
                                 </table>
