@@ -434,14 +434,14 @@ class SalaryService
         $totalCommission = $baseSalary; // Commission amount = base salary cho loại này
         
         // Calculate total before insurance
-        $totalBeforeInsurance = ($baseSalary + $totalAllowance + $totalTypeBonus) - ($totalTypeSalary + $totalTypePenalty);
+        $totalBeforeInsurance = ($baseSalary + $totalAllowance + $totalTypeBonus) - ($totalTypePenalty);
         
         // Calculate social insurance based on settings
         $socialInsurance = $this->calculateSocialInsurance($totalBeforeInsurance);
         
         // Calculate final salary
         $totalSalary = $totalBeforeInsurance;
-        $netSalary = $totalBeforeInsurance - $socialInsurance;
+        $netSalary = $totalBeforeInsurance - ($socialInsurance + $totalTypeSalary);
         
         return [
             'baseSalary' => $baseSalary,
@@ -492,42 +492,5 @@ class SalaryService
         
         // Bỏ giới hạn trần - tính 10% của toàn bộ số tiền
         return $amount * ($rate / 100);
-    }
-
-    /** */
-    protected function calculateSalaryDetails(User $user, Collection $shipments, $salaryPeriod)
-    {
-        $totalAllowance = 0;
-        $totalExpenses = 0; // Không tính chi phí chuyến hàng
-
-        $totalTypeSalary = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $salaryPeriod->start_date, $salaryPeriod->end_date);
-        $totalTypeBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $salaryPeriod->start_date, $salaryPeriod->end_date);
-        $totalTypePenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $salaryPeriod->start_date, $salaryPeriod->end_date);
-        
-        // Process shipment deductions for salary calculation - chỉ tính cho shipment đã hoàn thành
-        foreach ($shipments as $shipment) {
-            $totalAllowance += $shipment->shipmentDeductionTypeDriverAndBusboy($user->id)->sum('amount') ?? 0; // tổng phụ cấp
-            // Không tính chi phí chuyến hàng vào lương nhân viên
-            // $totalExpenses += $shipment->shipmentDeductionTypeExpense()->sum('amount') ?? 0; // tổng chi phí
-        }
-        
-        // Calculate insurance deduction (10% of total: salary base + allowances)
-        $baseSalary = $user->salary_base ?? 0;
-        $totalBeforeInsurance = ($baseSalary + $totalAllowance + $totalTypeBonus) - ($totalTypeSalary + $totalTypePenalty);
-        $insuranceDeduction = $totalBeforeInsurance * (Constants::TAX_IN_VAT/100); // 10% of total
-        
-        // Calculate total salary - updated formula
-        $totalSalary = $totalBeforeInsurance - $insuranceDeduction;
-        
-        return [
-            'totalAllowance' => $totalAllowance,
-            'totalExpenses' => $totalExpenses,
-            'totalBeforeInsurance' => $totalBeforeInsurance,
-            'insuranceDeduction' => $insuranceDeduction,
-            'totalSalary' => $totalSalary,
-            'totalTypeSalary' => $totalTypeSalary,
-            'totalTypeBonus' => $totalTypeBonus,
-            'totalTypePenalty' => $totalTypePenalty
-        ];
     }
 }
