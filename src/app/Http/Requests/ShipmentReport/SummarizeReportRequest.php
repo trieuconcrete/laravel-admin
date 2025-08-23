@@ -27,6 +27,7 @@ class SummarizeReportRequest extends FormRequest
             'statement_end_date' => 'required|date|after_or_equal:statement_start_date',
             'shipment_type' => 'required|integer|in:1,2,3,4',
             'customer_id' => 'required|exists:customers,id',
+            'month' => 'nullable|string',
         ];
     }
 
@@ -40,9 +41,12 @@ class SummarizeReportRequest extends FormRequest
             $endDate = $this->input('statement_end_date');
             $customerId = $this->input('customer_id');
             $shipmentType = $this->input('shipment_type');
+            $month = $this->input('month');
 
-            // Luôn kiểm tra overlap vì shipment_type là bắt buộc
-            if (ShipmentReport::checkTimeOverlap($customerId, $startDate, $endDate, $shipmentType)) {
+            // Luôn kiểm tra time exist and overlap vì shipment_type là bắt buộc
+            $isTimeOverlap = ShipmentReport::checkTimeOverlap($customerId, $startDate, $endDate, $shipmentType);
+            $isTimeExist = ShipmentReport::checkTimeExist($customerId, $startDate, $endDate, $shipmentType);
+            if (!$isTimeExist && $isTimeOverlap) {
                 $validator->errors()->add('time_overlap', 'Thời gian bảng kê đã chồng lên nhau với các bảng kê khác cùng loại.');
             }
         });

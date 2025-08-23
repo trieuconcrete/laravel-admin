@@ -47,7 +47,7 @@ class ShipmentDeductionType extends Model
     const TYPE_CAR_RENTAL_EXPENSE = 'car_rental_expense';
     const TYPE_DRIVER = 'driver';
     const TYPE_BUS_DRIVER = 'bus_driver';
-
+    
     /**
      * Status options
      */

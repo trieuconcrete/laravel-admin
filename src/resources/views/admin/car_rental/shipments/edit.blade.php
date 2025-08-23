@@ -66,7 +66,7 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-4">
                                                     <label class="form-label">Ngày chạy <span class="text-danger">*</span></label>
-                                                    <input type="date" class="form-control" name="run_date" id="run_date" value="{{ old('run_date', $shipment->run_date ? $shipment->run_date->format('Y-m-d') : ($shipment->departure_time ? $shipment->departure_time->format('Y-m-d') : date('Y-m-d'))) }}" required>
+                                                    <input type="date" class="form-control" name="run_date" id="run_date" value="{{ old('run_date', $shipment->run_date ? $shipment->run_date->format('d/m/Y') : ($shipment->departure_time ? $shipment->departure_time->format('d/m/Y') : date('Y-m-d'))) }}" required>
                                                     @error('run_date')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-4">

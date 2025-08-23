@@ -148,6 +148,32 @@ class ShipmentReport extends Model
     }
 
     /**
+     * Kiểm tra thời gian có tồn tại không
+     */
+    public static function checkTimeExist($customerId, $startDate, $endDate, $shipmentType = null, $excludeId = null)
+    {
+        $query = self::where('customer_id', $customerId)
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->where(function ($subQ) use ($startDate, $endDate) {
+                    // Kiểm tra overlap: start_date <= endDate AND end_date >= StartDate
+                    $subQ->whereDate('statement_start_date', $startDate)
+                          ->whereDate('statement_end_date', $endDate);
+                });
+            });
+
+        // Chỉ kiểm tra overlap cho cùng loại shipment_type
+        if ($shipmentType) {
+            $query->where('shipment_type', $shipmentType);
+        }
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->exists();
+    }
+
+    /**
      * Lấy danh sách báo cáo theo khách hàng và loại chuyến xe
      */
     public static function getReportsByCustomerAndType($customerId, $shipmentType = null)

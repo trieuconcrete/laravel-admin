@@ -27,13 +27,16 @@ class PerTripShipmentExport extends BaseShipmentExport
     {
         return [
             'STT',
-            'Mã chuyến xe',
             'Ngày',
+            'Số xe',
             'Điểm đi',
             'Điểm đến',
             'Số chuyến',
+            'Kết hợp',
+            'Phụ phí chuyến xe',
             'Đơn giá',
-            'Thành tiền'
+            'Thành tiền',
+            'Ghi chú'
         ];
     }
 } 

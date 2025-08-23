@@ -128,6 +128,7 @@ class CustomerController extends Controller
         
         // Lấy danh sách các tháng có báo cáo (unique months)
         $shipmentMonthlyReports = \App\Models\ShipmentReport::where('customer_id', $customer->id)
+            ->whereNull('car_rental_id')
             ->select('monthly')
             ->distinct()
             ->orderBy('monthly', 'desc')

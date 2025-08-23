@@ -493,7 +493,14 @@
                                                 <table class="table table-borderless mb-0">
                                                     <tbody>
                                                         <tr class="border-bottom">
-                                                            <td class="fw-medium">Lương cơ bản</td>
+                                                            <td class="fw-medium">
+                                                                @if($salaryType == 2)
+                                                                    Lương doanh số (12%)
+                                                                    <small class="d-block text-muted">{{ number_format($totalTripValue) }} ₫ × 12%</small>
+                                                                @else
+                                                                    Lương cơ bản
+                                                                @endif
+                                                            </td>
                                                             <td class="text-end" data-salary="base">{{ number_format($salaryBase) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom">
@@ -560,7 +567,13 @@
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <p class="text-muted mb-0">Cơ bản</p>
+                                                                <p class="text-muted mb-0">
+                                                                    @if($salaryType == 2)
+                                                                        Doanh số (12%)
+                                                                    @else
+                                                                        Cơ bản
+                                                                    @endif
+                                                                </p>
                                                                 <h6>{{ number_format($salaryBase) }} đ</h6>
                                                             </div>
                                                         </div>
@@ -1052,7 +1065,14 @@
                 height: 250,
                 type: 'pie',
             },
-            labels: ['Lương cơ bản', 'Trợ cấp', 'BHXH', 'Phạt', 'Ứng lương', 'Thưởng'],
+            labels: [
+                @if($salaryType == 2)
+                    'Lương doanh số (12%)', 
+                @else
+                    'Lương cơ bản',
+                @endif
+                'Trợ cấp', 'BHXH', 'Phạt', 'Ứng lương', 'Thưởng'
+            ],
             colors: ['#0ab39c', '#299cdb', '#f06548', '#ea5455', '#ff9f43', '#28c76f'],
             legend: {
                 show: true,
