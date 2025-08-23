@@ -84,6 +84,7 @@ class Shipment extends Model
         'cargo_weight' => 'decimal:2',
         'distance' => 'decimal:2', // Cast cho trường số km
         'unit_price' => 'decimal:2',
+        'trip_count' => 'decimal:2',
         'unit_price_for_car_rental' => 'decimal:2',
         'crane_price' => 'decimal:2', // Cast cho trường đơn giá cẩu hàng
         'has_crane_service' => 'boolean', // Cast cho trường có dịch vụ cẩu hàng

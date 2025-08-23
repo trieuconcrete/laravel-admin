@@ -149,7 +149,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Số lượng chuyến</label>
-                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count ?? 1) }}">
+                                                    <input type="text" class="form-control float-input" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count ?? 1) }}">
                                                     @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>

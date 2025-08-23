@@ -680,6 +680,9 @@
                                 totalWeight += parseFloat(shipment.cargo_weight) || 0;
                                 totalCombinedFees += parseFloat(shipment.combined_fees) || 0;
                                 grandTotal += parseFloat(shipment.total_amount) || 0;
+                                amountWithTax = parseFloat(grandTotal * 0.08) || 0;
+                                totalAmountWithTax = parseFloat(grandTotal + amountWithTax) || 0;
+
                                 let shipmentLink;
                                 if (shipment.shipment_type == 2) {
                                     // Giả sử bạn đã định nghĩa carRentalEditRoute trong blade
@@ -710,6 +713,8 @@
                             document.getElementById('totalWeight').textContent = numberFormat(totalWeight.toFixed(2));
                             document.getElementById('totalCombinedFees').textContent = numberFormat(totalCombinedFees);
                             document.getElementById('grandTotal').textContent = numberFormat(grandTotal);
+                            document.getElementById('amountWithTax').textContent = numberFormat(amountWithTax);
+                            document.getElementById('totalAmountWithTax').textContent = numberFormat(totalAmountWithTax);
                         } else {
                             // No data found
                             tableBody.innerHTML = '<tr><td colspan="12" class="text-center">Không có dữ liệu chuyến xe trong tháng này</td></tr>';
@@ -719,6 +724,8 @@
                             document.getElementById('totalWeight').textContent = '0';
                             document.getElementById('totalCombinedFees').textContent = '0';
                             document.getElementById('grandTotal').textContent = '0';
+                            document.getElementById('amountWithTax').textContent = '0';
+                            document.getElementById('totalAmountWithTax').textContent = '0';
                         }
 
                         // Button luôn hiển thị và sẵn sàng để tổng kết
@@ -1083,6 +1090,8 @@
                 let totalWeight = 0;
                 let totalCombinedFees = 0;
                 let grandTotal = 0;
+                let amountWithTax = 0;
+                let totalAmountWithTax = 0;
 
                 shipments.forEach(shipment => {
                     const row = document.createElement('tr');
@@ -1091,6 +1100,8 @@
                     totalWeight += parseFloat(shipment.cargo_weight) || 0;
                     totalCombinedFees += parseFloat(shipment.combined_fees) || 0;
                     grandTotal += parseFloat(shipment.total_amount) || 0;
+                    amountWithTax = parseFloat(grandTotal * 0.08) || 0;
+                    totalAmountWithTax = parseFloat(grandTotal + amountWithTax) || 0;
                     let shipmentLink;
                     if (shipment.shipment_type == 2) {
                         // Giả sử bạn đã định nghĩa carRentalEditRoute trong blade
@@ -1121,6 +1132,8 @@
                 document.getElementById('totalWeight').textContent = numberFormat(totalWeight.toFixed(2));
                 document.getElementById('totalCombinedFees').textContent = numberFormat(totalCombinedFees);
                 document.getElementById('grandTotal').textContent = numberFormat(grandTotal);
+                document.getElementById('amountWithTax').textContent = numberFormat(amountWithTax);
+                document.getElementById('totalAmountWithTax').textContent = numberFormat(totalAmountWithTax);
             }
 
             // Handle summarize report button click

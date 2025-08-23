@@ -498,7 +498,8 @@
                                                                 <a href="{{ route('admin.car-rental.edit-vehicle-log', $shipment->id) }}" class="btn btn-sm btn-primary">
                                                                     <i class="ri-edit-line"></i>
                                                                 </a>
-                                                                <button type="button" class="btn btn-sm btn-danger" onclick="deleteVehicleLog({{ $shipment->id }})">
+                                                                <button type="button" class="btn btn-sm btn-danger" onclick="deleteVehicleLog({{ $shipment->id }})"
+                                                                    @disabled($shipment->status !== \App\Models\Shipment::STATUS_PENDING)>
                                                                     <i class="ri-delete-bin-line"></i>
                                                                 </button>
                                                             </div>
@@ -797,10 +798,6 @@ $(document).ready(function() {
 
     // Trigger change event on page load
     $('#add_vehicle_id').trigger('change');
-
-
-
-
 
     // Initialize datetime pickers
     $('input[type="datetime-local"]').flatpickr({
