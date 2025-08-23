@@ -209,7 +209,7 @@ class SalaryController extends Controller
                 'allowance' => $salaryDetail->total_allowance,
                 'total_expenses' => $salaryDetail->total_expenses,
                 'insurance' => $salaryDetail->social_insurance,
-                'total' => $salaryDetail->net_salary, // Sử dụng data đã sync
+                'total' => max(0, $salaryDetail->net_salary), // Đảm bảo không âm
                 'status' => $salaryDetail->status,
                 'shipment_count' => $salaryDetail->working_days,
                 'other_deduction' => $salaryDetail->other_deduction,
@@ -542,14 +542,28 @@ class SalaryController extends Controller
             $monthSalary = 0;
             
             if ($monthSalaryPeriod) {
+                // Sử dụng logic mới: đảm bảo không âm
                 $monthSalary = SalaryDetail::where('period_id', $monthSalaryPeriod->period_id)
-                    ->sum('net_salary');
+                    ->get()
+                    ->sum(function($detail) {
+                        return max(0, $detail->net_salary);
+                    });
             }
             
             $chartData[] = [
                 'month' => $monthLabel,
                 'total' => $monthSalary
             ];
+            
+            // Debug log cho tháng 8/2025
+            if ($monthLabel === '08/2025') {
+                Log::info('Chart Data Debug - Tháng 8/2025', [
+                    'month' => $monthLabel,
+                    'monthSalary' => $monthSalary,
+                    'monthSalaryPeriod' => $monthSalaryPeriod ? $monthSalaryPeriod->period_id : null,
+                    'expected_total' => 569510000
+                ]);
+            }
         }
         
         return $chartData;

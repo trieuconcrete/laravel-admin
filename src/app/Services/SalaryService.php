@@ -480,17 +480,20 @@ class SalaryService
 
     /**
      * Calculate social insurance based on settings
-     * BHXH: 10% của tổng lương (không giới hạn trần)
+     * BHXH: X% của Y
+     * X: settings.social_insurance_contribution_rate ?? 10.5
+     * Y: settings.social_insurance_contribution_amount ?? 5500000
      * 
-     * @param float $amount
+     * @param float $amount (không sử dụng nữa, chỉ giữ để tương thích)
      * @return float
      */
     protected function calculateSocialInsurance(float $amount): float
     {
-        // Get settings with cache - sử dụng rate 10% cố định
-        $rate = 10.0; // Cố định 10% theo yêu cầu
+        // Lấy settings từ database thông qua SettingService và parse decimal
+        $rate = parseDecimal($this->settingService->get('social_insurance_contribution_rate', 10.5));
+        $insuranceAmount = parseDecimal($this->settingService->get('social_insurance_contribution_amount', 5500000));
         
-        // Bỏ giới hạn trần - tính 10% của toàn bộ số tiền
-        return $amount * ($rate / 100);
+        // Tính BHXH: X% của Y (không phụ thuộc vào $amount)
+        return $insuranceAmount * ($rate / 100);
     }
 }

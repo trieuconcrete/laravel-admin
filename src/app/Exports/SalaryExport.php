@@ -590,8 +590,15 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Add TRỪ BHXH row
         $insuranceRow = $row++;
-        $insuranceDeduction = $totalBeforeInsurance * (Constants::TAX_IN_VAT/100); // 10% of total
-        $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (10%):');
+        
+        // Lấy settings từ database và parse decimal
+        $insuranceRate = parseDecimal(Setting::get('social_insurance_contribution_rate', 10.5));
+        $insuranceAmount = parseDecimal(Setting::get('social_insurance_contribution_amount', 5500000));
+        
+        // Tính BHXH: X% của Y (không phụ thuộc vào totalBeforeInsurance)
+        $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        
+        $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (' . $insuranceRate . '%):');
         $sheet->mergeCells('A' . $insuranceRow . ':D' . $insuranceRow);
         $sheet->getStyle('A' . $insuranceRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $insuranceRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
@@ -600,6 +607,7 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Add TỔNG LƯƠNG CÒN LẠI row
         $remainingSalaryRow = $row++;
+        // BHXH giờ không phụ thuộc vào totalBeforeInsurance, nên tính lại
         $totalSalaryRemaining = $totalBeforeInsurance - $insuranceDeduction;
         $sheet->setCellValue('A' . $remainingSalaryRow, 'TỔNG LƯƠNG CÒN LẠI:');
         $sheet->mergeCells('A' . $remainingSalaryRow . ':D' . $remainingSalaryRow);

@@ -282,9 +282,15 @@ class UserService
             $salaryBase = $user->salary_base ?? 0;
         }
         
-        // Calculate insurance deduction (10% of total: salary base + allowances)
+        // Calculate insurance deduction: X% của Y (từ settings)
         $totalBeforeInsurance = ($salaryBase + $totalAllowance + $totalBonus) - ( $totalPenalty);
-        $insuranceDeduction = $totalBeforeInsurance * (Constants::TAX_IN_VAT/100); // 10% of total
+        
+        // Lấy settings từ database và parse decimal
+        $insuranceRate = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_rate', 10.5));
+        $insuranceAmount = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_amount', 5500000));
+        
+        // Tính BHXH: X% của Y (không phụ thuộc vào totalBeforeInsurance)
+        $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
         
         // dd($totalBeforeInsurance, $insuranceDeduction, $salaryBase,$totalAllowance,$totalBonus, $totalOtherDeduction, $totalPenalty);
         // Calculate total salary - updated formula
