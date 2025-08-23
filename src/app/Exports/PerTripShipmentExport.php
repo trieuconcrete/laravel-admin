@@ -32,10 +32,11 @@ class PerTripShipmentExport extends BaseShipmentExport
             'Điểm đi',
             'Điểm đến',
             'Số chuyến',
-            'Phụ thu kết hợp',
-            'Chi phí chuyến xe',
+            'Kết hợp',
+            'Phụ phí chuyến xe',
             'Đơn giá',
-            'Thành tiền'
+            'Thành tiền',
+            'Ghi chú'
         ];
     }
 } 

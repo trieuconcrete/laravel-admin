@@ -158,11 +158,12 @@ class ShipmentReportController extends Controller
     {
         switch ($shipmentType) {
             case 3: // Xe nâng
-                return ($shipment->crane_price ?? 0) * ($shipment->trip_count ?? 1);
+                $totalAmount = ($shipment->crane_price ?? 0) * ($shipment->trip_count ?? 1);
             case 4: // Xe đường dài
-                return ($shipment->unit_price ?? 0) * ($shipment->distance ?? 0);
+                $totalAmount =  ($shipment->unit_price ?? 0) * ($shipment->distance ?? 0);
             default: // Các loại khác
-                return ($shipment->unit_price ?? 0) * ($shipment->trip_count ?? 1);
+                $totalAmount =  ($shipment->unit_price ?? 0) * ($shipment->trip_count ?? 1);
         }
+        return $totalAmount + $shipment->total_expense_deductions;
     }
 } 
