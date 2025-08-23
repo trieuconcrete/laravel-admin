@@ -232,18 +232,20 @@ abstract class BaseShipmentExport implements WithTitle, WithStyles, ShouldAutoSi
         $sheet->setCellValue('E' . $row, $shipment['destination']);
         
         // Set value based on shipment type
-        if ($this->shipmentType == 4) {
-            $sheet->setCellValue('F' . $row, $shipment['distance'] ?? 0);
-        } else {
-            $sheet->setCellValue('F' . $row, $shipment['trip_count'] ?? 1);
-        }
+        // if ($this->shipmentType == 4) {
+        //     $sheet->setCellValue('F' . $row, $shipment['distance'] ?? 0);
+        // } else {
+        //     $sheet->setCellValue('F' . $row, $shipment['trip_count'] ?? 1);
+        // }
         
         // Set unit price based on shipment type
-        if ($this->shipmentType == 3) {
-            $sheet->setCellValue('I' . $row, $shipment['crane_price'] ?? 0);
-        } else {
-            $sheet->setCellValue('I' . $row, $shipment['unit_price'] ?? 0);
-        }
+        // if ($this->shipmentType == 3) {
+        //     $sheet->setCellValue('I' . $row, $shipment['crane_price'] ?? 0);
+        // } else {
+        //     $sheet->setCellValue('I' . $row, $shipment['unit_price'] ?? 0);
+        // }
+        $sheet->setCellValue('F' . $row, $shipment['trip_count'] ?? 1);
+        $sheet->setCellValue('I' . $row, $shipment['unit_price'] ?? 0);
 
         $sheet->setCellValue('G' . $row, $shipment['total_combined_surcharge']);
         $sheet->setCellValue('H' . $row, $shipment['total_expense_deductions']);

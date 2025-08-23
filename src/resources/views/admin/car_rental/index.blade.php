@@ -101,6 +101,7 @@
                                                     @endif  --}}
                                                     <button type="button"
                                                         class="btn btn-sm btn-outline-danger delete-car-rental-btn"
+                                                        @disabled($carRental->status !== \App\Models\CarRental::STATUS_PENDING)
                                                         data-car-rental-id="{{ $carRental->id }}">
                                                         Xóa
                                                     </button>
@@ -388,6 +389,28 @@
 @push('scripts')
     <script src="{{ asset('js/car-rental.js') }}"></script>
     <script>
+        $('.delete-car-rental-btn').on('click', function (e) {
+            e.preventDefault();
+
+            const carRentalId = $(this).data('car-rental-id');
+            const form = $('#delete-form-' + carRentalId);
+
+            Swal.fire({
+                title: 'Bạn chắc chắn muốn xóa?',
+                // text: "Hành động này không thể hoàn tác!",
+                icon: 'warning'
+                , showCancelButton: true
+                , confirmButtonColor: '#d33'
+                , cancelButtonColor: '#3085d6'
+                , confirmButtonText: 'Xóa'
+                , cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+
         $(document).ready(function () {
             const hasOldVehicles = {{ count(old('vehicles', [])) > 0 ? 'true' : 'false' }};
 
@@ -398,28 +421,6 @@
             $('#add-vehicle-btn').on('click', addVehicleRow);
 
             $('#vehicle-rows').on('click', '.remove-row', removeVehicleRow);
-
-            $('.delete-car-rental-btn').click(function (e) {
-                e.preventDefault();
-
-                const carRentalId = $(this).data('car-rental-id');
-                const form = $('#delete-form-' + carRentalId);
-
-                Swal.fire({
-                    title: 'Bạn chắc chắn muốn xóa?',
-                    // text: "Hành động này không thể hoàn tác!",
-                    icon: 'warning'
-                    , showCancelButton: true
-                    , confirmButtonColor: '#d33'
-                    , cancelButtonColor: '#3085d6'
-                    , confirmButtonText: 'Xóa'
-                    , cancelButtonText: 'Hủy'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
-                });
-            });
 
             ['#add-car-rental-form'].forEach(function (formSelector) {
                 const $form = $(formSelector);
