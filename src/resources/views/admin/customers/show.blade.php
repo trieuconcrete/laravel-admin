@@ -245,7 +245,7 @@
                                 </div>
                             </div>
 
-                            <div class="row mb-5 mt-5">
+                            <div class="row mb-4 mt-4">
                                 <div class="col-md-12 text-center">
                                     <button type="button" id="searchShipments" class="btn btn-info me-2">
                                         <i class="ri-search-line me-1"></i>Tìm chuyến xe
@@ -258,7 +258,7 @@
                                         <i class="las la-calculator align-middle me-1"></i>
                                         Tổng kết công nợ
                                     </button>
-                                    <a href="{{ route('admin.shipments.create') . '?customer_id=' . $customer->id }}" class="btn btn-primary">
+                                    <a href="{{ route('admin.shipments.create') . '?customer_id=' . $customer->id }}" class="btn btn-primary" target="_blank">
                                         <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe
                                     </a>
                                 </div>
@@ -272,7 +272,7 @@
                                             <th>Điểm đi</th>
                                             <th>Điểm đến</th>
                                             <th>Số chuyến</th>
-                                            <th>Khối lượng xe (kg)</th>
+                                            <th>Khối lượng(kg)</th>
                                             <th>Đơn giá</th>
                                             <th>Phụ thu</th>
                                             <th>Thành tiền</th>
@@ -305,20 +305,54 @@
                                         @endif --}}
                                     </tbody>
                                     <tfoot>
+                                        @php
+                                            $totalTrips = isset($monthlyShipments) ? $monthlyShipments->sum('trip_count') : 0;
+                                            $totalWeight = isset($monthlyShipments) ? ($monthlyShipments->sum('cargo_weight')) : 0;
+                                            $totalCombinedFees = isset($monthlyShipments) ? ($monthlyShipments->sum('combined_fees')) : 0;
+                                            $grandTotal = isset($monthlyShipments) ? ($monthlyShipments->sum('total_amount')) : 0;
+                                            $amountWithTax = isset($monthlyShipments) ? ($grandTotal * 0.08) : 0;
+                                            $totalAmountWithTax = isset($monthlyShipments) ? ($grandTotal + $amountWithTax) : 0;
+                                        @endphp
                                         <tr class="table-primary fw-bold">
                                             <td colspan="4">Tổng cộng</td>
                                             <td id="totalTrips">
-                                                {{ isset($monthlyShipments) ? $monthlyShipments->sum('trip_count') : 0 }}
+                                                {{ number_format($totalTrips) }}
                                             </td>
                                             <td id="totalWeight">
-                                                {{ isset($monthlyShipments) ? $monthlyShipments->sum('cargo_weight') : 0 }}
+                                                {{ number_format($totalWeight) }}
                                             </td>
                                             <td></td>
                                             <td id="totalCombinedFees">
-                                                {{ isset($monthlyShipments) ? number_format($monthlyShipments->sum('combined_fees')) : 0 }}
+                                                {{ number_format($totalCombinedFees) }}
                                             </td>
                                             <td id="grandTotal">
-                                                {{ isset($monthlyShipments) ? number_format($monthlyShipments->sum('total_amount')) : 0 }}
+                                                {{ number_format($grandTotal) }}
+                                            </td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr class="table-primary fw-bold">
+                                            <td colspan="4">Thuế GTGT 8%</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td id="amountWithTax">
+                                                {{ number_format($amountWithTax) }}
+                                            </td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr class="table-primary fw-bold">
+                                            <td colspan="4">Tổng thanh toán</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td id="totalAmountWithTax">
+                                                {{ number_format($totalAmountWithTax) }}
                                             </td>
                                             <td></td>
                                             <td></td>
@@ -660,7 +694,7 @@
                                 <td>${shipment.origin}</td>
                                 <td>${shipment.destination}</td>
                                 <td>${shipment.trip_count}</td>
-                                <td>${shipment.cargo_weight}</td>
+                                <td>${numberFormat(shipment.cargo_weight)}</td>
                                 <td>${numberFormat(shipment.unit_price)}</td>
                                 <td>${shipment.combined_fees > 0 ? numberFormat(shipment.combined_fees) : ''}</td>
                                 <td>${numberFormat(shipment.total_amount)}</td>
@@ -673,7 +707,7 @@
 
                             // Update footer totals
                             document.getElementById('totalTrips').textContent = totalTrips;
-                            document.getElementById('totalWeight').textContent = totalWeight.toFixed(2);
+                            document.getElementById('totalWeight').textContent = numberFormat(totalWeight.toFixed(2));
                             document.getElementById('totalCombinedFees').textContent = numberFormat(totalCombinedFees);
                             document.getElementById('grandTotal').textContent = numberFormat(grandTotal);
                         } else {
@@ -820,13 +854,13 @@
                             const shipmentType = document.querySelector('select[name="shipment_type"]').value;
                             const typeLabel = shipmentType && shipmentType !== '' ? getShipmentTypeLabel(shipmentType) : 'Tất cả các loại';
                             
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Thành công',
-                                text: `Tìm thấy ${data.total_count} chuyến xe (${typeLabel}) với tổng tiền ${numberFormat(data.total_amount)} VND`,
-                                timer: 2000,
-                                showConfirmButton: false
-                            });
+                            // Swal.fire({
+                            //     icon: 'success',
+                            //     title: 'Thành công',
+                            //     text: `Tìm thấy ${data.total_count} chuyến xe (${typeLabel}) với tổng tiền ${numberFormat(data.total_amount)} VND`,
+                            //     timer: 2000,
+                            //     showConfirmButton: false
+                            // });
                         } else {
                             console.log('=== API returned error ===');
                             console.log('API error data:', data);
@@ -1071,7 +1105,7 @@
                         <td>${shipment.origin}</td>
                         <td>${shipment.destination}</td>
                         <td>${shipment.trip_count}</td>
-                        <td>${shipment.cargo_weight}</td>
+                        <td>${numberFormat(shipment.cargo_weight)}</td>
                         <td>${numberFormat(shipment.unit_price)}</td>
                         <td>${shipment.combined_fees > 0 ? numberFormat(shipment.combined_fees) : ''}</td>
                         <td>${numberFormat(shipment.total_amount)}</td>
@@ -1084,7 +1118,7 @@
 
                 // Update footer totals
                 document.getElementById('totalTrips').textContent = totalTrips;
-                document.getElementById('totalWeight').textContent = totalWeight.toFixed(2);
+                document.getElementById('totalWeight').textContent = numberFormat(totalWeight.toFixed(2));
                 document.getElementById('totalCombinedFees').textContent = numberFormat(totalCombinedFees);
                 document.getElementById('grandTotal').textContent = numberFormat(grandTotal);
             }

@@ -275,8 +275,8 @@
                                     </div>
 
                                     <div class="table-responsive">
-                                        <table class="table table-bordered table-striped">
-                                            <thead>
+                                        <table class="table table-hover table-striped align-middle table-nowrap mb-0">
+                                            <thead class="table-light">
                                                 <tr>
                                                     <th>Xe</th>
                                                     <th class="text-center">Ngày chạy</th>
@@ -379,8 +379,8 @@
                                                     @endphp
                                                     
                                                     <tr>
-                                                        <td>{{ $shipment->vehicle->vehicleType->name ?? 'N/A' }} - {{ $shipment->vehicle->plate_number ?? 'N/A' }}</td>
-                                                        <td class="text-center">{{ $shipment->run_date ? \Carbon\Carbon::parse($shipment->run_date)->format('Y-m-d') : '' }}</td>
+                                                        <td>{{ $shipment->vehicle->plate_number ?? 'N/A' }} - {{ $shipment->vehicle->vehicleType->name ?? 'N/A' }}</td>
+                                                        <td class="text-center">{{ $shipment->run_date ? \Carbon\Carbon::parse($shipment->run_date)->format('d/m/Y') : '' }}</td>
                                                         <td class="text-center">
                                                             @if($shipment->start_time && $shipment->end_time)
                                                                 @php

@@ -160,7 +160,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Khối lượng (kg)</label>
-                                                    <input type="text" class="form-control" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight') }}">
+                                                    <input type="text" class="form-control number" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight') }}">
                                                     @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>

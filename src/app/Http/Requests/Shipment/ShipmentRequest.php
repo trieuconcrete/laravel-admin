@@ -200,6 +200,12 @@ class ShipmentRequest extends FormRequest
                 'unit_price_for_car_rental' => str_replace(',', '', $this->unit_price_for_car_rental),
             ]);
         }
+        // Remove commas from unit_price_for_car_rental
+        if ($this->cargo_weight) {
+            $this->merge([
+                'cargo_weight' => str_replace(',', '', $this->cargo_weight),
+            ]);
+        }
     }
 
     public function rules()
