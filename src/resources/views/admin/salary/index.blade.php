@@ -451,7 +451,7 @@
                                             <th>Ứng lương</th>
                                             {{--  <th>Tổng giá trị</th>  --}}
                                             <th>Tổng trước BHXH</th>
-                                            <th>BHXH (10%)</th>
+                                            <th>BHXH ({{ \App\Models\Setting::get('social_insurance_contribution_rate', 10.5) }}%) <small class="text-muted" title="Mức đóng lương cơ bản: {{ \App\Models\Setting::get('social_insurance_contribution_amount', 5500000) }} đ">ⓘ</small></th>
                                             <th>Tổng lương</th>
                                             <th>Trạng thái</th>
                                         </tr>

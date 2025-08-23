@@ -132,3 +132,30 @@ if (!function_exists('vehicle_type_text')) {
         return $types[$type] ?? $type;
     }
 }
+
+/**
+ * Parse decimal number from string (supports both comma and dot as decimal separator)
+ * Chuyển đổi string số thập phân từ dấu phẩy (,) hoặc dấu chấm (.) thành float
+ * 
+ * @param string|float|int $value
+ * @return float
+ */
+function parseDecimal($value): float
+{
+    if (is_numeric($value)) {
+        return (float) $value;
+    }
+    
+    if (is_string($value)) {
+        // Thay thế dấu phẩy bằng dấu chấm để parse đúng
+        $normalized = str_replace(',', '.', $value);
+        
+        // Kiểm tra xem có phải số hợp lệ không
+        if (is_numeric($normalized)) {
+            return (float) $normalized;
+        }
+    }
+    
+    // Fallback về 0 nếu không parse được
+    return 0.0;
+}

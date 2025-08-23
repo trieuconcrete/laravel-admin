@@ -25,15 +25,28 @@ class LongDistanceShipmentExport extends BaseShipmentExport
      */
     protected function getHeaders(): array
     {
+        // return [
+        //     'STT',
+        //     'Mã chuyến xe',
+        //     'Ngày',
+        //     'Điểm đi',
+        //     'Điểm đến',
+        //     'Số km',
+        //     'Đơn giá/km',
+        //     'Thành tiền'
+        // ];
         return [
             'STT',
-            'Mã chuyến xe',
             'Ngày',
+            'Số xe',
             'Điểm đi',
             'Điểm đến',
-            'Số km',
-            'Đơn giá/km',
-            'Thành tiền'
+            'Số chuyến',
+            'Kết hợp',
+            'Phụ phí chuyến xe',
+            'Đơn giá',
+            'Thành tiền',
+            'Ghi chú'
         ];
     }
 } 

@@ -40,6 +40,82 @@ $(document).ready(function() {
         formatParkingFeeInput($(this));
     });
 
+    // Handle float-input class for decimal numbers (like 0.5 for half trip)
+    $('.float-input').on('input', function() {
+        let value = $(this).val();
+        
+        // Allow numbers, one decimal point, and negative sign
+        value = value.replace(/[^0-9.-]/g, '');
+        
+        // Ensure only one decimal point
+        let parts = value.split('.');
+        if (parts.length > 2) {
+            value = parts[0] + '.' + parts.slice(1).join('');
+        }
+        
+        // Ensure only one negative sign at the beginning
+        if (value.indexOf('-') > 0) {
+            value = value.replace(/-/g, '');
+        }
+        
+        $(this).val(value);
+    });
+    
+    $('.float-input').on('change blur', function() {
+        let value = $(this).val();
+        
+        if (value === '' || value === '-' || value === '.') {
+            $(this).val('');
+            return;
+        }
+        
+        // Remove any non-numeric characters except decimal and minus
+        value = value.replace(/[^0-9.-]/g, '');
+        
+        // Parse the value
+        let numValue = parseFloat(value);
+        
+        if (!isNaN(numValue)) {
+            // For trip_count field, round to nearest 0.5
+            if ($(this).attr('name') === 'trip_count') {
+                // Round to nearest 0.5
+                numValue = Math.round(numValue * 2) / 2;
+                
+                // Ensure minimum value is 0.5
+                if (numValue < 0.5) {
+                    numValue = 0.5;
+                }
+                
+                // Format the number
+                if (numValue % 1 === 0) {
+                    // Whole number
+                    $(this).val(numValue.toFixed(0));
+                } else {
+                    // Has .5
+                    $(this).val(numValue.toFixed(1));
+                }
+                
+                // Show notification if value was adjusted
+                if (parseFloat(value) !== numValue && typeof toastr !== 'undefined') {
+                    toastr.info('Số lượng chuyến đã được điều chỉnh về ' + numValue + ' (làm tròn đến 0.5)');
+                }
+            } else {
+                // For other float inputs, keep 2 decimal places
+                $(this).val(numValue.toFixed(2).replace(/\.00$/, ''));
+            }
+        } else {
+            $(this).val('');
+        }
+    });
+    
+    // Initialize float-input values on page load
+    $('.float-input').each(function() {
+        let value = $(this).val();
+        if (value && value !== '') {
+            $(this).trigger('change');
+        }
+    });
+
     window.formatParkingFeeInput = function(input) {
         formatParkingFeeInput($(input));
     };

@@ -661,10 +661,19 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         // Add empty cell in notes column for the penalty row
         $sheet->setCellValue($notesColumnLetter . $penaltyRow, '');
         
-        // TRỪ BHXH (10%): 10% của (TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY)
+        // TRỪ BHXH: X% của Y
+        // X: settings.social_insurance_contribution_rate ?? 10.5
+        // Y: settings.social_insurance_contribution_amount ?? 5500000
         $insuranceRow = $row++;
-        $insuranceDeduction = $totalSalary * 0.10; // 10% của totalSalary
-        $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (10%):');
+        
+        // Lấy settings từ database và parse decimal
+        $insuranceRate = parseDecimal(Setting::get('social_insurance_contribution_rate', 10.5));
+        $insuranceAmount = parseDecimal(Setting::get('social_insurance_contribution_amount', 5500000));
+        
+        // Tính BHXH: X% của Y
+        $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        
+        $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (' . $insuranceRate . '%):');
         $sheet->mergeCells('A' . $insuranceRow . ':J' . $insuranceRow);
         $sheet->getStyle('A' . $insuranceRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $insuranceRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
@@ -672,17 +681,20 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->getStyle('K' . $insuranceRow)->getNumberFormat()->setFormatCode('#,##0');
         
         // TỔNG LƯƠNG CÒN LẠI: (TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY) - (TRỪ BHXH + TRỪ PHẠT + TRỪ ỨNG LƯƠNG)
+        // BHXH = X% của Y (từ settings), không phụ thuộc vào totalSalary
         $remainingSalaryRow = $row++;
         $totalSalaryRemaining = $totalSalary - ($insuranceDeduction + $totalTypePenalty + $totalTypeSalary);
         
         // Debug log cho BHXH và Tổng lương còn lại
         Log::info('Debug Final Calculation', [
             'totalSalary' => $totalSalary,
+            'insuranceRate' => $insuranceRate,
+            'insuranceAmount' => $insuranceAmount,
             'insuranceDeduction' => $insuranceDeduction,
             'totalTypePenalty' => $totalTypePenalty,
             'totalTypeSalary' => $totalTypeSalary,
             'totalSalaryRemaining' => $totalSalaryRemaining,
-            'bhxh_calculation' => '10% của ' . $totalSalary . ' = ' . $insuranceDeduction,
+            'bhxh_calculation' => $insuranceRate . '% của ' . $insuranceAmount . ' = ' . $insuranceDeduction,
             'remaining_calculation' => $totalSalary . ' - (' . $insuranceDeduction . ' + ' . $totalTypePenalty . ' + ' . $totalTypeSalary . ') = ' . $totalSalaryRemaining
         ]);
         

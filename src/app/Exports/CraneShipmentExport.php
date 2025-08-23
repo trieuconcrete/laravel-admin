@@ -25,15 +25,28 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     protected function getHeaders(): array
     {
+        // return [
+        //     'STT',
+        //     'Mã chuyến xe',
+        //     'Ngày',
+        //     'Điểm đi',
+        //     'Điểm đến',
+        //     'Số chuyến',
+        //     'Đơn giá cẩu',
+        //     'Thành tiền'
+        // ];
         return [
             'STT',
-            'Mã chuyến xe',
             'Ngày',
+            'Số xe',
             'Điểm đi',
             'Điểm đến',
-            'Số chuyến',
-            'Đơn giá cẩu',
-            'Thành tiền'
+            'Số Lượng',
+            'Kết hợp',
+            'Phụ phí chuyến xe',
+            'Đơn giá',
+            'Thành tiền',
+            'Ghi chú'
         ];
     }
 } 
