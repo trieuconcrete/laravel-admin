@@ -68,6 +68,8 @@ class Shipment extends Model
         'overtime_rate',
         'total_overtime_cost',
         'parking_fee',
+        'weighing_fee', // Phí cân hàng
+        'testing_surcharge', // Phụ phí kiểm tra
         'is_overtime_at_noon'
     ];
 
@@ -82,6 +84,7 @@ class Shipment extends Model
         'cargo_weight' => 'decimal:2',
         'distance' => 'decimal:2', // Cast cho trường số km
         'unit_price' => 'decimal:2',
+        'trip_count' => 'decimal:2',
         'unit_price_for_car_rental' => 'decimal:2',
         'crane_price' => 'decimal:2', // Cast cho trường đơn giá cẩu hàng
         'has_crane_service' => 'boolean', // Cast cho trường có dịch vụ cẩu hàng
@@ -99,6 +102,8 @@ class Shipment extends Model
         'overtime_rate' => 'decimal:2',
         'total_overtime_cost' => 'decimal:2',
         'parking_fee' => 'decimal:2',
+        'weighing_fee' => 'decimal:2',
+        'testing_surcharge' => 'decimal:2',
         'is_overtime_at_noon' => 'boolean',
     ];
 
@@ -238,6 +243,7 @@ class Shipment extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
 
     public function goods()
     {
@@ -535,10 +541,66 @@ class Shipment extends Model
      */
     public function shipmentDeductionTypeExpense()
     {
-        return  $this->shipmentDeductions()->whereHas('shipmentDeductionType', function($query) {
-            $query->where('type', ShipmentDeductionType::TYPE_EXPENSE)
-                ->where('status', 'active');
+        return $this->hasMany(ShipmentDeduction::class)
+            ->whereHas('shipmentDeductionType', function($query) {
+                $query->where('type', ShipmentDeductionType::TYPE_EXPENSE)
+                    ->where('status', ShipmentDeductionType::STATUS_ACTIVE);
         });
+    }
+
+    /**
+     * PHỤ THU KẾT HỢP
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<ShipmentDeduction, Shipment>
+     */
+    public function shipmentDeductionTypeExpenseCombinedSurchar()
+    {
+        return $this->hasMany(ShipmentDeduction::class)
+            ->whereHas('shipmentDeductionType', function($query) {
+                $query->where('type', ShipmentDeductionType::TYPE_EXPENSE)
+                    ->where('name', 'PHỤ THU KẾT HỢP')
+                    ->where('status', ShipmentDeductionType::STATUS_ACTIVE);
+        });
+    }
+
+    /**
+     * BỐC XẾP
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<ShipmentDeduction, Shipment>
+     */
+    public function shipmentDeductionTypeExpenseCargoHandling()
+    {
+        return $this->hasMany(ShipmentDeduction::class)
+            ->whereHas('shipmentDeductionType', function($query) {
+                $query->where('type', ShipmentDeductionType::TYPE_EXPENSE)
+                    ->where('name', 'BỐC XẾP')
+                    ->where('status', ShipmentDeductionType::STATUS_ACTIVE);
+        });
+    }
+
+    /**
+     * Lấy tổng chi phí phát sinh (expense)
+     * @return float
+     */
+    public function getTotalExpenseDeductionsAttribute()
+    {
+        return $this->shipmentDeductionTypeExpense()->sum('amount');
+    }
+
+    /**
+     * Lấy tổng tiền PHỤ THU KẾT HỢP
+     * @return float
+     */
+    public function getTotalCombinedSurchargeAttribute()
+    {
+        return $this->shipmentDeductionTypeExpenseCombinedSurchar()->sum('amount');
+    }
+
+    /**
+     * Lấy tổng tiền Bốc 
+     * @return float
+     */
+    public function getTotalCombinedCargoHandlingAttribute()
+    {
+        return $this->shipmentDeductionTypeExpenseCargoHandling()->sum('amount');
     }
 
     /**

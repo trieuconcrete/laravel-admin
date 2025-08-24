@@ -10,4 +10,6 @@ interface VehicleRepositoryInterface extends BaseRepositoryInterface
      * @return void
      */
     public function getVehiclesWithFilters(array $filters);
+
+    public function getVehiclesByIsCarRental($isCarRental);
 }

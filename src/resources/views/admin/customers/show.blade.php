@@ -24,7 +24,7 @@
                                         <div class="col-md-4">
                                             <div class="text-center">
                                                 <div class="fs-4 fw-bold text-primary" id="totalReported">-</div>
-                                                <div class="text-muted">Tổng bảng kê</div>
+                                                <div class="text-muted">Tổng công nợ</div>
                                                 <small class="text-info d-none" id="refundNote">(*) Có điều chỉnh</small>
                                             </div>
                                         </div>
@@ -58,10 +58,12 @@
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'generalInfo' ? 'active' : '' }}" id="nav-overview-tab" data-bs-toggle="tab" data-bs-target="#generalInfo"
                             type="button" role="tab" aria-controls="generalInfo" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'generalInfo' ? 'true' : 'false' }}">Thông tin</button>
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'active' : '' }}" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#monthlyReport"
-                            type="button" role="tab" aria-controls="monthlyReport" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'true' : 'false' }}">Bảng kê</button>
+                            type="button" role="tab" aria-controls="monthlyReport" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'true' : 'false' }}">Chuyến xe</button>
+                        <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'carRental' ? 'active' : '' }}" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#carRental"
+                            type="button" role="tab" aria-controls="carRental" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'carRental' ? 'true' : 'false' }}">Thuê xe</button>
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'active' : '' }}" id="nav-transactions-tab" data-bs-toggle="tab"
                             data-bs-target="#transactions" type="button" role="tab" aria-controls="transactions"
-                            aria-selected="{{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'true' : 'false' }}">Giao dịch</button>
+                            aria-selected="{{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'true' : 'false' }}">Thanh toán</button>
                     </div>
                     <!-- Tab Content -->
                     <div class="tab-content p-3 border border-top-0 rounded-bottom">
@@ -236,28 +238,29 @@
                                         <select class="form-control" name="shipment_type" id="shipment_type">
                                             <option value="">Tất cả loại chuyến xe</option>
                                             <option value="1">Khách chạy theo chuyến</option>
-                                            <option value="2">Khách chạy theo tháng</option>
                                             <option value="3">Xe nâng</option>
                                             <option value="4">Xe đường dài bắc-nam</option>
                                         </select>
                                     </div>
                                 </div>
-                                
                             </div>
 
-                            <div class="row mb-5 mt-5">
+                            <div class="row mb-4 mt-4">
                                 <div class="col-md-12 text-center">
                                     <button type="button" id="searchShipments" class="btn btn-info me-2">
-                                        <i class="ri-search-line"></i>Tìm kiếm chuyến xe
+                                        <i class="ri-search-line me-1"></i>Tìm chuyến xe
+                                    </button>
+                                    <button type="button" id="exportInvoice" class="btn btn-outline-primary">
+                                        <i class="las la-file-invoice align-middle me-1"></i> Xuất bảng kê
                                     </button>
                                     <button type="button" id="summarizeReport"
                                         class="btn btn-secondary me-2">
                                         <i class="las la-calculator align-middle me-1"></i>
-                                        Tổng kết bảng kê
+                                        Tổng kết công nợ
                                     </button>
-                                    <button type="button" id="exportInvoice" class="btn btn-outline-primary">
-                                        <i class="las la-file-invoice align-middle me-2"></i> Xuất bảng kê
-                                    </button>
+                                    <a href="{{ route('admin.shipments.create') . '?customer_id=' . $customer->id }}" class="btn btn-primary" target="_blank">
+                                        <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe
+                                    </a>
                                 </div>
                             </div>
                             <div class="table-responsive">
@@ -269,7 +272,7 @@
                                             <th>Điểm đi</th>
                                             <th>Điểm đến</th>
                                             <th>Số chuyến</th>
-                                            <th>Khối lượng xe (kg)</th>
+                                            <th>Khối lượng(kg)</th>
                                             <th>Đơn giá</th>
                                             <th>Phụ thu</th>
                                             <th>Thành tiền</th>
@@ -302,20 +305,54 @@
                                         @endif --}}
                                     </tbody>
                                     <tfoot>
+                                        @php
+                                            $totalTrips = isset($monthlyShipments) ? $monthlyShipments->sum('trip_count') : 0;
+                                            $totalWeight = isset($monthlyShipments) ? ($monthlyShipments->sum('cargo_weight')) : 0;
+                                            $totalCombinedFees = isset($monthlyShipments) ? ($monthlyShipments->sum('combined_fees')) : 0;
+                                            $grandTotal = isset($monthlyShipments) ? ($monthlyShipments->sum('total_amount')) : 0;
+                                            $amountWithTax = isset($monthlyShipments) ? ($grandTotal * 0.08) : 0;
+                                            $totalAmountWithTax = isset($monthlyShipments) ? ($grandTotal + $amountWithTax) : 0;
+                                        @endphp
                                         <tr class="table-primary fw-bold">
                                             <td colspan="4">Tổng cộng</td>
                                             <td id="totalTrips">
-                                                {{ isset($monthlyShipments) ? $monthlyShipments->sum('trip_count') : 0 }}
+                                                {{ number_format($totalTrips) }}
                                             </td>
                                             <td id="totalWeight">
-                                                {{ isset($monthlyShipments) ? $monthlyShipments->sum('cargo_weight') : 0 }}
+                                                {{ number_format($totalWeight) }}
                                             </td>
                                             <td></td>
                                             <td id="totalCombinedFees">
-                                                {{ isset($monthlyShipments) ? number_format($monthlyShipments->sum('combined_fees')) : 0 }}
+                                                {{ number_format($totalCombinedFees) }}
                                             </td>
                                             <td id="grandTotal">
-                                                {{ isset($monthlyShipments) ? number_format($monthlyShipments->sum('total_amount')) : 0 }}
+                                                {{ number_format($grandTotal) }}
+                                            </td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr class="table-primary fw-bold">
+                                            <td colspan="4">Thuế GTGT 8%</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td id="amountWithTax">
+                                                {{ number_format($amountWithTax) }}
+                                            </td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr class="table-primary fw-bold">
+                                            <td colspan="4">Tổng thanh toán</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td id="totalAmountWithTax">
+                                                {{ number_format($totalAmountWithTax) }}
                                             </td>
                                             <td></td>
                                             <td></td>
@@ -326,20 +363,28 @@
                             </div>
                         </div>
 
+                        <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'carRental' ? 'show active' : '' }}" id="carRental">
+                            {{-- <div class="d-flex justify-content-between mb-3">
+                                <h6>Danh sách thuê xe</h6>
+                                <button class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target=""><i class="ri-add-circle-line align-middle me-1"></i>Thêm thuê xe</button>
+                            </div> --}}
+                            @include('admin.customers.partials.car-rental', ['carRentals' => $carRentals])
+                        </div>
+
                         <!-- Transactions Tab -->
                         <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'show active' : '' }}" id="transactions">
 
                             <div class="d-flex justify-content-between mb-3">
-                                <h6>Lịch sử giao dịch</h6>
-                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#transactionModal"><i class="fas fa-plus me-1"></i>Thêm giao
-                                    dịch</button>
+                                <h6>Lịch sử thanh toán</h6>
+                                <button class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#transactionModal"><i class="ri-add-circle-line align-middle me-1"></i>Thêm thanh toán</button>
                             </div>
 
                             <!-- Search Form -->
                             <div class="card mb-3">
                                 <div class="card-header bg-light">
-                                    <h6 class="mb-0">Tìm kiếm giao dịch</h6>
+                                    <h6 class="mb-0">Tìm kiếm thanh toán</h6>
                                 </div>
                                 <div class="card-body">
                                     <form id="transactionSearchForm" method="GET"
@@ -533,6 +578,7 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const carRentalEditRoute = "{{ route('admin.car-rental.edit-vehicle-log', ':id') }}";
             // Handle active tab from URL parameter or controller variable
             const urlParams = new URLSearchParams(window.location.search);
             const activeTabParam = urlParams.get('active_tab');
@@ -627,21 +673,31 @@
                             // Add rows for each shipment
                             data.data.forEach(shipment => {
                                 const row = document.createElement('tr');
+                                console.log('Shipment type:', shipment.shipment_type);
 
                                 // Update totals
                                 totalTrips += parseInt(shipment.trip_count) || 0;
                                 totalWeight += parseFloat(shipment.cargo_weight) || 0;
                                 totalCombinedFees += parseFloat(shipment.combined_fees) || 0;
                                 grandTotal += parseFloat(shipment.total_amount) || 0;
+                                amountWithTax = parseFloat(grandTotal * 0.08) || 0;
+                                totalAmountWithTax = parseFloat(grandTotal + amountWithTax) || 0;
 
+                                let shipmentLink;
+                                if (shipment.shipment_type == 2) {
+                                    // Giả sử bạn đã định nghĩa carRentalEditRoute trong blade
+                                    shipmentLink = `<a href="${carRentalEditRoute.replace(':id', shipment.id)}">${shipment.shipment_code}</a>`;
+                                } else {
+                                    shipmentLink = `<a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a>`;
+                                }
                                 // Format the row HTML
                                 row.innerHTML = `
-                                <td><a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a></td>
+                                <td>${shipmentLink}</td>
                                 <td>${shipment.departure_time}</td>
                                 <td>${shipment.origin}</td>
                                 <td>${shipment.destination}</td>
                                 <td>${shipment.trip_count}</td>
-                                <td>${shipment.cargo_weight}</td>
+                                <td>${numberFormat(shipment.cargo_weight)}</td>
                                 <td>${numberFormat(shipment.unit_price)}</td>
                                 <td>${shipment.combined_fees > 0 ? numberFormat(shipment.combined_fees) : ''}</td>
                                 <td>${numberFormat(shipment.total_amount)}</td>
@@ -654,9 +710,11 @@
 
                             // Update footer totals
                             document.getElementById('totalTrips').textContent = totalTrips;
-                            document.getElementById('totalWeight').textContent = totalWeight.toFixed(2);
+                            document.getElementById('totalWeight').textContent = numberFormat(totalWeight.toFixed(2));
                             document.getElementById('totalCombinedFees').textContent = numberFormat(totalCombinedFees);
                             document.getElementById('grandTotal').textContent = numberFormat(grandTotal);
+                            document.getElementById('amountWithTax').textContent = numberFormat(amountWithTax);
+                            document.getElementById('totalAmountWithTax').textContent = numberFormat(totalAmountWithTax);
                         } else {
                             // No data found
                             tableBody.innerHTML = '<tr><td colspan="12" class="text-center">Không có dữ liệu chuyến xe trong tháng này</td></tr>';
@@ -666,6 +724,8 @@
                             document.getElementById('totalWeight').textContent = '0';
                             document.getElementById('totalCombinedFees').textContent = '0';
                             document.getElementById('grandTotal').textContent = '0';
+                            document.getElementById('amountWithTax').textContent = '0';
+                            document.getElementById('totalAmountWithTax').textContent = '0';
                         }
 
                         // Button luôn hiển thị và sẵn sàng để tổng kết
@@ -801,13 +861,13 @@
                             const shipmentType = document.querySelector('select[name="shipment_type"]').value;
                             const typeLabel = shipmentType && shipmentType !== '' ? getShipmentTypeLabel(shipmentType) : 'Tất cả các loại';
                             
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Thành công',
-                                text: `Tìm thấy ${data.total_count} chuyến xe (${typeLabel}) với tổng tiền ${numberFormat(data.total_amount)} VND`,
-                                timer: 2000,
-                                showConfirmButton: false
-                            });
+                            // Swal.fire({
+                            //     icon: 'success',
+                            //     title: 'Thành công',
+                            //     text: `Tìm thấy ${data.total_count} chuyến xe (${typeLabel}) với tổng tiền ${numberFormat(data.total_amount)} VND`,
+                            //     timer: 2000,
+                            //     showConfirmButton: false
+                            // });
                         } else {
                             console.log('=== API returned error ===');
                             console.log('API error data:', data);
@@ -1030,6 +1090,8 @@
                 let totalWeight = 0;
                 let totalCombinedFees = 0;
                 let grandTotal = 0;
+                let amountWithTax = 0;
+                let totalAmountWithTax = 0;
 
                 shipments.forEach(shipment => {
                     const row = document.createElement('tr');
@@ -1038,14 +1100,23 @@
                     totalWeight += parseFloat(shipment.cargo_weight) || 0;
                     totalCombinedFees += parseFloat(shipment.combined_fees) || 0;
                     grandTotal += parseFloat(shipment.total_amount) || 0;
+                    amountWithTax = parseFloat(grandTotal * 0.08) || 0;
+                    totalAmountWithTax = parseFloat(grandTotal + amountWithTax) || 0;
+                    let shipmentLink;
+                    if (shipment.shipment_type == 2) {
+                        // Giả sử bạn đã định nghĩa carRentalEditRoute trong blade
+                        shipmentLink = `<a href="${carRentalEditRoute.replace(':id', shipment.id)}">${shipment.shipment_code}</a>`;
+                    } else {
+                        shipmentLink = `<a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a>`;
+                    }
 
                     row.innerHTML = `
-                        <td><a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a></td>
+                        <td>${shipmentLink}</td>
                         <td>${shipment.departure_time}</td>
                         <td>${shipment.origin}</td>
                         <td>${shipment.destination}</td>
                         <td>${shipment.trip_count}</td>
-                        <td>${shipment.cargo_weight}</td>
+                        <td>${numberFormat(shipment.cargo_weight)}</td>
                         <td>${numberFormat(shipment.unit_price)}</td>
                         <td>${shipment.combined_fees > 0 ? numberFormat(shipment.combined_fees) : ''}</td>
                         <td>${numberFormat(shipment.total_amount)}</td>
@@ -1058,9 +1129,11 @@
 
                 // Update footer totals
                 document.getElementById('totalTrips').textContent = totalTrips;
-                document.getElementById('totalWeight').textContent = totalWeight.toFixed(2);
+                document.getElementById('totalWeight').textContent = numberFormat(totalWeight.toFixed(2));
                 document.getElementById('totalCombinedFees').textContent = numberFormat(totalCombinedFees);
                 document.getElementById('grandTotal').textContent = numberFormat(grandTotal);
+                document.getElementById('amountWithTax').textContent = numberFormat(amountWithTax);
+                document.getElementById('totalAmountWithTax').textContent = numberFormat(totalAmountWithTax);
             }
 
             // Handle summarize report button click
@@ -1151,7 +1224,8 @@
                                     statement_start_date: startDate,
                                     statement_end_date: endDate,
                                     shipment_type: parseInt(shipmentType),
-                                    customer_id: customerId
+                                    customer_id: customerId,
+                                    month: monthSelect ? monthSelect.value : ''
                                 })
                             })
                                 .then(response => response.json())
@@ -1264,7 +1338,8 @@
                                     const params = new URLSearchParams({
                                         statement_start_date: startDate,
                                         statement_end_date: endDate,
-                                        shipment_type: shipmentType
+                                        shipment_type: shipmentType,
+                                        month: monthSelect ? monthSelect.value : ''
                                     });
 
                                     const downloadUrl = `{{ route('admin.shipment-reports.export', $customer) }}?${params.toString()}`;

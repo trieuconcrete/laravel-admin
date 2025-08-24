@@ -19,6 +19,7 @@ class CarRental extends Model
      */
     protected $fillable = [
         'customer_id',
+        'vehicle_id',
         'status',
         'type',
         'description',
@@ -39,6 +40,7 @@ class CarRental extends Model
         'product_name',
         'contract_number',
         'end_working_hour',
+        'start_working_hour',
     ];
 
     const OVERTIME_FEE_PER_HOUR_DEFAULT = 50000; // Default value for overtime fee per hour
@@ -59,6 +61,7 @@ class CarRental extends Model
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
         'end_working_hour' => 'string',   // time  
+        'start_working_hour' => 'string', // time
     ];
 
     /**
@@ -102,6 +105,14 @@ class CarRental extends Model
     }
 
     /**
+     * Quan hệ với phương tiện
+     */
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class, 'vehicle_id', 'vehicle_id');
+    }
+
+    /**
      * Get the car rental vehicles for the car rental.
      */
     public function carRentalVehicles(): HasMany
@@ -123,6 +134,14 @@ class CarRental extends Model
     public function shipments(): HasMany
     {
         return $this->hasMany(Shipment::class, 'car_rental_id');
+    }
+
+    /**
+     * Get the shipment reports for the car rental.
+     */
+    public function shipmentReports(): HasMany
+    {
+        return $this->hasMany(ShipmentReport::class, 'car_rental_id');
     }
 
     /**
@@ -213,15 +232,15 @@ class CarRental extends Model
         
         // Tính tổng phí làm thêm giờ từ tất cả vehicle logs
         $totalOvertimeCost = 0;
-        $vehicleLogs = CarRentalVehicleLog::where('car_rental_id', $this->id)->get();
+        $shipments = Shipment::where('car_rental_id', $this->id)->get();
         
-        foreach ($vehicleLogs as $log) {
+        foreach ($shipments as $log) {
             $totalOvertimeCost += $log->total_overtime_cost ?? 0;
         }
         
         // Tính tổng phí cầu đường
         $totalTollFees = 0;
-        foreach ($vehicleLogs as $log) {
+        foreach ($shipments as $log) {
             // Sử dụng relationship để lấy toll fees
             $tollFees = $log->tollFees;
             if ($tollFees) {
@@ -232,10 +251,14 @@ class CarRental extends Model
         }
         
         // Tính tổng phí bãi xe
-        $totalParkingFees = $vehicleLogs->sum('parking_fee') ?? 0;
-        
+        $totalParkingFees = $shipments->sum('parking_fee') ?? 0;
+        $totalParkingFeesWithoutVat = ($totalParkingFees + $totalTollFees) / (1 + $vatRate);
+
+        $totalWeighingFees = $shipments->sum('weighing_fee') ?? 0;
+        $totalTestingSurcharges = $shipments->sum('testing_surcharge') ?? 0;
+
         // Tính tổng km đã chạy
-        $totalDistance = $this->carRentalVehicleLogs()->sum('total_distance');
+        $totalDistance = $this->shipments->sum('actual_distance');
         
         // Tính phí vượt giới hạn km
         $overDistanceFee = 0;
@@ -248,8 +271,13 @@ class CarRental extends Model
         }
         
         // Tính subtotal (tổng trước thuế)
-        $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFees + $totalParkingFees + $overDistanceFee;
-        
+        if ($this->type == 1) {
+            // Loại thuê xe theo chuyến
+            $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalParkingFeesWithoutVat + $totalWeighingFees + $totalTestingSurcharges + $overDistanceFee;
+        } else {
+            // Loại thuê xe khoáng
+            $subtotal = $monthlyRentalFee;
+        }
         // Tính thuế VAT
         $vatAmount = $subtotal * $vatRate;
         
@@ -310,7 +338,7 @@ class CarRental extends Model
      */
     public function getOverDistanceFeeAttribute(): float
     {
-        $totalDistance = $this->carRentalVehicleLogs()->sum('total_distance');
+        $totalDistance = $this->shipments->sum('actual_distance');
         $maxDistance = $this->max_distance;
         $overDistanceFeePerKm = $this->over_distance_fee_per_km ?? self::OVER_DISTANCE_FEE_PER_KM_DEFAULT;
 
@@ -372,7 +400,7 @@ class CarRental extends Model
      */
     public function getTotalDistanceAttribute(): float
     {
-        return $this->carRentalVehicleLogs()->sum('total_distance');
+        return $this->shipments->sum('actual_distance');
     }
 
     /**
@@ -382,7 +410,7 @@ class CarRental extends Model
      */
     public function getTotalOvertimeHoursAttribute(): float
     {
-        return $this->carRentalVehicleLogs()->sum('overtime_hours');
+        return $this->shipments()->sum('overtime_hours');
     }
 
     /**
@@ -402,5 +430,106 @@ class CarRental extends Model
             2 => 'Khoáng',
             default => 'Không xác định',
         };
+    }
+
+    /**
+     * Tính tổng công nợ của khách hàng (tổng tiền phải trả)
+     * 
+     * @return array
+     */
+    public function calculateTotalDebt(): array
+    {
+        // Lấy thông tin cơ bản
+        $monthlyRentalFee = $this->monthly_rental_fee ?? 0;
+        
+        // Tính tổng phí làm thêm giờ từ shipments
+        $totalOvertimeCost = $this->shipments()->sum('total_overtime_cost') ?? 0;
+        
+        // Tính tổng phí cầu đường từ shipments
+        $totalTollFees = 0;
+        foreach ($this->shipments as $shipment) {
+            $totalTollFees += $shipment->tollFees->sum('fee_amount') ?? 0;
+        }
+        
+        // Tính tổng phí bãi xe từ shipments
+        $totalParkingFees = $this->shipments()->sum('parking_fee') ?? 0;
+        
+        // Tính tổng km đã chạy từ shipments
+        $totalDistance = $this->shipments()->sum('distance') ?? 0;
+        
+        // Tính phí vượt giới hạn km
+        $overDistanceFee = 0;
+        $maxDistance = $this->max_distance;
+        $overDistanceFeePerKm = $this->over_distance_fee_per_km ?? self::OVER_DISTANCE_FEE_PER_KM_DEFAULT;
+
+        if ($maxDistance && $maxDistance > 0 && $totalDistance > $maxDistance) {
+            $overDistanceFee = ($totalDistance - $maxDistance) * $overDistanceFeePerKm;
+        }
+        
+        // Tính subtotal (tổng trước thuế)
+        $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFees + $totalParkingFees + $overDistanceFee;
+        
+        // Tính thuế VAT (mặc định 8%)
+        $vatRate = 0.08; // Có thể thay đổi thành field trong database sau
+        $vatAmount = $subtotal * $vatRate;
+        
+        // Tính tổng cộng sau thuế
+        $totalWithVat = $subtotal + $vatAmount;
+        
+        // Tính số tiền đã thanh toán (nếu có)
+        $paidAmount = 0; // Cần implement payment tracking sau
+        
+        // Tính công nợ còn lại
+        $remainingDebt = $totalWithVat - $paidAmount;
+        
+        return [
+            'monthly_rental_fee' => $monthlyRentalFee,
+            'total_overtime_cost' => $totalOvertimeCost,
+            'total_toll_fees' => $totalTollFees,
+            'total_parking_fees' => $totalParkingFees,
+            'total_distance' => $totalDistance,
+            'over_distance_fee' => $overDistanceFee,
+            'subtotal' => $subtotal,
+            'vat_rate' => $vatRate,
+            'vat_amount' => $vatAmount,
+            'total_with_vat' => $totalWithVat,
+            'paid_amount' => $paidAmount,
+            'remaining_debt' => $remainingDebt,
+            'currency' => $this->currency ?? 'VNĐ',
+            'calculation_date' => now()->format('Y-m-d H:i:s'),
+        ];
+    }
+
+    /**
+     * Get total debt attribute
+     *
+     * @return float
+     */
+    public function getTotalDebtAttribute(): float
+    {
+        $calculation = $this->calculateTotalDebt();
+        return $calculation['remaining_debt'];
+    }
+
+    /**
+     * Get paid amount attribute
+     *
+     * @return float
+     */
+    public function getPaidAmountAttribute(): float
+    {
+        $calculation = $this->calculateTotalDebt();
+        return $calculation['paid_amount'];
+    }
+
+    /**
+     * Get remaining debt attribute
+     *
+     * @return float
+     */
+    public function getRemainingDebtAttribute(): float
+    {
+        $calculation = $this->calculateTotalDebt();
+        return $calculation['remaining_debt'];
     }
 }

@@ -25,6 +25,7 @@ class SalaryService
     protected $salaryDetailRepository;
     protected $shipmentRepository;
     protected $userRepository;
+    protected $settingService;
     
     /**
      * Constructor
@@ -33,17 +34,52 @@ class SalaryService
      * @param SalaryDetailRepositoryInterface $salaryDetailRepository
      * @param UserRepositoryInterface $userRepository
      * @param ShipmentRepositoryInterface $shipmentRepository
+     * @param SettingService $settingService
      */
     public function __construct(
         SalaryPeriodRepositoryInterface $salaryPeriodRepository,
         SalaryDetailRepositoryInterface $salaryDetailRepository,
         UserRepositoryInterface $userRepository,
-        ShipmentRepositoryInterface $shipmentRepository
+        ShipmentRepositoryInterface $shipmentRepository,
+        SettingService $settingService
     ) {
         $this->shipmentRepository = $shipmentRepository;
         $this->salaryPeriodRepository = $salaryPeriodRepository;
         $this->salaryDetailRepository = $salaryDetailRepository;
         $this->userRepository = $userRepository;
+        $this->settingService = $settingService;
+    }
+    
+    /**
+     * Calculate salary period dates based on settings
+     * Tính ngày bắt đầu và kết thúc kỳ lương theo yêu cầu issue #197
+     * 
+     * @param int $month
+     * @param int $year
+     * @return array
+     */
+    public function calculateSalaryPeriodDates(int $month, int $year): array
+    {
+        // Lấy cấu hình từ settings với cache
+        $startDay = (int) $this->settingService->get('salary_start_date', 26);
+        $endDay = (int) $this->settingService->get('salary_end_date', 25);
+        
+        // Tính ngày bắt đầu: 26 tháng trước
+        $startDate = Carbon::create($year, $month - 1, $startDay);
+        
+        // Tính ngày kết thúc: 25 tháng sau
+        $endDate = Carbon::create($year, $month, $endDay);
+        
+        // Đảm bảo ngày kết thúc sau ngày bắt đầu
+        if ($endDate->lte($startDate)) {
+            $endDate->addMonth();
+        }
+        
+        return [
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'period_name' => sprintf('%02d/%d', $month, $year)
+        ];
     }
     
     /**
@@ -177,15 +213,17 @@ class SalaryService
      */
     protected function createOrUpdateSalaryPeriod(array $data, $month, $year)
     {
-        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
-        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+        // Calculate salary period dates based on settings (issue #197)
+        $periodDates = $this->calculateSalaryPeriodDates((int)$month, (int)$year);
+        $startDate = $periodDates['start_date'];
+        $endDate = $periodDates['end_date'];
         $paymentDate = $endDate->copy()->addDays(10); // Payment date is 10 days after end of month
         
         // Check if period already exists
         $salaryPeriod = $this->salaryPeriodRepository->findSalaryPeriodByCondition(['period_name' => $data['period_name']]);
         
         if (!$salaryPeriod) {
-            // Create new salary period
+            // Create new salary period with calculated dates
             $salaryPeriod = $this->salaryPeriodRepository->create([
                 'period_name' => $data['period_name'],
                 'start_date' => $startDate,
@@ -194,6 +232,13 @@ class SalaryService
                 'status' => 'processing',
                 'notes' => $data['notes'] ?? null,
                 'created_by' => Auth::id(),
+            ]);
+        } else {
+            // Update existing period with new calculated dates
+            $salaryPeriod = $this->salaryPeriodRepository->update($salaryPeriod->period_id, [
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'payment_date' => $paymentDate,
             ]);
         }
         
@@ -211,14 +256,14 @@ class SalaryService
      */
     protected function processSalaryForUser(User $user, $salaryPeriod, $month, $year)
     {
-        // Calculate salary components
-        $baseSalary = $user->salary_base ?? 0;
+        // Calculate salary period dates based on settings
+        $periodDates = $this->calculateSalaryPeriodDates((int)$month, (int)$year);
         
-        // Get completed shipments for the user (as driver or co-driver) for the selected month
-        $shipments = $this->shipmentRepository->getUserCompletedShipments($user, $month, $year);
-            
-        // Calculate salary details
-        $salaryDetails = $this->calculateSalaryDetails($user, $shipments, $salaryPeriod);
+        // Get completed shipments for the user in the calculated period
+        $shipments = $this->getUserCompletedShipmentsInPeriod($user, $periodDates['start_date'], $periodDates['end_date']);
+        
+        // Calculate salary details based on salary type
+        $salaryDetails = $this->calculateSalaryDetailsByType($user, $shipments, $salaryPeriod);
 
         // Check if salary detail already exists and is paid
         $existingSalaryDetail = \App\Models\SalaryDetail::where('employee_id', $user->id)
@@ -226,19 +271,19 @@ class SalaryService
             ->first();
 
         $updateData = [
-            'base_salary' => $baseSalary, // lương cơ bản
+            'base_salary' => $salaryDetails['baseSalary'],
             'working_days' => 0,
-            'total_expenses' => 0, // Không tính chi phí chuyến hàng
-            'total_allowance' => $salaryDetails['totalAllowance'], // phụ cấp
-            'social_insurance' => $salaryDetails['insuranceDeduction'], // thuế
-            'health_insurance' => 0, // Not used in current calculation
-            'income_tax' => Constants::TAX_IN_VAT, // Not used in current calculation
-            'total_salary' => $salaryDetails['totalBeforeInsurance'], // lương trước thuế
-            'net_salary' => $salaryDetails['totalSalary'], // lương thực tế
-            'bonus' => $salaryDetails['totalTypeBonus'], // No bonus calculation
-            'penalty' => $salaryDetails['totalTypePenalty'], // No penalty calculation
-            'other_deduction' => $salaryDetails['totalTypeSalary'], // Not used in current calculation
-            'salary_type' => $user->salary_type?->value ?? SalaryType::BASIC_SALARY->value, // Loại lương của tài xế
+            'total_expenses' => 0,
+            'total_allowance' => $salaryDetails['totalAllowance'],
+            'social_insurance' => $salaryDetails['socialInsurance'],
+            'health_insurance' => 0,
+            'income_tax' => 0,
+            'total_salary' => $salaryDetails['totalSalary'],
+            'net_salary' => $salaryDetails['netSalary'],
+            'bonus' => $salaryDetails['totalTypeBonus'],
+            'penalty' => $salaryDetails['totalTypePenalty'],
+            'other_deduction' => $salaryDetails['totalTypeSalary'],
+            'salary_type' => $user->salary_type?->value ?? SalaryType::BASIC_SALARY->value,
         ];
 
         // Only update status if not already paid
@@ -257,40 +302,198 @@ class SalaryService
         );
     }
 
-    /** */
-    protected function calculateSalaryDetails(User $user, Collection $shipments, $salaryPeriod)
+    /**
+     * Get completed shipments for a user in a specific date period
+     * 
+     * @param User $user
+     * @param Carbon $startDate
+     * @param Carbon $endDate
+     * @return Collection
+     */
+    protected function getUserCompletedShipmentsInPeriod(User $user, Carbon $startDate, Carbon $endDate): Collection
     {
-        $totalAllowance = 0;
-        $totalExpenses = 0; // Không tính chi phí chuyến hàng
+        return Shipment::whereHas('shipmentDeductions', function($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            // ->where(function($query) use ($startDate, $endDate) {
+            //     // Ưu tiên run_date, fallback về departure_time nếu run_date null
+            //     $query->where(function($subQuery) use ($startDate, $endDate) {
+            //         $subQuery->whereNotNull('run_date')
+            //                  ->whereBetween('run_date', [$startDate, $endDate]);
+            //     })
+            //     ->orWhere(function($subQuery) use ($startDate, $endDate) {
+            //         $subQuery->whereNull('run_date')
+                             ->whereBetween('departure_time', [$startDate, $endDate])
+            //     });
+            // })
+            ->completed() // Chỉ lấy shipment đã hoàn thành
+            ->with(['shipmentDeductions', 'shipmentDeductions.shipmentDeductionType'])
+            ->orderBy('run_date')
+            ->orderBy('departure_time')
+            ->get();
+    }
 
+    /**
+     * Calculate salary details based on salary type
+     * 
+     * @param User $user
+     * @param Collection $shipments
+     * @param mixed $salaryPeriod
+     * @return array
+     */
+    protected function calculateSalaryDetailsByType(User $user, Collection $shipments, $salaryPeriod): array
+    {
+        $salaryType = $user->salary_type?->value ?? SalaryType::BASIC_SALARY->value;
+        
+        if ($salaryType == SalaryType::COMMISSION_SALARY->value) {
+            // Tài xế ăn lương doanh số (công)
+            return $this->calculateCommissionBasedSalary($user, $shipments, $salaryPeriod);
+        } else {
+            // Tài xế ăn lương cơ bản
+            return $this->calculateBasicSalary($user, $shipments, $salaryPeriod);
+        }
+    }
+
+    /**
+     * Calculate basic salary (tài xế ăn lương cơ bản)
+     * 
+     * @param User $user
+     * @param Collection $shipments
+     * @param mixed $salaryPeriod
+     * @return array
+     */
+    protected function calculateBasicSalary(User $user, Collection $shipments, $salaryPeriod): array
+    {
+        $baseSalary = $user->salary_base ?? 0;
+        $totalAllowance = 0;
+        
+        // Get salary advance requests
         $totalTypeSalary = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $salaryPeriod->start_date, $salaryPeriod->end_date);
         $totalTypeBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $salaryPeriod->start_date, $salaryPeriod->end_date);
         $totalTypePenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $salaryPeriod->start_date, $salaryPeriod->end_date);
         
-        // Process shipment deductions for salary calculation - chỉ tính cho shipment đã hoàn thành
+        // Process shipment deductions for allowances
         foreach ($shipments as $shipment) {
-            $totalAllowance += $shipment->shipmentDeductionTypeDriverAndBusboy($user->id)->sum('amount') ?? 0; // tổng phụ cấp
-            // Không tính chi phí chuyến hàng vào lương nhân viên
-            // $totalExpenses += $shipment->shipmentDeductionTypeExpense()->sum('amount') ?? 0; // tổng chi phí
+            $totalAllowance += $shipment->shipmentDeductionTypeDriverAndBusboy($user->id)->sum('amount') ?? 0;
         }
         
-        // Calculate insurance deduction (10% of total: salary base + allowances)
-        $baseSalary = $user->salary_base ?? 0;
+        // Calculate total before insurance
         $totalBeforeInsurance = ($baseSalary + $totalAllowance + $totalTypeBonus) - ($totalTypeSalary + $totalTypePenalty);
-        $insuranceDeduction = $totalBeforeInsurance * (Constants::TAX_IN_VAT/100); // 10% of total
         
-        // Calculate total salary - updated formula
-        $totalSalary = $totalBeforeInsurance - $insuranceDeduction;
+        // Calculate social insurance based on settings
+        $socialInsurance = $this->calculateSocialInsurance($totalBeforeInsurance);
+        
+        // Calculate final salary
+        $totalSalary = $totalBeforeInsurance;
+        $netSalary = $totalBeforeInsurance - $socialInsurance;
         
         return [
+            'baseSalary' => $baseSalary,
             'totalAllowance' => $totalAllowance,
-            'totalExpenses' => $totalExpenses,
             'totalBeforeInsurance' => $totalBeforeInsurance,
-            'insuranceDeduction' => $insuranceDeduction,
+            'socialInsurance' => $socialInsurance,
             'totalSalary' => $totalSalary,
+            'netSalary' => $netSalary,
             'totalTypeSalary' => $totalTypeSalary,
             'totalTypeBonus' => $totalTypeBonus,
             'totalTypePenalty' => $totalTypePenalty
         ];
+    }
+
+    /**
+     * Calculate commission-based salary (tài xế ăn lương doanh số)
+     * 
+     * @param User $user
+     * @param Collection $shipments
+     * @param mixed $salaryPeriod
+     * @return array
+     */
+    protected function calculateCommissionBasedSalary(User $user, Collection $shipments, $salaryPeriod): array
+    {
+        $totalAllowance = 0;
+        $totalTripValue = 0;
+        
+        // Get salary advance requests
+        $totalTypeSalary = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $salaryPeriod->start_date, $salaryPeriod->end_date);
+        $totalTypeBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $salaryPeriod->start_date, $salaryPeriod->end_date);
+        $totalTypePenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $salaryPeriod->start_date, $salaryPeriod->end_date);
+        
+        // Calculate total trip value and allowances
+        foreach ($shipments as $shipment) {
+            // Tính tổng giá trị chuyến xe: sum(unit_price * trip_count)
+            $unitPrice = $shipment->unit_price ?? 0;
+            $tripCount = $shipment->trip_count ?? 1;
+            $totalTripValue += ($unitPrice * $tripCount);
+            
+            // Add allowances
+            $totalAllowance += $shipment->shipmentDeductionTypeDriverAndBusboy($user->id)->sum('amount') ?? 0;
+        }
+        
+        // Lương cơ bản = 12% của tổng giá trị chuyến xe
+        $baseSalary = $totalTripValue * 0.12; // 12% commission
+        $totalCommission = $baseSalary; // Commission amount = base salary cho loại này
+        
+        // Calculate total before insurance
+        $totalBeforeInsurance = ($baseSalary + $totalAllowance + $totalTypeBonus) - ($totalTypePenalty);
+        
+        // Calculate social insurance based on settings
+        $socialInsurance = $this->calculateSocialInsurance($totalBeforeInsurance);
+        
+        // Calculate final salary
+        $totalSalary = $totalBeforeInsurance;
+        $netSalary = $totalBeforeInsurance - ($socialInsurance + $totalTypeSalary);
+        
+        return [
+            'baseSalary' => $baseSalary,
+            'totalAllowance' => $totalAllowance,
+            'totalCommission' => $totalCommission,
+            'totalBeforeInsurance' => $totalBeforeInsurance,
+            'socialInsurance' => $socialInsurance,
+            'totalSalary' => $totalSalary,
+            'netSalary' => $netSalary,
+            'totalTypeSalary' => $totalTypeSalary,
+            'totalTypeBonus' => $totalTypeBonus,
+            'totalTypePenalty' => $totalTypePenalty
+        ];
+    }
+
+    /**
+     * Check if vehicle is eligible for commission
+     * Phân biệt theo biển số xe: Container + Đầu kéo
+     * 
+     * @param mixed $vehicle
+     * @return bool
+     */
+    protected function isCommissionEligibleVehicle($vehicle): bool
+    {
+        if (!$vehicle || !$vehicle->vehicleType) {
+            return false;
+        }
+        
+        $vehicleTypeName = strtolower($vehicle->vehicleType->name ?? '');
+        
+        // Check if vehicle type is Container or Đầu kéo
+        return str_contains($vehicleTypeName, 'container') || 
+               str_contains($vehicleTypeName, 'đầu kéo') ||
+               str_contains($vehicleTypeName, 'dau keo');
+    }
+
+    /**
+     * Calculate social insurance based on settings
+     * BHXH: X% của Y
+     * X: settings.social_insurance_contribution_rate ?? 10.5
+     * Y: settings.social_insurance_contribution_amount ?? 5500000
+     * 
+     * @param float $amount (không sử dụng nữa, chỉ giữ để tương thích)
+     * @return float
+     */
+    protected function calculateSocialInsurance(float $amount): float
+    {
+        // Lấy settings từ database thông qua SettingService và parse decimal
+        $rate = parseDecimal($this->settingService->get('social_insurance_contribution_rate', 10.5));
+        $insuranceAmount = parseDecimal($this->settingService->get('social_insurance_contribution_amount', 5500000));
+        
+        // Tính BHXH: X% của Y (không phụ thuộc vào $amount)
+        return $insuranceAmount * ($rate / 100);
     }
 }

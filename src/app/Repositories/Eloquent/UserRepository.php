@@ -3,6 +3,8 @@
 namespace App\Repositories\Eloquent;
 
 use App\Models\User;
+use App\Models\Vehicle;
+use App\Enum\UserStatus;
 use App\Models\Shipment;
 use App\Repositories\Interface\UserRepositoryInterface;
 
@@ -88,5 +90,28 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         $query->whereNull('deleted_at');
         
         return $query->latest()->paginate($perPage);
+    }
+
+    // Lấy danh sách tài xế chưa được phân công xe
+    public function getAvailableDrivers($vehicleId = null)
+    {
+        // Lấy tất cả driver_id đã được gán cho xe
+        $assignedDriverIds = Vehicle::whereNotNull('driver_id')
+            ->where('status', Vehicle::STATUS_ACTIVE) // Chỉ lấy xe đang hoạt động
+            ->where('is_car_rental', false) // Chỉ lấy xe không phải thuê
+            ->when($vehicleId, function ($query) use ($vehicleId) {
+                return $query->where('vehicle_id', '!=', $vehicleId); // Loại trừ xe hiện tại nếu có
+            })
+            ->pluck('driver_id')
+            ->toArray();
+        
+        // Lấy danh sách tài xế chưa được phân công
+        $availableDrivers = User::where('role', User::ROLE_DRIVER)
+            ->whereNotIn('id', $assignedDriverIds)
+            ->where('status', UserStatus::ACTIVE) // Chỉ lấy tài xế đang hoạt động
+            ->select('id', 'full_name')
+            ->get();
+        
+        return $availableDrivers;
     }
 }

@@ -1,5 +1,5 @@
 @extends('admin.layout')
-@section('title', 'Sửa chuyến')
+@section('title', 'Chi tiết chuyến xe')
 @section('content')
 
 <div class="container-fluid">
@@ -22,7 +22,6 @@
                         <div class="col-12">
                             <div class="d-flex align-items-lg-center flex-lg-row flex-column">
                                 <div class="flex-grow-1">
-                                    <h4 class="fs-16 mb-1">Chi tiết chuyến xe</h4>
                                 </div>
                                 <div class="mt-3 mt-lg-0">
                                     <div class="row g-3 mb-0 align-items-center">
@@ -150,7 +149,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Số lượng chuyến</label>
-                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count ?? 1) }}">
+                                                    <input type="text" class="form-control float-input" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment->trip_count ?? 1) }}">
                                                     @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
@@ -162,7 +161,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Khối lượng (kg)</label>
-                                                    <input type="text" class="form-control" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $shipment->cargo_weight) }}">
+                                                    <input type="text" class="form-control number" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $shipment->cargo_weight) }}">
                                                     @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>

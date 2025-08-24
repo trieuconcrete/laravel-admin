@@ -127,7 +127,7 @@ class ShipmentTollFeeDetailExport implements WithTitle, WithStyles, ShouldAutoSi
                 
                 // Method 2: Fallback to finding shipment by date
                 if ($plateNumber === 'N/A') {
-                    $shipmentOnDate = $this->shipments->firstWhere('run_date', $date);
+                $shipmentOnDate = $this->shipments->firstWhere('run_date', $date);
                     if ($shipmentOnDate && $shipmentOnDate->vehicle) {
                         $plateNumber = $shipmentOnDate->vehicle->plate_number ?? 'N/A';
                     }

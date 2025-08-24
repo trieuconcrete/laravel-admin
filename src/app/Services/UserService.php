@@ -18,6 +18,7 @@ use App\Constants;
 use App\Models\Position;
 use App\Models\ShipmentDeductionType;
 use App\Exports\SalaryExport;
+use App\Exports\SalaryCommissionExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use App\Repositories\Interface\PositionRepositoryInterface as PositionRepository;
@@ -249,34 +250,66 @@ class UserService
         $totalExpenses = 0; // Không tính chi phí chuyến hàng vào lương
         
         
-        // Get salary advance data for the month
-        $parsedMonth = Carbon::createFromFormat('m/Y', $selectedMonth);
-        $startDate = $parsedMonth->copy()->startOfMonth();
-        $endDate = $parsedMonth->copy()->endOfMonth();
+        // Sử dụng logic tính ngày mới từ SalaryService (issue #197)
+        list($month, $year) = explode('/', $selectedMonth);
+        $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$month, (int)$year);
+        $startDate = $periodDates['start_date'];
+        $endDate = $periodDates['end_date'];
         
         $totalOtherDeduction = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
         $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
         $totalPenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
         $totalPaid = $user->getTotalSalaryPayments($startDate, $endDate);
         
-        // Calculate insurance deduction (10% of total: salary base + allowances)
-        $totalBeforeInsurance = ($user->salary_base+ $totalAllowance + $totalBonus) - ($totalOtherDeduction + $totalPenalty);
-        $insuranceDeduction = $totalBeforeInsurance * (Constants::TAX_IN_VAT/100); // 10% of total
+        // Tính lương cơ bản theo loại lương
+        $salaryType = $user->salary_type?->value ?? 1; // 1: BASIC_SALARY, 2: COMMISSION_SALARY
+        $salaryBase = 0;
+        $totalTripValue = 0;
+        $commissionAmount = 0;
         
+        if ($salaryType == 2) { // COMMISSION_SALARY - Lương doanh số
+            // Tính tổng giá trị chuyến xe: sum(unit_price * trip_count)
+            foreach ($shipments as $shipment) {
+                $unitPrice = $shipment->unit_price ?? 0;
+                $tripCountPerShipment = $shipment->trip_count ?? 1;
+                $totalTripValue += ($unitPrice * $tripCountPerShipment);
+            }
+            
+            // Lương cơ bản = 12% của tổng giá trị chuyến xe
+            $salaryBase = $totalTripValue * 0.12; // 12%
+            $commissionAmount = $salaryBase;
+        } else { // BASIC_SALARY - Lương cơ bản
+            $salaryBase = $user->salary_base ?? 0;
+        }
+        
+        // Calculate insurance deduction: X% của Y (từ settings)
+        $totalBeforeInsurance = ($salaryBase + $totalAllowance + $totalBonus) - ( $totalPenalty);
+        
+        // Lấy settings từ database và parse decimal
+        $insuranceRate = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_rate', 10.5));
+        $insuranceAmount = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_amount', 5500000));
+        
+        // Tính BHXH: X% của Y (không phụ thuộc vào totalBeforeInsurance)
+        $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        
+        // dd($totalBeforeInsurance, $insuranceDeduction, $salaryBase,$totalAllowance,$totalBonus, $totalOtherDeduction, $totalPenalty);
         // Calculate total salary - updated formula
-        $totalSalary = $totalBeforeInsurance - $insuranceDeduction;
+        $totalSalary = $totalBeforeInsurance - ($insuranceDeduction + $totalOtherDeduction);
         
         return [
             'shipments' => $shipments,
             'shipmentsInMonth' => $shipmentsInMonth,
             'selectedMonth' => $selectedMonth,
-            'salaryBase' => $user->salary_base ?? 0, // lương cơ bản
+            'salaryBase' => $salaryBase, // lương cơ bản (đã tính theo loại)
             'totalAllowance' => $totalAllowance, // tổng phụ cấp
             'totalExpenses' => $totalExpenses, // tổng chi phí (không tính)
             'insuranceDeduction' => $insuranceDeduction, // khấu trừ bảo hiểm
             'totalSalary' => $totalSalary, // tổng lương
             'salaryDetails' => $salaryDetails,
-            'totalPaid' => $totalPaid // số tiền đã thanh toán
+            'totalPaid' => $totalPaid, // số tiền đã thanh toán
+            'salaryType' => $salaryType, // loại lương
+            'totalTripValue' => $totalTripValue, // tổng giá trị chuyến xe
+            'commissionAmount' => $commissionAmount // số tiền hoa hồng
         ];
     }
     
@@ -321,9 +354,10 @@ class UserService
         // Format month for query and filename
         $formattedMonth = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT);
         
-        // Get start and end date of the month
-        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
-        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth();
+        // Sử dụng logic tính ngày mới từ SalaryService (issue #197)
+        $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$month, (int)$year);
+        $startDate = $periodDates['start_date'];
+        $endDate = $periodDates['end_date'];
         
         // Get shipments for the user for the selected month using date range
         $shipments = $this->shipmentRepository->getUserShipmentsByDateRange($user, $startDate, $endDate);
@@ -332,8 +366,14 @@ class UserService
         $timestamp = Carbon::now()->format('Ymd_His');
         $fileName = 'bangluong_' . $user->employee_code . '_' . $month . '_' . $year . '_' . $timestamp . '.xlsx';
         
-        // Generate and download the Excel file
-        return Excel::download(new SalaryExport($user, $shipments, $formattedMonth), $fileName);
+        // Choose export class based on user's salary type
+        if ($user->salary_type?->value == SalaryType::COMMISSION_SALARY->value) {
+            // Tài xế lương doanh số: sử dụng SalaryCommissionExport
+            return Excel::download(new SalaryCommissionExport($user, $shipments, $formattedMonth), $fileName);
+        } else {
+            // Tài xế lương cơ bản hoặc mặc định: sử dụng SalaryExport
+            return Excel::download(new SalaryExport($user, $shipments, $formattedMonth), $fileName);
+        }
     }
     
     /**
@@ -530,10 +570,11 @@ class UserService
     {
         $paymentStatus = $user->isSalaryFullyPaid($month);
         
-        // Get payment history for this month
-        $parsedMonth = Carbon::createFromFormat('m/Y', $month);
-        $startDate = $parsedMonth->copy()->startOfMonth();
-        $endDate = $parsedMonth->copy()->endOfMonth();
+        // Sử dụng logic tính ngày mới từ SalaryService (issue #197)
+        list($monthNum, $year) = explode('/', $month);
+        $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$monthNum, (int)$year);
+        $startDate = $periodDates['start_date'];
+        $endDate = $periodDates['end_date'];
         
         $paymentRequests = $user->salaryAdvanceRequests()
             ->where('type', SalaryAdvanceRequest::TYPE_PAYMENT)

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\User;
 use App\Enum\SalaryType;
+use Illuminate\Support\Facades\Log;
 
 class SalaryDetail extends Model
 {
@@ -164,8 +165,23 @@ class SalaryDetail extends Model
      */
     public function calculateNetSalary()
     {
-        return $this->total_salary - $this->social_insurance - $this->health_insurance - 
-               $this->income_tax - $this->other_deduction;
+        $netSalary = $this->total_salary - $this->social_insurance - $this->health_insurance - 
+                     $this->income_tax - $this->other_deduction;
+        
+        // Debug log để kiểm tra giá trị
+        \Log::info('SalaryDetail calculateNetSalary Debug', [
+            'salary_id' => $this->salary_id,
+            'total_salary' => $this->total_salary,
+            'social_insurance' => $this->social_insurance,
+            'health_insurance' => $this->health_insurance,
+            'income_tax' => $this->income_tax,
+            'other_deduction' => $this->other_deduction,
+            'calculated_net_salary' => $netSalary,
+            'final_net_salary' => max(0, $netSalary)
+        ]);
+        
+        // Đảm bảo lương thực nhận không âm
+        return max(0, $netSalary);
     }
 
     /**

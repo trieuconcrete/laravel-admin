@@ -25,6 +25,13 @@ class SalaryController extends Controller
 {
     use AuthorizesRequests;
 
+    protected $salaryService;
+
+    public function __construct(SalaryService $salaryService)
+    {
+        $this->salaryService = $salaryService;
+    }
+
     /**
      * Display salary index page with salary data, statistics and charts
      *
@@ -45,15 +52,19 @@ class SalaryController extends Controller
         
         // Get filtered users with pagination
         $users = $this->getFilteredUsers($department, $search);
-        
+        // dd($users);
         // Process salary data for each user
         $salaries = $this->processSalaryData($users, $salaryPeriod);
         
+        // dd($salaries);
         // Calculate dashboard statistics
         $dashboardStats = $this->calculateDashboardStatistics($salaries);
         
         // Get department statistics
         $departmentStats = $this->calculateDepartmentStatistics($salaries);
+        
+        // Get salary statistics by type
+        $salaryStatsByType = $this->getSalaryStatisticsByType($salaries);
         
         // Generate chart data for the last 6 months
         $chartData = $this->generateChartData($selectedMonth);
@@ -69,7 +80,13 @@ class SalaryController extends Controller
             'totalPaidSalary' => $dashboardStats['totalPaidSalary'], 
             'totalPendingSalary' => $dashboardStats['totalPendingSalary'], 
             'averageSalary' => $dashboardStats['averageSalary'],
+            'basicSalaryCount' => $dashboardStats['basicSalaryCount'],
+            'commissionSalaryCount' => $dashboardStats['commissionSalaryCount'],
+            'totalCommission' => $dashboardStats['totalCommission'],
+            'totalTripValue' => $dashboardStats['totalTripValue'],
+            'totalTrips' => $dashboardStats['totalTrips'],
             'departmentStats' => $departmentStats,
+            'salaryStatsByType' => $salaryStatsByType,
             'chartData' => $chartData,
             'pendingAdvanceRequests' => $pendingAdvanceRequests
         ]);
@@ -77,6 +94,7 @@ class SalaryController extends Controller
     
     /**
      * Get salary period for a specific month
+     * Sử dụng logic tính ngày mới từ SalaryService (issue #197)
      *
      * @param string $month
      * @param string $year
@@ -84,12 +102,30 @@ class SalaryController extends Controller
      */
     private function getSalaryPeriodForMonth($month, $year)
     {
-        $startDate = Carbon::createFromDate($year, $month, 1)->startOfMonth()->format('Y-m-d');
-        $endDate = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d');
+        // Sử dụng logic tính ngày mới từ SalaryService
+        $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$month, (int)$year);
         
-        return SalaryPeriod::where('start_date', '=', $startDate)
-            ->where('end_date', '=', $endDate)
+        // Tìm salary period theo ngày đã tính từ settings
+        return SalaryPeriod::where('start_date', '=', $periodDates['start_date']->format('Y-m-d'))
+            ->where('end_date', '=', $periodDates['end_date']->format('Y-m-d'))
             ->first();
+    }
+
+    /**
+     * Get month/year from salary period
+     * Lấy tháng/năm chính xác từ kỳ lương (sử dụng end_date)
+     *
+     * @param SalaryPeriod $salaryPeriod
+     * @return array
+     */
+    private function getMonthYearFromSalaryPeriod($salaryPeriod)
+    {
+        $endDate = Carbon::parse($salaryPeriod->end_date);
+        return [
+            'month' => $endDate->month,
+            'year' => $endDate->year,
+            'formatted' => sprintf('%02d/%d', $endDate->month, $endDate->year)
+        ];
     }
     
     /**
@@ -141,6 +177,7 @@ class SalaryController extends Controller
         if (!$salaryPeriod) {
             return $salaries;
         }
+        
         foreach ($users as $user) {
             $departmentName = $user->position ? $user->position->name : 'Chưa phân công';
             
@@ -152,27 +189,171 @@ class SalaryController extends Controller
                 continue;
             }
 
+            // Xử lý theo loại lương của user
+            $salaryType = $user->salary_type?->value ?? 1; // 1: BASIC_SALARY, 2: COMMISSION_SALARY
+            $salaryTypeLabel = $user->salary_type?->getLabel() ?? 'Lương cơ bản';
+            
+            // Sử dụng data đã được tính sẵn trong SalaryDetail từ sync
+            // Chỉ tính thêm thông tin commission và trip cho display
+            $additionalInfo = $this->getAdditionalSalaryInfo($user, $salaryDetail, $salaryType);
+            
             $salaries[] = [
                 'id' => $user->id,
                 'user_id' => $user->id,
                 'employee_code' => $user->employee_code ?? 'NV' . str_pad($user->id, 3, '0', STR_PAD_LEFT),
                 'name' => $user->full_name,
                 'department' => $departmentName,
-                'base_salary' => $salaryDetail->base_salary,
+                'salary_type' => $salaryType,
+                'salary_type_label' => $salaryTypeLabel,
+                'base_salary' => $salaryDetail->base_salary, // Sử dụng data đã sync
                 'allowance' => $salaryDetail->total_allowance,
                 'total_expenses' => $salaryDetail->total_expenses,
                 'insurance' => $salaryDetail->social_insurance,
-                'total' => $salaryDetail->net_salary,
+                'total' => max(0, $salaryDetail->net_salary), // Đảm bảo không âm
                 'status' => $salaryDetail->status,
                 'shipment_count' => $salaryDetail->working_days,
                 'other_deduction' => $salaryDetail->other_deduction,
                 'bonus' => $salaryDetail->bonus,
                 'penalty' => $salaryDetail->penalty,
-                'total_salary' => $salaryDetail->total_salary
+                'total_salary' => $salaryDetail->total_salary, // Sử dụng data đã sync
+                'commission_amount' => $additionalInfo['commission_amount'],
+                'trip_count' => $additionalInfo['trip_count'],
+                'total_trip_value' => $additionalInfo['total_trip_value']
             ];
         }
         
         return $salaries;
+    }
+    
+    /**
+     * Calculate salary by type (Basic or Commission)
+     *
+     * @param User $user
+     * @param SalaryDetail $salaryDetail
+     * @param int $salaryType
+     * @return array
+     */
+    private function calculateSalaryByType($user, $salaryDetail, $salaryType)
+    {
+        // Lấy thông tin kỳ lương
+        $periodDates = $this->salaryService->calculateSalaryPeriodDates(
+            Carbon::parse($salaryDetail->salaryPeriod->end_date)->month,
+            Carbon::parse($salaryDetail->salaryPeriod->end_date)->year
+        );
+        
+        if ($salaryType == 2) { // COMMISSION_SALARY - Lương doanh số
+            // Tài xế lương doanh số: tính 12% commission trên tổng giá trị chuyến xe
+            $shipments = Shipment::where(function($query) use ($user) {
+                    $query->where('driver_id', $user->id)
+                          ->orWhere('co_driver_id', $user->id);
+                })
+                ->whereBetween('run_date', [$periodDates['start_date'], $periodDates['end_date']])
+                ->where('status', 'completed')
+                ->get();
+            
+            // Tính tổng giá trị chuyến xe: sum(unit_price * trip_count)
+            $totalTripValue = 0;
+            $tripCount = $shipments->count();
+            
+            foreach ($shipments as $shipment) {
+                $unitPrice = $shipment->unit_price ?? 0;
+                $tripCountPerShipment = $shipment->trip_count ?? 1;
+                $totalTripValue += ($unitPrice * $tripCountPerShipment);
+            }
+            
+            // Tính lương cơ bản = 12% của tổng giá trị chuyến xe
+            $commissionRate = 0.12; // 12%
+            $baseSalary = $totalTripValue * $commissionRate;
+            $commissionAmount = $baseSalary; // Commission amount = base salary cho loại này
+            
+            // Tính tổng lương và lương thực nhận
+            $totalSalary = $baseSalary + ($salaryDetail->total_allowance ?? 0) - ($salaryDetail->total_deductions ?? 0);
+            $netSalary = $totalSalary - ($salaryDetail->social_insurance ?? 0);
+            
+            return [
+                'base_salary' => $baseSalary,
+                'total_salary' => $totalSalary,
+                'net_salary' => $netSalary,
+                'commission_amount' => $commissionAmount,
+                'trip_count' => $tripCount,
+                'total_trip_value' => $totalTripValue
+            ];
+        } else { // BASIC_SALARY - Lương cơ bản
+            // Tài xế lương cơ bản: sử dụng salary_base từ users table
+            $baseSalary = $user->salary_base ?? 0;
+            
+            // Tính tổng lương và lương thực nhận
+            $totalSalary = $baseSalary + ($salaryDetail->total_allowance ?? 0) - ($salaryDetail->total_deductions ?? 0);
+            $netSalary = $totalSalary - ($salaryDetail->social_insurance ?? 0);
+            
+            return [
+                'base_salary' => $baseSalary,
+                'total_salary' => $totalSalary,
+                'net_salary' => $netSalary,
+                'commission_amount' => 0,
+                'trip_count' => 0,
+                'total_trip_value' => 0
+            ];
+        }
+    }
+    
+    /**
+     * Get additional salary info for display (commission, trip count, total trip value)
+     *
+     * @param User $user
+     * @param SalaryDetail $salaryDetail
+     * @param int $salaryType
+     * @return array
+     */
+    private function getAdditionalSalaryInfo($user, $salaryDetail, $salaryType)
+    {
+        if ($salaryType == 2) { // COMMISSION_SALARY
+            // Lấy thông tin kỳ lương
+            $periodDates = $this->salaryService->calculateSalaryPeriodDates(
+                Carbon::parse($salaryDetail->salaryPeriod->end_date)->month,
+                Carbon::parse($salaryDetail->salaryPeriod->end_date)->year
+            );
+            
+            // Tìm shipments của user trong kỳ lương
+            $shipments = Shipment::whereHas('shipmentDeductions', function($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                })
+                ->where(function($query) use ($periodDates) {
+                    $query->where(function($subQuery) use ($periodDates) {
+                        $subQuery->whereNotNull('run_date')
+                                 ->whereBetween('run_date', [$periodDates['start_date'], $periodDates['end_date']]);
+                    })
+                    ->orWhere(function($subQuery) use ($periodDates) {
+                        $subQuery->whereNull('run_date')
+                                 ->whereBetween('departure_time', [$periodDates['start_date'], $periodDates['end_date']]);
+                    });
+                })
+                ->where('status', 'completed')
+                ->get();
+            
+            // Tính tổng giá trị chuyến xe
+            $totalTripValue = 0;
+            foreach ($shipments as $shipment) {
+                $unitPrice = $shipment->unit_price ?? 0;
+                $tripCount = $shipment->trip_count ?? 1;
+                $totalTripValue += ($unitPrice * $tripCount);
+            }
+            
+            $commissionAmount = $salaryDetail->base_salary; // Commission = base salary cho loại này
+            $tripCount = $shipments->count();
+            
+            return [
+                'commission_amount' => $commissionAmount,
+                'trip_count' => $tripCount,
+                'total_trip_value' => $totalTripValue
+            ];
+        } else { // BASIC_SALARY
+            return [
+                'commission_amount' => 0,
+                'trip_count' => 0,
+                'total_trip_value' => 0
+            ];
+        }
     }
     
     /**
@@ -192,11 +373,29 @@ class SalaryController extends Controller
         }, $salaries));
         $averageSalary = $totalEmployees > 0 ? (array_sum(array_column($salaries, 'total')) / $totalEmployees) : 0;
         
+        // Thống kê theo loại lương
+        $basicSalaryCount = count(array_filter($salaries, function($salary) {
+            return $salary['salary_type'] == 1; // BASIC_SALARY
+        }));
+        $commissionSalaryCount = count(array_filter($salaries, function($salary) {
+            return $salary['salary_type'] == 2; // COMMISSION_SALARY
+        }));
+        
+        // Tổng commission và trip value
+        $totalCommission = array_sum(array_column($salaries, 'commission_amount'));
+        $totalTripValue = array_sum(array_column($salaries, 'total_trip_value'));
+        $totalTrips = array_sum(array_column($salaries, 'trip_count'));
+        
         return [
             'totalEmployees' => $totalEmployees,
             'totalPaidSalary' => $totalPaidSalary,
             'totalPendingSalary' => $totalPendingSalary,
-            'averageSalary' => $averageSalary
+            'averageSalary' => $averageSalary,
+            'basicSalaryCount' => $basicSalaryCount,
+            'commissionSalaryCount' => $commissionSalaryCount,
+            'totalCommission' => $totalCommission,
+            'totalTripValue' => $totalTripValue,
+            'totalTrips' => $totalTrips
         ];
     }
     
@@ -235,20 +434,91 @@ class SalaryController extends Controller
         foreach ($positions as $position) {
             $departmentName = $position->name;
             $departmentTotalSalary = 0;
+            $departmentBasicSalary = 0;
+            $departmentCommissionSalary = 0;
+            $departmentTotalCommission = 0;
+            $departmentTotalTrips = 0;
             
             if (isset($salariesByDepartment[$departmentName])) {
-                $departmentTotalSalary = array_sum(array_column($salariesByDepartment[$departmentName], 'total'));
+                $departmentSalaries = $salariesByDepartment[$departmentName];
+                $departmentTotalSalary = array_sum(array_column($departmentSalaries, 'total'));
+                
+                // Phân loại theo loại lương
+                foreach ($departmentSalaries as $salary) {
+                    if ($salary['salary_type'] == 1) { // BASIC_SALARY
+                        $departmentBasicSalary += $salary['total'];
+                    } else if ($salary['salary_type'] == 2) { // COMMISSION_SALARY
+                        $departmentCommissionSalary += $salary['total'];
+                        $departmentTotalCommission += $salary['commission_amount'];
+                        $departmentTotalTrips += $salary['trip_count'];
+                    }
+                }
             }
             
             $departmentStats[] = [
                 'name' => $departmentName,
                 'code' => $position->code,
                 'count' => $position->count,
-                'total_salary' => $departmentTotalSalary
+                'total_salary' => $departmentTotalSalary,
+                'basic_salary' => $departmentBasicSalary,
+                'commission_salary' => $departmentCommissionSalary,
+                'total_commission' => $departmentTotalCommission,
+                'total_trips' => $departmentTotalTrips
             ];
         }
         
         return $departmentStats;
+    }
+    
+    /**
+     * Get salary statistics by type
+     *
+     * @param array $salaries
+     * @return array
+     */
+    private function getSalaryStatisticsByType($salaries)
+    {
+        $basicSalaryStats = [
+            'count' => 0,
+            'total_salary' => 0,
+            'average_salary' => 0
+        ];
+        
+        $commissionSalaryStats = [
+            'count' => 0,
+            'total_salary' => 0,
+            'average_salary' => 0,
+            'total_commission' => 0,
+            'total_trip_value' => 0,
+            'total_trips' => 0
+        ];
+        
+        foreach ($salaries as $salary) {
+            if ($salary['salary_type'] == 1) { // BASIC_SALARY
+                $basicSalaryStats['count']++;
+                $basicSalaryStats['total_salary'] += $salary['total'];
+            } else if ($salary['salary_type'] == 2) { // COMMISSION_SALARY
+                $commissionSalaryStats['count']++;
+                $commissionSalaryStats['total_salary'] += $salary['total'];
+                $commissionSalaryStats['total_commission'] += $salary['commission_amount'];
+                $commissionSalaryStats['total_trip_value'] += $salary['total_trip_value'];
+                $commissionSalaryStats['total_trips'] += $salary['trip_count'];
+            }
+        }
+        
+        // Tính average salary
+        if ($basicSalaryStats['count'] > 0) {
+            $basicSalaryStats['average_salary'] = $basicSalaryStats['total_salary'] / $basicSalaryStats['count'];
+        }
+        
+        if ($commissionSalaryStats['count'] > 0) {
+            $commissionSalaryStats['average_salary'] = $commissionSalaryStats['total_salary'] / $commissionSalaryStats['count'];
+        }
+        
+        return [
+            'basic_salary' => $basicSalaryStats,
+            'commission_salary' => $commissionSalaryStats
+        ];
     }
     
     /**
@@ -272,14 +542,28 @@ class SalaryController extends Controller
             $monthSalary = 0;
             
             if ($monthSalaryPeriod) {
+                // Sử dụng logic mới: đảm bảo không âm
                 $monthSalary = SalaryDetail::where('period_id', $monthSalaryPeriod->period_id)
-                    ->sum('net_salary');
+                    ->get()
+                    ->sum(function($detail) {
+                        return max(0, $detail->net_salary);
+                    });
             }
             
             $chartData[] = [
                 'month' => $monthLabel,
                 'total' => $monthSalary
             ];
+            
+            // Debug log cho tháng 8/2025
+            if ($monthLabel === '08/2025') {
+                Log::info('Chart Data Debug - Tháng 8/2025', [
+                    'month' => $monthLabel,
+                    'monthSalary' => $monthSalary,
+                    'monthSalaryPeriod' => $monthSalaryPeriod ? $monthSalaryPeriod->period_id : null,
+                    'expected_total' => 569510000
+                ]);
+            }
         }
         
         return $chartData;
@@ -377,27 +661,44 @@ class SalaryController extends Controller
                 'payment_method' => 'bank_transfer' // You can make this dynamic if needed
             ]);
 
+            // Lấy tháng/năm chính xác từ kỳ lương
+            $periodInfo = $this->getMonthYearFromSalaryPeriod($salaryDetail->salaryPeriod);
+            $salaryMonth = $periodInfo['month'];
+            $salaryYear = $periodInfo['year'];
+            
+            // Lấy thông tin loại lương
+            $salaryType = $salaryDetail->employee->salary_type?->value ?? 1;
+            $salaryTypeLabel = $salaryDetail->employee->salary_type?->getLabel() ?? 'Lương cơ bản';
+            
+            // Tạo description theo loại lương
+            $salaryDescription = $salaryType == 2 
+                ? sprintf('%s lương doanh số tháng %d/%d cho %s (Mã NV: %s)', 
+                    $isRepeatedPayment ? 'Thanh toán lại' : 'Thanh toán',
+                    $salaryMonth, $salaryYear,
+                    $salaryDetail->employee->full_name,
+                    $salaryDetail->employee->employee_code)
+                : sprintf('%s lương cơ bản tháng %d/%d cho %s (Mã NV: %s)', 
+                    $isRepeatedPayment ? 'Thanh toán lại' : 'Thanh toán',
+                    $salaryMonth, $salaryYear,
+                    $salaryDetail->employee->full_name,
+                    $salaryDetail->employee->employee_code);
+            
             // Create transaction record
             $transaction = Transaction::create([
                 'type' => 'expense',
                 'category' => 'salary',
                 'amount' => $netSalary,
-                'description' => sprintf(
-                    '%s lương tháng %d/%d cho %s (Mã NV: %s)',
-                    $isRepeatedPayment ? 'Thanh toán lại' : 'Thanh toán',
-                    Carbon::parse($salaryDetail->salaryPeriod->start_date)->month,
-                    Carbon::parse($salaryDetail->salaryPeriod->start_date)->year,
-                    $salaryDetail->employee->full_name,
-                    $salaryDetail->employee->employee_code
-                ),
-                'transaction_date' => Carbon::parse($salaryDetail->salaryPeriod->start_date)->addDays(1),
+                'description' => $salaryDescription,
+                'transaction_date' => Carbon::parse($salaryDetail->salaryPeriod->end_date)->addDays(1),
                 'created_by' => $adminId,
                 'reference_id' => $salaryDetail->salary_id,
                 'reference_type' => get_class($salaryDetail),
                 'metadata' => [
                     'employee_id' => $salaryDetail->employee_id,
                     'employee_name' => $salaryDetail->employee->full_name,
-                    'period' => Carbon::parse($salaryDetail->salaryPeriod->start_date)->format('m/Y'),
+                    'period' => sprintf('%02d/%d', $salaryMonth, $salaryYear),
+                    'salary_type' => $salaryType,
+                    'salary_type_label' => $salaryTypeLabel,
                     'base_salary' => $salaryDetail->base_salary,
                     'total_allowances' => $salaryDetail->total_allowances ?? 0,
                     'total_deductions' => $salaryDetail->total_deductions ?? 0,
@@ -418,7 +719,7 @@ class SalaryController extends Controller
             ]);
             
             /** process sync salary */
-            $monthRequest = Carbon::parse($salaryDetail->salaryPeriod->start_date)->format('m/Y');
+            $monthRequest = sprintf('%02d/%d', $salaryMonth, $salaryYear);
             // Prepare sync data
             $dataSync = [
                 'month' => $monthRequest,

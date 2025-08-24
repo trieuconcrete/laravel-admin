@@ -542,31 +542,38 @@ function validateCarRentalForm() {
         }
     }
     
-    // 7. Kiểm tra toll fees nếu có
+    // 7. Kiểm tra toll fees nếu có (cho phép null)
     const tollFeeRows = document.querySelectorAll('#tollFeesTable tbody tr');
     if (tollFeeRows.length > 0) {
         for (const row of tollFeeRows) {
-            const stationName = row.querySelector('input[name*="[station_name]"]')?.value;
-            const transactionCode = row.querySelector('input[name*="[transaction_code]"]')?.value;
-            const feeAmount = row.querySelector('input[name*="[fee_amount]"]')?.value;
+            const stationName = row.querySelector('input[name*="[station_name]"]')?.value?.trim();
+            const transactionCode = row.querySelector('input[name*="[transaction_code]"]')?.value?.trim();
+            const feeAmount = row.querySelector('input[name*="[fee_amount]"]')?.value?.trim();
             
-            if (!stationName || !transactionCode || !feeAmount) {
-                if (!errorMessage) {
-                    errorMessage = 'Vui lòng điền đầy đủ thông tin phí cầu đường!';
-                    errorField = '#tollFeesTable';
-                    // Focus vào trường đầu tiên bị thiếu
-                    if (!stationName) {
-                        firstInvalidField = row.querySelector('input[name*="[station_name]"]');
-                    } else if (!transactionCode) {
-                        firstInvalidField = row.querySelector('input[name*="[transaction_code]"]');
-                    } else if (!feeAmount) {
-                        firstInvalidField = row.querySelector('input[name*="[fee_amount]"]');
+            // Chỉ validate nếu có ít nhất một trường được điền
+            const hasAnyValue = stationName || transactionCode || feeAmount;
+            
+            if (hasAnyValue) {
+                // Nếu có điền thông tin thì phải điền đầy đủ
+                if (!stationName || !transactionCode || !feeAmount) {
+                    if (!errorMessage) {
+                        errorMessage = 'Nếu nhập phí cầu đường thì vui lòng điền đầy đủ thông tin!';
+                        errorField = '#tollFeesTable';
+                        // Focus vào trường đầu tiên bị thiếu
+                        if (!stationName) {
+                            firstInvalidField = row.querySelector('input[name*="[station_name]"]');
+                        } else if (!transactionCode) {
+                            firstInvalidField = row.querySelector('input[name*="[transaction_code]"]');
+                        } else if (!feeAmount) {
+                            firstInvalidField = row.querySelector('input[name*="[fee_amount]"]');
+                        }
+                        console.log('Lỗi đầu tiên: Phí cầu đường thiếu thông tin');
                     }
-                    console.log('Lỗi đầu tiên: Vui lòng điền đầy đủ thông tin phí cầu đường');
+                    isValid = false;
+                    break;
                 }
-                isValid = false;
-                break;
             }
+            // Nếu không có trường nào được điền thì bỏ qua (cho phép null)
         }
     }
     
@@ -1129,7 +1136,7 @@ function addDriverPXRow(table, deductionTypes, users) {
     let html = `
         <td>
             <select name="driverPXs[${rowIndex}][user_id]" class="form-select form-select-sm" 
-                style="min-width: 180px;" required>
+                style="min-width: 180px;">
                 <option value="">Chọn nhân sự</option>`;
     
     // Thêm options cho users chưa được chọn

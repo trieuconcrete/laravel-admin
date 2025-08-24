@@ -1414,3 +1414,30 @@ function loadVehiclesFromAPI(isRental) {
         vehicleSelect.disabled = false;
     });
 }
+
+// Lấy các element
+const departureInput = document.querySelector('input[name="departure_time"]');
+const arrivalInput = document.querySelector('input[name="estimated_arrival_time"]');
+
+// Kiểm tra xem các element có tồn tại không
+if (departureInput && arrivalInput) {
+    // Lắng nghe sự kiện change trên input ngày khởi hành
+    departureInput.addEventListener('blur', function() {
+        // Lấy giá trị ngày khởi hành
+        const departureDate = this.value;
+        console.log('Departure date changed:', departureDate);
+        
+        // Set giá trị cho ngày dự kiến đến
+        if (departureDate) {
+            arrivalInput.value = departureDate;
+        }
+    });
+    
+    // Tùy chọn: Cũng lắng nghe sự kiện input để cập nhật real-time
+    departureInput.addEventListener('input', function() {
+        const departureDate = this.value;
+        if (departureDate) {
+            arrivalInput.value = departureDate;
+        }
+    });
+}

@@ -88,10 +88,13 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
-                                                    <select class="form-select" name="customer_id" required>
+                                                    @if (request('customer_id'))
+                                                        <input type="hidden" name="customer_id" value="{{ request('customer_id') }}">
+                                                    @endif
+                                                    <select class="form-select" name="customer_id" required @disabled(request('customer_id'))>
                                                         <option value="">Chọn khách hàng</option>
                                                         @foreach($customers as $id => $name)
-                                                            <option value="{{ $id }}" {{ old('customer_id') == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                                            <option value="{{ $id }}" @selected($id == request('customer_id'))>{{ $name }}</option>
                                                         @endforeach
                                                     </select>
                                                     @error('customer_id')<span class="text-danger">{{ $message }}</span>@enderror
@@ -110,14 +113,14 @@
                                             <div class="row mb-3">
                                                 @php
                                                 $defaultDeparture = date('Y-m-d');
-                                                $defaultArrival = date('Y-m-d', strtotime('+1 week'));
+                                                $defaultArrival = $defaultDeparture;
                                                 
                                                 // Nếu có giá trị old(), ưu tiên sử dụng nó
                                                 $departureDateValue = old('departure_time', $defaultDeparture);
                                                 $arrivalDateValue = old('estimated_arrival_time', $defaultArrival);
                                                 @endphp
                                                 <div class="col-md-3">
-                                                    <label class="form-label">Thời gian khởi hành<span class="text-danger">*</span></label>
+                                                    <label class="form-label">Ngày khởi hành<span class="text-danger">*</span></label>
                                                     <input type="date" class="form-control date-input" name="departure_time" value="@formatDateForInput($departureDateValue)" required autocomplete="off">
                                                     @error('departure_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
@@ -127,7 +130,7 @@
                                                     @error('start_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-3">
-                                                    <label class="form-label">Thời gian dự kiến đến</label>
+                                                    <label class="form-label">Ngày dự kiến đến</label>
                                                     <input type="date" class="form-control date-input" name="estimated_arrival_time" value="@formatDateForInput($arrivalDateValue)" required autocomplete="off">
                                                     @error('estimated_arrival_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
@@ -145,7 +148,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Số lượng chuyến</label>
-                                                    <input type="number" class="form-control" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', 1) }}">
+                                                    <input type="text" class="form-control float-input" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', 1) }}">
                                                     @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
@@ -157,7 +160,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label class="form-label">Khối lượng (kg)</label>
-                                                    <input type="text" class="form-control" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight') }}">
+                                                    <input type="text" class="form-control number" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight') }}">
                                                     @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>

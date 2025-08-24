@@ -22,19 +22,24 @@ use App\Http\Requests\CarRental\UpdateCarRentalRequest;
 use App\Repositories\Interface\VehicleRepositoryInterface as VehicleRepository;
 use App\Repositories\Interface\CustomerRepositoryInterface as CustomerRepository;
 use App\Models\Customer;
+use App\Models\Shipment;
 
 class CarRentalController extends Controller
 {
+    protected $carRentalService;
+    protected $customerRepository;
+    protected $vehicleRepository;
     /**
      * Summary of __construct
      * @param \App\Services\CarRentalService $carRentalService
      * @param \App\Repositories\Interface\CustomerRepositoryInterface $customerRepository
      */
-    public function __construct(
-        protected CarRentalService $carRentalService,
-        protected CustomerRepository $customerRepository,
-        protected VehicleRepository $vehicleRepository
-    ) {}
+    public function __construct(CarRentalService $carRentalService, CustomerRepository $customerRepository, VehicleRepository $vehicleRepository) 
+    {
+        $this->carRentalService = $carRentalService;
+        $this->customerRepository = $customerRepository;
+        $this->vehicleRepository = $vehicleRepository;
+    }
 
     // /**
     //  * Summary of index
@@ -46,7 +51,7 @@ class CarRentalController extends Controller
     {
         $filters = $request->only(['type', 'status', 'keyword']);
         $customers = $this->customerRepository->all()->pluck('name', 'id');
-        $query = CarRental::with('customer')->orderBy('created_at', 'DESC');
+        $query = CarRental::with(['customer', 'shipmentReports'])->orderBy('created_at', 'DESC');
         /** search vehicle type */
         if (!empty($filters['type'])) {
             $query->where('type', $filters['type']);
@@ -60,8 +65,9 @@ class CarRentalController extends Controller
 
         $carRentalstatuses = CarRental::getStatuses();
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
+        $vehicles = $this->vehicleRepository->getVehiclesByIsCarRental(false);
 
-        return view('admin.car_rental.index', compact('carRentals', 'carRentalstatuses', 'customers', 'vehicleTypes'));
+        return view('admin.car_rental.index', compact('carRentals', 'carRentalstatuses', 'customers', 'vehicleTypes', 'vehicles'));
     }
 
     /**
@@ -98,18 +104,19 @@ class CarRentalController extends Controller
 
     public function show($id)
     {
-        $carRental = CarRental::with(['carRentalVehicles'])->findOrFail($id);
+        $carRental = CarRental::with(['vehicle', 'carRentalVehicles', 'shipmentReports'])->findOrFail($id);
         if (request()->ajax()) {
             return view('admin.car_rental.partials.detail', compact('carRental'))->render();
         }
 
-        return abort(404);    }
+        return abort(404);
+    }
 
     public function edit($id)
     {
-        $carRental = CarRental::findOrFail($id);
+        $carRental = CarRental::with('vehicle', 'carRentalVehicles', 'shipmentReports')->findOrFail($id);
         $customers = $this->customerRepository->all()->pluck('name', 'id');
-        $vehicles = Vehicle::with('vehicleType')->where('status', Vehicle::STATUS_ACTIVE)->get();
+        $vehicles = $this->vehicleRepository->getVehiclesByIsCarRental(false);
         $carRentalstatuses = CarRental::getStatuses();
         $carRentalVehicles = $carRental->carRentalVehicles;
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
@@ -136,7 +143,6 @@ class CarRentalController extends Controller
             ->select('id', 'full_name', 'employee_code')
             ->get();
 
-            // dd($carRentalVehicleLogs);
         return view('admin.car_rental.edit', compact(
             'carRental',
             'customers',
@@ -204,6 +210,12 @@ class CarRentalController extends Controller
             $data['start_odometer'] = str_replace(',', '', $data['start_odometer']);
             $data['end_odometer'] = str_replace(',', '', $data['end_odometer']);
             $data['parking_fee'] = str_replace(',', '', $data['parking_fee']);
+            $data['weighing_fee'] = str_replace(',', '', $data['weighing_fee']);
+            $data['testing_surcharge'] = str_replace(',', '', $data['testing_surcharge']);
+
+            $data['overtime_rate'] = str_replace(',', '', $data['overtime_rate']);
+            $data['max_distance'] = str_replace(',', '', $data['max_distance'] ?? '');
+            $data['over_distance_fee_per_km'] = str_replace(',', '', $data['over_distance_fee_per_km'] ?? '');
             
             // Xử lý loại bỏ dấu phẩy từ driver deductions
             if (!empty($data['drivers'])) {
@@ -268,16 +280,35 @@ class CarRentalController extends Controller
                 'driverPXs.*.deductions' => 'nullable|array',
                 'driverPXs.*.deductions.*' => 'nullable',
                 'is_car_rental_value' => 'nullable|in:0,1',
-                'run_date' => 'required|date',
-                'start_time' => 'required|date_format:H:i',
-                'end_time' => 'required|date_format:H:i|after:start_time',
+                'run_date' => [
+                    'required',
+                    'date',
+                    function ($attribute, $value, $fail) use ($data) {
+                        // Kiểm tra run_date phải nằm trong khoảng start_date và end_date của car rental
+                        if (!empty($data['car_rental_id'])) {
+                            $carRental = \App\Models\CarRental::find($data['car_rental_id']);
+                            if ($carRental) {
+                                if ($carRental->start_date && $value < $carRental->start_date) {
+                                    $fail('Ngày chạy phải >= ngày bắt đầu thuê xe (' . $carRental->start_date . ')');
+                                }
+                                if ($carRental->end_date && $value > $carRental->end_date) {
+                                    $fail('Ngày chạy phải <= ngày kết thúc thuê xe (' . $carRental->end_date . ')');
+                                }
+                            }
+                        }
+                    }
+                ],
+                'start_time' => 'required|date_format:H:i,H:i:s',
+                'end_time' => 'required|date_format:H:i,H:i:s|after:start_time',
                 'start_location' => 'nullable|string|max:255',
                 'end_location' => 'nullable|string|max:255',
                 'start_odometer' => 'required|numeric|min:0',
                 'end_odometer' => 'required|numeric|gt:start_odometer',
-                'overtime_rate' => 'nullable|numeric|min:0',
+                'overtime_rate' => 'required|numeric|min:0',
                 'is_overtime_at_noon' => 'nullable|boolean',
                 'parking_fee' => 'nullable|numeric|min:0',
+                'weighing_fee' => 'nullable|numeric|min:0',
+                'testing_surcharge' => 'nullable|numeric|min:0',
                 'notes' => 'nullable|string',
                 'toll_fees' => 'nullable|array',
                 'toll_fees.*.station_name' => 'nullable|string|max:255',
@@ -293,26 +324,86 @@ class CarRentalController extends Controller
 
             $validated['overtime_rate'] = $validated['overtime_rate'] ?? 50000;
             $validated['parking_fee'] = isset($validated['parking_fee']) ? abs((float)$validated['parking_fee']) : 0;
+            $validated['weighing_fee'] = isset($validated['weighing_fee']) ? abs((float)$validated['weighing_fee']) : 0;
+            $validated['testing_surcharge'] = isset($validated['testing_surcharge']) ? abs((float)$validated['testing_surcharge']) : 0;
 
             // Tính toán thời gian và quãng đường
             $startDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['start_time']);
             $endDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['end_time']);
             $totalDistance = abs($validated['end_odometer'] - $validated['start_odometer']);
 
-            // Tính overtime_hours (chỉ tính sau 17:30)
+            // Tính overtime_hours (sử dụng start_working_hour và end_working_hour từ car rental)
             $overtimeHours = 0;
             $overtimeRate = $validated['overtime_rate'] ?? 0;
             if ($overtimeRate > 0) {
-                $overtimeStart = \Carbon\Carbon::parse($validated['run_date'] . ' 17:30');
-                if ($endDateTime->greaterThan($overtimeStart)) {
-                    $effectiveStart = $startDateTime->greaterThan($overtimeStart) ? $startDateTime : $overtimeStart;
-                    $overtimeHours = abs($endDateTime->floatDiffInRealHours($effectiveStart));
+                // Lấy start_working_hour và end_working_hour từ car rental
+                $carRental = \App\Models\CarRental::find($validated['car_rental_id']);
+                $startWorkingHour = $carRental && $carRental->start_working_hour ? 
+                    $carRental->start_working_hour : '07:00';
+                $endWorkingHour = $carRental && $carRental->end_working_hour ? 
+                    $carRental->end_working_hour : '17:30';
+                
+                Log::info('Overtime calculation setup:', [
+                    'start_time' => $validated['start_time'],
+                    'end_time' => $validated['end_time'],
+                    'start_working_hour' => $startWorkingHour,
+                    'end_working_hour' => $endWorkingHour,
+                    'run_date' => $validated['run_date']
+                ]);
+                
+                // Tính OT buổi sáng (khi bắt đầu sớm hơn start_working_hour)
+                if ($validated['start_time'] < $startWorkingHour) {
+                    // Chuyển đổi thời gian thành phút để tính toán
+                    $startTimeMinutes = $this->timeToMinutes($validated['start_time']);
+                    $startWorkingMinutes = $this->timeToMinutes($startWorkingHour);
+                    $morningOvertime = ($startWorkingMinutes - $startTimeMinutes) / 60;
+                    
+                    $overtimeHours += $morningOvertime;
+                    Log::info('Morning overtime calculated:', [
+                        'start_time' => $validated['start_time'],
+                        'start_working_hour' => $startWorkingHour,
+                        'morning_overtime' => $morningOvertime,
+                        'startTimeMinutes' => $startTimeMinutes,
+                        'startWorkingMinutes' => $startWorkingMinutes
+                    ]);
+                } else {
+                    Log::info('No morning overtime - start time is not before working hour');
                 }
                 
-                // Thêm tăng ca trưa 1h nếu có chọn checkbox (theo yêu cầu issue #180)
+                // Tính OT buổi chiều (khi kết thúc muộn hơn end_working_hour)
+                if ($validated['end_time'] > $endWorkingHour) {
+                    // Chuyển đổi thời gian thành phút để tính toán
+                    $endTimeMinutes = $this->timeToMinutes($validated['end_time']);
+                    $endWorkingMinutes = $this->timeToMinutes($endWorkingHour);
+                    $afternoonOvertime = ($endTimeMinutes - $endWorkingMinutes) / 60;
+                    
+                    $overtimeHours += $afternoonOvertime;
+                    Log::info('Afternoon overtime calculated:', [
+                        'end_time' => $validated['end_time'],
+                        'end_working_hour' => $endWorkingHour,
+                        'afternoon_overtime' => $afternoonOvertime,
+                        'endTimeMinutes' => $endTimeMinutes,
+                        'endWorkingMinutes' => $endWorkingMinutes
+                    ]);
+                } else {
+                    Log::info('No afternoon overtime - end time is not after working hour');
+                }
+                
+                // Thêm tăng ca trưa 1h nếu có chọn checkbox
                 if (!empty($validated['is_overtime_at_noon'])) {
                     $overtimeHours += 1;
+                    Log::info('Noon overtime added: 1 hour');
                 }
+                
+                Log::info('Total overtime calculation:', [
+                    'start_time' => $validated['start_time'],
+                    'end_time' => $validated['end_time'],
+                    'start_working_hour' => $startWorkingHour,
+                    'end_working_hour' => $endWorkingHour,
+                    'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
+                    'total_overtime_hours' => $overtimeHours,
+                    'final_overtime_hours' => $overtimeHours
+                ]);
             }
             $totalOvertimeCost = abs($overtimeRate * $overtimeHours);
 
@@ -388,6 +479,8 @@ class CarRentalController extends Controller
                 'total_overtime_cost' => $totalOvertimeCost,
                 'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
                 'parking_fee' => $validated['parking_fee'],
+                'weighing_fee' => $validated['weighing_fee'] ?? 0,
+                'testing_surcharge' => $validated['testing_surcharge'] ?? 0,
                 'notes' => $validated['notes'],
                 'unit_price_for_car_rental' => $validated['is_car_rental_value'] ? $validated['unit_price_for_car_rental'] : null
             ];
@@ -756,6 +849,9 @@ class CarRentalController extends Controller
             $data['start_odometer'] = str_replace(',', '', $data['start_odometer']);
             $data['end_odometer'] = str_replace(',', '', $data['end_odometer']);
             $data['parking_fee'] = str_replace(',', '', $data['parking_fee']);
+            $data['weighing_fee'] = str_replace(',', '', $data['weighing_fee'] ?? '');
+            $data['testing_surcharge'] = str_replace(',', '', $data['testing_surcharge'] ?? '');
+            $data['overtime_rate'] = str_replace(',', '', $data['overtime_rate']);
             $data['max_distance'] = str_replace(',', '', $data['max_distance'] ?? '');
             $data['over_distance_fee_per_km'] = str_replace(',', '', $data['over_distance_fee_per_km'] ?? '');
             
@@ -819,15 +915,33 @@ class CarRentalController extends Controller
                 'driverPXs.*.deductions' => 'nullable|array',
                 'driverPXs.*.deductions.*' => 'nullable',
                 'is_car_rental_value' => 'required|in:0,1',
-                'run_date' => 'required|date',
-                'start_time' => 'required|date_format:H:i',
-                'end_time' => 'required|date_format:H:i|after:start_time',
+                'run_date' => [
+                    'required',
+                    'date',
+                    function ($attribute, $value, $fail) use ($data) {
+                        // Kiểm tra run_date phải nằm trong khoảng start_date và end_date của car rental
+                        if (!empty($data['car_rental_id'])) {
+                            $carRental = \App\Models\CarRental::find($data['car_rental_id']);
+                            if ($carRental) {
+                                if ($carRental->start_date && $value < $carRental->start_date) {
+                                    $fail('Ngày chạy phải >= ngày bắt đầu thuê xe (' . $carRental->start_date . ')');
+                                }
+                                if ($carRental->end_date && $value > $carRental->end_date) {
+                                    $fail('Ngày chạy phải <= ngày kết thúc thuê xe (' . $carRental->end_date . ')');
+                                }
+                            }
+                        }
+                    }
+                ],
+                'start_time' => 'required|date_format:H:i,H:i:s',
+                'end_time' => 'required|date_format:H:i,H:i:s|after:start_time',
                 'start_location' => 'nullable|string|max:255',
                 'end_location' => 'nullable|string|max:255',
                 'start_odometer' => 'required|numeric|min:0',
                 'end_odometer' => 'required|numeric|gt:start_odometer',
-                'overtime_rate' => 'nullable|numeric|min:0',
-                'parking_fee' => 'nullable|numeric|min:0',
+                'weighing_fee' => 'nullable|numeric|min:0',
+                'testing_surcharge' => 'nullable|numeric|min:0',
+                'overtime_rate' => 'required|numeric|min:0',
                 'is_overtime_at_noon' => 'nullable|boolean',
                 'status' => 'required|in:pending,in_transit,cancelled,delayed,completed',
                 'notes' => 'nullable|string',
@@ -845,6 +959,8 @@ class CarRentalController extends Controller
             
             $validated['overtime_rate'] = $validated['overtime_rate'] ?? 50000;
             $validated['parking_fee'] = isset($validated['parking_fee']) ? abs((float)$validated['parking_fee']) : 0;
+            $validated['weighing_fee'] = isset($validated['weighing_fee']) ? abs((float)$validated['weighing_fee']) : 0;
+            $validated['testing_surcharge'] = isset($validated['testing_surcharge']) ? abs((float)$validated['testing_surcharge']) : 0;
 
             // Get vehicle và car rental để lấy thông tin
             $vehicle = \App\Models\Vehicle::findOrFail($validated['vehicle_id']);
@@ -903,20 +1019,78 @@ class CarRentalController extends Controller
             $startDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['start_time']);
             $endDateTime = \Carbon\Carbon::parse($validated['run_date'] . ' ' . $validated['end_time']);
             
-            // Tính overtime_hours (chỉ tính sau 17:30)
+            // Tính overtime_hours (sử dụng start_working_hour và end_working_hour từ car rental)
             $overtimeHours = 0;
             $overtimeRate = $validated['overtime_rate'] ?? 0;
             if ($overtimeRate > 0) {
-                $overtimeStart = \Carbon\Carbon::parse($validated['run_date'] . ' 17:30');
-                if ($endDateTime->greaterThan($overtimeStart)) {
-                    $effectiveStart = $startDateTime->greaterThan($overtimeStart) ? $startDateTime : $overtimeStart;
-                    $overtimeHours = abs($endDateTime->floatDiffInRealHours($effectiveStart));
+                // Lấy start_working_hour và end_working_hour từ car rental
+                $carRental = \App\Models\CarRental::find($validated['car_rental_id']);
+                $startWorkingHour = $carRental && $carRental->start_working_hour ? 
+                    $carRental->start_working_hour : '07:00';
+                $endWorkingHour = $carRental && $carRental->end_working_hour ? 
+                    $carRental->end_working_hour : '17:30';
+                
+                Log::info('Overtime calculation setup:', [
+                    'start_time' => $validated['start_time'],
+                    'end_time' => $validated['end_time'],
+                    'start_working_hour' => $startWorkingHour,
+                    'end_working_hour' => $endWorkingHour,
+                    'run_date' => $validated['run_date']
+                ]);
+                
+                // Tính OT buổi sáng (khi bắt đầu sớm hơn start_working_hour)
+                if ($validated['start_time'] < $startWorkingHour) {
+                    // Chuyển đổi thời gian thành phút để tính toán
+                    $startTimeMinutes = $this->timeToMinutes($validated['start_time']);
+                    $startWorkingMinutes = $this->timeToMinutes($startWorkingHour);
+                    $morningOvertime = ($startWorkingMinutes - $startTimeMinutes) / 60;
+                    
+                    $overtimeHours += $morningOvertime;
+                    Log::info('Morning overtime calculated:', [
+                        'start_time' => $validated['start_time'],
+                        'start_working_hour' => $startWorkingHour,
+                        'morning_overtime' => $morningOvertime,
+                        'startTimeMinutes' => $startTimeMinutes,
+                        'startWorkingMinutes' => $startWorkingMinutes
+                    ]);
+                } else {
+                    Log::info('No morning overtime - start time is not before working hour');
                 }
                 
-                // Thêm tăng ca trưa 1h nếu có chọn checkbox (theo yêu cầu issue #180)
+                // Tính OT buổi chiều (khi kết thúc muộn hơn end_working_hour)
+                if ($validated['end_time'] > $endWorkingHour) {
+                    // Chuyển đổi thời gian thành phút để tính toán
+                    $endTimeMinutes = $this->timeToMinutes($validated['end_time']);
+                    $endWorkingMinutes = $this->timeToMinutes($endWorkingHour);
+                    $afternoonOvertime = ($endTimeMinutes - $endWorkingMinutes) / 60;
+                    
+                    $overtimeHours += $afternoonOvertime;
+                    Log::info('Afternoon overtime calculated:', [
+                        'end_time' => $validated['end_time'],
+                        'end_working_hour' => $endWorkingHour,
+                        'afternoon_overtime' => $afternoonOvertime,
+                        'endTimeMinutes' => $endTimeMinutes,
+                        'endWorkingMinutes' => $endWorkingMinutes
+                    ]);
+                } else {
+                    Log::info('No afternoon overtime - end time is not after working hour');
+                }
+                
+                // Thêm tăng ca trưa 1h nếu có chọn checkbox
                 if (!empty($validated['is_overtime_at_noon'])) {
                     $overtimeHours += 1;
+                    Log::info('Noon overtime added: 1 hour');
                 }
+                
+                Log::info('Total overtime calculation:', [
+                    'start_time' => $validated['start_time'],
+                    'end_time' => $validated['end_time'],
+                    'start_working_hour' => $startWorkingHour,
+                    'end_working_hour' => $endWorkingHour,
+                    'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
+                    'total_overtime_hours' => $overtimeHours,
+                    'final_overtime_hours' => $overtimeHours
+                ]);
             }
             $totalOvertimeCost = abs($overtimeRate * $overtimeHours);
 
@@ -945,6 +1119,8 @@ class CarRentalController extends Controller
                 'total_overtime_cost' => $totalOvertimeCost,
                 'is_overtime_at_noon' => $validated['is_overtime_at_noon'] ?? false,
                 'parking_fee' => $validated['parking_fee'],
+                'weighing_fee' => $validated['weighing_fee'] ?? 0,
+                'testing_surcharge' => $validated['testing_surcharge'] ?? 0,
                 'notes' => $validated['notes'],
                 'unit_price_for_car_rental' => $validated['is_car_rental_value'] ? $validated['unit_price_for_car_rental'] : null
             ];
@@ -1244,17 +1420,32 @@ class CarRentalController extends Controller
     {
         $carRental = CarRental::with('customer')->findOrFail($car_rental_id);
         
+        // Kiểm tra type để quyết định export gì
+        if ($carRental->type == 2) { // Thuê xe theo kiểu khoáng
+            // Export DEBIT NOTE
+            return $this->exportDebitNote($carRental);
+        } else {
+            // Export bảng kê (logic cũ)
+            return $this->exportVehicleLog($carRental);
+        }
+    }
+    
+    /**
+     * Export bảng kê (cho type = 1: Thuê nguyên xe tính theo chuyến)
+     */
+    private function exportVehicleLog($carRental)
+    {
         // Get shipments instead of vehicle logs (Issue #180 implementation)
-        $shipments = \App\Models\Shipment::where('car_rental_id', $car_rental_id)
+        $shipments = \App\Models\Shipment::where('car_rental_id', $carRental->id)
             ->where('shipment_type', \App\Models\Shipment::SHIPMENT_TYPE_MONTHLY_RENTAL)
-            // ->where('is_car_rental', true) // Removed to match edit view logic - get all shipments for car rental
             ->with(['driver', 'vehicle', 'tollFees'])
-            ->orderBy('run_date', 'asc')
+            // ->orderBy('run_date', 'asc')
+            ->latest('created_at')
             ->get();
             
         // Debug log to check shipments count
         Log::info('Download vehicle log - Shipments loaded:', [
-            'car_rental_id' => $car_rental_id,
+            'car_rental_id' => $carRental->id,
             'shipments_count' => $shipments->count(),
             'shipments_data' => $shipments->map(function($shipment) {
                 return [
@@ -1289,6 +1480,27 @@ class CarRentalController extends Controller
 
         return Excel::download(new \App\Exports\ShipmentVehicleLogExport($carRental, $shipments, $tollFeesByDate, $month), $fileName);
     }
+    
+    /**
+     * Export DEBIT NOTE (cho type = 2: Thuê xe theo kiểu khoáng)
+     */
+    private function exportDebitNote($carRental)
+    {
+        // Lấy danh sách shipments
+        $shipments = \App\Models\Shipment::where('car_rental_id', $carRental->id)
+            ->where('shipment_type', \App\Models\Shipment::SHIPMENT_TYPE_MONTHLY_RENTAL)
+            ->with(['driver', 'vehicle', 'tollFees'])
+            ->orderBy('run_date', 'asc')
+            ->get();
+        
+        // Tính toán tổng công nợ
+        $debtSummary = $this->calculateFilteredDebt($carRental, $shipments, null, null);
+        
+        // Tạo tên file
+        $fileName = 'debit_note_' . $carRental->id . '_' . now()->format('Y-m-d') . '.xlsx';
+        
+        return Excel::download(new \App\Exports\DebitNoteExport($carRental, $debtSummary, $shipments), $fileName);
+    }
 
     /**
      * Summary of create
@@ -1299,7 +1511,7 @@ class CarRentalController extends Controller
         // Lấy thông tin car rental để có customer_id
         $carRental = CarRental::with('customer')->findOrFail($id);
         
-        $vehicles = Vehicle::with(['vehicleType', 'driver'])->where('status', Vehicle::STATUS_ACTIVE)->get();
+        $vehicles = $this->vehicleRepository->getVehiclesByIsCarRental(false);
         
         // Get customers data
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
@@ -1357,5 +1569,481 @@ class CarRentalController extends Controller
             'userPXs',
             'carRentalDeductionTypes'
         ));
+    }
+
+    /**
+     * Hiển thị tổng kết công nợ của car rental
+     * 
+     * @param int $id
+     * @return \Illuminate\Contracts\View\View|\Illuminate\Http\JsonResponse
+     */
+    public function showDebtSummary($id)
+    {
+        try {
+            $carRental = CarRental::with(['customer', 'shipments.tollFees'])->findOrFail($id);
+            
+            // Lấy parameters từ request
+            $startDate = request('start_date');
+            $endDate = request('end_date');
+            $notes = request('notes');
+            
+            // Nếu có start_date và end_date, filter shipments theo khoảng thời gian
+            if ($startDate && $endDate) {
+                $shipments = $carRental->shipments()
+                    ->with(['tollFees', 'vehicle', 'driver'])
+                    ->whereBetween('run_date', [$startDate, $endDate])
+                    ->orderBy('run_date', 'asc')
+                    ->get();
+            } else {
+                $shipments = $carRental->shipments()
+                    ->with(['tollFees', 'vehicle', 'driver'])
+                    ->orderBy('run_date', 'asc')
+                    ->get();
+            }
+            
+            // Tính toán tổng công nợ với filter
+            $debtSummary = $this->calculateFilteredDebt($carRental, $shipments, $startDate, $endDate);
+            
+            // Nếu là AJAX request, trả về HTML
+            if (request()->ajax()) {
+                return view('admin.car_rental.partials.debt_summary_result', compact('carRental', 'debtSummary', 'shipments', 'startDate', 'endDate', 'notes'));
+            }
+            
+            // Nếu là normal request, trả về full page
+            return view('admin.car_rental.debt_summary', compact('carRental', 'debtSummary', 'shipments'));
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to show debt summary', ['error' => $e->getMessage()]);
+            
+            if (request()->ajax()) {
+                return response()->json(['error' => 'Không thể tải tổng kết công nợ: ' . $e->getMessage()], 500);
+            }
+            
+            return back()->with('error', 'Không thể tải tổng kết công nợ: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Tính toán tổng công nợ với filter theo khoảng thời gian
+     */
+    private function calculateFilteredDebt($carRental, $shipments, $startDate = null, $endDate = null)
+    {
+        // Lấy thông tin cơ bản
+        $monthlyRentalFee = $carRental->monthly_rental_fee ?? 0;
+        $overDistanceFeePerKm = $carRental->over_distance_fee_per_km ?? 0;
+        $vatRate = $carRental->vat_rate ?? 8; // Default 10%
+        
+        // Tính tổng các chi phí từ shipments
+        $totalOvertimeCost = $shipments->sum('overtime_cost') ?? 0;
+        $totalTollFees = $shipments->sum(function($s) { return $s->tollFees->sum('fee_amount'); }) ?? 0;
+        $totalParkingFees = $shipments->sum('parking_fee') ?? 0;
+        $totalWeighingFees = $shipments->sum('weighing_fee') ?? 0;
+        $totalTestingSurcharges = $shipments->sum('testing_surcharge') ?? 0;
+        $totalDistance = $shipments->sum('distance') ?? 0;
+        
+        // Tính phí vượt quãng đường
+        $maxDistance = $carRental->max_distance ?? 0;
+        $overDistanceFee = 0;
+        if ($maxDistance > 0 && $totalDistance > $maxDistance) {
+            $overDistanceFee = ($totalDistance - $maxDistance) * $overDistanceFeePerKm;
+        }
+        
+        // Tính subtotal
+        $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFees + $totalParkingFees + $overDistanceFee;
+        
+        // Tính VAT
+        $vatAmount = $subtotal * ($vatRate / 100);
+        $totalWithVat = $subtotal + $vatAmount;
+        
+        // Tính còn nợ (giả sử chưa thanh toán gì)
+        $paidAmount = 0; // TODO: Implement payment tracking
+        $remainingDebt = $totalWithVat - $paidAmount;
+        
+        return [
+            'monthly_rental_fee' => $monthlyRentalFee,
+            'total_overtime_cost' => $totalOvertimeCost,
+            'total_toll_fees' => $totalTollFees,
+            'total_parking_fees' => $totalParkingFees,
+            'total_weighing_fees' => $totalWeighingFees,
+            'total_testing_surcharges' => $totalTestingSurcharges,
+            'total_distance' => $totalDistance,
+            'over_distance_fee' => $overDistanceFee,
+            'subtotal' => $subtotal,
+            'vat_rate' => $vatRate,
+            'vat_amount' => $vatAmount,
+            'total_with_vat' => $totalWithVat,
+            'paid_amount' => $paidAmount,
+            'remaining_debt' => $remainingDebt,
+            'currency' => $carRental->currency ?? 'VNĐ',
+            'calculation_date' => now()->format('Y-m-d H:i:s'),
+            'filter_start_date' => $startDate,
+            'filter_end_date' => $endDate,
+        ];
+    }
+
+    /**
+     * Export tổng kết công nợ ra Excel
+     * 
+     * @param int $id
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportDebtSummary($id)
+    {
+        try {
+            $carRental = CarRental::with(['customer', 'shipments.tollFees'])->findOrFail($id);
+            
+            // Lấy parameters từ request
+            $startDate = request('start_date');
+            $endDate = request('end_date');
+            $notes = request('notes');
+            
+            // Nếu có start_date và end_date, filter shipments theo khoảng thời gian
+            if ($startDate && $endDate) {
+                $shipments = $carRental->shipments()
+                    ->with(['tollFees', 'vehicle', 'driver'])
+                    ->whereBetween('run_date', [$startDate, $endDate])
+                    ->orderBy('run_date', 'asc')
+                    ->get();
+            } else {
+                $shipments = $carRental->shipments()
+                    ->with(['tollFees', 'vehicle', 'driver'])
+                    ->orderBy('run_date', 'asc')
+                    ->get();
+            }
+            
+            // Tính toán tổng công nợ với filter
+            $debtSummary = $this->calculateFilteredDebt($carRental, $shipments, $startDate, $endDate);
+            
+            // Tạo tên file với thông tin filter
+            $fileName = 'tong_ket_cong_no_' . $carRental->id;
+            if ($startDate && $endDate) {
+                $fileName .= '_' . \Carbon\Carbon::parse($startDate)->format('Y-m-d') . '_' . \Carbon\Carbon::parse($endDate)->format('Y-m-d');
+            }
+            $fileName .= '_' . now()->format('Y-m-d') . '.xlsx';
+            
+            return Excel::download(new \App\Exports\DebtSummaryExport($carRental, $debtSummary, $shipments), $fileName);
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to export debt summary', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Không thể export tổng kết công nợ: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Tổng kết công nợ theo khoảng thời gian
+     *
+     * @param CarRental $carRental
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function summarizeReport(CarRental $carRental, Request $request)
+    {
+        try {
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            $userId = auth('admin')->id();
+            
+            // Validate dates
+            if (!$startDate || !$endDate) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vui lòng cung cấp ngày bắt đầu và kết thúc'
+                ], 400);
+            }
+            
+            // Get shipments based on car rental type
+            $shipmentType = $carRental->type == 1 ? 21 : 22; // 21: thuê nguyên xe, 22: thuê kiểu khoáng
+            
+            $shipments = Shipment::where('car_rental_id', $carRental->id)
+                ->where('shipment_type', Shipment::SHIPMENT_TYPE_MONTHLY_RENTAL)
+                ->whereBetween('run_date', [$startDate, $endDate])
+                ->get();
+            
+            if ($shipments->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có dữ liệu chuyến hàng trong khoảng thời gian này'
+                ], 400);
+            }
+            
+            // Calculate summary data
+            $summary = $this->calculateDebtSummary($carRental, $shipments, $startDate, $endDate);
+            
+            // Tìm hoặc tạo báo cáo
+            $period = date('Y-m', strtotime($startDate));
+            if ($startDate != $endDate && date('Y-m', strtotime($startDate)) != date('Y-m', strtotime($endDate))) {
+                $period = date('Y-m', strtotime($startDate)) . ' - ' . date('Y-m', strtotime($endDate));
+            }
+            
+            // Kiểm tra xem có báo cáo nào đã tồn tại với car_rental_id này không
+            $existingReport = \App\Models\ShipmentReport::where('car_rental_id', $carRental->id)
+                ->where('monthly', $period)
+                ->first();
+                
+            if ($existingReport) {
+                // Cập nhật báo cáo đã tồn tại
+                $existingReport->update([
+                    'total_amount' => $summary['total_with_vat'],
+                    'statement_start_date' => $startDate,
+                    'statement_end_date' => $endDate,
+                    'shipment_type' => $carRental->type == 1 ? 21 : 22,
+                    'updated_by' => $userId,
+                    'is_finalized' => true
+                ]);
+                $report = $existingReport;
+            } else {
+                // Kiểm tra xem có báo cáo nào đã tồn tại với customer_id, monthly, shipment_type giống nhau không
+                $conflictingReport = \App\Models\ShipmentReport::where('customer_id', $carRental->customer_id)
+                    ->where('monthly', $period)
+                    ->where('shipment_type', $carRental->type == 1 ? 21 : 22)
+                    ->whereNull('car_rental_id')
+                    ->first();
+                    
+                if ($conflictingReport) {
+                    // Cập nhật báo cáo đã tồn tại để thêm car_rental_id
+                    $conflictingReport->update([
+                        'car_rental_id' => $carRental->id,
+                        'total_amount' => $summary['total_with_vat'],
+                        'statement_start_date' => $startDate,
+                        'statement_end_date' => $endDate,
+                        'updated_by' => $userId,
+                        'is_finalized' => true
+                    ]);
+                    $report = $conflictingReport;
+                } else {
+                    // Tạo báo cáo mới
+                    $report = \App\Models\ShipmentReport::create([
+                        'customer_id' => $carRental->customer_id,
+                        'monthly' => $period,
+                        'shipment_type' => $carRental->type == 1 ? 21 : 22,
+                        'statement_start_date' => $startDate,
+                        'statement_end_date' => $endDate,
+                        'car_rental_id' => $carRental->id,
+                        'total_amount' => $summary['total_with_vat'],
+                        'created_by' => $userId,
+                        'updated_by' => $userId,
+                        'is_finalized' => true
+                    ]);
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Tổng kết công nợ thành công',
+                'data' => [
+                    'period' => $period,
+                    'total_amount' => $summary['total_with_vat'],
+                    'formatted_amount' => number_format($summary['total_with_vat'], 0, ',', '.'),
+                    'shipment_count' => $shipments->count(),
+                    'report_id' => $report->id,
+                    'created_at' => $report->created_at->format('d/m/Y H:i'),
+                    'updated_at' => $report->updated_at->format('d/m/Y H:i')
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error summarizing car rental debt', [
+                'car_rental_id' => $carRental->id,
+                'start_date' => $request->input('start_date'),
+                'end_date' => $request->input('end_date'),
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi khi tổng kết công nợ: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Xuất Excel tổng kết công nợ
+     *
+     * @param CarRental $carRental
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportSummary(CarRental $carRental, Request $request)
+    {
+        try {
+            $startDate = $request->input('start_date');
+            $endDate = $request->input('end_date');
+            
+            // Get shipments based on car rental type
+            $shipmentType = $carRental->type == 1 ? 21 : 22; // 21: thuê nguyên xe, 22: thuê kiểu khoáng
+            
+            $shipments = Shipment::where('car_rental_id', $carRental->id)
+                ->where('shipment_type', $shipmentType)
+                ->whereBetween('run_date', [$startDate, $endDate])
+                ->get();
+            
+            if ($shipments->isEmpty()) {
+                return back()->with('error', 'Không có dữ liệu chuyến hàng trong khoảng thời gian này');
+            }
+            
+            // Calculate summary data
+            $summary = $this->calculateDebtSummary($carRental, $shipments, $startDate, $endDate);
+            
+            // Tìm hoặc tạo báo cáo
+            $period = date('Y-m', strtotime($startDate));
+            if ($startDate != $endDate && date('Y-m', strtotime($startDate)) != date('Y-m', strtotime($endDate))) {
+                $period = date('Y-m', strtotime($startDate)) . ' - ' . date('Y-m', strtotime($endDate));
+            }
+            
+            // Kiểm tra xem có báo cáo nào đã tồn tại với car_rental_id này không
+            $report = \App\Models\ShipmentReport::where('car_rental_id', $carRental->id)
+                ->where('monthly', $period)
+                ->first();
+                
+            if (!$report) {
+                // Kiểm tra xem có báo cáo nào đã tồn tại với customer_id, monthly, shipment_type giống nhau không
+                $conflictingReport = \App\Models\ShipmentReport::where('customer_id', $carRental->customer_id)
+                    ->where('monthly', $period)
+                    ->where('shipment_type', $carRental->type == 1 ? 21 : 22)
+                    ->whereNull('car_rental_id')
+                    ->first();
+                    
+                if ($conflictingReport) {
+                    // Cập nhật báo cáo đã tồn tại để thêm car_rental_id
+                    $conflictingReport->update([
+                        'car_rental_id' => $carRental->id,
+                        'total_amount' => $summary['total_with_vat'],
+                        'statement_start_date' => $startDate,
+                        'statement_end_date' => $endDate,
+                        'updated_by' => auth('admin')->id(),
+                        'is_finalized' => true
+                    ]);
+                    $report = $conflictingReport;
+                } else {
+                    // Tạo báo cáo mới
+                    $report = \App\Models\ShipmentReport::create([
+                        'customer_id' => $carRental->customer_id,
+                        'monthly' => $period,
+                        'shipment_type' => $carRental->type == 1 ? 21 : 22,
+                        'statement_start_date' => $startDate,
+                        'statement_end_date' => $endDate,
+                        'car_rental_id' => $carRental->id,
+                        'total_amount' => $summary['total_with_vat'],
+                        'created_by' => auth('admin')->id(),
+                        'updated_by' => auth('admin')->id(),
+                        'is_finalized' => true
+                    ]);
+                }
+            }
+            
+            $fileName = 'Tong_ket_cong_no_' . $carRental->id . '_' . date('Ymd') . '.xlsx';
+            
+            return Excel::download(new \App\Exports\DebtSummaryExport($carRental, $summary, $shipments), $fileName);
+        } catch (\Exception $e) {
+            Log::error('Error exporting car rental debt summary', [
+                'car_rental_id' => $carRental->id,
+                'start_date' => $request->input('start_date'),
+                'end_date' => $request->input('end_date'),
+                'error' => $e->getMessage()
+            ]);
+            
+            return back()->with('error', 'Đã xảy ra lỗi khi xuất tổng kết công nợ: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Tính toán tổng kết công nợ
+     *
+     * @param CarRental $carRental
+     * @param Collection $shipments
+     * @param string $startDate
+     * @param string $endDate
+     * @return array
+     */
+    private function calculateDebtSummary($carRental, $shipments, $startDate, $endDate)
+    {
+        $summary = [];
+        
+        // Thông tin cơ bản
+        $summary['filter_start_date'] = $startDate;
+        $summary['filter_end_date'] = $endDate;
+        $summary['calculation_date'] = now()->format('d/m/Y H:i');
+        $summary['currency'] = 'VND';
+        
+        // Tính toán các chi phí
+        // Tính số tháng
+        $start = \Carbon\Carbon::parse($startDate);
+        $end = \Carbon\Carbon::parse($endDate);
+        // $months = $start->diffInMonths($end) + 1;
+        
+        $summary['monthly_rental_fee'] = $carRental->monthly_rental_fee ?? 0;
+        // $summary['total_months'] = $months;
+        // $summary['monthly_total'] = $summary['monthly_rental_fee'] * $months;
+        
+        // Tổng chi phí tăng ca
+        $summary['total_overtime_cost'] = $shipments->sum('total_overtime_cost') ?? 0;
+        
+        // Tổng phí cầu đường
+        $tollFees = 0;
+        foreach ($shipments as $shipment) {
+            $tollFees += $shipment->tollFees->sum('fee_amount') ?? 0;
+        }
+        $summary['total_toll_fees'] = $tollFees;
+        
+        // Tổng phí đỗ xe
+        $summary['total_parking_fees'] = $shipments->sum('parking_fee') ?? 0;
+        $summary['total_parking_fees_without_vat'] = ($summary['total_parking_fees'] + $summary['total_toll_fees'])/1.08 ?? 0;
+
+        $summary['total_weighing_fees'] = $shipments->sum('weighing_fee') ?? 0;
+        $summary['total_testing_surcharges'] = $shipments->sum('testing_surcharge') ?? 0;
+        
+        // Tổng quãng đường
+        $summary['total_distance'] = $shipments->sum('distance') ?? 0;
+        
+        // Phí vượt quãng đường
+        $summary['over_distance_fee'] = 0;
+        if ($carRental->type == 1 && $carRental->max_distance > 0) {
+            $maxDistance = $carRental->max_distance;
+            if ($summary['total_distance'] > $maxDistance) {
+                // dd($maxDistance);
+                $overDistance = $summary['total_distance'] - $maxDistance;
+                $summary['over_distance_fee'] = (int) $overDistance * (int)($carRental->over_distance_fee_per_km ?? 0);
+            }
+        }
+        
+        // Tổng cộng (chưa VAT)
+        if ($carRental->type == 2) {
+            // Nếu là thuê xe kiểu khoáng, không tính monthly_rental_fee
+            $summary['subtotal'] = $carRental->monthly_rental_fee;
+        } else {
+            // Nếu là thuê nguyên xe tính theo chuyến
+            $summary['subtotal'] = $carRental->monthly_rental_fee + 
+                                  $summary['total_overtime_cost'] + 
+                                  $summary['total_parking_fees_without_vat'] + 
+                                  $summary['total_toll_fees'] + 
+                                  $summary['total_weighing_fees'] + 
+                                  $summary['total_testing_surcharges'] + 
+                                  $summary['over_distance_fee'];
+        }
+        
+        // VAT
+        $summary['vat_rate'] = $carRental->customer->vat_rate ?? 8; // Default 8%
+        $summary['vat_amount'] = $summary['subtotal'] * ($summary['vat_rate'] / 100);
+        
+        // Tổng cộng (có VAT)
+        $summary['total_with_vat'] = $summary['subtotal'] + $summary['vat_amount'];
+        
+        // Đã thanh toán và còn nợ
+        $summary['paid_amount'] = 0; // Tạm thời để 0, cần phát triển thêm tính năng theo dõi thanh toán
+        $summary['remaining_debt'] = $summary['total_with_vat'] - $summary['paid_amount'];
+        
+        return $summary;
+    }
+
+    /**
+     * Chuyển đổi thời gian từ format H:i hoặc H:i:s thành số phút
+     * Ví dụ: "05:00" -> 300, "17:30" -> 1050
+     */
+    private function timeToMinutes($timeString)
+    {
+        $parts = explode(':', $timeString);
+        $hours = (int)$parts[0];
+        $minutes = (int)$parts[1];
+        
+        return ($hours * 60) + $minutes;
     }
 }
