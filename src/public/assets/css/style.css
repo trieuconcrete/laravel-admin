@@ -4,6 +4,9 @@ img.w-24 {
 img.h-24 {
     height: 240px;
 }
+img.object-cover {
+    object-fit: cover;
+}
 .img-avatar-table {
     width: 64px;
     height: 64px;
