@@ -170,7 +170,8 @@
                                             @endif
                                             <button type="button"
                                                     class="btn btn-sm btn-outline-danger delete-shipment-btn"
-                                                    data-shipment-id="{{ $shipment->id }}">
+                                                    data-shipment-id="{{ $shipment->id }}"
+                                                    @disabled($shipment->status != \App\Models\Shipment::STATUS_PENDING)>
                                                 Xóa
                                             </button>
                                             
