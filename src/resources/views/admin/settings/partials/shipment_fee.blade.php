@@ -72,7 +72,7 @@
                 <td>{{ $item->created_at->format('Y-m-d H:i:s') }}</td>
                 <td>{{ $item->updated_at->format('Y-m-d H:i:s') }}</td>
                 <td>
-                    <div class="btn-group" role="group">
+                    {{-- <div class="btn-group" role="group">
                         <a href="{{ route('admin.shipment-deduction-types.show', $item) }}" class="btn btn-sm btn-info">
                             <i class="ri-eye-line"></i>
                         </a>
@@ -82,7 +82,7 @@
                         <button type="button" class="btn btn-sm btn-danger delete-btn" data-id="{{ $item->id }}">
                             <i class="ri-delete-bin-line"></i>
                         </button>
-                    </div>
+                    </div> --}}
                 </td>
             </tr>
             @empty
