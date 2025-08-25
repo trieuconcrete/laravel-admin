@@ -17,7 +17,8 @@ class StoreSalaryAdvanceRequestRequest extends FormRequest
      */
     public function authorize()
     {
-        return true;
+        // Sử dụng Policy để kiểm tra quyền tạo
+        return $this->user()->can('create', SalaryAdvanceRequest::class);
     }
 
     /**
