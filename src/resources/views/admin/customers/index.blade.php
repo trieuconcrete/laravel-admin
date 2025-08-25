@@ -71,6 +71,7 @@
                                     <th>Thao tác</th>
                                     <th>Mã KH</th>
                                     <th>Tên khách hàng</th>
+                                    <th>Mã số thuế</th>
                                     <th>Loại</th>
                                     <th>Điện thoại</th>
                                     <th>Email</th>
@@ -98,6 +99,7 @@
                                         </td>
                                         <td>{{ $customer->customer_code }}</td>
                                         <td>{{ $customer->name }}</td>
+                                        <td>{{ $customer->tax_code }}</td>
                                         <td><span class="badge bg-{{ $customer->type_badge_class }}">{{ $customer->type_label }}</span></td>
                                         <td>{{ $customer->phone }}</td>
                                         <td>{{ $customer->email }}</td>

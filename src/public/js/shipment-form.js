@@ -252,7 +252,7 @@ function addGoodRow(goodsTable, goodsCount) {
             <div class="text-danger" id="error-goods-${goodsCount}-quantity"></div>
         </td>
         <td>
-            <input type="number" name="goods[${goodsCount}][weight]" class="form-control form-control-sm" min="0">
+            <input type="text" name="goods[${goodsCount}][weight]" class="form-control form-control-sm float-input" min="0">
             <div class="text-danger" id="error-goods-${goodsCount}-weight"></div>
         </td>
         <td>

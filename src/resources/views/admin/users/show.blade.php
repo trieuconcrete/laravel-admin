@@ -171,6 +171,13 @@
                                                     @enderror
                                                 </div>
                                             </div>
+                                            <div class="col-xxl-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Lương phần trăm doanh số </label>
+                                                    <input type="text" name="salary_by_percent" class="form-control float-input" placeholder="Nhập lương phần trăm doanh số" value="{{ old('salary_by_percent', $user->salary_by_percent) }}">
+                                                    <div class="text-danger error" data-field="salary_by_percent"></div>
+                                                </div>
+                                            </div>
                                             @endif
                                             <!--end col-->
                                             <div class="col-lg-12">

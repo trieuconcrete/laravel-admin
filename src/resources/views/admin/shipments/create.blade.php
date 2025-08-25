@@ -159,8 +159,8 @@
                                                     @error('distance')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Khối lượng (kg)</label>
-                                                    <input type="text" class="form-control number" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight') }}">
+                                                    <label class="form-label">Khối lượng (tấn)</label>
+                                                    <input type="text" class="form-control float-input" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight') }}">
                                                     @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
@@ -268,8 +268,8 @@
                                                                 <th>Tên hàng hóa</th>
                                                                 <th>Mô tả</th>
                                                                 <th>Số lượng</th>
-                                                                <th>Trọng lượng (kg)</th>
-                                                                <th>Giá trị (VNĐ)</th>
+                                                                <th>Trọng lượng (tấn)</th>
+                                                                <th>Giá(VNĐ)<small class="text-muted">Trên mỗi tấn</small></th>
                                                                 <th></th>
                                                             </tr>
                                                         </thead>
@@ -294,7 +294,7 @@
                                                                             @error('goods.'.$i.'.quantity')<span class="text-danger">{{ $message }}</span>@enderror
                                                                         </td>
                                                                         <td>
-                                                                            <input type="number" name="goods[{{ $i }}][weight]" class="form-control form-control-sm" min="0"  value="{{ old('goods.'.$i.'.weight', $good['weight'] ?? '') }}">
+                                                                            <input type="text" name="goods[{{ $i }}][weight]" class="form-control form-control-sm float-input" min="0"  value="{{ old('goods.'.$i.'.weight', $good['weight'] ?? '') }}">
                                                                             @error('goods.'.$i.'.weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                                         </td>
                                                                         <td>
@@ -321,7 +321,7 @@
                                                                         <div class="text-danger" id="error-goods-0-quantity">@error('goods.0.quantity'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="number" name="goods[0][weight]" class="form-control form-control-sm" min="0"  value="{{ old('goods.0.weight') }}">
+                                                                        <input type="text" name="goods[0][weight]" class="form-control form-control-sm float-input" min="0"  value="{{ old('goods.0.weight') }}">
                                                                         <div class="text-danger" id="error-goods-0-weight">@error('goods.0.weight'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
