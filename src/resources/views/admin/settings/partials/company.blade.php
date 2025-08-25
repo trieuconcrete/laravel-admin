@@ -47,16 +47,16 @@
                 <div class="col">
                     <div class="mb-3">
                         <label for="salary_start_date" class="form-label">Ngày bắt đầu tính lương</label>
-                        <input type="date" class="form-control" name="company[salary_start_date]"
-                            value="@formatDateForInput(old('company.salary_start_date', $settings['company']->where('key', 'salary_start_date')->first()->value ?? ''))">
+                        <input type="text" class="form-control" name="company[salary_start_date]"
+                            value="{{ (old('company.salary_start_date', $settings['company']->where('key', 'salary_start_date')->first()->value ?? '')) }}">
                         <div class="text-danger error" data-field="company[salary_start_date]"></div>
                     </div>
                 </div>
                 <div class="col">
                     <div class="mb-3">
                         <label for="salary_end_date" class="form-label">Ngày kết thúc tính lương</label>
-                        <input type="date" class="form-control" name="company[salary_end_date]"
-                            value="@formatDateForInput(old('company.salary_end_date', $settings['company']->where('key', 'salary_end_date')->first()->value ?? ''))">
+                        <input type="text" class="form-control" name="company[salary_end_date]"
+                            value="{{ (old('company.salary_end_date', $settings['company']->where('key', 'salary_end_date')->first()->value ?? '')) }}">
                         <div class="text-danger error" data-field="company[salary_end_date]"></div>
                     </div>
                 </div>

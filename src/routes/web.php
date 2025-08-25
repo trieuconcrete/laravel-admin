@@ -43,9 +43,13 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::get('users-export', [UserController::class, 'export'])->name('users.export');
     Route::get('users/{user}/export-salary', [UserController::class, 'exportSalary'])->name('users.export-salary');
     Route::prefix('users/{user}')->group(function () {
-        Route::post('salary-advance-requests', [UserController::class, 'createSalaryAdvanceRequest'])->name('users.salary-advance-requests.store');
+        Route::post('salary-advance-requests', [UserController::class, 'createSalaryAdvanceRequest'])
+            ->name('users.salary-advance-requests.store')
+            ->middleware('App\Http\Middleware\CheckSalaryAdvanceRequestPermission');
         Route::get('salary-advance-requests', [UserController::class, 'getSalaryAdvanceRequests'])->name('users.salary-advance-requests.index');
-        Route::put('salary-advance-requests/{request}', [UserController::class, 'updateSalaryAdvanceRequest'])->name('users.salary-advance-requests.update');
+        Route::put('salary-advance-requests/{request}', [UserController::class, 'updateSalaryAdvanceRequest'])
+            ->name('users.salary-advance-requests.update')
+            ->middleware('App\Http\Middleware\CheckSalaryAdvanceRequestPermission');
     });
 
     Route::get('profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -95,7 +99,9 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('salary', SalaryController::class);
     Route::post('salary/sync', [SalaryController::class, 'sync'])->name('salary.sync');
     Route::post('salary/{salary}/pay', [SalaryController::class, 'processPayment'])->name('salary.pay');
-    Route::post('salary/process-advance-request/{requestId}', [SalaryController::class, 'processAdvanceRequest'])->name('salary.process-advance-request');
+    Route::post('salary/process-advance-request/{requestId}', [SalaryController::class, 'processAdvanceRequest'])
+        ->name('salary.process-advance-request')
+        ->middleware('App\Http\Middleware\CheckSalaryAdvanceRequestPermission');
     
     // Quản lý cài đặt
     Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');

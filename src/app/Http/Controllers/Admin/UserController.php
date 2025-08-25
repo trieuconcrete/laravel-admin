@@ -276,7 +276,8 @@ class UserController extends Controller
      */
     public function createSalaryAdvanceRequest(User $user, StoreSalaryAdvanceRequestRequest $request): JsonResponse
     {
-        $this->authorize('view', $user);
+        // Kiểm tra quyền tạo SalaryAdvanceRequest
+        $this->authorize('create', SalaryAdvanceRequest::class);
         
         DB::beginTransaction();
         try {
@@ -359,6 +360,9 @@ class UserController extends Controller
             $salaryAdvanceRequest = SalaryAdvanceRequest::where('id', $requestId)
                 ->where('user_id', $user->id)
                 ->firstOrFail();
+
+            // Kiểm tra quyền update SalaryAdvanceRequest
+            $this->authorize('update', $salaryAdvanceRequest);
 
             // Store old status for comparison
             $oldStatus = $salaryAdvanceRequest->status;
