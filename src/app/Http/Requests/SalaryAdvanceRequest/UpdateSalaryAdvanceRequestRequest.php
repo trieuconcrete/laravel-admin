@@ -17,7 +17,12 @@ class UpdateSalaryAdvanceRequestRequest extends FormRequest
      */
     public function authorize()
     {
+        // Tạm thời return true để debug Policy trước
         return true;
+        
+        // TODO: Uncomment sau khi debug xong
+        // $salaryAdvanceRequest = $this->route('request');
+        // return $this->user()->can('update', $salaryAdvanceRequest);
     }
 
     /**

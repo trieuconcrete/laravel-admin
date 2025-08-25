@@ -785,6 +785,10 @@ class SalaryController extends Controller
             DB::beginTransaction();
             
             $advanceRequest = SalaryAdvanceRequest::with(['user'])->findOrFail($requestId);
+            
+            // Kiểm tra quyền update SalaryAdvanceRequest
+            $this->authorize('update', $advanceRequest);
+            
             $action = $request->input('action'); // 'approve' or 'reject'
             $notes = $request->input('notes', '');
             
