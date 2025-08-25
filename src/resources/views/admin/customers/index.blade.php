@@ -107,10 +107,9 @@
                             </tbody>
                         </table>
                     </div>
-
-                    {{ $customers->links('vendor.pagination.bootstrap-5') }}
                 </div>
             </div>
+            {{ $customers->links('vendor.pagination.bootstrap-5') }}
         </div> <!-- end col -->
     </div>
 
