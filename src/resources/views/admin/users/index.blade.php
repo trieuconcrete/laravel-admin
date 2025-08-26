@@ -221,16 +221,17 @@
                         </div>
                         <div class="col-xxl-6">
                             <label class="form-label">Loại lương tài xế</label>
-                            <select name="salary_type" class="form-select">
+                            <select name="salary_type" id="salaryTypeCreate" class="form-select">
                                 <option value="1">Tài xế ăn lương cơ bản</option>
                                 <option value="2">Tài xế ăn lương doanh số</option>
                             </select>
                             <div class="text-danger error" data-field="salary_type"></div>
                         </div>
-                        <div class="col-xxl-6">
-                            <label class="form-label">Lương phần trăm doanh số </label>
-                            <input type="text" name="salary_by_percent" class="form-control float-input" placeholder="Nhập lương phần trăm doanh số" value="{{ old('salary_by_percent', 12) }}">
+                        <div class="col-xxl-6" id="salaryByPercentContainerCreate" style="display: none;">
+                            <label class="form-label">Lương phần trăm doanh số (%) <span class="text-muted">*Mặc định: 12%</span></label>
+                            <input type="number" name="salary_by_percent" class="form-control" placeholder="Nhập phần trăm (VD: 12)" value="{{ old('salary_by_percent', 12) }}" min="1" max="100" step="0.01">
                             <div class="text-danger error" data-field="salary_by_percent"></div>
+                            <small class="text-muted">Phần trăm lương theo doanh số (áp dụng cho tài xế ăn lương doanh số)</small>
                         </div>
                         <div class="col-lg-12">
                             <label class="form-label">Địa chỉ </label>
@@ -522,6 +523,29 @@
                 });
             }
         });
+    });
+
+    // Handle salary type change to show/hide salary_by_percent input for create form
+    $(document).ready(function() {
+        $('#salaryTypeCreate').on('change', function() {
+            const salaryType = $(this).val();
+            const salaryByPercentContainer = $('#salaryByPercentContainerCreate');
+            const salaryByPercentInput = salaryByPercentContainer.find('input[name="salary_by_percent"]');
+            
+            if (salaryType === '2') { // Tài xế ăn lương doanh số
+                salaryByPercentContainer.show();
+                // Set default value nếu input rỗng
+                if (!salaryByPercentInput.val()) {
+                    salaryByPercentInput.val(12);
+                }
+            } else { // Tài xế ăn lương cơ bản
+                salaryByPercentContainer.hide();
+                salaryByPercentInput.val(''); // Clear value khi hide
+            }
+        });
+        
+        // Trigger change event on page load để set đúng trạng thái
+        $('#salaryTypeCreate').trigger('change');
     });
 </script>
 @endpush

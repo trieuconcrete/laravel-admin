@@ -251,18 +251,19 @@ class SalaryController extends Controller
                 ->where('status', 'completed')
                 ->get();
             
-            // Tính tổng giá trị chuyến xe: sum(unit_price * trip_count)
+            // Tính tổng giá trị chuyến xe: sum(unit_price_for_driver * trip_count) cho commission salary
             $totalTripValue = 0;
             $tripCount = $shipments->count();
             
             foreach ($shipments as $shipment) {
-                $unitPrice = $shipment->unit_price ?? 0;
+                // Chỉ sử dụng unit_price_for_driver, nếu null hoặc 0 thì giữ 0
+                $unitPrice = $shipment->unit_price_for_driver ?? 0;
                 $tripCountPerShipment = $shipment->trip_count ?? 1;
                 $totalTripValue += ($unitPrice * $tripCountPerShipment);
             }
             
-            // Tính lương cơ bản = 12% của tổng giá trị chuyến xe
-            $commissionRate = 0.12; // 12%
+            // Tính lương cơ bản = X% của tổng giá trị chuyến xe (X từ user.salary_by_percent)
+            $commissionRate = $user->getSalaryByPercent() / 100; // Convert percentage to decimal
             $baseSalary = $totalTripValue * $commissionRate;
             $commissionAmount = $baseSalary; // Commission amount = base salary cho loại này
             
@@ -331,10 +332,11 @@ class SalaryController extends Controller
                 ->where('status', 'completed')
                 ->get();
             
-            // Tính tổng giá trị chuyến xe
+            // Tính tổng giá trị chuyến xe cho commission salary
             $totalTripValue = 0;
             foreach ($shipments as $shipment) {
-                $unitPrice = $shipment->unit_price ?? 0;
+                // Chỉ sử dụng unit_price_for_driver, nếu null hoặc 0 thì giữ 0
+                $unitPrice = $shipment->unit_price_for_driver ?? 0;
                 $tripCount = $shipment->trip_count ?? 1;
                 $totalTripValue += ($unitPrice * $tripCount);
             }
