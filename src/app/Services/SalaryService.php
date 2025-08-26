@@ -284,6 +284,7 @@ class SalaryService
             'penalty' => $salaryDetails['totalTypePenalty'],
             'other_deduction' => $salaryDetails['totalTypeSalary'],
             'salary_type' => $user->salary_type?->value ?? SalaryType::BASIC_SALARY->value,
+            'salary_by_percent' => $user->isCommissionSalaryType() ? $user->getSalaryByPercent() : null,
         ];
 
         // Only update status if not already paid
@@ -420,8 +421,9 @@ class SalaryService
         
         // Calculate total trip value and allowances
         foreach ($shipments as $shipment) {
-            // Tính tổng giá trị chuyến xe: sum(unit_price * trip_count)
-            $unitPrice = $shipment->unit_price ?? 0;
+            // Tính tổng giá trị chuyến xe: sum(unit_price_for_driver * trip_count) cho commission salary
+            // Chỉ sử dụng unit_price_for_driver, nếu null hoặc 0 thì giữ 0
+            $unitPrice = $shipment->unit_price_for_driver ?? 0;
             $tripCount = $shipment->trip_count ?? 1;
             $totalTripValue += ($unitPrice * $tripCount);
             
@@ -429,8 +431,9 @@ class SalaryService
             $totalAllowance += $shipment->shipmentDeductionTypeDriverAndBusboy($user->id)->sum('amount') ?? 0;
         }
         
-        // Lương cơ bản = 12% của tổng giá trị chuyến xe
-        $baseSalary = $totalTripValue * 0.12; // 12% commission
+        // Lương cơ bản = X% của tổng giá trị chuyến xe (X từ user.salary_by_percent)
+        $commissionRate = $user->getSalaryByPercent() / 100; // Convert percentage to decimal
+        $baseSalary = $totalTripValue * $commissionRate;
         $totalCommission = $baseSalary; // Commission amount = base salary cho loại này
         
         // Calculate total before insurance
