@@ -66,6 +66,8 @@ class UpdateUserRequest extends FormRequest
                     'notes' => ['nullable', 'string'],
                     'id_number' => 'required|max:20',
                     'salary_base' => ['nullable', 'numeric', 'min:0'],
+                    'salary_type' => ['nullable', 'integer', 'in:1,2'],
+                    'salary_by_percent' => ['nullable', 'numeric', 'min:1', 'max:100'],
                     'address' => 'nullable|max:100',
                     'tab' => 'nullable|string',
                     'join_date' => 'nullable|' . $this->getSystemDateFormatRule(),

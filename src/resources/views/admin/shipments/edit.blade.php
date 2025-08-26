@@ -268,7 +268,7 @@
                                                                 <th>Tên hàng hóa</th>
                                                                 <th>Mô tả</th>
                                                                 <th>Số lượng</th>
-                                                                <th>Trọng lượng (kg)</th>
+                                                                <th>Trọng lượng (tấn)</th>
                                                                 <th>Giá trị (VNĐ)</th>
                                                                 <th></th>
                                                             </tr>
@@ -290,7 +290,7 @@
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-quantity">@error('goods.'.$i.'.quantity'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][weight]" class="form-control form-control-sm" min="0" value="{{ old('goods.'.$i.'.weight', $good->weight) }}">
+                                                                            <input type="text" name="goods[{{ $i }}][weight]" class="form-control form-control-sm float-input" min="0" value="{{ old('goods.'.$i.'.weight', $good->weight) }}">
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-weight">@error('goods.'.$i.'.weight'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
@@ -318,7 +318,7 @@
                                                                         <div class="text-danger" id="error-goods-0-quantity">@error('goods.0.quantity'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][weight]" class="form-control form-control-sm" min="0" value="{{ old('goods.0.weight') }}">
+                                                                        <input type="text" name="goods[0][weight]" class="form-control form-control-sm float-input" min="0" value="{{ old('goods.0.weight') }}">
                                                                         <div class="text-danger" id="error-goods-0-weight">@error('goods.0.weight'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
@@ -346,24 +346,26 @@
                                                         </label>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-6">
+                                                <div class="col-md-10">
                                                     <div class="row">
-                                                        <div class="col-md-3">
-                                                            <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
+                                                        <div class="col-md-6">
+                                                             <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
+                                                            <select class="form-select" name="vehicle_id" id="vehicles">
+                                                                <option value="">Chọn phương tiện</option>
+                                                                @foreach($vehicles as $vehicle)
+                                                                    <option value="{{ (int)$vehicle->vehicle_id }}" @selected(old('vehicle_id', $shipment->vehicle_id) == (int)$vehicle->vehicle_id)>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
+                                                                @endforeach
+                                                            </select>
+                                                            @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
+                                                             <!-- Loading spinner (hidden by default) -->
+                                                            <div class="spinner-border spinner-border-sm text-primary mt-2" id="vehicle_loading" style="display: none;">
+                                                                <span class="visually-hidden">Loading...</span>
+                                                            </div>
                                                         </div>
-                                                    <div class="col-md-7">
-                                                        <select class="form-select" name="vehicle_id" id="vehicles">
-                                                            <option value="">Chọn phương tiện</option>
-                                                            @foreach($vehicles as $vehicle)
-                                                                <option value="{{ (int)$vehicle->vehicle_id }}" @selected(old('vehicle_id', $shipment->vehicle_id) == (int)$vehicle->vehicle_id)>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                        @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-2">
-                                                        <!-- Loading spinner (hidden by default) -->
-                                                        <div class="spinner-border spinner-border-sm text-primary mt-2" id="vehicle_loading" style="display: none;">
-                                                            <span class="visually-hidden">Loading...</span>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Giá chuyến</label>
+                                                            <small class="text-muted">Chi phí HPL trả cho tài xế(12%)</small>
+                                                            <input type="text" class="form-control number" placeholder="Nhập giá chuyến trả cho tài xế" name="unit_price_for_driver" value="{{ old('unit_price_for_driver', $shipment->unit_price_for_driver) }}">
                                                         </div>
                                                     </div>
                                                 </div>
@@ -545,7 +547,8 @@
                                                 </div>
                                             </div>
                                             <div id="carRental" class="mt-3">
-                                                <div class="row">
+                                                <hr>
+                                                <div class="row mb-3">
                                                     <div class="col-md-6">
                                                         <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
                                                         <small class="text-muted">Chi phí HPL trả cho đối tác cho thuê xe</small>
@@ -553,7 +556,6 @@
                                                         @error('unit_price_for_car_rental')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
                                                 </div>
-                                                <hr>
                                                 <div class="mb-3">
                                                     <label class="form-label fs-5">Chi phí chuyến xe</label> <small class="text-muted">Chi phí HPL trả cho đối tác cho thuê xe</small>
                                                     <div class="table-responsive">

@@ -139,6 +139,7 @@ class ShipmentService
                 'is_overtime_at_noon' => $data['is_overtime_at_noon'] ?? false,
                 'created_by' => auth('admin')->id(),
                 'unit_price_for_car_rental' => $data['unit_price_for_car_rental'] ?? null,
+                'unit_price_for_driver' => $data['unit_price_for_driver'] ?? $data['unit_price'],
             ];
 
             $shipment = Shipment::create($shipmentData);
@@ -314,6 +315,7 @@ class ShipmentService
 
             // 1. Cập nhật thông tin cơ bản của shipment
             $shipmentData = $data;
+            $shipmentData['unit_price_for_driver'] = $data['unit_price_for_driver'] ?? $data['unit_price']; // Ensure unit_price_for_driver is set
             unset($shipmentData['goods'], $shipmentData['deductions'], $shipmentData['drivers']);
             $shipment->update($shipmentData);
             

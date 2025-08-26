@@ -268,15 +268,17 @@ class UserService
         $commissionAmount = 0;
         
         if ($salaryType == 2) { // COMMISSION_SALARY - Lương doanh số
-            // Tính tổng giá trị chuyến xe: sum(unit_price * trip_count)
+            // Tính tổng giá trị chuyến xe: sum(unit_price_for_driver * trip_count) cho commission salary
             foreach ($shipments as $shipment) {
-                $unitPrice = $shipment->unit_price ?? 0;
+                // Chỉ sử dụng unit_price_for_driver, nếu null hoặc 0 thì giữ 0
+                $unitPrice = $shipment->unit_price_for_driver ?? 0;
                 $tripCountPerShipment = $shipment->trip_count ?? 1;
                 $totalTripValue += ($unitPrice * $tripCountPerShipment);
             }
             
-            // Lương cơ bản = 12% của tổng giá trị chuyến xe
-            $salaryBase = $totalTripValue * 0.12; // 12%
+            // Lương cơ bản = X% của tổng giá trị chuyến xe (X từ user.salary_by_percent)
+            $commissionRate = $user->getSalaryByPercent() / 100; // Convert percentage to decimal
+            $salaryBase = $totalTripValue * $commissionRate;
             $commissionAmount = $salaryBase;
         } else { // BASIC_SALARY - Lương cơ bản
             $salaryBase = $user->salary_base ?? 0;

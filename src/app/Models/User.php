@@ -56,7 +56,8 @@ class User extends Authenticatable
         'notes',
         'salary_advance_amount',
         'join_date',
-        'salary_type'
+        'salary_type',
+        'salary_by_percent'
     ];
 
     /**
@@ -323,5 +324,36 @@ class User extends Authenticatable
     public static function getSalaryTypes(): array
     {
         return SalaryType::getTypes();
+    }
+
+    /**
+     * Get salary by percent for commission calculation
+     * 
+     * @return float
+     */
+    public function getSalaryByPercent(): float
+    {
+        // Nếu user không có loại lương commission thì return 0
+        if (!$this->isCommissionSalaryType()) {
+            return 0;
+        }
+        
+        // Return giá trị salary_by_percent, mặc định 12% nếu null
+        return (float) ($this->salary_by_percent ?? 12.00);
+    }
+
+    /**
+     * Set salary by percent (chỉ cho commission salary type)
+     * 
+     * @param float|null $percent
+     * @return void
+     */
+    public function setSalaryByPercent(?float $percent): void
+    {
+        if ($this->isCommissionSalaryType()) {
+            $this->salary_by_percent = $percent;
+        } else {
+            $this->salary_by_percent = null;
+        }
     }
 }
