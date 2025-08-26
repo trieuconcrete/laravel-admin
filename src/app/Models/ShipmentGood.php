@@ -14,6 +14,10 @@ class ShipmentGood extends Model
         'weight',
         'notes'
     ];
+    protected $casts = [
+        'quantity' => 'integer',
+        'weight' => 'float',
+    ];
 
     public function shipment()
     {

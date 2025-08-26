@@ -47,6 +47,7 @@ class Shipment extends Model
         'distance', // số km
         'unit_price', // giá chuyến hàng
         'unit_price_for_car_rental', // giá chuyến hàng
+        'unit_price_for_driver', // giá chuyến hàng cho tài xế
         'trip_count', // số lượng chuyến hàng
         'crane_price',
         'has_crane_service',
@@ -86,6 +87,7 @@ class Shipment extends Model
         'unit_price' => 'decimal:2',
         'trip_count' => 'decimal:2',
         'unit_price_for_car_rental' => 'decimal:2',
+        'unit_price_for_driver' => 'decimal:2',
         'crane_price' => 'decimal:2', // Cast cho trường đơn giá cẩu hàng
         'has_crane_service' => 'boolean', // Cast cho trường có dịch vụ cẩu hàng
         'created_at' => 'datetime',
