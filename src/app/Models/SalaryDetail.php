@@ -58,7 +58,8 @@ class SalaryDetail extends Model
         'approved_by',
         'total_allowance',
         'total_expenses',
-        'salary_type' // 1: Tài xế ăn lương cơ bản, 2: Tài xế ăn lương doanh số
+        'salary_type', // 1: Tài xế ăn lương cơ bản, 2: Tài xế ăn lương doanh số
+        'salary_by_percent' // Phần trăm lương theo doanh số - snapshot khi tạo kỳ lương
     ];
 
     /**
@@ -232,5 +233,36 @@ class SalaryDetail extends Model
     public function isCommissionSalaryType(): bool
     {
         return $this->salary_type?->isCommissionSalary() ?? false;
+    }
+
+    /**
+     * Get commission percentage for this salary detail
+     * 
+     * @return float
+     */
+    public function getCommissionPercentage(): float
+    {
+        // Nếu không phải commission salary type thì return 0
+        if (!$this->isCommissionSalaryType()) {
+            return 0;
+        }
+        
+        // Return giá trị salary_by_percent, mặc định 12% nếu null
+        return (float) ($this->salary_by_percent ?? 12.00);
+    }
+
+    /**
+     * Set commission percentage (chỉ cho commission salary type)
+     * 
+     * @param float|null $percent
+     * @return void
+     */
+    public function setCommissionPercentage(?float $percent): void
+    {
+        if ($this->isCommissionSalaryType()) {
+            $this->salary_by_percent = $percent;
+        } else {
+            $this->salary_by_percent = null;
+        }
     }
 }

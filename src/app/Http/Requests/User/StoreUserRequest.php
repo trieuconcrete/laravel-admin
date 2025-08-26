@@ -57,6 +57,7 @@ class StoreUserRequest extends FormRequest
             'join_date' => ['nullable', $this->getSystemDateFormatRule()],
             'salary_base' => ['nullable', 'numeric'],
             'salary_type' => ['nullable', 'integer', 'in:1,2'],
+            'salary_by_percent' => ['nullable', 'numeric', 'min:1', 'max:100'],
             'status' => ['required'],
             'gender' => 'nullable',
             'address' => ['nullable', 'string', 'max:255'],

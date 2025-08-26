@@ -48,8 +48,7 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
             $keyword = $filters['keyword'];
             $query->where(function ($q) use ($keyword) {
                 $q->where('customer_code', 'like', '%' . $keyword . '%')
-                    ->orWhere('name', 'like', '%' . $keyword . '%')
-                    ->orWhere('manufacemailtured_year', 'like', '%' . $keyword . '%');
+                    ->orWhere('name', 'like', '%' . $keyword . '%');
             });
         }
 
