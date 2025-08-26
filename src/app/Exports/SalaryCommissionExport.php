@@ -150,7 +150,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         if (!empty($licenseNumber)) {
             $userInfo .= ' (XE ' . $licenseNumber . ')';
         }
-        $userInfo .= ' - LƯƠNG DOANH SỐ (12%)';
+        $userInfo .= ' - LƯƠNG DOANH SỐ (' . $this->user->getSalaryByPercent() . '%)';
         $sheet->setCellValue('A6', $userInfo);
         $sheet->getStyle('A6')->getFont()->setBold(true)->setSize(12);
         
@@ -179,7 +179,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Base headers for fixed columns
         $baseHeaders = [
-            'STT', 'NGÀY', 'CÔNG TY', 'ĐIỂM ĐI', 'ĐIỂM ĐẾN', 'HÀNG HÓA', 'KM', 'GIÁ', 'KHỐI LƯỢNG THỰC TẾ(KG)', 'THÀNH TIỀN(bao gồm cẩu)', 'THÀNH TIỀN'
+            'STT', 'NGÀY', 'CÔNG TY', 'ĐIỂM ĐI', 'ĐIỂM ĐẾN', 'HÀNG HÓA', 'KM', 'GIÁ CHO TÀI XẾ', 'KHỐI LƯỢNG THỰC TẾ(KG)', 'THÀNH TIỀN(bao gồm cẩu)', 'THÀNH TIỀN'
         ];
         
         // Get all deduction type names for dynamic headers (remove duplicates)
@@ -260,7 +260,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->getColumnDimension('E')->setWidth(20); // ĐIỂM ĐẾN
         $sheet->getColumnDimension('F')->setWidth(15); // HÀNG HÓA
         $sheet->getColumnDimension('G')->setWidth(10); // KM
-        $sheet->getColumnDimension('H')->setWidth(15); // GIÁ
+        $sheet->getColumnDimension('H')->setWidth(15); // GIÁ CHO TÀI XẾ
         $sheet->getColumnDimension('I')->setWidth(20); // KHỐI LƯỢNG THỰC TẾ(KG)
         $sheet->getColumnDimension('J')->setWidth(20); // THÀNH TIỀN(bao gồm cẩu)
         $sheet->getColumnDimension('K')->setWidth(15); // THÀNH TIỀN
@@ -342,11 +342,14 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
                 $goodsNames = $shipment->goods->pluck('name')->implode(', ');
                 $sheet->setCellValue('F' . $row, $goodsNames ?: '-'); // HÀNG HÓA
                 $sheet->setCellValue('G' . $row, $shipment->distance ?? '-'); // KM
-                $sheet->setCellValue('H' . $row, $shipment->unit_price ?? '-'); // GIÁ
+                // Hiển thị unit_price_for_driver, nếu null/0 thì hiển thị unit_price để tham khảo
+                $displayPrice = $shipment->unit_price_for_driver ?? $shipment->unit_price ?? '-';
+                $sheet->setCellValue('H' . $row, $displayPrice); // GIÁ CHO TÀI XẾ
                 $sheet->setCellValue('I' . $row, $shipment->actual_weight ?? '-'); // KHỐI LƯỢNG THỰC TẾ(KG)
                 
-                // THÀNH TIỀN(bao gồm cẩu) = (Giá chuyến × Số lượng chuyến) + Chi phí chuyến xe
-                $unitPrice = (float)($shipment->unit_price ?? 0);
+                // THÀNH TIỀN(bao gồm cẩu) = (Giá chuyến cho tài xế × Số lượng chuyến) + Chi phí chuyến xe
+                // Chỉ sử dụng unit_price_for_driver, nếu null hoặc 0 thì giữ 0
+                $unitPrice = (float)($shipment->unit_price_for_driver ?? 0);
                 $tripCount = (int)($shipment->trip_count ?? 1);
                 $tripValue = $unitPrice * $tripCount;
                 
@@ -533,22 +536,23 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $totalTypeBonus = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
         $totalTypePenalty = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
         
-        // Bỏ row LƯƠNG DOANH SỐ (12%) theo yêu cầu
+        // Bỏ row LƯƠNG DOANH SỐ (X%) theo yêu cầu
         // $baseSalaryRow = $row++; // Không tăng row nữa
         
         // Add TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY row
         $totalSalaryRow = $row++;
         
         // Calculate total salary: commission + user-specific deductions only
-        // Tính tổng giá trị chuyến xe: sum(unit_price * trip_count)
+        // Tính tổng giá trị chuyến xe: sum(unit_price_for_driver * trip_count) cho commission salary
         $totalTripValue = 0;
         foreach ($this->shipments as $shipment) {
-            $unitPrice = $shipment->unit_price ?? 0;
+            // Chỉ sử dụng unit_price_for_driver, nếu null hoặc 0 thì giữ 0
+            $unitPrice = $shipment->unit_price_for_driver ?? 0;
             $tripCount = $shipment->trip_count ?? 1;
             $totalTripValue += ($unitPrice * $tripCount);
         }
         
-        $commissionRate = 0.12;
+        $commissionRate = $this->user->getSalaryByPercent() / 100; // Get user's commission rate
         $commissionSalary = $totalTripValue * $commissionRate;
         
         // Tính tổng trợ cấp của user (sum(ShipmentDeduction.user_id == user_id))
@@ -569,18 +573,20 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
 
         $userSpecificDeductions = ShipmentDeduction::where('user_id', $this->user->id)->sum('amount');
         
-        // TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY = (12% của sum(THÀNH TIỀN)) + Tổng trợ cấp của user
+        // TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY = ({$this->user->getSalaryByPercent()}% của sum(THÀNH TIỀN)) + Tổng trợ cấp của user
         $totalSalary = $commissionSalary + $userSpecificDeductions;
         
         // Debug log
         Log::info('Debug TotalSalary Calculation', [
+            'user_id' => $this->user->id,
+            'user_commission_rate' => $this->user->getSalaryByPercent(),
             'totalTripValue' => $totalTripValue,
             'commissionRate' => $commissionRate,
             'commissionSalary' => $commissionSalary,
             'userSpecificDeductions' => $userSpecificDeductions,
             'totalSalary' => $totalSalary,
             'calculation' => 'TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY = (' . $commissionSalary . ') + (' . $userSpecificDeductions . ') = ' . $totalSalary,
-            'formula' => '(12% của sum(THÀNH TIỀN)) + Tổng trợ cấp của user'
+            'formula' => '(' . $this->user->getSalaryByPercent() . '% của sum(THÀNH TIỀN)) + Tổng trợ cấp của user'
         ]);
         
         $sheet->setCellValue('A' . $totalSalaryRow, 'TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY:');

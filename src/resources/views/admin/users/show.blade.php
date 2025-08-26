@@ -162,7 +162,7 @@
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
                                                     <label for="salaryType" class="form-label">Loại lương tài xế</label>
-                                                    <select name="salary_type" class="form-select">
+                                                    <select name="salary_type" id="salaryType" class="form-select">
                                                         <option value="1" {{ $user->salary_type?->value == 1 ? 'selected' : '' }}>Tài xế ăn lương cơ bản</option>
                                                         <option value="2" {{ $user->salary_type?->value == 2 ? 'selected' : '' }}>Tài xế ăn lương doanh số</option>
                                                     </select>
@@ -171,11 +171,12 @@
                                                     @enderror
                                                 </div>
                                             </div>
-                                            <div class="col-xxl-6">
+                                            <div class="col-xxl-6" id="salaryByPercentContainer" style="{{ $user->salary_type?->value == 2 ? '' : 'display: none;' }}">
                                                 <div class="mb-3">
-                                                    <label class="form-label">Lương phần trăm doanh số </label>
-                                                    <input type="text" name="salary_by_percent" class="form-control float-input" placeholder="Nhập lương phần trăm doanh số" value="{{ old('salary_by_percent', $user->salary_by_percent) }}">
+                                                    <label class="form-label">Lương phần trăm doanh số (%) <span class="text-muted">*Mặc định: 12%</span></label>
+                                                    <input type="number" name="salary_by_percent" class="form-control" placeholder="Nhập phần trăm (VD: 12)" value="{{ old('salary_by_percent', $user->salary_by_percent ?? 12) }}" min="1" max="100" step="0.01">
                                                     <div class="text-danger error" data-field="salary_by_percent"></div>
+                                                    <small class="text-muted">Phần trăm lương theo doanh số (áp dụng cho tài xế ăn lương doanh số)</small>
                                                 </div>
                                             </div>
                                             @endif
@@ -502,8 +503,8 @@
                                                         <tr class="border-bottom">
                                                             <td class="fw-medium">
                                                                 @if($salaryType == 2)
-                                                                    Lương doanh số (12%)
-                                                                    <small class="d-block text-muted">{{ number_format($totalTripValue) }} ₫ × 12%</small>
+                                                                    Lương doanh số ({{ $user->getSalaryByPercent() }}%)
+                                                                    <small class="d-block text-muted">{{ number_format($totalTripValue) }} ₫ × {{ $user->getSalaryByPercent() }}%</small>
                                                                 @else
                                                                     Lương cơ bản
                                                                 @endif
@@ -576,7 +577,7 @@
                                                             <div>
                                                                 <p class="text-muted mb-0">
                                                                     @if($salaryType == 2)
-                                                                        Doanh số (12%)
+                                                                        Doanh số ({{ $user->getSalaryByPercent() }}%)
                                                                     @else
                                                                         Cơ bản
                                                                     @endif
@@ -1074,7 +1075,7 @@
             },
             labels: [
                 @if($salaryType == 2)
-                    'Lương doanh số (12%)', 
+                    'Lương doanh số ({{ $user->getSalaryByPercent() }}%)', 
                 @else
                     'Lương cơ bản',
                 @endif
@@ -1579,5 +1580,28 @@
             }
         }
     }
+
+    // Handle salary type change to show/hide salary_by_percent input
+    $(document).ready(function() {
+        $('#salaryType').on('change', function() {
+            const salaryType = $(this).val();
+            const salaryByPercentContainer = $('#salaryByPercentContainer');
+            const salaryByPercentInput = $('input[name="salary_by_percent"]');
+            
+            if (salaryType === '2') { // Tài xế ăn lương doanh số
+                salaryByPercentContainer.show();
+                // Set default value nếu input rỗng
+                if (!salaryByPercentInput.val()) {
+                    salaryByPercentInput.val(12);
+                }
+            } else { // Tài xế ăn lương cơ bản
+                salaryByPercentContainer.hide();
+                salaryByPercentInput.val(''); // Clear value khi hide
+            }
+        });
+        
+        // Trigger change event on page load để set đúng trạng thái
+        $('#salaryType').trigger('change');
+    });
 </script>
 @endpush
