@@ -571,10 +571,27 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         //     }
         // }
 
-        $userSpecificDeductions = ShipmentDeduction::where('user_id', $this->user->id)->sum('amount');
+        // Tính tổng từng loại phụ cấp từ deductionTypeNames
+        $deductionDetails = [];
+        $totalUserSpecificDeductions = 0;
+        
+        foreach ($deductionColumns as $deductionName => $column) {
+            $deductionType = $this->deductionTypes->firstWhere('name', $deductionName);
+            if ($deductionType && $deductionType->type !== 'expense') {
+                $columnSum = 0;
+                for ($i = 9; $i <= $lastDataRow; $i++) { // Start from row 9 (data rows)
+                    $cellValue = $sheet->getCell($column . $i)->getValue();
+                    if (is_numeric($cellValue)) {
+                        $columnSum += $cellValue;
+                    }
+                }
+                $deductionDetails[$deductionName] = $columnSum;
+                $totalUserSpecificDeductions += $columnSum;
+            }
+        }
         
         // TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY = ({$this->user->getSalaryByPercent()}% của sum(THÀNH TIỀN)) + Tổng trợ cấp của user
-        $totalSalary = $commissionSalary + $userSpecificDeductions;
+        $totalSalary = $commissionSalary + $totalUserSpecificDeductions;
         
         // Debug log
         Log::info('Debug TotalSalary Calculation', [
@@ -583,26 +600,62 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
             'totalTripValue' => $totalTripValue,
             'commissionRate' => $commissionRate,
             'commissionSalary' => $commissionSalary,
-            'userSpecificDeductions' => $userSpecificDeductions,
+            'deductionDetails' => $deductionDetails,
+            'totalUserSpecificDeductions' => $totalUserSpecificDeductions,
             'totalSalary' => $totalSalary,
-            'calculation' => 'TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY = (' . $commissionSalary . ') + (' . $userSpecificDeductions . ') = ' . $totalSalary,
+            'calculation' => 'TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY = (' . $commissionSalary . ') + (' . $totalUserSpecificDeductions . ') = ' . $totalSalary,
             'formula' => '(' . $this->user->getSalaryByPercent() . '% của sum(THÀNH TIỀN)) + Tổng trợ cấp của user'
         ]);
         
-        $sheet->setCellValue('A' . $totalSalaryRow, 'TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY:');
+        // Hiển thị chi tiết từng loại phụ cấp
+        foreach ($deductionDetails as $deductionName => $amount) {
+            if ($amount > 0) { // Chỉ hiển thị những loại có số tiền > 0
+                $deductionRow = $row++;
+                $sheet->setCellValue('A' . $deductionRow, $deductionName . ':');
+                $sheet->mergeCells('A' . $deductionRow . ':J' . $deductionRow);
+                $sheet->getStyle('A' . $deductionRow)->getFont()->setBold(true);
+                $sheet->getStyle('A' . $deductionRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->setCellValue('K' . $deductionRow, $amount);
+                $sheet->getStyle('K' . $deductionRow)->getNumberFormat()->setFormatCode('#,##0');
+                
+                // Highlight deduction row with light blue background
+                $sheet->getStyle('A' . $deductionRow . ':K' . $deductionRow)->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        // 'color' => ['rgb' => 'E6F3FF'], // Light blue
+                    ],
+                ]);
+                
+                // Add empty cell in notes column for the deduction row
+                $sheet->setCellValue($notesColumnLetter . $deductionRow, '');
+            }
+        }
+        
+        // Thêm dòng TỔNG LƯƠNG DT (salary_by_percent)
+        $commissionSalaryRow = $row++;
+        $sheet->setCellValue('A' . $commissionSalaryRow, 'TỔNG LƯƠNG DT (' . $this->user->getSalaryByPercent() . '%):');
+        $sheet->mergeCells('A' . $commissionSalaryRow . ':J' . $commissionSalaryRow);
+        $sheet->getStyle('A' . $commissionSalaryRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $commissionSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('K' . $commissionSalaryRow, $commissionSalary);
+        $sheet->getStyle('K' . $commissionSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        
+        // Highlight TỔNG LƯƠNG DT row (no background color)
+        
+        // Add empty cell in notes column for the commission salary row
+        $sheet->setCellValue($notesColumnLetter . $commissionSalaryRow, '');
+        
+        // Thêm dòng TỔNG LƯƠNG (commission + phụ cấp)
+        $totalSalaryRow = $row++;
+        $sheet->setCellValue('A' . $totalSalaryRow, 'TỔNG LƯƠNG:');
         $sheet->mergeCells('A' . $totalSalaryRow . ':J' . $totalSalaryRow);
-        $sheet->getStyle('A' . $totalSalaryRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $totalSalaryRow)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF0000'));
         $sheet->getStyle('A' . $totalSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->setCellValue('K' . $totalSalaryRow, $totalSalary);
         $sheet->getStyle('K' . $totalSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('K' . $totalSalaryRow)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF0000'));
         
-        // Highlight TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY row with yellow background
-        $sheet->getStyle('A' . $totalSalaryRow . ':K' . $totalSalaryRow)->applyFromArray([
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'color' => ['rgb' => 'FFFF00'],
-            ],
-        ]);
+        // Highlight TỔNG LƯƠNG row (no background color)
         
         // Add empty cell in notes column for the total salary row
         $sheet->setCellValue($notesColumnLetter . $totalSalaryRow, '');
@@ -616,13 +669,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->setCellValue('K' . $bonusRow, $totalTypeBonus);
         $sheet->getStyle('K' . $bonusRow)->getNumberFormat()->setFormatCode('#,##0');
         
-        // Highlight THƯỞNG row with yellow background
-        $sheet->getStyle('A' . $bonusRow . ':K' . $bonusRow)->applyFromArray([
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'color' => ['rgb' => 'FFFF00'],
-            ],
-        ]);
+        // Highlight THƯỞNG row (no background color)
         
         // Add empty cell in notes column for the bonus row
         $sheet->setCellValue($notesColumnLetter . $bonusRow, '');
@@ -636,13 +683,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->setCellValue('K' . $advanceSalaryRow, $totalTypeSalary);
         $sheet->getStyle('K' . $advanceSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
         
-        // Highlight TỔNG ỨNG LƯƠNG row with yellow background
-        $sheet->getStyle('A' . $advanceSalaryRow . ':K' . $advanceSalaryRow)->applyFromArray([
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'color' => ['rgb' => 'FFFF00'],
-            ],
-        ]);
+        // Highlight TỔNG ỨNG LƯƠNG row (no background color)
         
         // Add empty cell in notes column for the advance salary row
         $sheet->setCellValue($notesColumnLetter . $advanceSalaryRow, '');
@@ -656,13 +697,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->setCellValue('K' . $penaltyRow, $totalTypePenalty);
         $sheet->getStyle('K' . $penaltyRow)->getNumberFormat()->setFormatCode('#,##0');
         
-        // Highlight PHẠT row with yellow background
-        $sheet->getStyle('A' . $penaltyRow . ':K' . $penaltyRow)->applyFromArray([
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'color' => ['rgb' => 'FFFF00'],
-            ],
-        ]);
+        // Highlight PHẠT row (no background color)
         
         // Add empty cell in notes column for the penalty row
         $sheet->setCellValue($notesColumnLetter . $penaltyRow, '');
@@ -679,7 +714,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         // Tính BHXH: X% của Y
         $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
         
-        $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (' . $insuranceRate . '%):');
+        $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (' . $insuranceRate . '%) - Mức đóng lương cơ bản: ' . number_format($insuranceAmount) . ' đ');
         $sheet->mergeCells('A' . $insuranceRow . ':J' . $insuranceRow);
         $sheet->getStyle('A' . $insuranceRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $insuranceRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
@@ -704,16 +739,17 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
             'remaining_calculation' => $totalSalary . ' - (' . $insuranceDeduction . ' + ' . $totalTypePenalty . ' + ' . $totalTypeSalary . ') = ' . $totalSalaryRemaining
         ]);
         
-        $sheet->setCellValue('A' . $remainingSalaryRow, 'TỔNG LƯƠNG CÒN LẠI:');
+        $sheet->setCellValue('A' . $remainingSalaryRow, 'THỰC LÃNH:');
         $sheet->mergeCells('A' . $remainingSalaryRow . ':J' . $remainingSalaryRow);
-        $sheet->getStyle('A' . $remainingSalaryRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $remainingSalaryRow)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF0000'));
         $sheet->getStyle('A' . $remainingSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->setCellValue('K' . $remainingSalaryRow, $totalSalaryRemaining);
         $sheet->getStyle('K' . $remainingSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('K' . $remainingSalaryRow)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF0000'));
         
         // Style the additional calculation rows (separate from the main table)
-        // Vì đã bỏ row LƯƠNG DOANH SỐ, nên bắt đầu từ totalSalaryRow
-        $calculationStartRow = $totalSalaryRow;
+        // Bắt đầu từ dòng đầu tiên của phụ cấp (nếu có) hoặc từ commissionSalaryRow
+        $calculationStartRow = isset($deductionDetails) && !empty($deductionDetails) ? ($commissionSalaryRow - count(array_filter($deductionDetails, function($amount) { return $amount > 0; }))) : $commissionSalaryRow;
         $calculationEndRow = $remainingSalaryRow;
         $calculationRange = 'A' . $calculationStartRow . ':K' . $calculationEndRow;
         $sheet->getStyle($calculationRange)->applyFromArray([
@@ -730,24 +766,12 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
             ],
         ]);
         
-        // Highlight TRỪ BHXH row with yellow background
-        $sheet->getStyle('A' . $insuranceRow . ':K' . $insuranceRow)->applyFromArray([
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'color' => ['rgb' => 'FFFF00'],
-            ],
-        ]);
+        // Highlight TRỪ BHXH row (no background color)
         
         // Add empty cell in notes column for the insurance row
         $sheet->setCellValue($notesColumnLetter . $insuranceRow, '');
         
-        // Highlight TỔNG LƯƠNG CÒN LẠI row with yellow background
-        $sheet->getStyle('A' . $remainingSalaryRow . ':K' . $remainingSalaryRow)->applyFromArray([
-            'fill' => [
-                'fillType' => Fill::FILL_SOLID,
-                'color' => ['rgb' => 'FFFF00'],
-            ],
-        ]);
+        // Highlight TỔNG LƯƠNG CÒN LẠI row (no background color)
         
         // Add empty cell in notes column for the remaining salary row
         $sheet->setCellValue($notesColumnLetter . $remainingSalaryRow, '');
