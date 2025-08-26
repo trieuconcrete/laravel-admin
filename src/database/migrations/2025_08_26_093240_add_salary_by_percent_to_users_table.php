@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->decimal('salary_by_percent', 5, 2)
+            $table->float('salary_by_percent', 5, 2)
                   ->nullable()
                   ->default(12.00)
                   ->after('salary_type')
