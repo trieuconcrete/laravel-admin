@@ -1,8 +1,6 @@
 @if ($paginator->hasPages())
 <div class="row g-0 text-center text-sm-start align-items-center mb-4">
-    <div class="col-sm-6">
-    </div>
-    <div class="col-sm-6">
+    <div class="col-sm-12">
         <div class="pagination pagination-separated justify-content-center justify-content-sm-end mb-sm-0">
             <nav class="d-flex justify-items-center justify-content-between">
                 <div class="d-flex justify-content-between flex-fill d-sm-none">
