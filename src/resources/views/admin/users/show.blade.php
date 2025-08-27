@@ -367,8 +367,15 @@
                                             <th>Ngày</th>
                                             <th>Điểm đi</th>
                                             <th>Điểm đến</th>
-                                            <th>Số tấn/chuyến</th>
-                                            <th>Giá</th>
+                                            <th>Số tấn</th>
+                                            <th>Số chuyến</th>
+                                            <th>
+                                                @if($user->salary_type?->value == 2)
+                                                    Giá cho tài xế
+                                                @else
+                                                    Giá
+                                                @endif
+                                            </th>
                                             <th>Trạng thái</th>
                                             <th>Ghi chú</th>
                                         </tr>
@@ -393,8 +400,19 @@
                                                     <td>@formatDate($shipment->departure_time)</td>
                                                     <td>{{ $shipment->origin }}</td>
                                                     <td>{{ $shipment->destination }}</td>
-                                                    <td>{{ $shipment->cargo_weight }} T</td>
-                                                    <td>{{ number_format($shipment->unit_price) }}</td>
+                                                    <td>
+                                                        @if($shipment->cargo_weight)
+                                                            {{ $shipment->cargo_weight ?? 0 }} T
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ (int) $shipment->trip_count }}</td>
+                                                    <td>
+                                                        @if($user->salary_type?->value == 2)
+                                                            {{ number_format((($shipment->unit_price_for_driver ?? 0) * $shipment->trip_count) * ($user->getSalaryByPercent() / 100)) }}
+                                                        @else
+                                                            {{ number_format($shipment->unit_price) }}
+                                                        @endif
+                                                    </td>
                                                     <td>
                                                         <span class="badge {{ $shipment->status_badge_class }}">{{ $shipment->status_label }}</span>
                                                     </td>
@@ -479,10 +497,9 @@
                                                         @if($salaryDetail)
                                                             <button type="button" class="btn btn-sm btn-info d-inline-flex align-items-center process-payment" 
                                                                 data-salary-id="{{ $salaryDetail->salary_id }}"
-                                                                style="white-space: nowrap;"
-                                                                {{ $salaryDetail->status === 'paid' ? 'disabled' : '' }}>
+                                                                style="white-space: nowrap;">
                                                                 <i class="ri-currency-fill me-1"></i>
-                                                                {{ $salaryDetail->status === 'paid' ? 'Đã thanh toán' : 'Thanh toán' }}
+                                                                {{ $salaryDetail->status === 'paid' ? 'Thanh toán lại' : 'Thanh toán' }}
                                                             </button>
                                                         @else
                                                             <button type="button" class="btn btn-sm btn-secondary d-inline-flex align-items-center" 
@@ -1343,10 +1360,10 @@
                                 timer: 2000,
                                 timerProgressBar: true
                             }).then(() => {
-                                // Update button state
-                                button.html('<i class="ri-check-line me-1"></i>Đã thanh toán');
-                                button.removeClass('btn-info').addClass('btn-success');
-                                button.prop('disabled', true);
+                                // Update button state for repeated payment
+                                button.html('<i class="ri-currency-fill me-1"></i>Thanh toán lại');
+                                button.removeClass('btn-success').addClass('btn-info');
+                                button.prop('disabled', false);
                                 refreshSalaryDetails(); // Refresh salary details after paying
                             });
                         } else {
@@ -1356,8 +1373,9 @@
                                 text: response.message,
                                 confirmButtonText: 'Đóng'
                             });
-                            // Re-enable button
-                            button.prop('disabled', false).html('<i class="ri-currency-fill me-1"></i>Thanh toán');
+                            // Re-enable button with appropriate text
+                            const buttonText = button.hasClass('btn-success') ? 'Thanh toán lại' : 'Thanh toán';
+                            button.prop('disabled', false).html('<i class="ri-currency-fill me-1"></i>' + buttonText);
                         }
                     },
                     error: function(xhr) {
@@ -1371,8 +1389,9 @@
                             confirmButtonText: 'Đóng'
                         });
                         
-                        // Re-enable button
-                        button.prop('disabled', false).html('<i class="ri-currency-fill me-1"></i>Thanh toán');
+                        // Re-enable button with appropriate text
+                        const buttonText = button.hasClass('btn-success') ? 'Thanh toán lại' : 'Thanh toán';
+                        button.prop('disabled', false).html('<i class="ri-currency-fill me-1"></i>' + buttonText);
                     }
                 });
             }
