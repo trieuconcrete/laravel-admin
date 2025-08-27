@@ -15,6 +15,7 @@ class Transaction extends Model
     const TYPE_EXPENSE = 'expense'; // chi
 
     const CATEGORY_ADVANCE_SALARY = 'advance_salary'; // ứng lương
+    const CATEGORY_SALARY = 'salary'; // thanh toán lương
     const CATEGORY_CUSTOMER_PAYMENT = 'customer_payment'; // thanh toán khách hàng
     const CATEGORY_CUSTOMER_REFUND = 'customer_refund'; // hoàn trả khách hàng
     const CATEGORY_OTHER = 'other'; // khác
@@ -87,6 +88,7 @@ class Transaction extends Model
     {
         return [
             self::CATEGORY_ADVANCE_SALARY => 'Ứng lương',
+            self::CATEGORY_SALARY => 'Thanh toán lương',
             self::CATEGORY_CUSTOMER_PAYMENT => 'Khách hàng thanh toán',
             self::CATEGORY_CUSTOMER_REFUND => 'Khách hàng hoàn trả',
             self::CATEGORY_OTHER => 'Khác',
@@ -112,6 +114,7 @@ class Transaction extends Model
     {
         return match($this->category) {
             self::CATEGORY_ADVANCE_SALARY => 'warning',
+            self::CATEGORY_SALARY => 'info',
             self::CATEGORY_CUSTOMER_PAYMENT => 'success',
             self::CATEGORY_CUSTOMER_REFUND => 'danger',
             self::CATEGORY_OTHER => 'secondary',
