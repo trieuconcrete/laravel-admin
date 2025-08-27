@@ -165,7 +165,6 @@ class ShipmentReport extends Model
         if ($shipmentType) {
             $query->where('shipment_type', $shipmentType);
         }
-
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
@@ -251,5 +250,18 @@ class ShipmentReport extends Model
             ],
             $data
         );
+    }
+
+    public function getShipmentTypeLabel()
+    {
+        $types = [
+            1 => 'Khách chạy theo chuyến',
+            3 => 'Xe nâng',
+            4 => 'Xe đường dài bắc-nam',
+            21 => 'Thuê tháng theo chuyến',
+            22 => 'Thuê tháng kiểu khoáng'
+        ];
+
+        return $types[$this->shipment_type] ?? '';
     }
 } 

@@ -65,8 +65,6 @@
         </tbody>
     </table>
 </div>
-@if($transactions instanceof \Illuminate\Pagination\LengthAwarePaginator && $transactions->count() > 0)
-<div class="d-flex justify-content-center mt-4" id="transaction-pagination">
-    {{ $transactions->appends(request()->except('page'))->links() }}
-</div>
+@if($carRentals instanceof \Illuminate\Pagination\LengthAwarePaginator && $carRentals->count() > 0)
+    {{ $carRentals->appends(request()->except('page'))->links() }}
 @endif

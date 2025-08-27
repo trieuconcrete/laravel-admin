@@ -30,50 +30,53 @@ class ShipmentReportService
             $totalShipmentCount = 0;
 
             // Tổng kết cho một loại cụ thể (shipment_type luôn có giá trị)
-                // Tổng kết cho một loại cụ thể
-                $shipments = Shipment::where('customer_id', $customerId)
-                    ->where('shipment_type', $shipmentType)
-                    ->whereBetween('departure_time', [$startDate, $endDate])
-                    ->where('status', 'completed')
-                    ->get();
+            // Tổng kết cho một loại cụ thể
+            $query = Shipment::where('customer_id', $customerId)
+                ->where('shipment_type', $shipmentType)
+                ->whereBetween('departure_time', [$startDate, $endDate])
+                ->where('status', 'completed');
+            $shipments = $query->get();
 
-                $totalAmount = $shipments->sum(function ($shipment) use ($shipmentType) {
-                    return $this->calculateAmount($shipment, $shipmentType);
-                });
-                $vatAmount = $totalAmount * 0.08; // Assuming 8% VAT
+            $totalAmount = $shipments->sum(function ($shipment) use ($shipmentType) {
+                return $this->calculateAmount($shipment, $shipmentType);
+            });
+            $vatAmount = $totalAmount * 0.08; // Assuming 8% VAT
 
-                // Kiểm tra xem đã có báo cáo cho loại này với khoảng thời gian này chưa
-                $existingReport = ShipmentReport::where('customer_id', $customerId)
-                    ->where('shipment_type', $shipmentType)
-                    ->where('statement_start_date', $startDate)
-                    ->where('statement_end_date', $endDate)
-                    ->first();
+            // Kiểm tra xem đã có báo cáo cho loại này với khoảng thời gian này chưa
+            $existingReport = ShipmentReport::where('customer_id', $customerId)
+                ->where('shipment_type', $shipmentType)
+                ->where('statement_start_date', $startDate)
+                ->where('statement_end_date', $endDate)
+                ->first();
 
-                if ($existingReport) {
-                    // Cập nhật báo cáo hiện có
-                    $report = $existingReport;
-                    $report->update([
-                        'total_amount' => $totalAmount + $vatAmount,
-                        'is_finalized' => true,
-                        'updated_by' => Auth::id(),
-                    ]);
-                } else {
-                    // Tạo báo cáo mới
-                    $report = ShipmentReport::create([
-                        'customer_id' => $customerId,
-                        'monthly' => $monthly,
-                        'shipment_type' => $shipmentType,
-                        'total_amount' => $totalAmount + $vatAmount,
-                        'statement_start_date' => $startDate,
-                        'statement_end_date' => $endDate,
-                        'is_finalized' => true,
-                        'created_by' => Auth::id(),
-                        'updated_by' => Auth::id(),
-                    ]);
-                }
+            if ($existingReport) {
+                // Cập nhật báo cáo hiện có
+                $report = $existingReport;
+                $report->update([
+                    'total_amount' => $totalAmount + $vatAmount,
+                    'is_finalized' => true,
+                    'updated_by' => Auth::id(),
+                ]);
+            } else {
+                // Tạo báo cáo mới
+                $report = ShipmentReport::create([
+                    'customer_id' => $customerId,
+                    'monthly' => $monthly,
+                    'shipment_type' => $shipmentType,
+                    'total_amount' => $totalAmount + $vatAmount,
+                    'statement_start_date' => $startDate,
+                    'statement_end_date' => $endDate,
+                    'is_finalized' => true,
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                ]);
+            }
+            if ($report->id) {
+                $query->update(['shipment_report_id' => $report->id]); // Cập nhật shipment_report_id cho các shipment
+            }
 
-                $reports[] = $report;
-                $totalShipmentCount = $shipments->count();
+            $reports[] = $report;
+            $totalShipmentCount = $shipments->count();
 
 
 
@@ -134,6 +137,7 @@ class ShipmentReportService
                         'total_expense_deductions' => $shipment->total_expense_deductions,
                         'total_combined_surcharge' => $shipment->total_combined_surcharge, // phụ thu kết hợp
                         'total_cargo_handling' => $shipment->total_cargo_handling, // bốc xếp
+                        'shipment_report_id' => $shipment->shipment_report_id,
                         'notes' => $shipment->notes,
                         'status' => $shipment->status,
                         'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : '',

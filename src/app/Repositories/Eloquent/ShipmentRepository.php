@@ -32,27 +32,21 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
         if (!empty($filters['shipment_type'])) {
             $query->shipmentType($filters['shipment_type']);
         }
-        
-        if (!empty($filters['departure_time']) && empty($filters['estimated_arrival_time'])) {
-            $query->where('departure_time', '>=', $filters['departure_time']);
-        } elseif (empty($filters['departure_time']) && !empty($filters['estimated_arrival_time'])) {
-            $query->where('estimated_arrival_time', '<=', $filters['estimated_arrival_time']);
-        } elseif (!empty($filters['departure_time']) && !empty($filters['estimated_arrival_time'])) {
-            $query->where(function($query) use ($filters) {
-                $query->where('departure_time', '>=', $filters['departure_time'])
-                    ->where('departure_time', '<=', $filters['estimated_arrival_time']);
-            })->orWhere(function($query) use ($filters) {
-                $query->where('estimated_arrival_time', '>=', $filters['departure_time'])
-                    ->where('estimated_arrival_time', '<=', $filters['estimated_arrival_time']);
-            })->orWhere(function($query) use ($filters) {
-                $query->where('departure_time', '<=', $filters['departure_time'])
-                    ->where('estimated_arrival_time', '>=', $filters['estimated_arrival_time']);
-            });
-        }
+        $departureTime = $filters['departure_time'] ?? null;
+        $arrivalTime = $filters['estimated_arrival_time'] ?? null;
+        $query->when($departureTime, function($q) use ($departureTime) {
+            $q->where('departure_time', '>=', $departureTime);
+        });
+        $query->when($arrivalTime, function($q) use ($arrivalTime) {
+            $q->where('estimated_arrival_time', '<=', $arrivalTime);
+        });
 
         if (!empty($filters['keyword'])) {
             $query->search($filters['keyword']);
         }
+        $query->when(!empty($filters['customer_id']), function($q) use ($filters) {
+            $q->where('customer_id', $filters['customer_id']);
+        });
         return $query->with(['driver', 'vehicle', 'goods', 'shipmentDeductions.shipmentDeductionType'])
             ->orderByDesc('created_at')
             ->orderByDesc('updated_at')

@@ -91,7 +91,7 @@
                                                     @if (request('customer_id'))
                                                         <input type="hidden" name="customer_id" value="{{ request('customer_id') }}">
                                                     @endif
-                                                    <select class="form-select" name="customer_id" required @disabled(request('customer_id'))>
+                                                    <select class="form-select js-example-basic-single" name="customer_id" required @disabled(request('customer_id'))>
                                                         <option value="">Chọn khách hàng</option>
                                                         @foreach($customers as $id => $name)
                                                             <option value="{{ $id }}" @selected($id == request('customer_id'))>{{ $name }}</option>
