@@ -61,6 +61,8 @@
                             type="button" role="tab" aria-controls="monthlyReport" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'true' : 'false' }}">Chuyến xe</button>
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'carRental' ? 'active' : '' }}" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#carRental"
                             type="button" role="tab" aria-controls="carRental" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'carRental' ? 'true' : 'false' }}">Thuê xe</button>
+                        <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'shipmentReport' ? 'active' : '' }}" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#shipmentReport"
+                            type="button" role="tab" aria-controls="shipmentReport" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'shipmentReport' ? 'true' : 'false' }}">Công nợ</button>
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'active' : '' }}" id="nav-transactions-tab" data-bs-toggle="tab"
                             data-bs-target="#transactions" type="button" role="tab" aria-controls="transactions"
                             aria-selected="{{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'true' : 'false' }}">Thanh toán</button>
@@ -276,6 +278,7 @@
                                             <th>Đơn giá</th>
                                             <th>Phụ thu</th>
                                             <th>Thành tiền</th>
+                                            <th>Công nợ</th>
                                             <th>Ghi chú</th>
                                             <th>Trạng thái</th>
                                         </tr>
@@ -370,6 +373,9 @@
                                     data-bs-target=""><i class="ri-add-circle-line align-middle me-1"></i>Thêm thuê xe</button>
                             </div> --}}
                             @include('admin.customers.partials.car-rental', ['carRentals' => $carRentals])
+                        </div>
+                        <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'shipmentReport' ? 'show active' : '' }}" id="shipmentReport">
+                            @include('admin.customers.partials.shipment-reports', ['shipmentReports' => $shipmentReports])
                         </div>
 
                         <!-- Transactions Tab -->
@@ -690,6 +696,13 @@
                                 } else {
                                     shipmentLink = `<a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a>`;
                                 }
+                                let shipmentReport;
+                                if (shipment.shipment_report_id) {
+                                    shipmentReport = `<span class="badge bg-success">Đã tổng kết</span>`;
+                                } else {
+                                    shipmentReport = `<span class="badge bg-danger">Chưa tổng kết</span>`;
+                                }
+
                                 // Format the row HTML
                                 row.innerHTML = `
                                 <td>${shipmentLink}</td>
@@ -701,6 +714,7 @@
                                 <td>${numberFormat(shipment.unit_price)}</td>
                                 <td>${shipment.combined_fees > 0 ? numberFormat(shipment.combined_fees) : ''}</td>
                                 <td>${numberFormat(shipment.total_amount)}</td>
+                                <td>${shipmentReport}</td>
                                 <td>${shipment.notes || ''}</td>
                                 <td><span class="badge bg-${getStatusBadgeClass(shipment.status)}">${getStatusLabel(shipment.status)}</span></td>
                             `;
@@ -1109,6 +1123,12 @@
                     } else {
                         shipmentLink = `<a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a>`;
                     }
+                    let shipmentReport;
+                    if (shipment.shipment_report_id) {
+                        shipmentReport = `<span class="badge bg-success">Đã tổng kết</span>`;
+                    } else {
+                        shipmentReport = `<span class="badge bg-danger">Chưa tổng kết</span>`;
+                    }
 
                     row.innerHTML = `
                         <td>${shipmentLink}</td>
@@ -1120,6 +1140,7 @@
                         <td>${numberFormat(shipment.unit_price)}</td>
                         <td>${shipment.combined_fees > 0 ? numberFormat(shipment.combined_fees) : ''}</td>
                         <td>${numberFormat(shipment.total_amount)}</td>
+                        <td>${shipmentReport}</td>
                         <td>${shipment.notes || ''}</td>
                         <td><span class="badge bg-${getStatusBadgeClass(shipment.status)}">${getStatusLabel(shipment.status)}</span></td>
                     `;
@@ -1251,6 +1272,11 @@
                                         `,
                                             showConfirmButton: true,
                                             confirmButtonText: 'Đóng'
+                                        }).then((result) => {
+                                            // Optional: Reload page or update UI
+                                            if (result.isConfirmed) {
+                                                window.location.reload();
+                                            }
                                         });
                                     } else {
                                         Swal.fire({
@@ -1272,6 +1298,10 @@
                                     // Re-enable button
                                     summarizeButton.disabled = false;
                                     summarizeButton.innerHTML = originalText;
+                                    setTimeout(() => {
+                                        // Tự động làm mới trang sau 2 giây để cập nhật dữ liệu
+                                        window.location.reload();
+                                    }, 3000);
                                 });
                         }
                     });

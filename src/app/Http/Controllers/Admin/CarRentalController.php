@@ -265,7 +265,7 @@ class CarRentalController extends Controller
                     }
                 }
             }
-
+            
             // Validate request data
             $validated = validator($data, [
                 'car_rental_id' => 'required|exists:car_rentals,id',
@@ -1754,10 +1754,10 @@ class CarRentalController extends Controller
             // Get shipments based on car rental type
             $shipmentType = $carRental->type == 1 ? 21 : 22; // 21: thuê nguyên xe, 22: thuê kiểu khoáng
             
-            $shipments = Shipment::where('car_rental_id', $carRental->id)
+            $query = Shipment::where('car_rental_id', $carRental->id)
                 ->where('shipment_type', Shipment::SHIPMENT_TYPE_MONTHLY_RENTAL)
-                ->whereBetween('run_date', [$startDate, $endDate])
-                ->get();
+                ->whereBetween('run_date', [$startDate, $endDate]);
+            $shipments =  $query->get();
             
             if ($shipments->isEmpty()) {
                 return response()->json([
@@ -1825,6 +1825,9 @@ class CarRentalController extends Controller
                         'is_finalized' => true
                     ]);
                 }
+            }
+            if ($report) {
+                $query->update(['shipment_report_id' => $report->id]);
             }
             
             return response()->json([

@@ -127,10 +127,11 @@ class CustomerController extends Controller
         $customerStatusActives = Customer::getStatusActives();
         
         // Lấy danh sách các tháng có báo cáo (unique months)
-        $shipmentMonthlyReports = \App\Models\ShipmentReport::where('customer_id', $customer->id)
+        $queryShipmentReport = \App\Models\ShipmentReport::where('customer_id', $customer->id);
+        $shipmentReports = $queryShipmentReport->orderBy('monthly', 'desc')->paginate(10);
+        // Lọc chỉ lấy các báo cáo không thuộc về Car Rental (car_rental_id là null)
+        $shipmentMonthlyReports = $queryShipmentReport
             ->whereNull('car_rental_id')
-            ->select('monthly')
-            ->distinct()
             ->orderBy('monthly', 'desc')
             ->get();
 
@@ -163,6 +164,7 @@ class CustomerController extends Controller
                 'filters',
                 'customerStatusActives',
                 'shipmentMonthlyReports',
+                'shipmentReports',
                 'carRentals'
             ));
         } catch (\Exception $e) {

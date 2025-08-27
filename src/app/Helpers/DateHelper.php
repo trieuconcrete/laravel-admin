@@ -54,7 +54,7 @@ class DateHelper
 
         // Get date format from settings
         $settingService = App::make('App\Services\SettingService');
-        $format = $settingService->get('date_format', $defaultFormat ?: 'Y-m-d');
+        $format = $settingService->get('date_format', $defaultFormat ?: 'd/m/Y');
 
         return $date->format($format);
     }

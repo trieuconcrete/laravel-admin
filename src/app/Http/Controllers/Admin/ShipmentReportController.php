@@ -137,6 +137,7 @@ class ShipmentReportController extends Controller
                     'cargo_weight' => $shipment->cargo_weight ?? 0,
                     'combined_fees' => $shipment->shipmentExtraFee->sum('amount'),
                     'total_amount' => $this->calculateTotalAmount($shipment, $currentShipmentType),
+                    'shipment_report_id' => $shipment->shipment_report_id,
                     'notes' => $shipment->notes,
                     'status' => $shipment->status,
                     'shipment_type' => $shipment->shipment_type,

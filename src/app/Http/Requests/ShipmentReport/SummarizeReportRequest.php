@@ -46,6 +46,7 @@ class SummarizeReportRequest extends FormRequest
             // Luôn kiểm tra time exist and overlap vì shipment_type là bắt buộc
             $isTimeOverlap = ShipmentReport::checkTimeOverlap($customerId, $startDate, $endDate, $shipmentType);
             $isTimeExist = ShipmentReport::checkTimeExist($customerId, $startDate, $endDate, $shipmentType);
+
             if (!$isTimeExist && $isTimeOverlap) {
                 $validator->errors()->add('time_overlap', 'Thời gian bảng kê đã chồng lên nhau với các bảng kê khác cùng loại.');
             }
