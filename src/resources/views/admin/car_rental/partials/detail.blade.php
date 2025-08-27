@@ -3,7 +3,7 @@
     <div class="row mb-3">
         <div class="col-md-6">
             <label class="form-label">Khách hàng <span class="text-danger">*</span></label>
-            <select class="form-select" name="customer_id">
+            <select class="form-select js-example-basic-single" name="customer_id">
                 <option value="">Chọn khách hàng</option>
                 @foreach ($customers as $key => $customer)
                     <option value="{{ $key }}"

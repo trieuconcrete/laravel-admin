@@ -92,19 +92,16 @@
                 <div class="col">
                     <form action="{{ route('admin.shipments.index') }}" method="GET">
                         <div class="row g-3">
-                            <div class="col-md-2">
-                                <select class="form-select" name="status">
-                                    <option value="">Tất cả trạng thái</option>
-                                    @foreach($shipmentStatus as $key => $value)
-                                        <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>{{ $value }}</option>
-                                    @endforeach
-                                </select>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm mã chuyến, tuyến, tài xế..." value="{{ request('keyword') }}">
+                                </div>
                             </div>
-                            <div class="col-md-3">
-                                <select class="form-select" name="shipment_type">
-                                    <option value="">Tất cả chuyến xe</option>
-                                    @foreach($shipmentTypes as $key => $value)
-                                        <option value="{{ $key }}" {{ request('shipment_type') == $key ? 'selected' : '' }}>{{ $value }}</option>
+                            <div class="col-md-4">
+                                <select class="form-select js-example-basic-single" name="customer_id">
+                                    <option value="">Chọn khách hàng</option>
+                                    @foreach($customers as $id => $name)
+                                        <option value="{{ $id }}" @selected($id == request('customer_id'))>{{ $name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -120,10 +117,21 @@
                                     <input type="date" class="form-control" id="endDateFilter" name="estimated_arrival_time" value="@formatDateForInput(request('estimated_arrival_time'))">
                                 </div>
                             </div>
+                            <div class="col-md-2">
+                                <select class="form-select" name="status">
+                                    <option value="">Tất cả trạng thái</option>
+                                    @foreach($shipmentStatus as $key => $value)
+                                        <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>{{ $value }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                             <div class="col-md-3">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm mã chuyến, tuyến, tài xế..." value="{{ request('keyword') }}">
-                                </div>
+                                <select class="form-select" name="shipment_type">
+                                    <option value="">Tất cả chuyến xe</option>
+                                    @foreach($shipmentTypes as $key => $value)
+                                        <option value="{{ $key }}" {{ request('shipment_type') == $key ? 'selected' : '' }}>{{ $value }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
                         <div class="row mt-4">

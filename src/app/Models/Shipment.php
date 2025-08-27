@@ -60,6 +60,7 @@ class Shipment extends Model
         
         // Từ CarRentalVehicleLog
         'car_rental_id',
+        'shipment_report_id', // ID báo cáo chuyến hàng
         'start_time',
         'end_time',
         'run_date',
