@@ -33,8 +33,6 @@
         </tbody>
     </table>
 </div>
-@if($transactions instanceof \Illuminate\Pagination\LengthAwarePaginator && $transactions->count() > 0)
-<div class="d-flex justify-content-center mt-4" id="transaction-pagination">
-    {{ $transactions->appends(request()->except('page'))->links() }}
-</div>
+@if($shipmentReports instanceof \Illuminate\Pagination\LengthAwarePaginator && $shipmentReports->count() > 0)
+    {{ $shipmentReports->appends(request()->except('page'))->links('vendor.pagination.bootstrap-5') }}
 @endif
