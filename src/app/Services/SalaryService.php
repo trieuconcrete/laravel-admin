@@ -287,12 +287,13 @@ class SalaryService
             'salary_by_percent' => $user->isCommissionSalaryType() ? $user->getSalaryByPercent() : null,
         ];
 
-        // Only update status if not already paid
-        if (!$existingSalaryDetail || $existingSalaryDetail->status !== 'paid') {
+        // Always allow status updates for repeated payments
+        if (!$existingSalaryDetail) {
             $updateData['status'] = 'pending';
             $updateData['payment_date'] = null;
             $updateData['payment_method'] = null;
         }
+        // If existing and paid, keep the paid status and payment info
 
         return $this->salaryDetailRepository->updateOrCreate(
             [

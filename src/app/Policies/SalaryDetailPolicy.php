@@ -71,11 +71,7 @@ class SalaryDetailPolicy
      */
     public function update(User $user, SalaryDetail $salaryDetail)
     {
-        // Only allow update if salary is not yet paid
-        if ($salaryDetail->status === 'paid') {
-            return false;
-        }
-        
+        // Allow update even if paid (for repeated payments)
         return $user->hasPermission('salary.update') || 
                ($user->hasPermission('salary.update_team') && 
                 $user->id === $salaryDetail->employee->managed_by);
@@ -90,11 +86,7 @@ class SalaryDetailPolicy
      */
     public function delete(User $user, SalaryDetail $salaryDetail)
     {
-        // Only allow delete if salary is not yet paid
-        if ($salaryDetail->status === 'paid') {
-            return false;
-        }
-        
+        // Allow delete even if paid (for repeated payments)
         return $user->hasPermission('salary.delete');
     }
 

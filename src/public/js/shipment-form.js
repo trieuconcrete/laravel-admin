@@ -66,6 +66,7 @@ function removeDriverRow(button, rowIndex) {
 function removeGoodRow(button, rowIndex) {
     // Xóa hàng từ bảng
     button.closest('tr').remove();
+    window.shipmentCalculator.removeRowEventListeners(rowIndex);
 }
 
 /**
@@ -256,8 +257,12 @@ function addGoodRow(goodsTable, goodsCount) {
             <div class="text-danger" id="error-goods-${goodsCount}-weight"></div>
         </td>
         <td>
-            <input type="text" name="goods[${goodsCount}][unit]" class="form-control form-control-sm unit-input">
+            <input type="text" name="goods[${goodsCount}][unit]" class="form-control form-control-sm number">
             <div class="text-danger" id="error-goods-${goodsCount}-unit"></div>
+        </td>
+        <td>
+            <input type="text" name="goods[${goodsCount}][amount]" readonly class="form-control form-control-sm number">
+            <div class="text-danger" id="error-goods-${goodsCount}-amount"></div>
         </td>
         <td>
             <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeGoodRow(this, ${goodsCount})"><i class="ri-delete-bin-fill"></i></button>
@@ -311,7 +316,8 @@ function addGoodRow(goodsTable, goodsCount) {
             }
         });
     });
-    
+    window.shipmentCalculator.setupRowEventListeners(goodsCount);
+
     return goodsCount + 1;
 }
 

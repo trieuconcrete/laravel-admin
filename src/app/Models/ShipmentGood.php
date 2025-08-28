@@ -12,11 +12,13 @@ class ShipmentGood extends Model
         'quantity',
         'unit',
         'weight',
+        'amount',
         'notes'
     ];
     protected $casts = [
         'quantity' => 'integer',
         'weight' => 'float',
+        'amount' => 'decimal:2',
     ];
 
     public function shipment()
