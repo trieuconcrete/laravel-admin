@@ -160,19 +160,20 @@
                                                     @error('distance')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Khối lượng (tấn)</label>
+                                                    <label class="form-label">Khối lượng chuyến (tấn)</label>
                                                     <input type="text" class="form-control float-input" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $shipment->cargo_weight) }}">
                                                     @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
                                             <!-- Additional fields for origin and destination -->
-                                            <div class="origin-destination bg-light p-3 mb-2">
-                                            <div class="row mb-3">
+                                            <div class="origin-destination bg-light p-3 mb-3">
+                                                <label class="form-label fs-5">Thông tin lộ trình</label>
+                                                <div class="row mb-3">
                                                     <div class="col-md-4">
                                                         <label class="form-label">Điểm đi<span class="text-danger">*</span></label>
                                                         <input type="text" class="form-control" placeholder="Nhập điểm đi" name="origin" value="{{ old('origin', $shipment->origin) }}" required>
                                                         @error('origin')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
+                                                    </div>
                                                     <div class="col-md-4">
                                                         <label class="form-label">Công ty</label>
                                                         <input type="text" class="form-control" placeholder="Nhập công ty" name="company" value="{{ old('company', $shipment->company) }}">
@@ -182,81 +183,43 @@
                                                         <label class="form-label">Điểm đến</label>
                                                         <input type="text" class="form-control" placeholder="Nhập điểm đến 1" name="destination" value="{{ old('destination', $shipment->destination) }}">
                                                         @error('destination')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="row mb-3">
+                                                <div class="row mb-3">
                                                     <div class="col-md-4">
                                                         {{--  <label class="form-label">Điểm đi 2</label>  --}}
                                                         <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 2" name="origin2" value="{{ old('origin2', $shipment->origin2) }}">
-                                                        @error('origin2')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                                    <div class="col-md-4">
-                                                        <input type="text" class="form-control" placeholder="Nhập công ty" name="company2" value="{{ old('company2', $shipment->company2) }}">
-                                                        @error('company2')<span class="text-danger">{{ $message }}</span>@enderror
+                                                            @error('origin2')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
-                                                    <div class="col-md-4">
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 2" name="destination2" value="{{ old('destination2', $shipment->destination2) }}">
-                                                        @error('destination2')<span class="text-danger">{{ $message }}</span>@enderror
+                                                        <div class="col-md-4">
+                                                            <input type="text" class="form-control" placeholder="Nhập công ty" name="company2" value="{{ old('company2', $shipment->company2) }}">
+                                                            @error('company2')<span class="text-danger">{{ $message }}</span>@enderror
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <input type="text" class="form-control" placeholder="Nhập điểm đến 2" name="destination2" value="{{ old('destination2', $shipment->destination2) }}">
+                                                            @error('destination2')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="row mb-3">
+                                                <div class="row mb-3">
                                                     <div class="col-md-4">
                                                         {{--  <label class="form-label">Điểm đi 3</label>  --}}
                                                         <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 3" name="origin3" value="{{ old('origin3', $shipment->origin3) }}">
                                                         @error('origin3')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
+                                                    </div>
                                                     <div class="col-md-4">
                                                         <input type="text" class="form-control" placeholder="Nhập công ty" name="company3" value="{{ old('company3', $shipment->company3) }}">
                                                         @error('company3')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
+                                                    </div>
                                                     <div class="col-md-4">
                                                         <input type="text" class="form-control" placeholder="Nhập điểm đến 3" name="destination3" value="{{ old('destination3', $shipment->destination3) }}">
                                                         @error('destination3')<span class="text-danger">{{ $message }}</span>@enderror
-                                            </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <!-- End -->
-                                            <div class="row mb-3">
-                                                <div class="col-md-12">
-                                                <label class="form-label">Ghi chú</label>
-                                                    <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="notes">{!! old('notes', $shipment->notes) !!}</textarea>
-                                                    @error('notes')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                            </div>
-                                            <hr>
-                                            <div class="mb-3">
-                                                <label class="form-label">Chi phí chuyến xe</label>
-                                                <div class="table-responsive">
-                                                    <table class="table table-bordered">
-                                                        <thead>
-                                                            <tr>
-                                                                @foreach($deductionTypes as $type)
-                                                                    <th>{{ $type->name }}</th>
-                                                                @endforeach
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                @foreach($deductionTypes as $type)
-                                                                    <td>
-                                                                        <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
-                                                                        @if($type->name === 'Ghi chú')
-                                                                            <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->notes : '') }}</textarea>
-                                                                        @else
-                                                                            <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->amount : '') }}">
-                                                                        @endif
-                                                                        @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
-                                                                    </td>
-                                                                @endforeach
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                            <hr>
-                                            <div class="mb-3">
+                                            <div class="mb-3 bg-light p-3" id="goodsSection">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <label class="form-label mb-0">Danh sách hàng hóa</label>
+                                                    <label class="form-label fs-5">Danh sách hàng hóa</label>
                                                     <button type="button" class="btn btn-sm btn-outline-primary" id="addGoodBtn">
                                                         <i class="fas fa-plus me-1"></i>Thêm hàng hóa
                                                     </button>
@@ -342,6 +305,43 @@
                                                             @endif
                                                         </tbody>
                                                     </table>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 bg-light p-3">
+                                                <label class="form-label fs-5">Chi phí chuyến xe</label> <small class="text-muted">Chi phí khách hàng trả cho HPL</small>
+                                                <div class="table-responsive">
+                                                    <table class="table">
+                                                        <thead>
+                                                            <tr>
+                                                                @foreach($deductionTypes as $type)
+                                                                    <th>{{ $type->name }}</th>
+                                                                @endforeach
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                @foreach($deductionTypes as $type)
+                                                                    <td>
+                                                                        <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
+                                                                        @if($type->name === 'Ghi chú')
+                                                                            <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->notes : '') }}</textarea>
+                                                                        @else
+                                                                            <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->amount : '') }}">
+                                                                        @endif
+                                                                        @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
+                                                                    </td>
+                                                                @endforeach
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <div class="mb-3">
+                                                <div class="col-md-12">
+                                                <label class="form-label">Ghi chú</label>
+                                                    <textarea class="form-control" rows="2" placeholder="Nhập ghi chú" name="notes">{!! old('notes', $shipment->notes) !!}</textarea>
+                                                    @error('notes')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
                                         </div>
