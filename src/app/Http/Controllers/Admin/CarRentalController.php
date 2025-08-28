@@ -1476,7 +1476,8 @@ class CarRentalController extends Controller
         }
 
         $month = now()->format('m/Y');
-        $fileName = 'bien_ban_nhat_ky_lo_trinh_xe_' . $carRental->id . '_' . str_replace('/', '', $month) . '.xlsx';
+        $safeMonth = str_replace(['/', '\\', ' '], '_', $month);
+        $fileName = 'bien_ban_nhat_ky_lo_trinh_xe_' . $carRental->id . '_' . $safeMonth . '.xlsx';
 
         return Excel::download(new \App\Exports\ShipmentVehicleLogExport($carRental, $shipments, $tollFeesByDate, $month), $fileName);
     }
@@ -1714,12 +1715,15 @@ class CarRentalController extends Controller
             // Tính toán tổng công nợ với filter
             $debtSummary = $this->calculateFilteredDebt($carRental, $shipments, $startDate, $endDate);
             
-            // Tạo tên file với thông tin filter
+            // Tạo tên file với thông tin filter - ensure safe characters
             $fileName = 'tong_ket_cong_no_' . $carRental->id;
             if ($startDate && $endDate) {
-                $fileName .= '_' . \Carbon\Carbon::parse($startDate)->format('Y-m-d') . '_' . \Carbon\Carbon::parse($endDate)->format('Y-m-d');
+                $safeStartDate = str_replace(['/', '\\', ' '], '_', \Carbon\Carbon::parse($startDate)->format('Y-m-d'));
+                $safeEndDate = str_replace(['/', '\\', ' '], '_', \Carbon\Carbon::parse($endDate)->format('Y-m-d'));
+                $fileName .= '_' . $safeStartDate . '_' . $safeEndDate;
             }
-            $fileName .= '_' . now()->format('Y-m-d') . '.xlsx';
+            $safeCurrentDate = str_replace(['/', '\\', ' '], '_', now()->format('Y-m-d'));
+            $fileName .= '_' . $safeCurrentDate . '.xlsx';
             
             return Excel::download(new \App\Exports\DebtSummaryExport($carRental, $debtSummary, $shipments), $fileName);
             

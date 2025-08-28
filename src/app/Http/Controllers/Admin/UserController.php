@@ -9,6 +9,7 @@ use App\Models\ShipmentDeductionType;
 use App\Models\SalaryAdvanceRequest;
 use App\Exports\UserExport;
 use App\Exports\SalaryExport;
+use App\Exports\OfficeSalaryExport;
 use Illuminate\Http\Request;
 use App\Models\DriverLicense;
 use App\Http\Controllers\Controller;
@@ -265,6 +266,32 @@ class UserController extends Controller
         
         // Use service to handle export logic
         return $this->userService->exportUserSalary($user, $selectedMonth);
+    }
+
+    /**
+     * Xuất bảng lương văn phòng cho nhân viên ăn lương cơ bản (trừ tài xế)
+     * 
+     * @param \App\Models\User $user
+     * @param \Illuminate\Http\Request $request
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportOfficeSalary(User $user, Request $request)
+    {
+        $this->authorize('view', $user);
+        
+        // Kiểm tra điều kiện: nhân viên ăn lương cơ bản và không phải tài xế
+        if (!$user->isEligibleForLunchAllowance()) {
+            abort(403, 'Chỉ nhân viên văn phòng mới có thể xuất bảng lương này.');
+        }
+        
+        $month = $request->get('month', now()->format('m/Y'));
+        $timestamp = Carbon::now()->format('Ymd_His');
+        // Thay thế "/" bằng "_" trong tên file để tránh lỗi
+        $safeMonth = str_replace('/', '_', $month);
+        $safeName = str_replace(['/', '\\', ' '], '_', $user->full_name);
+        $fileName = 'bang_luong_van_phong_' . $safeName . '_' . $safeMonth . '_' . $timestamp . '.xlsx';
+
+        return Excel::download(new OfficeSalaryExport($user, $month), $fileName);
     }
     
     /**
