@@ -236,7 +236,8 @@ class CustomerController extends Controller
             $monthDate = \DateTime::createFromFormat('Y-m', $month);
             $monthName = $monthDate->format('m-Y');
             
-            $filename = "hoa_don_{$customer->name}_{$monthName}.xlsx";
+            $safeName = str_replace(['/', '\\', ' '], '_', $customer->name ?? 'unknown');
+        $filename = "hoa_don_{$safeName}_{$monthName}.xlsx";
             
             return Excel::download(
                 new InvoiceExport($customer, $monthlyShipments, $month, $taxRate),
