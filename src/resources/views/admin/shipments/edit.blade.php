@@ -144,6 +144,7 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
+                                                    <input type="hidden" class="hidden" id="total-amount-edit" value="{{ old('unit_price', $shipment->unit_price) }}">
                                                     <input type="text" id="total-amount" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $shipment->unit_price) }}">
                                                     @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>

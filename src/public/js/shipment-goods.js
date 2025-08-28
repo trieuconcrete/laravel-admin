@@ -1,4 +1,4 @@
-// Hàm format số với dấu phẩy phân cách hàng nghìn (định dạng Việt Nam)
+// Hàm format số với dấu phẩy phân cách hàng nghìn (định dạng mong muốn: 12,000,000)
 function formatNumber(num) {
     if (isNaN(num) || num === null || num === undefined || num === '') return '';
     
@@ -6,7 +6,7 @@ function formatNumber(num) {
     const number = parseFloat(num);
     if (number === 0) return '0';
     
-    // Format với dấu phẩy phân cách hàng nghìn (định dạng Việt Nam)
+    // Format với dấu phẩy phân cách hàng nghìn (định dạng US)
     return Math.round(number).toLocaleString('en-US');
 }
 
@@ -17,7 +17,7 @@ function formatCurrency(num) {
     const number = parseFloat(num);
     if (number === 0) return '0';
     
-    // Format tiền tệ Việt Nam với dấu phẩy, làm tròn về số nguyên
+    // Format tiền tệ với dấu phẩy phân cách hàng nghìn (định dạng US: 12,000,000)
     return Math.round(number).toLocaleString('en-US');
 }
 
@@ -65,19 +65,7 @@ function calculateAmount(rowIndex) {
         // Trigger event để các hàm khác có thể listen
         amountInput.dispatchEvent(new Event('change'));
         
-        const totalElement = document.getElementById('total-amount');
-        const currentTotal = totalElement ? parseNumber(totalElement.value) : 0;
         // Tính lại tổng tiền
-        // if (currentTotal <= 0) {
-        //     console.log('Total-amount <= 0, calculating new total...');
-        //     calculateTotalAmount();
-        // } else {
-        //     console.log('Total-amount > 0, keeping existing total:', formatCurrency(currentTotal));
-        //     // Vẫn format lại để đảm bảo display đúng
-        //     if (totalElement) {
-        //         totalElement.value = formatCurrency(currentTotal);
-        //     }
-        // }
         calculateTotalAmount();
 
         console.log(`Row ${rowIndex}: ${formatCurrency(unit)} * ${weight} * ${quantity} = ${formatCurrency(amount)}`);
@@ -100,7 +88,7 @@ function formatInputOnBlur(input, isPrice = false) {
 }
 
 // Hàm setup event listeners cho một row
-function setupRowEventListeners(rowIndex) {
+function setupRowEventListeners(rowIndex, skipInitialCalculation = false) {
     const quantityInput = document.querySelector(`input[name="goods[${rowIndex}][quantity]"]`);
     const weightInput = document.querySelector(`input[name="goods[${rowIndex}][weight]"]`);
     const unitInput = document.querySelector(`input[name="goods[${rowIndex}][unit]"]`);
@@ -203,18 +191,25 @@ function setupRowEventListeners(rowIndex) {
         });
     }
 
-    // Tính toán lần đầu nếu đã có giá trị
+    // Tính toán lần đầu chỉ khi không skip
     calculateAmount(rowIndex);
 }
 
 // Hàm setup event listeners cho tất cả các rows hiện có
 function setupAllRowEventListeners() {
+    // Kiểm tra total-amount hiện tại để quyết định có skip initial calculation không
+    const totalElement = document.getElementById('total-amount');
+    const currentTotal = totalElement ? parseNumber(totalElement.value) : 0;
+    const skipInitialCalculation = currentTotal > 0; // Skip nếu đã có total
+    
+    console.log('setupAllRowEventListeners - Current total:', currentTotal, 'Skip calculation:', skipInitialCalculation);
+    
     // Tìm tất cả các hidden input chứa row indexes
     const rowInputs = document.querySelectorAll('input[name="goods_rows[]"]');
     
     rowInputs.forEach(function(input) {
         const rowIndex = input.value;
-        setupRowEventListeners(parseInt(rowIndex));
+        setupRowEventListeners(parseInt(rowIndex), skipInitialCalculation);
         
         // Format sẵn unit và amount input nếu có giá trị
         const unitInput = document.querySelector(`input[name="goods[${rowIndex}][unit]"]`);
@@ -258,7 +253,7 @@ function calculateTotalAmount() {
         totalElement.value = formatCurrency(total);
         totalElement.dispatchEvent(new Event('change'));
     }
-    
+
     return total;
 }
 
@@ -282,8 +277,24 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup event listeners cho tất cả rows
     setupAllRowEventListeners();
     
-    // Tính toán và format tổng tiền
-    calculateTotalAmount();
+    // Kiểm tra total-amount hiện tại
+    const totalElement = document.getElementById('total-amount');
+    const totalElementEdit = document.getElementById('total-amount-edit');
+    const currentTotal = totalElementEdit ? parseNumber(totalElementEdit.value) : 0;
+    
+    console.log('Current total-amount:', currentTotal);
+    
+    // Chỉ tính toán và cập nhật tổng tiền nếu total-amount <= 0
+    if (currentTotal <= 0) {
+        console.log('Total-amount <= 0, calculating new total...');
+        calculateTotalAmount();
+    } else {
+        console.log('Total-amount > 0, keeping existing total:', formatCurrency(currentTotal));
+        // Vẫn format lại total-amount để đảm bảo display đúng
+        if (totalElement) {
+            totalElement.value = formatCurrency(currentTotal);
+        }
+    }
     
     // Format tất cả các input amount hiện có
     document.querySelectorAll('input[name*="[amount]"]').forEach(function(input) {
