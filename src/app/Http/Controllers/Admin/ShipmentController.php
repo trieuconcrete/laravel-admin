@@ -127,6 +127,7 @@ class ShipmentController extends Controller
     public function store(ShipmentRequest $request)
     {
         try {
+            dd($request->goods);
             $this->shipmentService->createShipment($request->validated());
             return redirect()->route('admin.shipments.index')->with('success', 'Tạo chuyến hàng thành công.');
         } catch (\Exception $e) {

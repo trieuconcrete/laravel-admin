@@ -142,6 +142,9 @@ class ShipmentRequest extends FormRequest
                 if (isset($item['unit']) && !empty($item['unit'])) {
                     $goods[$key]['unit'] = str_replace(',', '', $item['unit']);
                 }
+                if (isset($item['amount']) && !empty($item['amount'])) {
+                    $goods[$key]['amount'] = str_replace(',', '', $item['amount']);
+                }
             }
             $this->merge([
                 'goods' => $goods

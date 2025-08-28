@@ -144,7 +144,7 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
-                                                    <input type="text" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $shipment->unit_price) }}">
+                                                    <input type="text" id="total-amount" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $shipment->unit_price) }}">
                                                     @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-6">
@@ -160,8 +160,8 @@
                                                     @error('distance')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Khối lượng (kg)</label>
-                                                    <input type="text" class="form-control number" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $shipment->cargo_weight) }}">
+                                                    <label class="form-label">Khối lượng (tấn)</label>
+                                                    <input type="text" class="form-control float-input" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $shipment->cargo_weight) }}">
                                                     @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
@@ -266,10 +266,11 @@
                                                         <thead>
                                                             <tr>
                                                                 <th>Tên hàng hóa</th>
-                                                                <th>Mô tả</th>
+                                                                <th>Nội dung công việc</th>
                                                                 <th>Số lượng</th>
-                                                                <th>Trọng lượng (tấn)</th>
-                                                                <th>Giá trị (VNĐ)</th>
+                                                                <th>Khối lượng (tấn)</th>
+                                                                <th>Đơn giá (VNĐ)</th>
+                                                                <th>Thành tiền</th>
                                                                 <th></th>
                                                             </tr>
                                                         </thead>
@@ -282,7 +283,7 @@
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-name">@error('goods.'.$i.'.name'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][Ghi chú]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.Ghi chú', $good->notes) }}">
+                                                                            <input type="text" name="goods[{{ $i }}][notes]" class="form-control form-control-sm" value="{{ old('goods.'.$i.'.Ghi chú', $good->notes) }}">
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-Ghi chú">@error('goods.'.$i.'.Ghi chú'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
@@ -294,8 +295,12 @@
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-weight">@error('goods.'.$i.'.weight'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
-                                                                            <input type="text" name="goods[{{ $i }}][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.'.$i.'.unit', $good->unit) }}">
+                                                                            <input type="text" name="goods[{{ $i }}][unit]" class="form-control form-control-sm number" value="{{ old('goods.'.$i.'.unit', $good->unit) }}">
                                                                             <div class="text-danger" id="error-goods-{{ $i }}-unit">@error('goods.'.$i.'.unit'){{ $message }}@enderror</div>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="text" name="goods[{{ $i }}][amount]" class="form-control form-control-sm number" value="{{ old('goods.'.$i.'.amount', $good->amount) }}">
+                                                                            <div class="text-danger" id="error-goods-{{ $i }}-amount">@error('goods.'.$i.'.amount'){{ $message }}@enderror</div>
                                                                         </td>
                                                                         <td>
                                                                             <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeGoodRow(this, {{ $i }})"><i class="ri-delete-bin-fill"></i></button>
@@ -310,7 +315,7 @@
                                                                         <div class="text-danger" id="error-goods-0-name">@error('goods.0.name'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][Ghi chú]" class="form-control form-control-sm" value="{{ old('goods.0.Ghi chú') }}">
+                                                                        <input type="text" name="goods[0][notes]" class="form-control form-control-sm" value="{{ old('goods.0.Ghi chú') }}">
                                                                         <div class="text-danger" id="error-goods-0-Ghi chú">@error('goods.0.Ghi chú'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
@@ -322,8 +327,12 @@
                                                                         <div class="text-danger" id="error-goods-0-weight">@error('goods.0.weight'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" name="goods[0][unit]" class="form-control form-control-sm unit-input" value="{{ old('goods.0.unit') }}">
+                                                                        <input type="text" name="goods[0][unit]" class="form-control form-control-sm number" value="{{ old('goods.0.unit') }}">
                                                                         <div class="text-danger" id="error-goods-0-unit">@error('goods.0.unit'){{ $message }}@enderror</div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="text" name="goods[0][amount]" class="form-control form-control-sm number" value="{{ old('goods.0.amount') }}">
+                                                                        <div class="text-danger" id="error-goods-0-amount">@error('goods.0.amount'){{ $message }}@enderror</div>
                                                                     </td>
                                                                     <td>
                                                                         <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeGoodRow(this, 0)"><i class="ri-delete-bin-fill"></i></button>
@@ -434,7 +443,7 @@
                                                                             </td>
                                                                         @endforeach
                                                                         <td>
-                                                                            <input type="text" name="drivers[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.Ghi chú', $driver['deductions']->first() ? $driver['deductions']->first()->notes : '') }}">
+                                                                            <input type="text" name="drivers[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.Ghi chú', $driver['deductions']->first() ? $driver['deductions']->first()->notes : '') }}">
                                                                             @error('drivers.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
                                                                         <td>
@@ -469,7 +478,7 @@
                                                                         </td>
                                                                     @endforeach
                                                                     <td>
-                                                                        <input type="text" name="drivers[0][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.Ghi chú', '') }}">
+                                                                        <input type="text" name="drivers[0][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.Ghi chú', '') }}">
                                                                         @error('drivers.0.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     <td>
@@ -531,7 +540,7 @@
                                                                             </td>
                                                                         @endforeach
                                                                         <td>
-                                                                            <input type="text" name="driverPXs[{{ $i }}][deductions][Ghi chú]" class="form-control form-control-sm " value="{{ old('driverPXs.'.$i.'.deductions.Ghi chú', isset($driver['deductions'][$type->id]['Ghi chú']) ? $driver['deductions'][$type->id]['Ghi chú'] : '') }}">
+                                                                            <input type="text" name="driverPXs[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('driverPXs.'.$i.'.deductions.Ghi chú', isset($driver['deductions'][$type->id]['Ghi chú']) ? $driver['deductions'][$type->id]['Ghi chú'] : '') }}">
                                                                             @error('driverPXs.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
                                                                         <td>
@@ -934,4 +943,5 @@
         }
     });
 </script>
+<script src="{{ asset('js/shipment-goods.js') }}"></script>
 @endpush

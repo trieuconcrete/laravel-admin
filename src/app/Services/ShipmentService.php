@@ -198,6 +198,7 @@ class ShipmentService
                             'unit' => $good['unit'],
                             'notes' => $good['notes'] ?? null,
                             'weight' => $good['weight'] ?? null,
+                            'amount' => $good['amount'] ?? null,
                         ]);
                     }
                 }
@@ -363,6 +364,7 @@ class ShipmentService
                             'unit' => $good['unit'],
                             'notes' => $good['notes'] ?? null,
                             'weight' => $good['weight'] ?? null,
+                            'amount' => $good['amount'] ?? null,
                         ]);
                     }
                 }
