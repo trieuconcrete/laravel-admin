@@ -306,6 +306,12 @@
                                                                 </tr>
                                                             @endif
                                                         </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <th colspan="5" class="text-end font-weight-bold">Tổng thành tiền:</th>
+                                                                <th id="total-amount-goods"></th>
+                                                            </tr>
+                                                        </tfoot>
                                                     </table>
                                                 </div>
                                             </div>

@@ -254,6 +254,12 @@ function calculateTotalAmount() {
         totalElement.dispatchEvent(new Event('change'));
     }
 
+    // Cập nhật tổng tiền nếu có element hiển thị
+    const totalAmountGoods = document.getElementById('total-amount-goods');
+    if (totalAmountGoods) {
+        totalAmountGoods.textContent = formatCurrency(total) + ' ₫';
+    }
+
     return total;
 }
 
