@@ -11,6 +11,7 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Font;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 
 class TopbandShipmentExport extends BaseShipmentExport
 {
@@ -124,7 +125,8 @@ class TopbandShipmentExport extends BaseShipmentExport
         $sheet->setCellValue('C' . $row, $shipment['plate_number'] ?? ''); // Số xe
         $sheet->setCellValue('D' . $row, $shipment['origin']); // Điểm đi
         $sheet->setCellValue('E' . $row, $shipment['destination']); // Điểm đến
-        $sheet->setCellValue('F' . $row, $shipment['cargo_weight'] ?? 1); // Số tấn
+        $sheet->setCellValue('F' . $row, floatval($shipment['cargo_weight'] ?? 1)); // Số tấn
+        $sheet->getStyle('F' . $row)->getNumberFormat()->setFormatCode('0.0000');
         $sheet->setCellValue('G' . $row, $shipment['company'] ?? ''); // Địa chỉ
         $sheet->setCellValue('H' . $row, $shipment['goods_name'] ?? ''); // Loại hàng
         $sheet->setCellValue('I' . $row, ''); // TTGT

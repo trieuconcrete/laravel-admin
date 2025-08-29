@@ -127,8 +127,8 @@ abstract class BaseShipmentExport implements WithTitle, WithStyles, ShouldAutoSi
         $sheet->getStyle('A8')->getFont()->setBold(true);
 
         // TAX
-        $sheet->setCellValue('I10', 'Hóa đơn: 01GTKT0/001');
-        $sheet->setCellValue('I11', 'Bảng kê số: 0123456789');
+        $sheet->setCellValue('I10', 'Hóa đơn: ');
+        $sheet->setCellValue('I11', 'Bảng kê số: ');
         $sheet->setCellValue('I12', 'ĐVT: VNĐ');
 
     }
