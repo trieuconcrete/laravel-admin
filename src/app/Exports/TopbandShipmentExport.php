@@ -12,14 +12,14 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Font;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class CraneShipmentExport extends BaseShipmentExport
+class TopbandShipmentExport extends BaseShipmentExport
 {
     /**
      * @return string
      */
     public function title(): string
     {
-        return 'Bảng kê chuyến xe - Xe nâng';
+        return 'Bảng kê vận chuyển ' . date('m/Y', strtotime($this->startDate));
     }
 
     /**
@@ -27,7 +27,7 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     protected function getReportTitle(): string
     {
-        return 'BẢNG KÊ CHUYẾN XE - XE NÂNG';
+        return 'BẢNG KÊ VẬN CHUYỂN THÁNG ' . date('m/Y', strtotime($this->startDate));
     }
 
     /**
@@ -35,28 +35,21 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     protected function getHeaders(): array
     {
-        // return [
-        //     'STT',
-        //     'Mã chuyến xe',
-        //     'Ngày',
-        //     'Điểm đi',
-        //     'Điểm đến',
-        //     'Số chuyến',
-        //     'Đơn giá cẩu',
-        //     'Thành tiền'
-        // ];
         return [
             'A' => 'STT',
             'B' => 'Ngày',
             'C' => 'Số xe',
             'D' => 'Điểm đi',
             'E' => 'Điểm đến',
-            'F' => 'Số Lượng',
-            'G' => 'Kết hợp',
-            'H' => 'Phụ phí chuyến xe',
-            'I' => 'Đơn giá',
-            'J' => 'Thành tiền',
-            'K' => 'Ghi chú'
+            'F' => 'Số tấn',
+            'G' => 'Địa chỉ',
+            'H' => 'Loại hàng',
+            'I' => 'TTGT',
+            'J' => 'Đơn giá',
+            'K' => 'Phụ thu kết hợp',
+            'L' => 'Phí bốc xếp',
+            'M' => 'Thành tiền',
+            'N' => 'Ghi chú'
         ];
     }
 
@@ -127,16 +120,19 @@ class CraneShipmentExport extends BaseShipmentExport
     protected function addDataRow(Worksheet $sheet, int $row, int $index, array $shipment)
     {
         $sheet->setCellValue('A' . $row, $index + 1);
-        $sheet->setCellValue('B' . $row, $shipment['departure_time']);
-        $sheet->setCellValue('C' . $row, $shipment['vehicle_plate_number']);
-        $sheet->setCellValue('D' . $row, $shipment['origin']);
-        $sheet->setCellValue('E' . $row, $shipment['destination']);
-        $sheet->setCellValue('F' . $row, $shipment['trip_count'] ?? 1);
-        $sheet->setCellValue('G' . $row, $shipment['total_combined_surcharge']);
-        $sheet->setCellValue('H' . $row, $shipment['total_expense_deductions']);
-        $sheet->setCellValue('I' . $row, $shipment['unit_price'] ?? 0);
-        $sheet->setCellValue('J' . $row, $shipment['total_amount']);
-        $sheet->setCellValue('K' . $row, $shipment['notes'] ?? '');
+        $sheet->setCellValue('B' . $row, $shipment['departure_time']); // Ngày
+        $sheet->setCellValue('C' . $row, $shipment['plate_number'] ?? ''); // Số xe
+        $sheet->setCellValue('D' . $row, $shipment['origin']); // Điểm đi
+        $sheet->setCellValue('E' . $row, $shipment['destination']); // Điểm đến
+        $sheet->setCellValue('F' . $row, $shipment['cargo_weight'] ?? 1); // Số tấn
+        $sheet->setCellValue('G' . $row, $shipment['company'] ?? ''); // Địa chỉ
+        $sheet->setCellValue('H' . $row, $shipment['goods_name'] ?? ''); // Loại hàng
+        $sheet->setCellValue('I' . $row, ''); // TTGT
+        $sheet->setCellValue('J' . $row, $shipment['unit_price'] ?? 0); // Đơn giá
+        $sheet->setCellValue('K' . $row, $shipment['total_combined_surcharge'] ?? 0); // Phụ thu kết hợp
+        $sheet->setCellValue('L' . $row, $shipment['total_combined_cargo_handling'] ?? 0); // Phí bốc xếp
+        $sheet->setCellValue('M' . $row, $shipment['total_amount']); // Thành tiền
+        $sheet->setCellValue('N' . $row, $shipment['notes'] ?? ''); // Ghi chú
     }
 
     /**
@@ -203,15 +199,18 @@ class CraneShipmentExport extends BaseShipmentExport
     protected function setColumnWidths(Worksheet $sheet)
     {
         $sheet->getColumnDimension('A')->setWidth(5);   // STT
-        $sheet->getColumnDimension('B')->setWidth(15);  // Mã chuyến xe
-        $sheet->getColumnDimension('C')->setWidth(12);  // Ngày
+        $sheet->getColumnDimension('B')->setWidth(15);  // Ngày
+        $sheet->getColumnDimension('C')->setWidth(12);  // Số xe
         $sheet->getColumnDimension('D')->setWidth(15);  // Điểm đi
         $sheet->getColumnDimension('E')->setWidth(15);  // Điểm đến
-        $sheet->getColumnDimension('F')->setWidth(12);  // Số chuyến/KM
-        $sheet->getColumnDimension('G')->setWidth(15);  // Phụ thu kết hợp
-        $sheet->getColumnDimension('H')->setWidth(20);  // Chi phí chuyến xe
-        $sheet->getColumnDimension('I')->setWidth(15);  // Đơn giá
-        $sheet->getColumnDimension('J')->setWidth(15);  // Thành tiền
-        $sheet->getColumnDimension('K')->setWidth(20);  // Ghi chú
+        $sheet->getColumnDimension('F')->setWidth(12);  // Số tấn
+        $sheet->getColumnDimension('G')->setWidth(15);  // Địa chỉ
+        $sheet->getColumnDimension('H')->setWidth(20);  // Loại hàng
+        $sheet->getColumnDimension('I')->setWidth(15);  // TTGT
+        $sheet->getColumnDimension('J')->setWidth(15);  // Đơn giá
+        $sheet->getColumnDimension('K')->setWidth(20);  // Phụ thu kết hợp
+        $sheet->getColumnDimension('L')->setWidth(20);  // Phí bốc xếp
+        $sheet->getColumnDimension('M')->setWidth(20);  // Thành tiền
+        $sheet->getColumnDimension('N')->setWidth(20);  // Ghi chú
     }
 } 

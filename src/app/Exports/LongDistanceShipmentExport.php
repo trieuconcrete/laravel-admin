@@ -35,16 +35,6 @@ class LongDistanceShipmentExport extends BaseShipmentExport
      */
     protected function getHeaders(): array
     {
-        // return [
-        //     'STT',
-        //     'Mã chuyến xe',
-        //     'Ngày',
-        //     'Điểm đi',
-        //     'Điểm đến',
-        //     'Số km',
-        //     'Đơn giá/km',
-        //     'Thành tiền'
-        // ];
         return [
             'A' => 'STT',
             'B' => 'Ngày',
@@ -152,39 +142,39 @@ class LongDistanceShipmentExport extends BaseShipmentExport
         $summaryRow = $row;
         $sheet->setCellValue('A' . $summaryRow, 'TỔNG CỘNG');
         $sheet->mergeCells('A' . $summaryRow . ':D' . $summaryRow);
-        $sheet->setCellValue('J' . $summaryRow, $totalAmount);
+        $sheet->setCellValue($this->beforeLastColumn . $summaryRow, $totalAmount);
         // Style summary row
-        $sheet->getStyle('A' . $summaryRow . ':K' . $summaryRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $summaryRow . ':' . $this->lastColumn . $summaryRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $summaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('J' . $summaryRow)->getNumberFormat()->setFormatCode('#,##0');
-        $sheet->getStyle('J' . $summaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle($this->beforeLastColumn . $summaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle($this->beforeLastColumn . $summaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
         // VAT
         $summaryRow++;
         $vatAmount = $totalAmount * 0.08; // Assuming 8% VAT
         $sheet->setCellValue('A' . $summaryRow, 'THUẾ GTGT 8%');
         $sheet->mergeCells('A' . $summaryRow . ':D' . $summaryRow);
-        $sheet->setCellValue('J' . $summaryRow, $vatAmount);
+        $sheet->setCellValue($this->beforeLastColumn . $summaryRow, $vatAmount);
         // Style summary row
-        $sheet->getStyle('A' . $summaryRow . ':K' . $summaryRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $summaryRow . ':' . $this->lastColumn . $summaryRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $summaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('J' . $summaryRow)->getNumberFormat()->setFormatCode('#,##0');
-        $sheet->getStyle('J' . $summaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle($this->beforeLastColumn . $summaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle($this->beforeLastColumn . $summaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
         // Amount + VAT
         $summaryRow++;
         $totalAmountVAT = $totalAmount + $vatAmount;
         $sheet->setCellValue('A' . $summaryRow, 'TỔNG THANH TOÁN');
         $sheet->mergeCells('A' . $summaryRow . ':D' . $summaryRow);
-        $sheet->setCellValue('J' . $summaryRow, $totalAmountVAT);
+        $sheet->setCellValue($this->beforeLastColumn . $summaryRow, $totalAmountVAT);
         // Style summary row
-        $sheet->getStyle('A' . $summaryRow . ':K' . $summaryRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $summaryRow . ':' . $this->lastColumn . $summaryRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $summaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('J' . $summaryRow)->getNumberFormat()->setFormatCode('#,##0');
-        $sheet->getStyle('J' . $summaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle($this->beforeLastColumn . $summaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle($this->beforeLastColumn . $summaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
 
         // Style the data rows including summary row
-        $dataRange = 'A14:K' . $summaryRow;
+        $dataRange = 'A14:' . $this->lastColumn . $summaryRow;
         $sheet->getStyle($dataRange)->applyFromArray([
             'borders' => [
                 'allBorders' => [

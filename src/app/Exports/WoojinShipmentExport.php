@@ -12,14 +12,14 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Font;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class CraneShipmentExport extends BaseShipmentExport
+class WoojinShipmentExport extends BaseShipmentExport
 {
     /**
      * @return string
      */
     public function title(): string
     {
-        return 'Bảng kê chuyến xe - Xe nâng';
+        return 'Bảng kê chuyến xe - Khách chạy theo chuyến';
     }
 
     /**
@@ -27,7 +27,7 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     protected function getReportTitle(): string
     {
-        return 'BẢNG KÊ CHUYẾN XE - XE NÂNG';
+        return 'BẢNG KÊ CHUYẾN XE - KHÁCH CHẠY THEO CHUYẾN';
     }
 
     /**
@@ -35,23 +35,13 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     protected function getHeaders(): array
     {
-        // return [
-        //     'STT',
-        //     'Mã chuyến xe',
-        //     'Ngày',
-        //     'Điểm đi',
-        //     'Điểm đến',
-        //     'Số chuyến',
-        //     'Đơn giá cẩu',
-        //     'Thành tiền'
-        // ];
         return [
             'A' => 'STT',
             'B' => 'Ngày',
             'C' => 'Số xe',
             'D' => 'Điểm đi',
             'E' => 'Điểm đến',
-            'F' => 'Số Lượng',
+            'F' => 'Số chuyến',
             'G' => 'Kết hợp',
             'H' => 'Phụ phí chuyến xe',
             'I' => 'Đơn giá',

@@ -57,18 +57,20 @@ class ShipmentReportController extends Controller
             $request->validate([
                 'statement_start_date' => 'required|date',
                 'statement_end_date' => 'required|date|after_or_equal:statement_start_date',
-                'shipment_type' => 'required|integer|in:1,2,3,4',
+                'shipment_type' => 'required|integer|in:1,2,3,4'
             ]);
 
             $startDate = $request->input('statement_start_date');
             $endDate = $request->input('statement_end_date');
             $shipmentType = $request->input('shipment_type');
+            $excelTemplate = $request->input('excel_template', 3); // Mặc định 3 nếu không có
 
             $result = $this->shipmentReportService->exportReport(
                 $customer->id,
                 $startDate,
                 $endDate,
-                $shipmentType
+                $shipmentType,
+                $excelTemplate
             );
 
             // Nếu result là response object (từ Excel::download), trả về trực tiếp

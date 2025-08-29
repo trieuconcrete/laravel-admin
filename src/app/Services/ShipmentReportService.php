@@ -2,17 +2,19 @@
 
 namespace App\Services;
 
+use App\Models\Customer;
 use App\Models\Shipment;
 use App\Models\ShipmentReport;
-use App\Models\Customer;
-use App\Exports\PerTripShipmentExport;
-use App\Exports\MonthlyRentalShipmentExport;
-use App\Exports\CraneShipmentExport;
-use App\Exports\LongDistanceShipmentExport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Exports\CraneShipmentExport;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\WoojinShipmentExport;
+use App\Exports\PerTripShipmentExport;
+use App\Exports\TopbandShipmentExport;
+use App\Exports\LongDistanceShipmentExport;
+use App\Exports\MonthlyRentalShipmentExport;
 
 class ShipmentReportService
 {
@@ -109,7 +111,7 @@ class ShipmentReportService
     /**
      * Xuất Excel bảng kê theo loại chuyến xe
      */
-    public function exportReport($customerId, $startDate, $endDate, $shipmentType)
+    public function exportReport($customerId, $startDate, $endDate, $shipmentType, $templateType)
     {
         try {
             // Lấy dữ liệu shipments
@@ -134,10 +136,12 @@ class ShipmentReportService
                         'cargo_weight' => $shipment->cargo_weight ?? 0,
                         'combined_fees' => $shipment->shipmentExtraFee->sum('amount'),
                         'total_amount' => $this->calculateAmount($shipment, $shipmentType),
-                        'total_expense_deductions' => $shipment->total_expense_deductions,
+                        'total_expense_deductions' => $shipment->total_expense_deductions, // phụ phí(tổng chi phí chuyến xe)
                         'total_combined_surcharge' => $shipment->total_combined_surcharge, // phụ thu kết hợp
-                        'total_cargo_handling' => $shipment->total_cargo_handling, // bốc xếp
+                        'total_combined_cargo_handling' => $shipment->total_combined_cargo_handling, // bốc xếp
                         'shipment_report_id' => $shipment->shipment_report_id,
+                        'goods_name' =>  $shipment->goods->pluck('name')->implode(', '),
+                        'company' => $shipment->company ? $shipment->company : '',
                         'notes' => $shipment->notes,
                         'status' => $shipment->status,
                         'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : '',
@@ -155,7 +159,7 @@ class ShipmentReportService
             $filename = $this->generateFilename($customer, $startDate, $endDate, $shipmentType);
 
             // Chọn export class dựa trên shipment type
-            $exportClass = $this->getExportClass($shipmentType);
+            $exportClass = $this->getExportClass($shipmentType, $templateType);
 
             return Excel::download(
                 new $exportClass($customer, $shipments, $startDate, $endDate, $shipmentType),
@@ -175,10 +179,15 @@ class ShipmentReportService
     /**
      * Lấy export class dựa trên shipment type
      */
-    private function getExportClass($shipmentType)
+    private function getExportClass($shipmentType, $templateType)   
     {
         switch ($shipmentType) {
             case 1:
+                if ($templateType == ShipmentReport::EXCEL_TEMPLATE_TOPBAND) {
+                    return TopbandShipmentExport::class; // Khách chạy theo chuyến TOPBAND
+                } elseif ($templateType == ShipmentReport::EXCEL_TEMPLATE_WOOJIN) {
+                    return WoojinShipmentExport::class; // Khách chạy theo chuyến WOOJIN
+                }
                 return PerTripShipmentExport::class; // Chuyến xe theo chuyến
             case 2:
                 return MonthlyRentalShipmentExport::class; // Thuê xe theo tháng
