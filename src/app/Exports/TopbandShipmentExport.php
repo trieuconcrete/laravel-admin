@@ -208,9 +208,24 @@ class TopbandShipmentExport extends BaseShipmentExport
         $sheet->getColumnDimension('H')->setWidth(20);  // Loại hàng
         $sheet->getColumnDimension('I')->setWidth(15);  // TTGT
         $sheet->getColumnDimension('J')->setWidth(15);  // Đơn giá
-        $sheet->getColumnDimension('K')->setWidth(20);  // Phụ thu kết hợp
-        $sheet->getColumnDimension('L')->setWidth(20);  // Phí bốc xếp
-        $sheet->getColumnDimension('M')->setWidth(20);  // Thành tiền
+        $sheet->getColumnDimension('K')->setWidth(15);  // Phụ thu kết hợp
+        $sheet->getColumnDimension('L')->setWidth(15);  // Phí bốc xếp
+        $sheet->getColumnDimension('M')->setWidth(15);  // Thành tiền
         $sheet->getColumnDimension('N')->setWidth(20);  // Ghi chú
+    }
+
+    /**
+     * Set number formats
+     */
+    protected function setNumberFormats(Worksheet $sheet, int $row)
+    {
+        $sheet->getStyle('F14:F' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('G14' . ':' . $this->lastColumn . '' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+        
+        // Set text alignment
+        $sheet->getStyle('A14:A' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('B14:B' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('C14:C' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('F14:F' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
     }
 } 
