@@ -212,9 +212,9 @@
                         <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'show active' : '' }}" id="monthlyReport">
                             <div class="row mb-3">
                                 <div class="col-md-3">
-                                    <label class="">Chọn bảng kê (tùy chọn)</label>
+                                    <label class="">Bảng kê</label>
                                     <select class="form-select" name="month" id="month">
-                                        <option value="">Chọn tháng kê</option>
+                                        <option value="">Chọn bảng kê</option>
                                         @if($shipmentMonthlyReports->count() > 0)
                                             @foreach($shipmentMonthlyReports as $index => $val)
                                                 <option value="{{ $val->monthly }}">{{ $val->monthly }}</option>
