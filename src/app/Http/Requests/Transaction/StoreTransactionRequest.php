@@ -38,6 +38,7 @@ class StoreTransactionRequest extends FormRequest
     public function rules()
     {
         return [
+            'shipment_report_id' => 'nullable',
             'amount' => 'required|numeric|min:0',
             'payment_date' => 'required|date',
             'payment_method' => 'required|in:' . implode(',', array_keys(Payment::getPaymentMethods())),

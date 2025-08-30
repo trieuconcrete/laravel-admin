@@ -56,6 +56,7 @@ class TransactionPaymentService
             // Create payment record
             $paymentData = [
                 'customer_id' => $customer->id,
+                'shipment_report_id' => $data['shipment_report_id'] ?? null,
                 'amount' => $data['amount'],
                 'payment_date' => $data['payment_date'],
                 'status' => Payment::STATUS_COMPLETED,

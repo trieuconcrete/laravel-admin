@@ -15,11 +15,12 @@
         </thead>
         <tbody>
             @foreach ($shipmentReports as $shipmentReport)
-                <tr>
+                <tr data-debt="{{ $shipmentReport->id }}" 
+                    data-amount="{{ $shipmentReport->total_amount }}" 
+                    data-notes="{{ $shipmentReport->getShipmentTypeLabel() }}">
                     <td>
                         <div class="btn-group">
-                            <a href="#"
-                                class="btn btn-sm btn-outline-primary">Thanh toán</a>
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#transactionModal" class="btn btn-sm btn-outline-primary">Thanh toán</a>
                         </div>
                     </td>
                     <td>{{ $shipmentReport->monthly }}</td>

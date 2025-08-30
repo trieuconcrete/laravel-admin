@@ -388,11 +388,8 @@
                             </div>
 
                             <!-- Search Form -->
-                            <div class="card mb-3">
-                                <div class="card-header bg-light">
-                                    <h6 class="mb-0">Tìm kiếm thanh toán</h6>
-                                </div>
-                                <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-12">
                                     <form id="transactionSearchForm" method="GET"
                                         action="{{ route('admin.customers.transactions', $customer) }}">
                                         <input type="hidden" name="active_tab" value="{{ $activeTab ?? 'transactions' }}">
@@ -441,13 +438,9 @@
                                         <div class="row mt-3">
                                             <div class="col-12 d-flex justify-content-center">
                                                 <div class="d-flex gap-3">
-                                                    <button type="submit" class="btn btn-primary px-4">
-                                                        <i class="fas fa-search me-2"></i>Tìm kiếm
+                                                    <button type="submit" class="btn btn-info me-2">
+                                                        <i class="ri-search-line me-1"></i>Tìm kiếm
                                                     </button>
-                                                    <a href="{{ route('admin.customers.transactions', $customer) }}?active_tab={{ $activeTab ?? 'transactions' }}"
-                                                        class="btn btn-outline-secondary px-4">
-                                                        <i class="fas fa-undo me-2"></i>Đặt lại
-                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -472,19 +465,19 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Thêm giao dịch</h5>
+                    <h5 class="modal-title">Thanh toán công nợ</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <hr>
                 <form id="transactionForm" enctype="multipart/form-data" method="POST"
                     action="{{ route('admin.customers.store-transaction', $customer) }}">
                     @csrf
+                    <input type="hidden" name="shipment_report_id" id="shipment_report_id" value="">
                     <div class="modal-body">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Số tiền <span class="text-danger">*</span></label>
-                                <input class="form-control number-format" type="text" placeholder="Số tiền" name="amount"
-                                    required />
+                                <input class="form-control number-format" type="text" placeholder="Số tiền" name="amount" id="amount" required />
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ngày thanh toán <span class="text-danger">*</span></label>
@@ -509,7 +502,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Chú thích</label>
-                            <textarea class="form-control" rows="3" placeholder="Nhập chú thích" name="notes"></textarea>
+                            <textarea class="form-control" rows="3" placeholder="Nhập chú thích" name="notes" id="notes"></textarea>
                         </div>
                         <div id="transactionFormErrors" class="alert alert-danger mt-2" style="display: none;"></div>
                     </div>
@@ -1890,11 +1883,39 @@
                 window.initialLoadHandled = true;
             }, 1000);
 
+            
+            // Handle payment button clicks
+            const transactionModal = document.getElementById('transactionModal');
+            const shipmentReportIdInput = document.getElementById('shipment_report_id');
+            const amountInput = document.getElementById('amount');
+            const notesInput = document.getElementById('notes');
 
+            // Listen for modal show event to populate data
+            transactionModal.addEventListener('show.bs.modal', function(event) {
+                // Button that triggered the modal
+                const button = event.relatedTarget;
+                
+                // Get shipment_report_id and amount from the parent row's data attributes
+                const row = button.closest('tr');
+                const shipmentId = row.getAttribute('data-debt');
+                const amount = row.getAttribute('data-amount');
+                const notes = row.getAttribute('data-notes');
 
-
-
-
+                // Set values in modal inputs
+                if (shipmentReportIdInput) {
+                    shipmentReportIdInput.value = shipmentId;
+                }
+                // Set values in modal inputs
+                if (notesInput) {
+                    notesInput.value = 'Công nợ #' + shipmentId + '\nLoại: ' + notes;
+                }
+                
+                if (amountInput && amount) {
+                    // Format amount with commas for display
+                    const formattedAmount = parseInt(amount).toLocaleString('en-US');
+                    amountInput.value = formattedAmount;
+                }
+            });
         });
     </script>
 @endpush
