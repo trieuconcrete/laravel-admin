@@ -19,7 +19,7 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     public function title(): string
     {
-        return 'Bảng kê chuyến xe - Xe nâng';
+        return 'Bảng kê vận chuyển ' . date('m/Y', strtotime($this->startDate));
     }
 
     /**
@@ -27,7 +27,7 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     protected function getReportTitle(): string
     {
-        return 'BẢNG KÊ CHUYẾN XE - XE NÂNG';
+        return 'BẢNG KÊ VẬN CHUYỂN THÁNG ' . date('m/Y', strtotime($this->startDate));
     }
 
     /**
@@ -35,28 +35,17 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     protected function getHeaders(): array
     {
-        // return [
-        //     'STT',
-        //     'Mã chuyến xe',
-        //     'Ngày',
-        //     'Điểm đi',
-        //     'Điểm đến',
-        //     'Số chuyến',
-        //     'Đơn giá cẩu',
-        //     'Thành tiền'
-        // ];
         return [
             'A' => 'STT',
             'B' => 'Ngày',
             'C' => 'Số xe',
-            'D' => 'Điểm đi',
-            'E' => 'Điểm đến',
-            'F' => 'Số Lượng',
-            'G' => 'Kết hợp',
-            'H' => 'Phụ phí chuyến xe',
-            'I' => 'Đơn giá',
-            'J' => 'Thành tiền',
-            'K' => 'Ghi chú'
+            'D' => 'Nội dung công việc',
+            'E' => 'Loại hàng',
+            'F' => 'TTGT',
+            'G' => 'Số Lượng',
+            'H' => 'Đơn giá',
+            'I' => 'Thành tiền',
+            'J' => 'Ghi chú'
         ];
     }
 
@@ -100,9 +89,9 @@ class CraneShipmentExport extends BaseShipmentExport
         $row = 14;
         $totalAmount = 0;
         foreach ($this->shipments as $index => $shipment) {
-            $this->addDataRow($sheet, $row, $index, $shipment);
+            $row = $this->addDataRow($sheet, $row, $index, $shipment);
             $totalAmount += $shipment['total_amount'];
-            $row++;
+            $row ++;
         }
 
         $this->addDataTotalRow($sheet, $row, $totalAmount);
@@ -126,17 +115,25 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     protected function addDataRow(Worksheet $sheet, int $row, int $index, array $shipment)
     {
-        $sheet->setCellValue('A' . $row, $index + 1);
-        $sheet->setCellValue('B' . $row, $shipment['departure_time']);
-        $sheet->setCellValue('C' . $row, $shipment['vehicle_plate_number']);
-        $sheet->setCellValue('D' . $row, $shipment['origin']);
-        $sheet->setCellValue('E' . $row, $shipment['destination']);
-        $sheet->setCellValue('F' . $row, $shipment['trip_count'] ?? 1);
-        $sheet->setCellValue('G' . $row, $shipment['total_combined_surcharge']);
-        $sheet->setCellValue('H' . $row, $shipment['total_expense_deductions']);
-        $sheet->setCellValue('I' . $row, $shipment['unit_price'] ?? 0);
-        $sheet->setCellValue('J' . $row, $shipment['total_amount']);
-        $sheet->setCellValue('K' . $row, $shipment['notes'] ?? '');
+        if ($shipment['goods']) {
+            foreach ($shipment['goods'] as $key => $goods) {
+                $index += $key;
+                $sheet->setCellValue('A' . $row, $row - 13);
+                $sheet->setCellValue('B' . $row, $shipment['departure_time']); // Ngày
+                $sheet->setCellValue('C' . $row, $shipment['vehicle_plate_number']); // Số xe
+                $sheet->setCellValue('D' . $row, $goods['notes']); // Nội dung công việc
+                $sheet->setCellValue('E' . $row, $goods['name']); // Loại hàng
+                $sheet->setCellValue('F' . $row, ''); // TTGT
+                $sheet->setCellValue('G' . $row, $goods['weight']); // Số Lượng
+                $sheet->setCellValue('H' . $row, $goods['unit'] ?? 0); // Đơn giá
+                $sheet->setCellValue('I' . $row, ($goods['amount'] ?? 0)); // Thành tiền
+                $sheet->setCellValue('J' . $row, ''); // Ghi chú
+                if ($key < count($shipment['goods']) - 1) {
+                    $row++;
+                }
+            }
+        }
+        return $row;
     }
 
     /**
@@ -203,15 +200,30 @@ class CraneShipmentExport extends BaseShipmentExport
     protected function setColumnWidths(Worksheet $sheet)
     {
         $sheet->getColumnDimension('A')->setWidth(5);   // STT
-        $sheet->getColumnDimension('B')->setWidth(15);  // Mã chuyến xe
-        $sheet->getColumnDimension('C')->setWidth(12);  // Ngày
-        $sheet->getColumnDimension('D')->setWidth(15);  // Điểm đi
-        $sheet->getColumnDimension('E')->setWidth(15);  // Điểm đến
-        $sheet->getColumnDimension('F')->setWidth(12);  // Số chuyến/KM
-        $sheet->getColumnDimension('G')->setWidth(15);  // Phụ thu kết hợp
-        $sheet->getColumnDimension('H')->setWidth(20);  // Chi phí chuyến xe
-        $sheet->getColumnDimension('I')->setWidth(15);  // Đơn giá
-        $sheet->getColumnDimension('J')->setWidth(15);  // Thành tiền
-        $sheet->getColumnDimension('K')->setWidth(20);  // Ghi chú
+        $sheet->getColumnDimension('B')->setWidth(15);  // Ngày
+        $sheet->getColumnDimension('C')->setWidth(12);  // Số xe
+        $sheet->getColumnDimension('D')->setWidth(20);  // Nội dung công việc
+        $sheet->getColumnDimension('E')->setWidth(15);  // Loại hàng
+        $sheet->getColumnDimension('F')->setWidth(12);  // TTGT
+        $sheet->getColumnDimension('G')->setWidth(15);  // Số Lượng
+        $sheet->getColumnDimension('H')->setWidth(20);  // Đơn giá
+        $sheet->getColumnDimension('I')->setWidth(15);  // Thành tiền
+        $sheet->getColumnDimension('J')->setWidth(20);  // Ghi chú
+    }
+
+    /**
+     * Set number formats
+     */
+    protected function setNumberFormats(Worksheet $sheet, int $row)
+    {
+        $sheet->getStyle('I14:I' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('H14' . ':' . $this->lastColumn . '' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+        
+        // Set text alignment
+        $sheet->getStyle('A14:A' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('B14:B' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('C14:C' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('F14:F' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('G14:H' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
     }
 } 

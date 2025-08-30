@@ -282,6 +282,7 @@ class ShipmentRequest extends FormRequest
             'goods.*.unit' => 'nullable|numeric|min:0',
             'goods.*.notes' => 'nullable|string|max:255',
             'goods.*.weight' => 'nullable|numeric|min:0',
+            'goods.*.amount' => 'nullable|numeric|min:0',
         ];
 
         // Nếu không phải xe thuê, thì yêu cầu thông tin tài xế và phương tiện

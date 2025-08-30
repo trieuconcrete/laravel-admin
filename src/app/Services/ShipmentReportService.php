@@ -119,7 +119,7 @@ class ShipmentReportService
                 ->where('shipment_type', $shipmentType)
                 ->whereBetween('departure_time', [$startDate, $endDate])
                 ->where('status', 'completed')
-                ->with(['customer', 'vehicle', 'vehicle.vehicleType', 'driver'])
+                ->with(['customer', 'vehicle', 'vehicle.vehicleType', 'driver', 'goods'])
                 ->get()
                 ->map(function ($shipment) use ($shipmentType) {
                     return [
@@ -141,10 +141,12 @@ class ShipmentReportService
                         'total_combined_cargo_handling' => $shipment->total_combined_cargo_handling, // bốc xếp
                         'shipment_report_id' => $shipment->shipment_report_id,
                         'goods_name' =>  $shipment->goods->pluck('name')->implode(', '),
+                        'goods_notes' =>  $shipment->goods->pluck('notes')->implode(', '),
                         'company' => $shipment->company ? $shipment->company : '',
                         'notes' => $shipment->notes,
                         'status' => $shipment->status,
                         'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : '',
+                        'goods' => $shipment->goods ? $shipment->goods->toArray() : [],
                     ];
                 });
 

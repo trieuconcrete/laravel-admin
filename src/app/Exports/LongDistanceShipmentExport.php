@@ -19,7 +19,7 @@ class LongDistanceShipmentExport extends BaseShipmentExport
      */
     public function title(): string
     {
-        return 'Bảng kê chuyến xe - Xe đường dài bắc-nam';
+        return 'Bảng kê vận chuyển ' . date('m/Y', strtotime($this->startDate));
     }
 
     /**
@@ -27,7 +27,7 @@ class LongDistanceShipmentExport extends BaseShipmentExport
      */
     protected function getReportTitle(): string
     {
-        return 'BẢNG KÊ CHUYẾN XE - XE ĐƯỜNG DÀI BẮC-NAM';
+        return 'BẢNG KÊ VẬN CHUYỂN THÁNG ' . date('m/Y', strtotime($this->startDate));
     }
 
     /**
@@ -42,11 +42,10 @@ class LongDistanceShipmentExport extends BaseShipmentExport
             'D' => 'Điểm đi',
             'E' => 'Điểm đến',
             'F' => 'Số chuyến',
-            'G' => 'Kết hợp',
-            'H' => 'Phụ phí chuyến xe',
-            'I' => 'Đơn giá',
-            'J' => 'Thành tiền',
-            'K' => 'Ghi chú'
+            'G' => 'Phụ phí',
+            'H' => 'Đơn giá',
+            'I' => 'Thành tiền',
+            'J' => 'Ghi chú'
         ];
     }
 
@@ -122,11 +121,10 @@ class LongDistanceShipmentExport extends BaseShipmentExport
         $sheet->setCellValue('D' . $row, $shipment['origin']);
         $sheet->setCellValue('E' . $row, $shipment['destination']);
         $sheet->setCellValue('F' . $row, $shipment['trip_count'] ?? 1);
-        $sheet->setCellValue('G' . $row, $shipment['total_combined_surcharge']);
-        $sheet->setCellValue('H' . $row, $shipment['total_expense_deductions']);
-        $sheet->setCellValue('I' . $row, $shipment['unit_price'] ?? 0);
-        $sheet->setCellValue('J' . $row, $shipment['total_amount']);
-        $sheet->setCellValue('K' . $row, $shipment['notes'] ?? '');
+        $sheet->setCellValue('G' . $row, $shipment['total_expense_deductions']);
+        $sheet->setCellValue('H' . $row, $shipment['unit_price'] ?? 0);
+        $sheet->setCellValue('I' . $row, $shipment['total_amount']);
+        $sheet->setCellValue('J' . $row, $shipment['notes'] ?? '');
     }
 
     /**
@@ -193,15 +191,30 @@ class LongDistanceShipmentExport extends BaseShipmentExport
     protected function setColumnWidths(Worksheet $sheet)
     {
         $sheet->getColumnDimension('A')->setWidth(5);   // STT
-        $sheet->getColumnDimension('B')->setWidth(15);  // Mã chuyến xe
-        $sheet->getColumnDimension('C')->setWidth(12);  // Ngày
+        $sheet->getColumnDimension('B')->setWidth(15);  // Ngày
+        $sheet->getColumnDimension('C')->setWidth(12);  // Số xe
         $sheet->getColumnDimension('D')->setWidth(15);  // Điểm đi
         $sheet->getColumnDimension('E')->setWidth(15);  // Điểm đến
-        $sheet->getColumnDimension('F')->setWidth(12);  // Số chuyến/KM
-        $sheet->getColumnDimension('G')->setWidth(15);  // Phụ thu kết hợp
-        $sheet->getColumnDimension('H')->setWidth(20);  // Chi phí chuyến xe
-        $sheet->getColumnDimension('I')->setWidth(15);  // Đơn giá
-        $sheet->getColumnDimension('J')->setWidth(15);  // Thành tiền
-        $sheet->getColumnDimension('K')->setWidth(20);  // Ghi chú
+        $sheet->getColumnDimension('F')->setWidth(12);  // Số chuyến
+        $sheet->getColumnDimension('G')->setWidth(15);  // Chi phí
+        $sheet->getColumnDimension('H')->setWidth(15);  // Đơn giá
+        $sheet->getColumnDimension('I')->setWidth(15);  // Thành tiền
+        $sheet->getColumnDimension('J')->setWidth(20);  // Ghi chú
+    }
+
+    /**
+     * Set number formats
+     */
+    protected function setNumberFormats(Worksheet $sheet, int $row)
+    {
+        $sheet->getStyle('I14:I' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('H14' . ':' . $this->lastColumn . '' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+        
+        // Set text alignment
+        $sheet->getStyle('A14:A' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('B14:B' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('C14:C' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('F14:F' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->getStyle('G14:H' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
     }
 } 
