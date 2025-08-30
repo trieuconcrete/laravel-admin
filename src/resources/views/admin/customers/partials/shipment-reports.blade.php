@@ -19,7 +19,7 @@
                     <td>
                         <div class="btn-group">
                             <a href="#"
-                                class="btn btn-sm btn-outline-primary">Chi tiết</a>
+                                class="btn btn-sm btn-outline-primary">Thanh toán</a>
                         </div>
                     </td>
                     <td>{{ $shipmentReport->monthly }}</td>

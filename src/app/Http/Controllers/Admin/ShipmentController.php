@@ -242,7 +242,6 @@ class ShipmentController extends Controller
                     'drivers_validated' => $request->validated()['drivers'] ?? [],
                 ]);
             }
-            
             $this->shipmentService->update($shipment, $request->validated());
             return redirect()->route('admin.shipments.index')->with('success', 'Cập nhật chuyến hàng thành công.');
         } catch (\Exception $e) {

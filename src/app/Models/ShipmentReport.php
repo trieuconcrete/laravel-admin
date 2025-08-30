@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\DB;
 class ShipmentReport extends Model
 {
     use HasFactory;
+    const EXCEL_TEMPLATE_TOPBAND = 1; // Khách chạy theo chuyến TOPBAND
+    const EXCEL_TEMPLATE_WOOJIN = 2; // Khách chạy theo chuyến WOOJIN
+    const EXCEL_TEMPLATE_PER_TRIP = 3; // Khách chạy theo chuyến
+    const EXCEL_TEMPLATE_MONTHLY_RENTAL = 4; // Khách thuê xe tháng
+    const EXCEL_TEMPLATE_CRANE = 5; // Xe nâng
+    const EXCEL_TEMPLATE_LONG_DISTANCE = 6; // Xe đường dài bắc-nam
 
     protected $fillable = [
         'monthly',
