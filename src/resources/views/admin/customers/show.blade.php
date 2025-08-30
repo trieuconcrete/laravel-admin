@@ -212,9 +212,9 @@
                         <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'show active' : '' }}" id="monthlyReport">
                             <div class="row mb-3">
                                 <div class="col-md-3">
-                                    <label class="">Chọn bảng kê (tùy chọn)</label>
+                                    <label class="">Bảng kê</label>
                                     <select class="form-select" name="month" id="month">
-                                        <option value="">Chọn tháng kê</option>
+                                        <option value="">Chọn bảng kê</option>
                                         @if($shipmentMonthlyReports->count() > 0)
                                             @foreach($shipmentMonthlyReports as $index => $val)
                                                 <option value="{{ $val->monthly }}">{{ $val->monthly }}</option>
@@ -266,17 +266,17 @@
                                 </div>
                             </div>
                             <div class="table-responsive">
-                                <table class="table table-hover" id="monthlyReportTable">
-                                    <thead class="table-light">
+                                <table class="table table-hover table-striped align-middle table-nowrap mb-0" id="monthlyReportTable">
+                                    <thead class="table-light text-uppercase">
                                         <tr>
-                                            <th>Mã chuyến xe</th>
+                                            <th>Mã chuyến</th>
                                             <th>Ngày</th>
                                             <th>Điểm đi</th>
                                             <th>Điểm đến</th>
-                                            <th>Số chuyến</th>
-                                            <th>Khối lượng(kg)</th>
+                                            <th>Chuyến</th>
+                                            <th>Số tấn</th>
                                             <th>Đơn giá</th>
-                                            <th>Phụ thu</th>
+                                            <th>Phụ phí</th>
                                             <th>Thành tiền</th>
                                             <th>Công nợ</th>
                                             <th>Ghi chú</th>
@@ -1338,8 +1338,8 @@
                     // Get shipment type label
                     const shipmentTypeLabel = getShipmentTypeLabel(shipmentType);
                     
-                    // Show confirmation dialog
-                    Swal.fire({
+                    // Prepare Swal options based on shipment type
+                    const swalOptions = {
                         title: 'Xác nhận xuất bảng kê?',
                         html: `
                             <div class="text-start">
@@ -1355,7 +1355,31 @@
                             confirmButton: 'btn btn-secondary',
                             cancelButton: 'btn btn-light'
                         }
-                    }).then((result) => {
+                    };
+
+                    // Only add input options if shipmentType is 1
+                    if (shipmentType == 1) {
+                        swalOptions.input = "select";
+                        swalOptions.inputOptions = {
+                            '1': 'TOPBAND',
+                            '2': 'WOOJIN',
+                            '3': 'Khác',
+                        };
+                        swalOptions.inputPlaceholder = "Chọn mẫu bảng kê";
+                        swalOptions.inputValidator = (value) => {
+                            return new Promise((resolve) => {
+                                if (value !== "") {
+                                    resolve();
+                                } else {
+                                    resolve("Vui lòng chọn mẫu bảng kê.");
+                                }
+                            });
+                        };
+                    }
+                    
+                    // Show confirmation dialog
+                    Swal.fire(swalOptions).then((result) => {
+                        console.log('Export confirmation result:', result);
                         if (result.isConfirmed) {
                             Swal.fire({
                                 title: 'Đang xử lý...',
@@ -1369,7 +1393,8 @@
                                         statement_start_date: startDate,
                                         statement_end_date: endDate,
                                         shipment_type: shipmentType,
-                                        month: monthSelect ? monthSelect.value : ''
+                                        month: monthSelect ? monthSelect.value : '',
+                                        excel_template: result.value || '' // Handle case when no template is selected
                                     });
 
                                     const downloadUrl = `{{ route('admin.shipment-reports.export', $customer) }}?${params.toString()}`;

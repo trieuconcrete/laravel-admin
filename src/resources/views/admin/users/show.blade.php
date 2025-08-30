@@ -180,6 +180,19 @@
                                                 </div>
                                             </div>
                                             @endif
+                                            
+                                            @if($user->isEligibleForLunchAllowance())
+                                            <div class="col-xxl-6">
+                                                <div class="mb-3">
+                                                    <label for="lunchAllowance" class="form-label">Trợ cấp ăn trưa</label>
+                                                    <div class="form-control-plaintext">
+                                                        <strong>{{ number_format($user->getDailyLunchAllowance()) }} đ/ngày</strong>
+                                                        <br>
+                                                        <small class="text-muted">Tổng: {{ number_format($user->getMonthlyLunchAllowance()) }} đ/tháng (22 ngày làm việc)</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @endif
                                             <!--end col-->
                                             <div class="col-lg-12">
                                                 <div class="mb-3">
@@ -486,10 +499,18 @@
                                                                 <option value="{{ $month }}" {{ $selectedMonth == $month ? 'selected' : '' }}>{{ $month }}</option>
                                                             @endforeach
                                                         </select>
+                                                        
+                                                        @if($user->isEligibleForLunchAllowance())
+                                                        <button type="button" id="export-office-salary-btn" class="btn btn-sm btn-success d-inline-flex align-items-center" style="white-space: nowrap;">
+                                                            <i class="ri-file-excel-2-line me-1"></i>
+                                                            Xuất Bảng Lương Văn Phòng
+                                                        </button>
+                                                        @else 
                                                         <button type="button" id="export-salary-btn" class="btn btn-sm btn-success d-inline-flex align-items-center" style="white-space: nowrap;">
                                                             <i class="ri-file-excel-2-line me-1"></i>
                                                             Xuất Bảng Lương
                                                         </button>
+                                                        @endif
                                                         <button type="button" data-bs-toggle="modal" data-bs-target="#salaryAdvanceModal" class="btn btn-sm btn-primary d-inline-flex align-items-center" style="white-space: nowrap;">
                                                             <i class="ri-currency-fill me-1"></i>
                                                             Yêu Cầu
@@ -529,7 +550,15 @@
                                                             <td class="text-end" data-salary="base">{{ number_format($salaryBase) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom">
-                                                            <td class="fw-medium">Trợ cấp</td>
+                                                            <td class="fw-medium">
+                                                                Trợ cấp
+                                                                @if($user->isEligibleForLunchAllowance())
+                                                                    <i class="bx bx-info-circle text-info ms-1" 
+                                                                       data-bs-toggle="tooltip" 
+                                                                       data-bs-placement="top" 
+                                                                       title="Phụ cấp cơm ngày: 770,00  (22 ngày × 35,000 đ) và các chi phí khác"></i>
+                                                                @endif
+                                                            </td>
                                                             <td class="text-end" data-salary="allowance">{{ number_format($totalAllowance) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom">
@@ -546,7 +575,7 @@
                                                         </tr>  --}}
                                                         <tr class="border-bottom bg-soft-light">
                                                             <td class="fw-medium">Tổng trước khấu trừ</td>
-                                                            <td class="text-end fw-semibold" data-salary="total-before-deduction">{{ number_format($salaryBase + $totalAllowance) }} đ</td>
+                                                            <td class="text-end fw-semibold" data-salary="total-before-deduction">{{ number_format($salaryBase + $totalAllowance + $totalBonus) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom">
                                                             <td class="fw-medium">Trừ BHXH ({{ \App\Models\Setting::get('social_insurance_contribution_rate', 10.5) }}%)<small class="text-muted">(Mức đóng lương cơ bản: {{ number_format(\App\Models\Setting::get('social_insurance_contribution_amount', 5500000)) }} đ)</small></td>
@@ -883,6 +912,31 @@
 
 @endsection
 
+@push('styles')
+<style>
+    .tooltip-inner {
+        max-width: 300px !important;
+        text-align: left !important;
+        white-space: pre-line !important;
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+    }
+    
+    .tooltip.show {
+        opacity: 1 !important;
+    }
+    
+    .bx-info-circle {
+        cursor: help;
+        transition: color 0.2s ease;
+    }
+    
+    .bx-info-circle:hover {
+        color: #0d6efd !important;
+    }
+</style>
+@endpush
+
 @push('scripts')
 <!-- Include the salary advance requests handler script -->
 <script src="{{ asset('js/salary-advance-requests-handler.js') }}"></script>
@@ -1072,6 +1126,50 @@
                             Swal.fire({
                                 icon: 'success',
                                 title: 'Xuất bảng lương thành công',
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        }, 2000);
+                    }
+                });
+            }
+        });
+    });
+
+    // Xử lý nút xuất bảng lương văn phòng
+    $('#export-office-salary-btn').click(function () {
+        Swal.fire({
+            title: 'Xác nhận xuất bảng lương văn phòng?',
+            text: 'Bạn có chắc chắn muốn xuất bảng lương văn phòng tháng {{ $selectedMonth }} của {{ $user->full_name }} không?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Có, xuất ngay',
+            cancelButtonText: 'Hủy bỏ',
+            customClass: {
+                confirmButton: 'btn btn-info',
+                cancelButton: 'btn btn-light'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    text: 'Vui lòng chờ trong giây lát',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+
+                        const link = document.createElement('a');
+                        link.href = "{{ route('admin.users.export-office-salary', ['user' => $user->id, 'month' => $selectedMonth]) }}";
+                        link.download = '';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        setTimeout(() => {
+                            Swal.close();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Xuất bảng lương văn phòng thành công',
                                 showConfirmButton: false,
                                 timer: 2000
                             });
@@ -1602,6 +1700,15 @@
 
     // Handle salary type change to show/hide salary_by_percent input
     $(document).ready(function() {
+        // Initialize Bootstrap tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                html: true,
+                template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner" style="max-width: 300px; text-align: left;"></div></div>'
+            });
+        });
+        
         $('#salaryType').on('change', function() {
             const salaryType = $(this).val();
             const salaryByPercentContainer = $('#salaryByPercentContainer');

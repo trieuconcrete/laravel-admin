@@ -26,10 +26,13 @@ abstract class BaseShipmentExport implements WithTitle, WithStyles, ShouldAutoSi
     protected $companyName;
     protected $companyAddress;
     protected $companyTaxCode;
+    protected $companyPhone;
+    protected $companyEmail;
 
     protected $headers;
     protected $firstColumn;
     protected $lastColumn;
+    protected $beforeLastColumn;
 
     /**
      * @param Customer $customer
@@ -49,11 +52,14 @@ abstract class BaseShipmentExport implements WithTitle, WithStyles, ShouldAutoSi
         // Company information - Header and Footer
         $this->companyName = Setting::get('company_name', 'CÔNG TY TNHH MTV VẬN TẢI HOÀNG PHÚ LONG');
         $this->companyAddress = Setting::get('company_address', 'Số 216, tổ 4, ấp 7, Bình Sơn, Long Thành, Đồng Nai');
-        $this->companyTaxCode = Setting::get('company_tax_code', '3603231556');
-        
+        $this->companyTaxCode = Setting::get('company_tax_code', '');
+        $this->companyPhone = Setting::get('company_phone', '');
+        $this->companyEmail = Setting::get('company_email', '');
+
         $this->headers = $this->getHeaders();
         $this->firstColumn = array_key_first($this->headers);
         $this->lastColumn = array_key_last($this->headers);
+        $this->beforeLastColumn = array_keys($this->headers)[count($this->headers) - 2];
     }
 
     /**
@@ -82,9 +88,13 @@ abstract class BaseShipmentExport implements WithTitle, WithStyles, ShouldAutoSi
         $sheet->setCellValue('A1', $this->companyName);
         $sheet->setCellValue('A2', 'Địa chỉ: ' . $this->companyAddress);
         $sheet->setCellValue('A3', 'MST: ' . $this->companyTaxCode);
-        $sheet->mergeCells('A1:D1');
+        $sheet->setCellValue('C3', "Số ĐT: {$this->companyPhone}");
+        $sheet->setCellValue('A4', "Email: {$this->companyEmail}");
+        $sheet->mergeCells('A1' . ':' . $this->lastColumn . '1');
         $sheet->mergeCells('A2' . ':' . $this->lastColumn . '2');
-        $sheet->mergeCells('A3:D3');
+        $sheet->mergeCells('A3:B3');
+        $sheet->mergeCells('C3:D3');
+        $sheet->mergeCells('A4:C4');
         
         // Format company header
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
@@ -105,16 +115,22 @@ abstract class BaseShipmentExport implements WithTitle, WithStyles, ShouldAutoSi
         ->setVertical(Alignment::VERTICAL_CENTER);
         
         // Customer information
-        $sheet->setCellValue('A8', 'Kính gửi: ' . $this->customer->name);
-        $sheet->setCellValue('A9', 'Địa chỉ: ' . $this->customer->address);
-        $sheet->setCellValue('A10', 'MST: ' . $this->customer->tax_code);
+        $sheet->setCellValue('A8', $this->customer->name);
+        $sheet->setCellValue('A9', 'MST: ' . $this->customer->tax_code);
+        $sheet->setCellValue('A10', 'Địa chỉ: ' . $this->customer->address);
         $sheet->setCellValue('A11', 'Email: ' . $this->customer->email);
         $sheet->mergeCells('A8:D8');
-        $sheet->mergeCells('A9' . ':' . $this->lastColumn . '9');
-        $sheet->mergeCells('A10:D10');
+        $sheet->mergeCells('A10:G10');
+        $sheet->mergeCells('A9:D9');
         $sheet->mergeCells('A11:D11');
         
         $sheet->getStyle('A8')->getFont()->setBold(true);
+
+        // TAX
+        $sheet->setCellValue('I10', 'Hóa đơn: ');
+        $sheet->setCellValue('I11', 'Bảng kê số: ');
+        $sheet->setCellValue('I12', 'ĐVT: VNĐ');
+
     }
 
     /**
@@ -122,8 +138,8 @@ abstract class BaseShipmentExport implements WithTitle, WithStyles, ShouldAutoSi
      */
     protected function setNumberFormats(Worksheet $sheet, int $row)
     {
-        $sheet->getStyle('F14:F' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
-        $sheet->getStyle('G14' . ':' . $this->lastColumn . '' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('I14:I' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('H14' . ':' . $this->lastColumn . '' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
         
         // Set text alignment
         $sheet->getStyle('A14:A' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
