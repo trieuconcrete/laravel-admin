@@ -14,6 +14,7 @@ class Payment extends Model
 
     protected $fillable = [
         'customer_id',
+        'shipment_report_id',
         'amount',
         'payment_date',
         'status',
