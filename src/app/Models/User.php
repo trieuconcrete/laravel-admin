@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Position;
 use App\Models\SalaryAdvanceRequest;
+use App\Models\Post;
 use App\Enum\SalaryType;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
@@ -126,6 +127,11 @@ class User extends Authenticatable
         return $this->belongsTo(Vehicle::class, 'vehicle_id');
     }
 
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'author_id');
+    }
+
     /**
      * Generate employee code for the user
      *
@@ -203,7 +209,7 @@ class User extends Authenticatable
 
     /**
      * Get total amount of salary payments (payment type) for a date range
-     * 
+     *
      * @param mixed $startDate
      * @param mixed $endDate
      * @return float
@@ -219,7 +225,7 @@ class User extends Authenticatable
 
     /**
      * Check if salary is fully paid for a specific month
-     * 
+     *
      * @param string $month Format: m/Y (e.g., 07/2025)
      * @return array
      */
@@ -229,11 +235,11 @@ class User extends Authenticatable
         list($monthNum, $year) = explode('/', $month);
         $startDate = Carbon::createFromDate($year, $monthNum, 1)->startOfMonth();
         $endDate = Carbon::createFromDate($year, $monthNum, 1)->endOfMonth();
-        
+
         // Get salary detail for this month
         $periodName = 'Kỳ lương tháng ' . $month;
         $salaryPeriod = \App\Models\SalaryPeriod::where('period_name', $periodName)->first();
-        
+
         if (!$salaryPeriod) {
             return [
                 'is_fully_paid' => false,
@@ -243,11 +249,11 @@ class User extends Authenticatable
                 'remaining_amount' => 0
             ];
         }
-        
+
         $salaryDetail = \App\Models\SalaryDetail::where('employee_id', $this->id)
             ->where('period_id', $salaryPeriod->period_id)
             ->first();
-            
+
         if (!$salaryDetail) {
             return [
                 'is_fully_paid' => false,
@@ -257,14 +263,14 @@ class User extends Authenticatable
                 'remaining_amount' => 0
             ];
         }
-        
+
         // Get total paid amount for this month
         $totalPaid = $this->getTotalSalaryPayments($startDate, $endDate);
-        
+
         // Calculate remaining amount
         $netSalary = $salaryDetail->net_salary ?? 0;
         $remainingAmount = $netSalary - $totalPaid;
-        
+
         return [
             'is_fully_paid' => $remainingAmount <= 0,
             'reason' => $remainingAmount <= 0 ? 'Đã thanh toán đủ lương' : 'Chưa thanh toán đủ lương',
@@ -328,7 +334,7 @@ class User extends Authenticatable
 
     /**
      * Get salary by percent for commission calculation
-     * 
+     *
      * @return float
      */
     public function getSalaryByPercent(): float
@@ -337,14 +343,14 @@ class User extends Authenticatable
         if (!$this->isCommissionSalaryType()) {
             return 0;
         }
-        
+
         // Return giá trị salary_by_percent, mặc định 12% nếu null
         return (float) ($this->salary_by_percent ?? 12.00);
     }
 
     /**
      * Set salary by percent (chỉ cho commission salary type)
-     * 
+     *
      * @param float|null $percent
      * @return void
      */
