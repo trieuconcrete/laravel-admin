@@ -27,7 +27,7 @@ class WoojinShipmentExport extends BaseShipmentExport
      */
     protected function getReportTitle(): string
     {
-        return 'BẢNG KÊ VẬN CHUYỂN THÁNG ' . date('m/Y', strtotime($this->startDate));
+        return 'BẢNG KÊ VẬN CHUYỂN HÀNG HÓA';
     }
 
     /**
@@ -100,7 +100,7 @@ class WoojinShipmentExport extends BaseShipmentExport
         $this->setNumberFormats($sheet, $row);
         
         // Add signature section
-        $this->addSignatureSection($sheet, $row + 5, $this->companyName);
+        $this->addSignatureSection($sheet, $row + 3, $this->companyName);
         
         return $sheet;
     }
@@ -216,5 +216,89 @@ class WoojinShipmentExport extends BaseShipmentExport
         $sheet->getStyle('C14:C' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('F14:F' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle('G14:H' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    }
+
+    /**
+     * Summary of setUpHeaderAndFooter
+     * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet
+     * @return void
+     */
+    protected function setUpHeaderAndFooter(Worksheet $sheet): void
+    {
+        // Set company information
+        $sheet->setCellValue('A1', mb_strtoupper($this->companyName, 'UTF-8'));
+        $sheet->setCellValue('A2', 'Địa chỉ: ' . $this->companyAddress);
+        $sheet->setCellValue('A3', 'MST: ' . $this->companyTaxCode);
+        $sheet->mergeCells('A1' . ':' . $this->lastColumn . '1');
+        $sheet->mergeCells('A2' . ':' . $this->lastColumn . '2');
+        $sheet->mergeCells('A3:B3');
+        $sheet->mergeCells('C3:D3');
+        $sheet->mergeCells('A4:C4');
+        
+        // Format company header
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getRowDimension(1)->setRowHeight(20); // Height in points (you can adjust this value)
+        $sheet->getStyle('A2:A3')->getFont()->setSize(11);
+        
+        // Add report title
+        $sheet->setCellValue('A5', $this->getReportTitle());
+        $sheet->getRowDimension(5)->setRowHeight(25); // Height in points (you can adjust this value)
+        $sheet->getRowDimension(6)->setRowHeight(20); // Height in points (you can adjust this value)
+
+        $sheet->setCellValue('A6', sprintf(
+    '(THÁNG %s)',
+            date('m/Y', strtotime($this->startDate))
+        ));
+        $sheet->mergeCells('A5' . ':' . $this->lastColumn . '5');
+        $sheet->mergeCells('A6' . ':' . $this->lastColumn . '6');
+        $sheet->getStyle('A5')->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('A6')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A5:A6')->getAlignment()
+        ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+        ->setVertical(Alignment::VERTICAL_CENTER);
+        
+        // Customer information
+        $sheet->setCellValue('A8', 'Khách hàng: ' . mb_strtoupper($this->customer->name,'UTF-8'));
+        $sheet->setCellValue('A9', 'Địa chỉ: ' . $this->customer->address);
+        $sheet->setCellValue('A10', 'MST: ' . $this->customer->tax_code);
+        $sheet->mergeCells('A8:D8');
+        $sheet->mergeCells('A10:G10');
+        $sheet->mergeCells('A9:D9');
+        $sheet->mergeCells('A11:D11');
+        
+        $sheet->getStyle('A8')->getFont()->setBold(true);
+
+        // TAX
+        $sheet->setCellValue('I10', 'HĐ: ');
+        $sheet->setCellValue('I11', 'Bảng kê số: ');
+        $sheet->setCellValue('I12', 'ĐVT: VNĐ');
+
+    }
+
+    /**
+     * Add signature section
+     */
+    protected function addSignatureSection(Worksheet $sheet, int $startRow, string $companyName)
+    {
+        $currentDate = date('d/m/Y');
+        $timestamp = strtotime(str_replace('/', '-', $currentDate));
+        $currentDate = 'ngày ' . date('d', $timestamp) . ' tháng ' . date('m', $timestamp) . ' năm ' . date('Y', $timestamp);
+        
+        // Put location and date
+        $sheet->setCellValue('F' . $startRow, 'Long Thành, ' . $currentDate);
+        $sheet->setCellValue('F' . ($startRow + 1), mb_strtoupper($this->companyName, 'UTF-8'));
+        $sheet->mergeCells('F' . ($startRow) . ':I' . ($startRow));
+        $sheet->mergeCells('F' . ($startRow + 1) . ':I' . ($startRow + 1));
+        $sheet->getStyle('F' . ($startRow) . ':I' . ($startRow))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('F' . ($startRow + 1) . ':I' . ($startRow + 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Put customer name and company name
+        $sheet->setCellValue('A' . ($startRow + 1), mb_strtoupper($this->customer->name, 'UTF-8'));
+        $sheet->mergeCells('A' . ($startRow + 1) . ':D' . ($startRow + 1));
+        $sheet->getStyle('A' . ($startRow + 1) . ':D' . ($startRow + 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle('A' . ($startRow + 1))->getFont()->setBold(true);
+        $sheet->getStyle('F' . $startRow)->getFont()->setBold(true)->setItalic(true);
+        $sheet->getStyle('F' . ($startRow + 1))->getFont()->setBold(true);
     }
 } 

@@ -7,6 +7,7 @@ use App\Services\SettingService;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\ShipmentDeductionType;
+use App\Models\VehicleType;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Requests\Setting\UpdateSettingRequest;
 
@@ -35,51 +36,85 @@ class SettingController extends Controller
      */
     public function index(Request $request)
     {
-        $activeTab = $request->get('group', session('last_active_tab', 'company'));
-        $groups = ['company', 'system', 'shipment', 'shepment-fee', 'notifications'];
+        $activeTab = $request->get('group', $request->get('tab', session('last_active_tab', 'company')));
+        $groups = ['company', 'system', 'shipment', 'shipment-fee', 'vehicle-types', 'notifications'];
         
         $settings = [];
         foreach ($groups as $group) {
-            $settings[$group] = $this->settingService->getByGroup($group);
+            if (!in_array($group, ['shipment-fee', 'vehicle-types'])) {
+                $settings[$group] = $this->settingService->getByGroup($group);
+            }
         }
 
-        $query = ShipmentDeductionType::query();
+        // Shipment Deduction Types
+        $deductionQuery = ShipmentDeductionType::query();
 
-        // Filter by type
         if ($request->filled('type')) {
-            $query->where('type', $request->type);
+            $deductionQuery->where('type', $request->type);
         }
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
+        if ($request->filled('status') && $activeTab === 'shipment-fee') {
+            $deductionQuery->where('status', $request->status);
         }
 
-        // Search by name
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+        if ($request->filled('search') && $activeTab === 'shipment-fee') {
+            $deductionQuery->where('name', 'like', '%' . $request->search . '%');
         }
 
-        // Sorting
         $sortBy = $request->get('sort_by', 'order');
         $sortDirection = $request->get('sort_direction', 'asc');
         
         if (in_array($sortBy, ['id', 'name', 'type', 'status', 'order', 'created_at', 'updated_at'])) {
-            $query->orderBy($sortBy, $sortDirection);
+            $deductionQuery->orderBy($sortBy, $sortDirection);
         } else {
-            $query->ordered();
+            $deductionQuery->ordered();
         }
 
-        $deductionTypes = $query->paginate(20);
+        $deductionTypes = $deductionQuery->paginate(20)->withQueryString();
 
-        if ($request->ajax()) {
+        // Vehicle Types
+        $vehicleQuery = VehicleType::query();
+
+        if ($request->filled('status') && $activeTab === 'vehicle-types') {
+            $vehicleQuery->where('status', $request->status);
+        }
+
+        if ($request->filled('search') && $activeTab === 'vehicle-types') {
+            $vehicleQuery->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $vehicleSortBy = $request->get('sort_by', 'vehicle_type_id');
+        $vehicleSortDirection = $request->get('sort_direction', 'asc');
+        
+        if (in_array($vehicleSortBy, ['vehicle_type_id', 'name', 'status', 'created_at', 'updated_at'])) {
+            $vehicleQuery->orderBy($vehicleSortBy, $vehicleSortDirection);
+        } else {
+            $vehicleQuery->orderBy('vehicle_type_id', 'asc');
+        }
+
+        $vehicleTypes = $vehicleQuery->paginate(20)->withQueryString();
+
+        if ($request->ajax() && $activeTab === 'shipment-fee') {
             return response()->json([
                 'success' => true,
                 'data' => $deductionTypes,
             ]);
         }
 
-        return view('admin.settings.index', compact('settings', 'activeTab', 'groups', 'deductionTypes'));
+        if ($request->ajax() && $activeTab === 'vehicle-types') {
+            return response()->json([
+                'success' => true,
+                'data' => $vehicleTypes,
+            ]);
+        }
+
+        return view('admin.settings.index', compact(
+            'settings', 
+            'activeTab', 
+            'groups', 
+            'deductionTypes',
+            'vehicleTypes'
+        ));
     }
 
     /**
@@ -95,6 +130,9 @@ class SettingController extends Controller
             
             // Lấy dữ liệu theo group từ request
             $companySettings = $request->input('company', []);
+            if ($companySettings['social_insurance_contribution_amount']) {
+                $companySettings['social_insurance_contribution_amount'] = str_replace(',', '', $companySettings['social_insurance_contribution_amount']);
+            }
             $systemSettings = $request->input('system', []);
             $shipmentSettings = $request->input('shipment', []);
             $notificationSettings = $request->input('notifications', []);
