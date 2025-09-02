@@ -78,6 +78,23 @@ abstract class BaseShipmentExport implements WithTitle, WithStyles, ShouldAutoSi
     abstract protected function getHeaders(): array;
 
     /**
+     * Set default Arial font for the entire worksheet
+     */
+    protected function setDefaultFont(Worksheet $sheet): void
+    {
+        // Set default font for entire worksheet
+        $sheet->getParent()->getDefaultStyle()->getFont()->setName('Arial')->setSize(10);
+        
+        // Alternative method - set font for entire sheet range
+        $highestRow = $sheet->getHighestRow();
+        $highestColumn = $sheet->getHighestColumn();
+        $sheet->getStyle('A1:' . $highestColumn . $highestRow)
+              ->getFont()
+              ->setName('Arial')
+              ->setSize(11);
+    }
+
+    /**
      * Summary of setUpHeaderAndFooter
      * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet
      * @return void
@@ -85,7 +102,7 @@ abstract class BaseShipmentExport implements WithTitle, WithStyles, ShouldAutoSi
     protected function setUpHeaderAndFooter(Worksheet $sheet): void
     {
         // Set company information
-        $sheet->setCellValue('A1', $this->companyName);
+        $sheet->setCellValue('A1', mb_strtoupper($this->companyName, 'UTF-8'));
         $sheet->setCellValue('A2', 'Địa chỉ: ' . $this->companyAddress);
         $sheet->setCellValue('A3', 'MST: ' . $this->companyTaxCode);
         $sheet->setCellValue('C3', "Số ĐT: {$this->companyPhone}");
@@ -98,26 +115,28 @@ abstract class BaseShipmentExport implements WithTitle, WithStyles, ShouldAutoSi
         
         // Format company header
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getRowDimension(1)->setRowHeight(20); // Height in points (you can adjust this value)
         $sheet->getStyle('A2:A3')->getFont()->setSize(11);
         
         // Add report title
         $sheet->setCellValue('A5', $this->getReportTitle());
         $sheet->getRowDimension(5)->setRowHeight(25); // Height in points (you can adjust this value)
-        $sheet->getRowDimension(6)->setRowHeight(20); // Height in points (you can adjust this value)
+        // $sheet->getRowDimension(6)->setRowHeight(1); // Height in points (you can adjust this value)
+        // $sheet->getRowDimension(7)->setRowHeight(1); // Height in points (you can adjust this value)
 
-        $sheet->setCellValue('A6', '(Từ ngày: ' . date('d/m/Y', strtotime($this->startDate)) . ' - Đến ngày: ' . date('d/m/Y', strtotime($this->endDate)) . ')');
+        // $sheet->setCellValue('A6', '(Từ ngày: ' . date('d/m/Y', strtotime($this->startDate)) . ' - Đến ngày: ' . date('d/m/Y', strtotime($this->endDate)) . ')');
         $sheet->mergeCells('A5' . ':' . $this->lastColumn . '5');
-        $sheet->mergeCells('A6' . ':' . $this->lastColumn . '6');
+        // $sheet->mergeCells('A6' . ':' . $this->lastColumn . '6');
         $sheet->getStyle('A5')->getFont()->setBold(true)->setSize(16);
-        $sheet->getStyle('A6')->getFont()->setBold(true)->setSize(14);
+        // $sheet->getStyle('A6')->getFont()->setBold(true)->setSize(14);
         $sheet->getStyle('A5:A6')->getAlignment()
         ->setHorizontal(Alignment::HORIZONTAL_CENTER)
         ->setVertical(Alignment::VERTICAL_CENTER);
         
         // Customer information
-        $sheet->setCellValue('A8', $this->customer->name);
-        $sheet->setCellValue('A9', 'MST: ' . $this->customer->tax_code);
+        $sheet->setCellValue('A8', 'Khách hàng: ' . mb_strtoupper($this->customer->name,'UTF-8'));
         $sheet->setCellValue('A10', 'Địa chỉ: ' . $this->customer->address);
+        $sheet->setCellValue('A9', 'MST: ' . $this->customer->tax_code);
         $sheet->setCellValue('A11', 'Email: ' . $this->customer->email);
         $sheet->mergeCells('A8:D8');
         $sheet->mergeCells('A10:G10');
