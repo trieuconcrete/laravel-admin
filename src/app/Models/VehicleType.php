@@ -23,6 +23,7 @@ class VehicleType extends Model
      */
     protected $fillable = [
         'name',
+        'status',
         'description'
     ];
 

@@ -60,6 +60,11 @@
                                 <i class="fas fa-bell mr-1"></i> Chi phí chuyến xe
                             </a>
                         </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {{ $activeTab == 'vehicle-types' ? 'active' : '' }}" id="vehicle-types-tab" data-bs-toggle="tab" href="#vehicle-types" role="tab" aria-controls="vehicle-types" aria-selected="{{ $activeTab == 'vehicle-types' ? 'true' : 'false' }}">
+                                <i class="fas fa-car mr-1"></i> Loại xe
+                            </a>
+                        </li>
                     </ul>
                 </div>
                 <div class="card-body p-4">
@@ -77,6 +82,9 @@
                         </div>
                         <div class="tab-pane fade {{ $activeTab == 'shipment-fee' ? 'show active' : '' }}" id="shipment-fee" role="tabpanel" aria-labelledby="shipment-fee-tab">
                             @include('admin.settings.partials.shipment_fee', ['deductionTypes' => $deductionTypes])
+                        </div>
+                        <div class="tab-pane fade {{ $activeTab == 'vehicle-types' ? 'show active' : '' }}" id="vehicle-types" role="tabpanel" aria-labelledby="vehicle-types-tab">
+                            @include('admin.settings.partials.vehicle_types', ['vehicleTypes' => $vehicleTypes])
                         </div>
                     </div>
                 </div>
