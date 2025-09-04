@@ -130,7 +130,7 @@ class SettingController extends Controller
             
             // Lấy dữ liệu theo group từ request
             $companySettings = $request->input('company', []);
-            if ($companySettings['social_insurance_contribution_amount']) {
+            if (isset($companySettings['social_insurance_contribution_amount'])) {
                 $companySettings['social_insurance_contribution_amount'] = str_replace(',', '', $companySettings['social_insurance_contribution_amount']);
             }
             $systemSettings = $request->input('system', []);
