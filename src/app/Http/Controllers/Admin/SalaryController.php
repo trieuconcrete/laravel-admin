@@ -723,7 +723,7 @@ class SalaryController extends Controller
             ];
             // Sync salary
             $salaryService = app(SalaryService::class);
-            $result = $salaryService->syncSalary($dataSync);
+            $result = $salaryService->syncSalaryForUser($salaryDetail->employee, $monthRequest);
 
             if (!$result['success']) {
                 throw new \Exception($result['message']);   
