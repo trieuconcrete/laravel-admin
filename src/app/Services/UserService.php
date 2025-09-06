@@ -218,10 +218,14 @@ class UserService
     {
         // Parse month and year from selectedMonth
         list($month, $year) = explode('/', $selectedMonth);
+        // Sử dụng logic tính ngày mới từ SalaryService (issue #197)
+        $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$month, (int)$year);
+        $startDate = $periodDates['start_date'];
+        $endDate = $periodDates['end_date'];
         
         // Get completed shipments for the user for the selected month
-        $shipments = $this->shipmentRepository->getUserCompletedShipments($user, $month, $year);
-        $shipmentsInMonth = $this->shipmentRepository->getUserShipmentsInMonth($user, $month, $year);
+        $shipments = $this->shipmentRepository->getUserShipmentsByDateRange($user, $startDate, $endDate, true);
+        $shipmentsInMonth = $this->shipmentRepository->getUserShipmentsByDateRange($user, $startDate, $endDate);
 
         // Calculate salary details
         $salaryDetails = [];
@@ -246,20 +250,24 @@ class UserService
             ];
         }
 
-        $totalAllowance = array_sum(array_column($salaryDetails, 'allowance')) ?? 0;
         $totalExpenses = 0; // Không tính chi phí chuyến hàng vào lương
-        
-        
-        // Sử dụng logic tính ngày mới từ SalaryService (issue #197)
-        list($month, $year) = explode('/', $selectedMonth);
-        $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$month, (int)$year);
-        $startDate = $periodDates['start_date'];
-        $endDate = $periodDates['end_date'];
         
         $totalOtherDeduction = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
         $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
         $totalPenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
         $totalPaid = $user->getTotalSalaryPayments($startDate, $endDate);
+        
+        // Tính trợ cấp theo role
+        $totalAllowance = 0;
+        if ($user->role === 'driver') {
+            // Role = driver: Giữ nguyên logic hiện tại (từ chuyến hàng)
+            $totalAllowance = array_sum(array_column($salaryDetails, 'allowance')) ?? 0;
+        } else {
+            // Role khác: Trợ cấp = PHỤ CẤP CƠM NGÀY + tổng chi phí khác
+            $lunchAllowance = 22 * 35000; // 22 ngày × 35,000 VND
+            $otherCosts = $user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_OTHER, $startDate, $endDate)->sum('amount') ?? 0;
+            $totalAllowance = $lunchAllowance + $otherCosts;
+        }
         
         // Tính lương cơ bản theo loại lương
         $salaryType = $user->salary_type?->value ?? 1; // 1: BASIC_SALARY, 2: COMMISSION_SALARY
@@ -311,7 +319,12 @@ class UserService
             'totalPaid' => $totalPaid, // số tiền đã thanh toán
             'salaryType' => $salaryType, // loại lương
             'totalTripValue' => $totalTripValue, // tổng giá trị chuyến xe
-            'commissionAmount' => $commissionAmount // số tiền hoa hồng
+            'commissionAmount' => $commissionAmount, // số tiền hoa hồng
+            'allowanceBreakdown' => $user->role === 'driver' ? null : [
+                'lunchAllowance' => 22 * 35000,
+                'otherCosts' => $user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_OTHER, $startDate, $endDate)->sum('amount') ?? 0,
+                'otherCostsDetails' => $user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_OTHER, $startDate, $endDate)
+            ]
         ];
     }
     
@@ -364,9 +377,10 @@ class UserService
         // Get shipments for the user for the selected month using date range
         $shipments = $this->shipmentRepository->getUserShipmentsByDateRange($user, $startDate, $endDate);
             
-        // Create filename
+        // Create filename - ensure safe characters
         $timestamp = Carbon::now()->format('Ymd_His');
-        $fileName = 'bangluong_' . $user->employee_code . '_' . $month . '_' . $year . '_' . $timestamp . '.xlsx';
+        $safeEmployeeCode = str_replace(['/', '\\', ' '], '_', $user->employee_code ?? 'unknown');
+        $fileName = 'bangluong_' . $safeEmployeeCode . '_' . $month . '_' . $year . '_' . $timestamp . '.xlsx';
         
         // Choose export class based on user's salary type
         if ($user->salary_type?->value == SalaryType::COMMISSION_SALARY->value) {

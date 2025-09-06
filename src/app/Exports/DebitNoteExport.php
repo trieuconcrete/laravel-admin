@@ -62,6 +62,21 @@ class DebitNoteSheet implements FromCollection, WithTitle, WithStyles, ShouldAut
 
     public function styles(Worksheet $sheet)
     {
+        // Table headers - Row 12
+        $headers = [
+            'A' => 'STT',
+            'B' => 'TÊN HÀNG',
+            'C' => 'ĐƠN VỊ TÍNH',
+            'D' => 'SỐ LƯỢNG',
+            'E' => 'ĐƠN GIÁ',
+            'F' => 'THÀNH TIỀN',
+            'G' => 'GHI CHÚ',
+        ];
+
+        $firstColumn = array_key_first($headers);
+        $lastColumn = array_key_last($headers);
+        $beforeLastColumn = array_keys($headers)[count($headers) - 2];
+        
         // Company information - Header
         $companyName = Setting::get('company_name', 'CÔNG TY TNHH MTV VẬN TẢI HOÀNG PHÚ LONG');
         $companyAddress = Setting::get('company_address', 'Số 216, tổ 4, ấp 7, Bình Sơn, Long Thành, Đồng Nai');
@@ -69,8 +84,14 @@ class DebitNoteSheet implements FromCollection, WithTitle, WithStyles, ShouldAut
         
         // Set company information
         $sheet->setCellValue('A1', $companyName);
+        $sheet->getRowDimension(1)->setRowHeight(20); // Height in points (you can adjust this value)
         $sheet->setCellValue('A2', 'ĐC: ' . $companyAddress);
         $sheet->setCellValue('A3', 'MST: ' . $companyTaxCode);
+        $sheet->mergeCells('A1' . ':' . $lastColumn . '1');
+        $sheet->mergeCells('A2' . ':' . $lastColumn . '2');
+        $sheet->mergeCells('A3:B3');
+        $sheet->mergeCells('C3:D3');
+        $sheet->mergeCells('A4:C4');
         
         // Format company header
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
@@ -78,12 +99,13 @@ class DebitNoteSheet implements FromCollection, WithTitle, WithStyles, ShouldAut
         
         // Add report title
         $sheet->setCellValue('A5', 'PHIẾU ĐỀ NGHỊ THANH TOÁN (DEBIT NOTE)');
+        $sheet->getRowDimension(5)->setRowHeight(25); // Height in points (you can adjust this value)
         $sheet->setCellValue('A6', 'Hợp đồng số: ' . ($this->carRental->contract_number ?? '01/01/2025/HĐNTVCHH/TBS-' . $this->carRental->id));
         $sheet->mergeCells('A5:G5');
         $sheet->mergeCells('A6:G6');
         $sheet->getStyle('A5')->getFont()->setBold(true)->setSize(16);
         $sheet->getStyle('A6')->getFont()->setBold(true)->setSize(14);
-        $sheet->getStyle('A5:A6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A5:A6')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
         
         // Customer information
         $customerName = $this->carRental->customer->name ?? 'N/A';
@@ -93,17 +115,14 @@ class DebitNoteSheet implements FromCollection, WithTitle, WithStyles, ShouldAut
         $sheet->setCellValue('A8', 'Bên sử dụng dịch vụ(Service user): ' . $customerName);
         $sheet->setCellValue('A9', 'Địa chỉ(Address): ' . $customerAddress);
         $sheet->setCellValue('A10', 'MST(Tax code): ' . $customerTaxCode);
-        
+        $sheet->mergeCells('A8:D8');
+        $sheet->mergeCells('A10:G10');
+        $sheet->mergeCells('A9:D9');
+
         $sheet->getStyle('A8')->getFont()->setBold(true);
         
-        // Table headers - Row 12
-        $headers = ['STT', 'TÊN HÀNG', 'ĐƠN VỊ TÍNH', 'SỐ LƯỢNG', 'ĐƠN GIÁ', 'THÀNH TIỀN', 'GHI CHÚ'];
-        $columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
-        
-        foreach ($columns as $index => $column) {
-            if (isset($headers[$index])) {
-                $sheet->setCellValue($column . '12', $headers[$index]);
-            }
+        foreach ($headers as $column => $title) {
+            $sheet->setCellValue($column . '12', $title);
         }
         
         // Style the header row
@@ -223,6 +242,7 @@ class DebitNoteSheet implements FromCollection, WithTitle, WithStyles, ShouldAut
         
         // Tổng cộng
         $sheet->setCellValue('A' . $row, 'TỔNG');
+        $sheet->getStyle('A' . ($row))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->mergeCells('A' . $row . ':E' . $row);
         $sheet->setCellValue('F' . $row, $totalAmount);
         
@@ -230,12 +250,14 @@ class DebitNoteSheet implements FromCollection, WithTitle, WithStyles, ShouldAut
         $vatRate = $this->debtSummary['vat_rate'] ?? 8; // Default 8%
         $vatAmount = $totalAmount * ($vatRate / 100);
         $sheet->setCellValue('A' . ($row + 1), 'VAT ' . $vatRate . '%');
+        $sheet->getStyle('A' . ($row + 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->mergeCells('A' . ($row + 1) . ':E' . ($row + 1));
         $sheet->setCellValue('F' . ($row + 1), $vatAmount);
         
         // Tổng tiền
         $grandTotal = $totalAmount + $vatAmount;
         $sheet->setCellValue('A' . ($row + 2), 'TỔNG TIỀN');
+        $sheet->getStyle('A' . ($row + 2))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->mergeCells('A' . ($row + 2) . ':E' . ($row + 2));
         $sheet->setCellValue('F' . ($row + 2), $grandTotal);
         

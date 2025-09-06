@@ -142,6 +142,9 @@ class ShipmentRequest extends FormRequest
                 if (isset($item['unit']) && !empty($item['unit'])) {
                     $goods[$key]['unit'] = str_replace(',', '', $item['unit']);
                 }
+                if (isset($item['amount']) && !empty($item['amount'])) {
+                    $goods[$key]['amount'] = str_replace(',', '', $item['amount']);
+                }
             }
             $this->merge([
                 'goods' => $goods
@@ -279,6 +282,7 @@ class ShipmentRequest extends FormRequest
             'goods.*.unit' => 'nullable|numeric|min:0',
             'goods.*.notes' => 'nullable|string|max:255',
             'goods.*.weight' => 'nullable|numeric|min:0',
+            'goods.*.amount' => 'nullable|numeric|min:0',
         ];
 
         // Nếu không phải xe thuê, thì yêu cầu thông tin tài xế và phương tiện

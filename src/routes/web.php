@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ShipmentController;
 use App\Http\Controllers\Admin\CarRentalController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PriceQuoteController;
+use App\Http\Controllers\Admin\VehicleTypeController;
 use App\Http\Controllers\Admin\ResetPasswordController;
 use App\Http\Controllers\Admin\ForgotPasswordController;
 use App\Http\Controllers\Admin\PaymentTransactionController;
@@ -42,6 +43,7 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::resource('users', UserController::class);
     Route::get('users-export', [UserController::class, 'export'])->name('users.export');
     Route::get('users/{user}/export-salary', [UserController::class, 'exportSalary'])->name('users.export-salary');
+    Route::get('users/{user}/export-office-salary', [UserController::class, 'exportOfficeSalary'])->name('users.export-office-salary');
     Route::prefix('users/{user}')->group(function () {
         Route::post('salary-advance-requests', [UserController::class, 'createSalaryAdvanceRequest'])
             ->name('users.salary-advance-requests.store')
@@ -108,6 +110,17 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     Route::post('settings/update/{tab?}', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
     Route::get('settings/reset', [\App\Http\Controllers\Admin\SettingController::class, 'resetToDefault'])->name('settings.reset');
     Route::get('settings/clear-cache', [\App\Http\Controllers\Admin\SettingController::class, 'clearCache'])->name('settings.clear-cache');
+
+    // Vehicle Types API routes
+    Route::prefix('vehicle-types')->name('vehicle-types.')->group(function () {
+        Route::get('/', [VehicleTypeController::class, 'index'])->name('index');
+        Route::post('/', [VehicleTypeController::class, 'store'])->name('store');
+        Route::get('/{id}', [VehicleTypeController::class, 'show'])->name('show');
+        Route::put('/{id}', [VehicleTypeController::class, 'update'])->name('update');
+        Route::delete('/{id}', [VehicleTypeController::class, 'destroy'])->name('destroy');
+        Route::patch('/{id}/toggle-status', [VehicleTypeController::class, 'toggleStatus'])->name('toggle-status');
+        Route::get('/select/options', [VehicleTypeController::class, 'getForSelect'])->name('select-options');
+    });
 
     // Shipment Deduction Types Routes
     Route::prefix('shipment-deduction-types')->name('shipment-deduction-types.')->group(function () {

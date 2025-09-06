@@ -12,7 +12,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Font;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class CraneShipmentExport extends BaseShipmentExport
+class WoojinShipmentExport extends BaseShipmentExport
 {
     /**
      * @return string
@@ -27,7 +27,7 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     protected function getReportTitle(): string
     {
-        return 'BẢNG KÊ VẬN CHUYỂN THÁNG ' . date('m/Y', strtotime($this->startDate));
+        return 'BẢNG KÊ VẬN CHUYỂN HÀNG HÓA';
     }
 
     /**
@@ -39,13 +39,13 @@ class CraneShipmentExport extends BaseShipmentExport
             'A' => 'STT',
             'B' => 'Ngày',
             'C' => 'Số xe',
-            'D' => 'Nội dung công việc',
-            'E' => 'Loại hàng',
-            'F' => 'TTGT',
-            'G' => 'Số Lượng',
-            'H' => 'Đơn giá',
-            'I' => 'Thành tiền',
-            'J' => 'Ghi chú'
+            'D' => 'Điểm đi',
+            'E' => 'Điểm đến',
+            'F' => 'Số tấn',
+            'G' => 'Tiền cước vận chuyển',
+            'H' => 'Kết hợp/hỗ trợ',
+            'I' => 'Tổng tiền',
+            'J' => 'Ghi chú',
         ];
     }
 
@@ -89,9 +89,9 @@ class CraneShipmentExport extends BaseShipmentExport
         $row = 14;
         $totalAmount = 0;
         foreach ($this->shipments as $index => $shipment) {
-            $row = $this->addDataRow($sheet, $row, $index, $shipment);
+            $this->addDataRow($sheet, $row, $index, $shipment);
             $totalAmount += $shipment['total_amount'];
-            $row ++;
+            $row++;
         }
 
         $this->addDataTotalRow($sheet, $row, $totalAmount);
@@ -100,7 +100,7 @@ class CraneShipmentExport extends BaseShipmentExport
         $this->setNumberFormats($sheet, $row);
         
         // Add signature section
-        $this->addSignatureSection($sheet, $row + 5, $this->companyName);
+        $this->addSignatureSection($sheet, $row + 3, $this->companyName);
         
         return $sheet;
     }
@@ -115,25 +115,16 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     protected function addDataRow(Worksheet $sheet, int $row, int $index, array $shipment)
     {
-        if ($shipment['goods']) {
-            foreach ($shipment['goods'] as $key => $goods) {
-                $index += $key;
-                $sheet->setCellValue('A' . $row, $row - 13);
-                $sheet->setCellValue('B' . $row, $shipment['departure_time']); // Ngày
-                $sheet->setCellValue('C' . $row, $shipment['vehicle_plate_number']); // Số xe
-                $sheet->setCellValue('D' . $row, $goods['notes']); // Nội dung công việc
-                $sheet->setCellValue('E' . $row, $goods['name']); // Loại hàng
-                $sheet->setCellValue('F' . $row, ''); // TTGT
-                $sheet->setCellValue('G' . $row, $goods['weight']); // Số Lượng
-                $sheet->setCellValue('H' . $row, $goods['unit'] ?? 0); // Đơn giá
-                $sheet->setCellValue('I' . $row, ($goods['amount'] ?? 0)); // Thành tiền
-                $sheet->setCellValue('J' . $row, ''); // Ghi chú
-                if ($key < count($shipment['goods']) - 1) {
-                    $row++;
-                }
-            }
-        }
-        return $row;
+        $sheet->setCellValue('A' . $row, $index + 1);
+        $sheet->setCellValue('B' . $row, $shipment['departure_time']);
+        $sheet->setCellValue('C' . $row, $shipment['vehicle_plate_number']);
+        $sheet->setCellValue('D' . $row, $shipment['origin']);
+        $sheet->setCellValue('E' . $row, $shipment['destination']);
+        $sheet->setCellValue('F' . $row, $shipment['cargo_weight'] ?? 1);
+        $sheet->setCellValue('G' . $row, $shipment['unit_price']);
+        $sheet->setCellValue('H' . $row, $shipment['total_combined_surcharge']);
+        $sheet->setCellValue('I' . $row, $shipment['total_amount'] ?? 0);
+        $sheet->setCellValue('J' . $row, $shipment['notes']);
     }
 
     /**
@@ -201,14 +192,14 @@ class CraneShipmentExport extends BaseShipmentExport
     {
         $sheet->getColumnDimension('A')->setWidth(5);   // STT
         $sheet->getColumnDimension('B')->setWidth(15);  // Ngày
-        $sheet->getColumnDimension('C')->setWidth(12);  // Số xe
-        $sheet->getColumnDimension('D')->setWidth(20);  // Nội dung công việc
-        $sheet->getColumnDimension('E')->setWidth(15);  // Loại hàng
-        $sheet->getColumnDimension('F')->setWidth(12);  // TTGT
-        $sheet->getColumnDimension('G')->setWidth(15);  // Số Lượng
-        $sheet->getColumnDimension('H')->setWidth(20);  // Đơn giá
-        $sheet->getColumnDimension('I')->setWidth(15);  // Thành tiền
-        $sheet->getColumnDimension('J')->setWidth(20);  // Ghi chú
+        $sheet->getColumnDimension('C')->setWidth(15);  // Số xe
+        $sheet->getColumnDimension('D')->setWidth(12);  // Điểm đi
+        $sheet->getColumnDimension('E')->setWidth(15);  // Điểm đến
+        $sheet->getColumnDimension('F')->setWidth(12);  // Số tấn
+        $sheet->getColumnDimension('G')->setWidth(20);  // Tiền cước vận chuyển
+        $sheet->getColumnDimension('H')->setWidth(15);  // Kêt hợp/hỗ trợ
+        $sheet->getColumnDimension('I')->setWidth(15);  // Tổng tiền
+        $sheet->getColumnDimension('J')->setWidth(20);  // Thành tiền
     }
 
     /**
@@ -216,14 +207,98 @@ class CraneShipmentExport extends BaseShipmentExport
      */
     protected function setNumberFormats(Worksheet $sheet, int $row)
     {
-        $sheet->getStyle('I14:I' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
-        $sheet->getStyle('H14' . ':' . $this->lastColumn . '' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('F14:F' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('G14' . ':' . $this->lastColumn . '' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
         
         // Set text alignment
         $sheet->getStyle('A14:A' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('B14:B' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('C14:C' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('F14:F' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('F14:F' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         $sheet->getStyle('G14:H' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+    }
+
+    /**
+     * Summary of setUpHeaderAndFooter
+     * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet
+     * @return void
+     */
+    protected function setUpHeaderAndFooter(Worksheet $sheet): void
+    {
+        // Set company information
+        $sheet->setCellValue('A1', mb_strtoupper($this->companyName, 'UTF-8'));
+        $sheet->setCellValue('A2', 'Địa chỉ: ' . $this->companyAddress);
+        $sheet->setCellValue('A3', 'MST: ' . $this->companyTaxCode);
+        $sheet->mergeCells('A1' . ':' . $this->lastColumn . '1');
+        $sheet->mergeCells('A2' . ':' . $this->lastColumn . '2');
+        $sheet->mergeCells('A3:B3');
+        $sheet->mergeCells('C3:D3');
+        $sheet->mergeCells('A4:C4');
+        
+        // Format company header
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getRowDimension(1)->setRowHeight(20); // Height in points (you can adjust this value)
+        $sheet->getStyle('A2:A3')->getFont()->setSize(11);
+        
+        // Add report title
+        $sheet->setCellValue('A5', $this->getReportTitle());
+        $sheet->getRowDimension(5)->setRowHeight(25); // Height in points (you can adjust this value)
+        $sheet->getRowDimension(6)->setRowHeight(20); // Height in points (you can adjust this value)
+
+        $sheet->setCellValue('A6', sprintf(
+    '(THÁNG %s)',
+            date('m/Y', strtotime($this->startDate))
+        ));
+        $sheet->mergeCells('A5' . ':' . $this->lastColumn . '5');
+        $sheet->mergeCells('A6' . ':' . $this->lastColumn . '6');
+        $sheet->getStyle('A5')->getFont()->setBold(true)->setSize(16);
+        $sheet->getStyle('A6')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A5:A6')->getAlignment()
+        ->setHorizontal(Alignment::HORIZONTAL_CENTER)
+        ->setVertical(Alignment::VERTICAL_CENTER);
+        
+        // Customer information
+        $sheet->setCellValue('A8', 'Khách hàng: ' . mb_strtoupper($this->customer->name,'UTF-8'));
+        $sheet->setCellValue('A9', 'Địa chỉ: ' . $this->customer->address);
+        $sheet->setCellValue('A10', 'MST: ' . $this->customer->tax_code);
+        $sheet->mergeCells('A8:D8');
+        $sheet->mergeCells('A10:G10');
+        $sheet->mergeCells('A9:D9');
+        $sheet->mergeCells('A11:D11');
+        
+        $sheet->getStyle('A8')->getFont()->setBold(true);
+
+        // TAX
+        $sheet->setCellValue('I10', 'HĐ: ');
+        $sheet->setCellValue('I11', 'Bảng kê số: ');
+        $sheet->setCellValue('I12', 'ĐVT: VNĐ');
+
+    }
+
+    /**
+     * Add signature section
+     */
+    protected function addSignatureSection(Worksheet $sheet, int $startRow, string $companyName)
+    {
+        $currentDate = date('d/m/Y');
+        $timestamp = strtotime(str_replace('/', '-', $currentDate));
+        $currentDate = 'ngày ' . date('d', $timestamp) . ' tháng ' . date('m', $timestamp) . ' năm ' . date('Y', $timestamp);
+        
+        // Put location and date
+        $sheet->setCellValue('F' . $startRow, 'Long Thành, ' . $currentDate);
+        $sheet->setCellValue('F' . ($startRow + 1), mb_strtoupper($this->companyName, 'UTF-8'));
+        $sheet->mergeCells('F' . ($startRow) . ':I' . ($startRow));
+        $sheet->mergeCells('F' . ($startRow + 1) . ':I' . ($startRow + 1));
+        $sheet->getStyle('F' . ($startRow) . ':I' . ($startRow))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('F' . ($startRow + 1) . ':I' . ($startRow + 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Put customer name and company name
+        $sheet->setCellValue('A' . ($startRow + 1), mb_strtoupper($this->customer->name, 'UTF-8'));
+        $sheet->mergeCells('A' . ($startRow + 1) . ':D' . ($startRow + 1));
+        $sheet->getStyle('A' . ($startRow + 1) . ':D' . ($startRow + 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle('A' . ($startRow + 1))->getFont()->setBold(true);
+        $sheet->getStyle('F' . $startRow)->getFont()->setBold(true)->setItalic(true);
+        $sheet->getStyle('F' . ($startRow + 1))->getFont()->setBold(true);
     }
 } 

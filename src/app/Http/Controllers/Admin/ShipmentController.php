@@ -45,13 +45,15 @@ class ShipmentController extends Controller
             'departure_time' => $request->input('departure_time'),
             'estimated_arrival_time' => $request->input('estimated_arrival_time'),
             'keyword' => $request->input('keyword'),
+            'customer_id' => $request->input('customer_id'),
         ];
+        $customers = Customer::where('is_active', 1)->pluck('name', 'id');
         // Use getList instead of list to avoid PHP reserved keyword conflict
         $shipments = $this->shipmentService->getList($filters, perPage: 15);
         $shipmentStatus = Shipment::$statuses;
         $shipmentTypes = Shipment::$shipmentTypes;
 
-        return view('admin.shipments.index', compact('shipments', 'shipmentStatus', 'shipmentTypes'));
+        return view('admin.shipments.index', compact('shipments', 'customers', 'shipmentStatus', 'shipmentTypes'));
     }
 
     /**
@@ -240,7 +242,6 @@ class ShipmentController extends Controller
                     'drivers_validated' => $request->validated()['drivers'] ?? [],
                 ]);
             }
-            
             $this->shipmentService->update($shipment, $request->validated());
             return redirect()->route('admin.shipments.index')->with('success', 'Cập nhật chuyến hàng thành công.');
         } catch (\Exception $e) {
