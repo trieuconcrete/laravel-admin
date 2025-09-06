@@ -103,11 +103,11 @@ class UserController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'User created successfully.'], 200);
+            return response()->json(['message' => 'Tạo người dùng thành công.'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('User creation failed', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Đã xảy ra lỗi: ' . $e->getMessage()], 500);
         }
     }
 
@@ -224,7 +224,7 @@ class UserController extends Controller
 
             DB::commit();
             
-            return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
+            return redirect()->route('admin.users.index')->with('success', 'Cập nhật người dùng thành công.');
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -243,7 +243,7 @@ class UserController extends Controller
         $this->authorize('delete', $user);
 
         $user->delete();
-        return back()->with('success', 'User deleted successfully.');
+        return back()->with('success', 'Xoá người dùng thành công.');
     }
 
     /**
