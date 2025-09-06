@@ -39,11 +39,18 @@ class UserController extends Controller
     use AuthorizesRequests;
     use UsesSystemDateFormat;
 
+    protected $userService;
+    protected $salaryService;
+
     /**
      * Summary of __construct
      * @param \App\Services\UserService $userService
+     * @param \App\Services\SalaryService $salaryService
      */
-    public function __construct(protected UserService $userService) {}
+    public function __construct(UserService $userService, SalaryService $salaryService) {
+        $this->userService = $userService;
+        $this->salaryService = $salaryService;
+    }
 
     /**
      * Summary of index
@@ -129,8 +136,9 @@ class UserController extends Controller
         $salaryAdvanceData = $this->userService->getSalaryAdvanceRequests($user, $selectedMonth);
 
         $parsedMonth = Carbon::createFromFormat('m/Y', $selectedMonth);
-        $startDate = $parsedMonth->copy()->startOfMonth();
-        $endDate = $parsedMonth->copy()->endOfMonth();
+        $periodDates = $this->salaryService->calculateSalaryPeriodDates($parsedMonth->format('m'), $parsedMonth->format('Y'));
+        $startDate = $periodDates['start_date'];
+        $endDate = $periodDates['end_date'];
 
         $totalOtherDeduction = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
         $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
