@@ -218,10 +218,14 @@ class UserService
     {
         // Parse month and year from selectedMonth
         list($month, $year) = explode('/', $selectedMonth);
+        // Sử dụng logic tính ngày mới từ SalaryService (issue #197)
+        $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$month, (int)$year);
+        $startDate = $periodDates['start_date'];
+        $endDate = $periodDates['end_date'];
         
         // Get completed shipments for the user for the selected month
-        $shipments = $this->shipmentRepository->getUserCompletedShipments($user, $month, $year);
-        $shipmentsInMonth = $this->shipmentRepository->getUserShipmentsInMonth($user, $month, $year);
+        $shipments = $this->shipmentRepository->getUserShipmentsByDateRange($user, $startDate, $endDate, true);
+        $shipmentsInMonth = $this->shipmentRepository->getUserShipmentsByDateRange($user, $startDate, $endDate);
 
         // Calculate salary details
         $salaryDetails = [];
@@ -247,13 +251,6 @@ class UserService
         }
 
         $totalExpenses = 0; // Không tính chi phí chuyến hàng vào lương
-        
-        
-        // Sử dụng logic tính ngày mới từ SalaryService (issue #197)
-        list($month, $year) = explode('/', $selectedMonth);
-        $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$month, (int)$year);
-        $startDate = $periodDates['start_date'];
-        $endDate = $periodDates['end_date'];
         
         $totalOtherDeduction = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
         $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);

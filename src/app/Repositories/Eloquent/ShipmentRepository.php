@@ -122,12 +122,15 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
      * @param Carbon $endDate
      * @return \Illuminate\Database\Eloquent\Collection<\App\Models\Shipment>
      */
-    public function getUserShipmentsByDateRange(User $user, Carbon $startDate, Carbon $endDate): Collection
+    public function getUserShipmentsByDateRange(User $user, Carbon $startDate, Carbon $endDate, $isCompleted = false): Collection
     {
         return Shipment::whereHas('shipmentDeductions', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
             ->whereBetween('departure_time', [$startDate, $endDate])
+            ->when($isCompleted, function($q) {
+                $q->completed(); // Chỉ lấy shipment đã hoàn thành nếu $isCompleted là true
+            })
             ->with(['shipmentDeductions', 'shipmentDeductions.shipmentDeductionType'])
             ->orderBy('departure_time')
             ->get();
