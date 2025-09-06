@@ -72,6 +72,7 @@ class CustomerService
                 'unit_price' => $shipment->unit_price,
                 'combined_fees' => $combinedFees,
                 'total_amount' => $totalAmount,
+                'shipment_report_id' => $shipment->shipment_report_id,
                 'notes' => $shipment->notes,
                 'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : 'N/A',
                 'status' => $shipment->status,

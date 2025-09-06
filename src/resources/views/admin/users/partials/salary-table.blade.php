@@ -10,17 +10,17 @@
     <td class="fw-medium">Tiền thưởng</td>
     <td class="text-end" data-salary="bonus">{{ number_format($totalBonus) }} đ</td>
 </tr>
-<tr class="border-bottom">
+{{--  <tr class="border-bottom">
     <td class="fw-medium">Tiền phạt</td>
     <td class="text-end text-danger" data-salary="penalty">- {{ number_format($totalPenalty) }} đ</td>
-</tr>
-<tr class="border-bottom">
+</tr>  --}}
+{{--  <tr class="border-bottom">
     <td class="fw-medium">Ứng lương <small class="text-muted">(Đã duyệt/Đã chi)</small></td>
     <td class="text-end text-danger" data-salary="other-deduction">- {{ number_format($totalOtherDeduction) }} đ</td>
-</tr>
+</tr>  --}}
 <tr class="border-bottom bg-soft-light">
     <td class="fw-medium">Tổng trước khấu trừ</td>
-    <td class="text-end fw-semibold" data-salary="total-before-deduction">{{ number_format($salaryBase + $totalAllowance) }} đ</td>
+    <td class="text-end fw-semibold" data-salary="total-before-deduction">{{ number_format($salaryBase + $totalAllowance + $totalBonus) }} đ</td>
 </tr>
 <tr class="border-bottom">
                                                 <td class="fw-medium">Trừ BHXH ({{ \App\Models\Setting::get('social_insurance_contribution_rate', 10.5) }}%)<small class="text-muted">(Mức đóng lương cơ bản: {{ \App\Models\Setting::get('social_insurance_contribution_amount', 5500000) }} đ)</small></td>

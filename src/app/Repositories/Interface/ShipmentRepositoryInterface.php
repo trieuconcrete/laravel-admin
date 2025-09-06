@@ -56,5 +56,5 @@ interface ShipmentRepositoryInterface extends BaseRepositoryInterface
      * @param Carbon $endDate
      * @return \Illuminate\Database\Eloquent\Collection<\App\Models\Shipment>
      */
-    public function getUserShipmentsByDateRange(User $user, Carbon $startDate, Carbon $endDate): Collection;
+    public function getUserShipmentsByDateRange(User $user, Carbon $startDate, Carbon $endDate, $isCompleted = false): Collection;
 }

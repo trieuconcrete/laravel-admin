@@ -208,6 +208,23 @@ class User extends Authenticatable
     }
 
     /**
+     * Get salary advance requests by type for a date range
+     * 
+     * @param mixed $type
+     * @param mixed $startDate
+     * @param mixed $endDate
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getSalaryAdvancesRequestByType($type, $startDate, $endDate)
+    {
+        return $this->salaryAdvanceRequests()
+            ->where('type', $type)
+            ->whereBetween('advance_month', [$startDate, $endDate])
+            ->whereIn('status', ['approved', SalaryAdvanceRequest::STATUS_PAID])
+            ->get();
+    }
+
+    /**
      * Get total amount of salary payments (payment type) for a date range
      *
      * @param mixed $startDate
@@ -310,6 +327,39 @@ class User extends Authenticatable
     public function isBasicSalaryType(): bool
     {
         return $this->salary_type?->isBasicSalary() ?? true;
+    }
+
+    /**
+     * Check if user is eligible for lunch allowance
+     * (Basic salary type and not a driver)
+     *
+     * @return bool
+     */
+    public function isEligibleForLunchAllowance(): bool
+    {
+        return $this->isBasicSalaryType() && $this->role !== self::ROLE_DRIVER;
+    }
+
+    /**
+     * Get daily lunch allowance amount
+     * Default: 35,000 VND per day
+     *
+     * @return float
+     */
+    public function getDailyLunchAllowance(): float
+    {
+        return 35000.00;
+    }
+
+    /**
+     * Get monthly lunch allowance amount
+     * Default: 35,000 VND × 22 working days = 770,000 VND
+     *
+     * @return float
+     */
+    public function getMonthlyLunchAllowance(): float
+    {
+        return $this->getDailyLunchAllowance() * 22;
     }
 
     /**

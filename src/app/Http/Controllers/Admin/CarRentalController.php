@@ -265,7 +265,7 @@ class CarRentalController extends Controller
                     }
                 }
             }
-
+            
             // Validate request data
             $validated = validator($data, [
                 'car_rental_id' => 'required|exists:car_rentals,id',
@@ -1476,7 +1476,8 @@ class CarRentalController extends Controller
         }
 
         $month = now()->format('m/Y');
-        $fileName = 'bien_ban_nhat_ky_lo_trinh_xe_' . $carRental->id . '_' . str_replace('/', '', $month) . '.xlsx';
+        $safeMonth = str_replace(['/', '\\', ' '], '_', $month);
+        $fileName = 'bien_ban_nhat_ky_lo_trinh_xe_' . $carRental->id . '_' . $safeMonth . '.xlsx';
 
         return Excel::download(new \App\Exports\ShipmentVehicleLogExport($carRental, $shipments, $tollFeesByDate, $month), $fileName);
     }
@@ -1714,12 +1715,15 @@ class CarRentalController extends Controller
             // Tính toán tổng công nợ với filter
             $debtSummary = $this->calculateFilteredDebt($carRental, $shipments, $startDate, $endDate);
             
-            // Tạo tên file với thông tin filter
+            // Tạo tên file với thông tin filter - ensure safe characters
             $fileName = 'tong_ket_cong_no_' . $carRental->id;
             if ($startDate && $endDate) {
-                $fileName .= '_' . \Carbon\Carbon::parse($startDate)->format('Y-m-d') . '_' . \Carbon\Carbon::parse($endDate)->format('Y-m-d');
+                $safeStartDate = str_replace(['/', '\\', ' '], '_', \Carbon\Carbon::parse($startDate)->format('Y-m-d'));
+                $safeEndDate = str_replace(['/', '\\', ' '], '_', \Carbon\Carbon::parse($endDate)->format('Y-m-d'));
+                $fileName .= '_' . $safeStartDate . '_' . $safeEndDate;
             }
-            $fileName .= '_' . now()->format('Y-m-d') . '.xlsx';
+            $safeCurrentDate = str_replace(['/', '\\', ' '], '_', now()->format('Y-m-d'));
+            $fileName .= '_' . $safeCurrentDate . '.xlsx';
             
             return Excel::download(new \App\Exports\DebtSummaryExport($carRental, $debtSummary, $shipments), $fileName);
             
@@ -1754,10 +1758,10 @@ class CarRentalController extends Controller
             // Get shipments based on car rental type
             $shipmentType = $carRental->type == 1 ? 21 : 22; // 21: thuê nguyên xe, 22: thuê kiểu khoáng
             
-            $shipments = Shipment::where('car_rental_id', $carRental->id)
+            $query = Shipment::where('car_rental_id', $carRental->id)
                 ->where('shipment_type', Shipment::SHIPMENT_TYPE_MONTHLY_RENTAL)
-                ->whereBetween('run_date', [$startDate, $endDate])
-                ->get();
+                ->whereBetween('run_date', [$startDate, $endDate]);
+            $shipments =  $query->get();
             
             if ($shipments->isEmpty()) {
                 return response()->json([
@@ -1825,6 +1829,9 @@ class CarRentalController extends Controller
                         'is_finalized' => true
                     ]);
                 }
+            }
+            if ($report) {
+                $query->update(['shipment_report_id' => $report->id]);
             }
             
             return response()->json([

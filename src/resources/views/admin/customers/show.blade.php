@@ -61,6 +61,8 @@
                             type="button" role="tab" aria-controls="monthlyReport" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'true' : 'false' }}">Chuyến xe</button>
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'carRental' ? 'active' : '' }}" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#carRental"
                             type="button" role="tab" aria-controls="carRental" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'carRental' ? 'true' : 'false' }}">Thuê xe</button>
+                        <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'shipmentReport' ? 'active' : '' }}" id="nav-shipments-tab" data-bs-toggle="tab" data-bs-target="#shipmentReport"
+                            type="button" role="tab" aria-controls="shipmentReport" aria-selected="{{ ($activeTab ?? 'generalInfo') == 'shipmentReport' ? 'true' : 'false' }}">Công nợ</button>
                         <button class="nav-link {{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'active' : '' }}" id="nav-transactions-tab" data-bs-toggle="tab"
                             data-bs-target="#transactions" type="button" role="tab" aria-controls="transactions"
                             aria-selected="{{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'true' : 'false' }}">Thanh toán</button>
@@ -210,9 +212,9 @@
                         <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'monthlyReport' ? 'show active' : '' }}" id="monthlyReport">
                             <div class="row mb-3">
                                 <div class="col-md-3">
-                                    <label class="">Chọn bảng kê (tùy chọn)</label>
+                                    <label class="">Bảng kê</label>
                                     <select class="form-select" name="month" id="month">
-                                        <option value="">Chọn tháng kê</option>
+                                        <option value="">Chọn bảng kê</option>
                                         @if($shipmentMonthlyReports->count() > 0)
                                             @foreach($shipmentMonthlyReports as $index => $val)
                                                 <option value="{{ $val->monthly }}">{{ $val->monthly }}</option>
@@ -264,18 +266,19 @@
                                 </div>
                             </div>
                             <div class="table-responsive">
-                                <table class="table table-hover" id="monthlyReportTable">
-                                    <thead class="table-light">
+                                <table class="table table-hover table-striped align-middle table-nowrap mb-0" id="monthlyReportTable">
+                                    <thead class="table-light text-uppercase">
                                         <tr>
-                                            <th>Mã chuyến xe</th>
+                                            <th>Mã chuyến</th>
                                             <th>Ngày</th>
                                             <th>Điểm đi</th>
                                             <th>Điểm đến</th>
-                                            <th>Số chuyến</th>
-                                            <th>Khối lượng(kg)</th>
+                                            <th>Chuyến</th>
+                                            <th>Số tấn</th>
                                             <th>Đơn giá</th>
-                                            <th>Phụ thu</th>
+                                            <th>Phụ phí</th>
                                             <th>Thành tiền</th>
+                                            <th>Công nợ</th>
                                             <th>Ghi chú</th>
                                             <th>Trạng thái</th>
                                         </tr>
@@ -371,6 +374,9 @@
                             </div> --}}
                             @include('admin.customers.partials.car-rental', ['carRentals' => $carRentals])
                         </div>
+                        <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'shipmentReport' ? 'show active' : '' }}" id="shipmentReport">
+                            @include('admin.customers.partials.shipment-reports', ['shipmentReports' => $shipmentReports])
+                        </div>
 
                         <!-- Transactions Tab -->
                         <div class="tab-pane fade {{ ($activeTab ?? 'generalInfo') == 'transactions' ? 'show active' : '' }}" id="transactions">
@@ -382,11 +388,8 @@
                             </div>
 
                             <!-- Search Form -->
-                            <div class="card mb-3">
-                                <div class="card-header bg-light">
-                                    <h6 class="mb-0">Tìm kiếm thanh toán</h6>
-                                </div>
-                                <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-12">
                                     <form id="transactionSearchForm" method="GET"
                                         action="{{ route('admin.customers.transactions', $customer) }}">
                                         <input type="hidden" name="active_tab" value="{{ $activeTab ?? 'transactions' }}">
@@ -435,13 +438,9 @@
                                         <div class="row mt-3">
                                             <div class="col-12 d-flex justify-content-center">
                                                 <div class="d-flex gap-3">
-                                                    <button type="submit" class="btn btn-primary px-4">
-                                                        <i class="fas fa-search me-2"></i>Tìm kiếm
+                                                    <button type="submit" class="btn btn-info me-2">
+                                                        <i class="ri-search-line me-1"></i>Tìm kiếm
                                                     </button>
-                                                    <a href="{{ route('admin.customers.transactions', $customer) }}?active_tab={{ $activeTab ?? 'transactions' }}"
-                                                        class="btn btn-outline-secondary px-4">
-                                                        <i class="fas fa-undo me-2"></i>Đặt lại
-                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -466,19 +465,19 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Thêm giao dịch</h5>
+                    <h5 class="modal-title">Thanh toán công nợ</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <hr>
                 <form id="transactionForm" enctype="multipart/form-data" method="POST"
                     action="{{ route('admin.customers.store-transaction', $customer) }}">
                     @csrf
+                    <input type="hidden" name="shipment_report_id" id="shipment_report_id" value="">
                     <div class="modal-body">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Số tiền <span class="text-danger">*</span></label>
-                                <input class="form-control number-format" type="text" placeholder="Số tiền" name="amount"
-                                    required />
+                                <input class="form-control number-format" type="text" placeholder="Số tiền" name="amount" id="amount" required />
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ngày thanh toán <span class="text-danger">*</span></label>
@@ -503,7 +502,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Chú thích</label>
-                            <textarea class="form-control" rows="3" placeholder="Nhập chú thích" name="notes"></textarea>
+                            <textarea class="form-control" rows="3" placeholder="Nhập chú thích" name="notes" id="notes"></textarea>
                         </div>
                         <div id="transactionFormErrors" class="alert alert-danger mt-2" style="display: none;"></div>
                     </div>
@@ -690,6 +689,13 @@
                                 } else {
                                     shipmentLink = `<a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a>`;
                                 }
+                                let shipmentReport;
+                                if (shipment.shipment_report_id) {
+                                    shipmentReport = `<span class="badge bg-success">Đã tổng kết</span>`;
+                                } else {
+                                    shipmentReport = `<span class="badge bg-danger">Chưa tổng kết</span>`;
+                                }
+
                                 // Format the row HTML
                                 row.innerHTML = `
                                 <td>${shipmentLink}</td>
@@ -701,6 +707,7 @@
                                 <td>${numberFormat(shipment.unit_price)}</td>
                                 <td>${shipment.combined_fees > 0 ? numberFormat(shipment.combined_fees) : ''}</td>
                                 <td>${numberFormat(shipment.total_amount)}</td>
+                                <td>${shipmentReport}</td>
                                 <td>${shipment.notes || ''}</td>
                                 <td><span class="badge bg-${getStatusBadgeClass(shipment.status)}">${getStatusLabel(shipment.status)}</span></td>
                             `;
@@ -1109,6 +1116,12 @@
                     } else {
                         shipmentLink = `<a href="/admin/shipments/${shipment.id}/edit" target="_blank" class="text-primary">${shipment.shipment_code}</a>`;
                     }
+                    let shipmentReport;
+                    if (shipment.shipment_report_id) {
+                        shipmentReport = `<span class="badge bg-success">Đã tổng kết</span>`;
+                    } else {
+                        shipmentReport = `<span class="badge bg-danger">Chưa tổng kết</span>`;
+                    }
 
                     row.innerHTML = `
                         <td>${shipmentLink}</td>
@@ -1120,6 +1133,7 @@
                         <td>${numberFormat(shipment.unit_price)}</td>
                         <td>${shipment.combined_fees > 0 ? numberFormat(shipment.combined_fees) : ''}</td>
                         <td>${numberFormat(shipment.total_amount)}</td>
+                        <td>${shipmentReport}</td>
                         <td>${shipment.notes || ''}</td>
                         <td><span class="badge bg-${getStatusBadgeClass(shipment.status)}">${getStatusLabel(shipment.status)}</span></td>
                     `;
@@ -1251,6 +1265,11 @@
                                         `,
                                             showConfirmButton: true,
                                             confirmButtonText: 'Đóng'
+                                        }).then((result) => {
+                                            // Optional: Reload page or update UI
+                                            if (result.isConfirmed) {
+                                                window.location.reload();
+                                            }
                                         });
                                     } else {
                                         Swal.fire({
@@ -1272,6 +1291,10 @@
                                     // Re-enable button
                                     summarizeButton.disabled = false;
                                     summarizeButton.innerHTML = originalText;
+                                    setTimeout(() => {
+                                        // Tự động làm mới trang sau 2 giây để cập nhật dữ liệu
+                                        window.location.reload();
+                                    }, 3000);
                                 });
                         }
                     });
@@ -1308,8 +1331,8 @@
                     // Get shipment type label
                     const shipmentTypeLabel = getShipmentTypeLabel(shipmentType);
                     
-                    // Show confirmation dialog
-                    Swal.fire({
+                    // Prepare Swal options based on shipment type
+                    const swalOptions = {
                         title: 'Xác nhận xuất bảng kê?',
                         html: `
                             <div class="text-start">
@@ -1325,7 +1348,31 @@
                             confirmButton: 'btn btn-secondary',
                             cancelButton: 'btn btn-light'
                         }
-                    }).then((result) => {
+                    };
+
+                    // Only add input options if shipmentType is 1
+                    if (shipmentType == 1) {
+                        swalOptions.input = "select";
+                        swalOptions.inputOptions = {
+                            '1': 'TOPBAND',
+                            '2': 'WOOJIN',
+                            '3': 'Khác',
+                        };
+                        swalOptions.inputPlaceholder = "Chọn mẫu bảng kê";
+                        swalOptions.inputValidator = (value) => {
+                            return new Promise((resolve) => {
+                                if (value !== "") {
+                                    resolve();
+                                } else {
+                                    resolve("Vui lòng chọn mẫu bảng kê.");
+                                }
+                            });
+                        };
+                    }
+                    
+                    // Show confirmation dialog
+                    Swal.fire(swalOptions).then((result) => {
+                        console.log('Export confirmation result:', result);
                         if (result.isConfirmed) {
                             Swal.fire({
                                 title: 'Đang xử lý...',
@@ -1339,7 +1386,8 @@
                                         statement_start_date: startDate,
                                         statement_end_date: endDate,
                                         shipment_type: shipmentType,
-                                        month: monthSelect ? monthSelect.value : ''
+                                        month: monthSelect ? monthSelect.value : '',
+                                        excel_template: result.value || '' // Handle case when no template is selected
                                     });
 
                                     const downloadUrl = `{{ route('admin.shipment-reports.export', $customer) }}?${params.toString()}`;
@@ -1835,11 +1883,39 @@
                 window.initialLoadHandled = true;
             }, 1000);
 
+            
+            // Handle payment button clicks
+            const transactionModal = document.getElementById('transactionModal');
+            const shipmentReportIdInput = document.getElementById('shipment_report_id');
+            const amountInput = document.getElementById('amount');
+            const notesInput = document.getElementById('notes');
 
+            // Listen for modal show event to populate data
+            transactionModal.addEventListener('show.bs.modal', function(event) {
+                // Button that triggered the modal
+                const button = event.relatedTarget;
+                
+                // Get shipment_report_id and amount from the parent row's data attributes
+                const row = button.closest('tr');
+                const shipmentId = row.getAttribute('data-debt');
+                const amount = row.getAttribute('data-amount');
+                const notes = row.getAttribute('data-notes');
 
-
-
-
+                // Set values in modal inputs
+                if (shipmentReportIdInput) {
+                    shipmentReportIdInput.value = shipmentId;
+                }
+                // Set values in modal inputs
+                if (notesInput) {
+                    notesInput.value = 'Công nợ #' + shipmentId + '\nLoại: ' + notes;
+                }
+                
+                if (amountInput && amount) {
+                    // Format amount with commas for display
+                    const formattedAmount = parseInt(amount).toLocaleString('en-US');
+                    amountInput.value = formattedAmount;
+                }
+            });
         });
     </script>
 @endpush

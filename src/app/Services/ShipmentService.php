@@ -134,6 +134,7 @@ class ShipmentService
                 'status' => $data['status'],
                 'distance' => $data['distance'] ?? null,
                 'unit_price' => $data['unit_price'] ?? null,
+                'cargo_weight' => $data['cargo_weight'] ?? null,
                 'trip_count' => $data['trip_count'] ?? null,
                 'overtime_rate' => $data['overtime_rate'] ?? 50000,
                 'is_overtime_at_noon' => $data['is_overtime_at_noon'] ?? false,
@@ -198,6 +199,7 @@ class ShipmentService
                             'unit' => $good['unit'],
                             'notes' => $good['notes'] ?? null,
                             'weight' => $good['weight'] ?? null,
+                            'amount' => $good['amount'] ?? null,
                         ]);
                     }
                 }
@@ -363,6 +365,7 @@ class ShipmentService
                             'unit' => $good['unit'],
                             'notes' => $good['notes'] ?? null,
                             'weight' => $good['weight'] ?? null,
+                            'amount' => $good['amount'] ?? null,
                         ]);
                     }
                 }

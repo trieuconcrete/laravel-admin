@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\DB;
 class ShipmentReport extends Model
 {
     use HasFactory;
+    const EXCEL_TEMPLATE_TOPBAND = 1; // Khách chạy theo chuyến TOPBAND
+    const EXCEL_TEMPLATE_WOOJIN = 2; // Khách chạy theo chuyến WOOJIN
+    const EXCEL_TEMPLATE_PER_TRIP = 3; // Khách chạy theo chuyến
+    const EXCEL_TEMPLATE_MONTHLY_RENTAL = 4; // Khách thuê xe tháng
+    const EXCEL_TEMPLATE_CRANE = 5; // Xe nâng
+    const EXCEL_TEMPLATE_LONG_DISTANCE = 6; // Xe đường dài bắc-nam
 
     protected $fillable = [
         'monthly',
@@ -165,7 +171,6 @@ class ShipmentReport extends Model
         if ($shipmentType) {
             $query->where('shipment_type', $shipmentType);
         }
-
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
@@ -251,5 +256,18 @@ class ShipmentReport extends Model
             ],
             $data
         );
+    }
+
+    public function getShipmentTypeLabel()
+    {
+        $types = [
+            1 => 'Khách chạy theo chuyến',
+            3 => 'Xe nâng',
+            4 => 'Xe đường dài bắc-nam',
+            21 => 'Thuê tháng theo chuyến',
+            22 => 'Thuê tháng kiểu khoáng'
+        ];
+
+        return $types[$this->shipment_type] ?? '';
     }
 } 

@@ -633,13 +633,7 @@ class SalaryController extends Controller
             // Check if the authenticated user has permission to process this payment
             // $this->authorize('process', $salaryDetail);
 
-            // Validate salary status
-            if ($salaryDetail->status === 'paid') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Lương đã được thanh toán trước đó.'
-                ], 400);
-            }
+            // Allow multiple payments - no need to validate if already paid
             
             // Validate salary period
             if (!$salaryDetail->salaryPeriod) {
@@ -652,7 +646,7 @@ class SalaryController extends Controller
             $now = now();
             $adminId = auth('admin')->id();
 
-            // Check if this is a repeated payment
+            // Check if this is a repeated payment (always allow)
             $isRepeatedPayment = $salaryDetail->status === 'paid';
             
             // Update salary status to paid (allow multiple payments)
@@ -729,7 +723,7 @@ class SalaryController extends Controller
             ];
             // Sync salary
             $salaryService = app(SalaryService::class);
-            $result = $salaryService->syncSalary($dataSync);
+            $result = $salaryService->syncSalaryForUser($salaryDetail->employee, $monthRequest);
 
             if (!$result['success']) {
                 throw new \Exception($result['message']);   

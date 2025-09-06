@@ -99,8 +99,8 @@ class SalaryAdvanceRequest extends Model
             self::TYPE_SALARY => 'Ứng lương',
             self::TYPE_BONUS => 'Tiền thưởng',
             self::TYPE_PENALTY => 'Phạt',
-            // self::TYPE_PAYMENT => 'Thanh toán lương',
-            // self::TYPE_OTHER => 'Khác',
+            self::TYPE_PAYMENT => 'Thanh toán lương',
+            self::TYPE_OTHER => 'Khác',
         ];
     }
 

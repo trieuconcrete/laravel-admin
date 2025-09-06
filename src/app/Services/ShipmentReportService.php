@@ -2,17 +2,19 @@
 
 namespace App\Services;
 
+use App\Models\Customer;
 use App\Models\Shipment;
 use App\Models\ShipmentReport;
-use App\Models\Customer;
-use App\Exports\PerTripShipmentExport;
-use App\Exports\MonthlyRentalShipmentExport;
-use App\Exports\CraneShipmentExport;
-use App\Exports\LongDistanceShipmentExport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Exports\CraneShipmentExport;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\WoojinShipmentExport;
+use App\Exports\PerTripShipmentExport;
+use App\Exports\TopbandShipmentExport;
+use App\Exports\LongDistanceShipmentExport;
+use App\Exports\MonthlyRentalShipmentExport;
 
 class ShipmentReportService
 {
@@ -30,50 +32,53 @@ class ShipmentReportService
             $totalShipmentCount = 0;
 
             // Tổng kết cho một loại cụ thể (shipment_type luôn có giá trị)
-                // Tổng kết cho một loại cụ thể
-                $shipments = Shipment::where('customer_id', $customerId)
-                    ->where('shipment_type', $shipmentType)
-                    ->whereBetween('departure_time', [$startDate, $endDate])
-                    ->where('status', 'completed')
-                    ->get();
+            // Tổng kết cho một loại cụ thể
+            $query = Shipment::where('customer_id', $customerId)
+                ->where('shipment_type', $shipmentType)
+                ->whereBetween('departure_time', [$startDate, $endDate])
+                ->where('status', 'completed');
+            $shipments = $query->get();
 
-                $totalAmount = $shipments->sum(function ($shipment) use ($shipmentType) {
-                    return $this->calculateAmount($shipment, $shipmentType);
-                });
-                $vatAmount = $totalAmount * 0.08; // Assuming 8% VAT
+            $totalAmount = $shipments->sum(function ($shipment) use ($shipmentType) {
+                return $this->calculateAmount($shipment, $shipmentType);
+            });
+            $vatAmount = $totalAmount * 0.08; // Assuming 8% VAT
 
-                // Kiểm tra xem đã có báo cáo cho loại này với khoảng thời gian này chưa
-                $existingReport = ShipmentReport::where('customer_id', $customerId)
-                    ->where('shipment_type', $shipmentType)
-                    ->where('statement_start_date', $startDate)
-                    ->where('statement_end_date', $endDate)
-                    ->first();
+            // Kiểm tra xem đã có báo cáo cho loại này với khoảng thời gian này chưa
+            $existingReport = ShipmentReport::where('customer_id', $customerId)
+                ->where('shipment_type', $shipmentType)
+                ->where('statement_start_date', $startDate)
+                ->where('statement_end_date', $endDate)
+                ->first();
 
-                if ($existingReport) {
-                    // Cập nhật báo cáo hiện có
-                    $report = $existingReport;
-                    $report->update([
-                        'total_amount' => $totalAmount + $vatAmount,
-                        'is_finalized' => true,
-                        'updated_by' => Auth::id(),
-                    ]);
-                } else {
-                    // Tạo báo cáo mới
-                    $report = ShipmentReport::create([
-                        'customer_id' => $customerId,
-                        'monthly' => $monthly,
-                        'shipment_type' => $shipmentType,
-                        'total_amount' => $totalAmount + $vatAmount,
-                        'statement_start_date' => $startDate,
-                        'statement_end_date' => $endDate,
-                        'is_finalized' => true,
-                        'created_by' => Auth::id(),
-                        'updated_by' => Auth::id(),
-                    ]);
-                }
+            if ($existingReport) {
+                // Cập nhật báo cáo hiện có
+                $report = $existingReport;
+                $report->update([
+                    'total_amount' => $totalAmount + $vatAmount,
+                    'is_finalized' => true,
+                    'updated_by' => Auth::id(),
+                ]);
+            } else {
+                // Tạo báo cáo mới
+                $report = ShipmentReport::create([
+                    'customer_id' => $customerId,
+                    'monthly' => $monthly,
+                    'shipment_type' => $shipmentType,
+                    'total_amount' => $totalAmount + $vatAmount,
+                    'statement_start_date' => $startDate,
+                    'statement_end_date' => $endDate,
+                    'is_finalized' => true,
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                ]);
+            }
+            if ($report->id) {
+                $query->update(['shipment_report_id' => $report->id]); // Cập nhật shipment_report_id cho các shipment
+            }
 
-                $reports[] = $report;
-                $totalShipmentCount = $shipments->count();
+            $reports[] = $report;
+            $totalShipmentCount = $shipments->count();
 
 
 
@@ -106,7 +111,7 @@ class ShipmentReportService
     /**
      * Xuất Excel bảng kê theo loại chuyến xe
      */
-    public function exportReport($customerId, $startDate, $endDate, $shipmentType)
+    public function exportReport($customerId, $startDate, $endDate, $shipmentType, $templateType)
     {
         try {
             // Lấy dữ liệu shipments
@@ -114,7 +119,7 @@ class ShipmentReportService
                 ->where('shipment_type', $shipmentType)
                 ->whereBetween('departure_time', [$startDate, $endDate])
                 ->where('status', 'completed')
-                ->with(['customer', 'vehicle', 'vehicle.vehicleType', 'driver'])
+                ->with(['customer', 'vehicle', 'vehicle.vehicleType', 'driver', 'goods'])
                 ->get()
                 ->map(function ($shipment) use ($shipmentType) {
                     return [
@@ -131,12 +136,17 @@ class ShipmentReportService
                         'cargo_weight' => $shipment->cargo_weight ?? 0,
                         'combined_fees' => $shipment->shipmentExtraFee->sum('amount'),
                         'total_amount' => $this->calculateAmount($shipment, $shipmentType),
-                        'total_expense_deductions' => $shipment->total_expense_deductions,
+                        'total_expense_deductions' => $shipment->total_expense_deductions, // phụ phí(tổng chi phí chuyến xe)
                         'total_combined_surcharge' => $shipment->total_combined_surcharge, // phụ thu kết hợp
-                        'total_cargo_handling' => $shipment->total_cargo_handling, // bốc xếp
+                        'total_combined_cargo_handling' => $shipment->total_combined_cargo_handling, // bốc xếp
+                        'shipment_report_id' => $shipment->shipment_report_id,
+                        'goods_name' =>  $shipment->goods->pluck('name')->implode(', '),
+                        'goods_notes' =>  $shipment->goods->pluck('notes')->implode(', '),
+                        'company' => $shipment->company ? $shipment->company : '',
                         'notes' => $shipment->notes,
                         'status' => $shipment->status,
                         'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : '',
+                        'goods' => $shipment->goods ? $shipment->goods->toArray() : [],
                     ];
                 });
 
@@ -151,7 +161,7 @@ class ShipmentReportService
             $filename = $this->generateFilename($customer, $startDate, $endDate, $shipmentType);
 
             // Chọn export class dựa trên shipment type
-            $exportClass = $this->getExportClass($shipmentType);
+            $exportClass = $this->getExportClass($shipmentType, $templateType);
 
             return Excel::download(
                 new $exportClass($customer, $shipments, $startDate, $endDate, $shipmentType),
@@ -171,10 +181,15 @@ class ShipmentReportService
     /**
      * Lấy export class dựa trên shipment type
      */
-    private function getExportClass($shipmentType)
+    private function getExportClass($shipmentType, $templateType)   
     {
         switch ($shipmentType) {
             case 1:
+                if ($templateType == ShipmentReport::EXCEL_TEMPLATE_TOPBAND) {
+                    return TopbandShipmentExport::class; // Khách chạy theo chuyến TOPBAND
+                } elseif ($templateType == ShipmentReport::EXCEL_TEMPLATE_WOOJIN) {
+                    return WoojinShipmentExport::class; // Khách chạy theo chuyến WOOJIN
+                }
                 return PerTripShipmentExport::class; // Chuyến xe theo chuyến
             case 2:
                 return MonthlyRentalShipmentExport::class; // Thuê xe theo tháng
