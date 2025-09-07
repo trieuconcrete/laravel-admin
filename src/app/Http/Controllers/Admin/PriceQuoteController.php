@@ -63,11 +63,11 @@ class PriceQuoteController extends Controller
             $this->quoteService->store($request);
 
             DB::commit();
-            return response()->json(['message' => 'Quote created successfully.'], 200);
+            return response()->json(['message' => 'Tạo báo giá thành công.'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Vehicle creation failed', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+            Log::error('Quote creation failed', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Đã xảy ra lỗi: ' . $e->getMessage()], 500);
         }
     }
 
@@ -103,11 +103,11 @@ class PriceQuoteController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'Quote update successfully.'], 200);
+            return response()->json(['message' => 'Cập nhật báo giá thành công.'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Quote update failed', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Đã xảy ra lỗi: ' . $e->getMessage()], 500);
         }
     }
 
@@ -124,11 +124,11 @@ class PriceQuoteController extends Controller
             $quote->attachments()->delete();
             $quote->delete();
             DB::commit();
-            return back()->with('success', 'Quote deleted successfully.');
+            return back()->with('success', 'Xoá báo giá thất bại.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Vehicle creation failed', ['error' => $e->getMessage()]);
-            return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
+            Log::error('Quote delete failed', ['error' => $e->getMessage()]);
+            return back()->withInput()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
     }
 }
