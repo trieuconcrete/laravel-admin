@@ -716,7 +716,7 @@
                                 <div class="row g-2">
                                     <div class="col-lg-4">
                                         <div>
-                                            <label for="passwordInput" class="form-label">Password <span class="text-danger">*</span></label>
+                                            <label for="passwordInput" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
                                             <input type="password" class="form-control" name="password" id="passwordInput" placeholder="Enter password">
                                         </div>
                                         @error('password')
@@ -726,8 +726,8 @@
                                     <!--end col-->
                                     <div class="col-lg-4">
                                         <div>
-                                            <label for="confirmpasswordInput" class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                                            <input type="password" class="form-control" name="password_confirmation" id="confirmpasswordInput" placeholder="Confirm password">
+                                            <label for="confirmpasswordInput" class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                                            <input type="password" class="form-control" name="password_confirmation" id="confirmpasswordInput" placeholder="Xác nhận mật khẩu">
                                         </div>
                                         @error('password_confirmation')
                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>

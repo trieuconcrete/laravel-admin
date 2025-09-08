@@ -4,7 +4,7 @@
 <head>
 
     <meta charset="utf-8" />
-    <title>Admin Login</title>
+    <title>Đăng nhập Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Vận Tải Hoàng Phú Long - An Tâm Trên Vạn Dặm" name="description" />
     <!-- App favicon -->
@@ -81,8 +81,8 @@
 
                             <div class="card-body p-4">
                                 <div class="text-center mt-2">
-                                    <h5 class="text-primary">Welcome Back !</h5>
-                                    <p class="text-muted">Sign in to continue to Admin.</p>
+                                    <h5 class="text-primary">Chào mừng trở lại!</h5>
+                                    <p class="text-muted">Đăng nhập để tiếp tục tới Admin.</p>
                                 </div>
                                 <div class="p-2 mt-4">
                                     @if ($errors->any())
@@ -93,27 +93,27 @@
 
                                         <div class="mb-3">
                                             <label for="email" class="form-label">Email</label>
-                                            <input type="text" name="email" class="form-control" id="email" placeholder="Enter email" value="{{ old('email') ?? $lastEmail ?? '' }}">
+                                            <input type="text" name="email" class="form-control" id="email" placeholder="Nhập email" value="{{ old('email') ?? $lastEmail ?? '' }}">
                                         </div>
 
                                         <div class="mb-3">
                                             <div class="float-end">
-                                                <a href="{{ route('admin.password.request') }}" class="text-muted">Forgot password?</a>
+                                                <a href="{{ route('admin.password.request') }}" class="text-muted">Quên mật khẩu?</a>
                                             </div>
-                                            <label class="form-label" for="password-input">Password</label>
+                                            <label class="form-label" for="password-input">Mật khẩu</label>
                                             <div class="position-relative auth-pass-inputgroup mb-3">
-                                                <input type="password" name="password" class="form-control pe-5 password-input" placeholder="Enter password" id="password-input">
+                                                <input type="password" name="password" class="form-control pe-5 password-input" placeholder="Nhập mật khẩu" id="password-input">
                                                 <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
                                             </div>
                                         </div>
 
                                         <div class="form-check">
                                             <input class="form-check-input" name="remember" type="checkbox" value="1" id="auth-remember-check" {{ old('remember') ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="auth-remember-check">Remember me</label>
+                                            <label class="form-check-label" for="auth-remember-check">Ghi nhớ đăng nhập</label>
                                         </div>
 
                                         <div class="mt-4">
-                                            <button class="btn btn-success w-100" type="submit">Sign In</button>
+                                            <button class="btn btn-success w-100" type="submit">Đăng nhập</button>
                                         </div>
                                     </form>
                                 </div>

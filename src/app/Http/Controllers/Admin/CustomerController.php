@@ -61,11 +61,11 @@ class CustomerController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'Customer created successfully.'], 200);
+            return response()->json(['message' => 'Tạo khách hàng thành công.'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Customer creation failed', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+            Log::error('Tạo khách hàng thất bại', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Đã xảy ra lỗi: ' . $e->getMessage()], 500);
         }
     }
 
@@ -196,10 +196,10 @@ class CustomerController extends Controller
             $this->customerService->update($request, $customer);
 
             DB::commit();
-            return redirect()->route('admin.customers.index')->with('success', 'Customer updated successfully.');
+            return redirect()->route('admin.customers.index')->with('success', 'Cập nhật khách hàng thành công.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
     }
 
@@ -212,9 +212,9 @@ class CustomerController extends Controller
     {
         try {
             $customer->delete();
-            return back()->with('success', 'Customer deleted successfully.');
+            return back()->with('success', 'Xóa khách hàng thành công.');
         } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
     }
     
