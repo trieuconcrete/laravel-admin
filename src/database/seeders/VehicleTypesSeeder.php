@@ -15,7 +15,11 @@ class VehicleTypesSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('vehicle_types')->truncate();
+        // Skip truncation if called from DataSeederMaster (tables already truncated with FK checks disabled)
+        if (!app()->has('seeder.skip_truncate')) {
+            DB::table('vehicle_types')->truncate();
+        }
+        
         $vehicleTypes = [
             [
                 'name' => 'Xe tải nhỏ',
