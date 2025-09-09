@@ -22,6 +22,7 @@ use Carbon\Carbon;
 use App\Models\SalaryAdvanceRequest;
 use App\Constants;
 use Illuminate\Support\Facades\Log;
+use App\Services\SalaryService;
 
 class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
 {
@@ -29,6 +30,9 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
     protected $shipments;
     protected $month;
     protected $deductionTypes;
+    protected $startDate;
+    protected $endDate;
+    protected $salaryService;
 
     /**
      * @param User $user
@@ -40,6 +44,13 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         $this->user = $user;
         $this->shipments = $shipments;
         $this->month = $month;
+        $this->salaryService = app(SalaryService::class);
+        
+        // Calculate start and end dates from month
+        list($year, $monthNum) = explode('-', $month);
+        $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$monthNum, (int)$year);
+        $this->startDate = $periodDates['start_date'];
+        $this->endDate = $periodDates['end_date'];
         
         // Get deduction types and limit to prevent Excel errors
         $allDeductionTypes = ShipmentDeductionType::where('status', 'active')->get();
@@ -478,11 +489,9 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         $totalRow = $row;
         
         // Get salary advance data for the month
-        $startDate = Carbon::parse($this->month)->startOfMonth();
-        $endDate = Carbon::parse($this->month)->endOfMonth();
-        $totalTypeSalary = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
-        $totalTypeBonus = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
-        $totalTypePenalty = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
+        $totalTypeSalary = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $this->startDate, $this->endDate);
+        $totalTypeBonus = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $this->startDate, $this->endDate);
+        $totalTypePenalty = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $this->startDate, $this->endDate);
         
         // Add LƯƠNG CƠ BẢN row (base salary with deduction sums)
         $baseSalaryRow = $row++;
@@ -591,14 +600,20 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         // Add TRỪ BHXH row
         $insuranceRow = $row++;
         
-        // Lấy settings từ database và parse decimal
-        $insuranceRate = parseDecimal(Setting::get('social_insurance_contribution_rate', 10.5));
-        $insuranceAmount = parseDecimal(Setting::get('social_insurance_contribution_amount', 5500000));
+        // Kiểm tra xem user có đóng bảo hiểm không
+        $insuranceDeduction = 0;
+        $insuranceRate = 0;
+        if ($this->user->shouldPayInsuranceForPeriod($this->startDate, $this->endDate)) {
+            // Lấy settings từ database và parse decimal
+            $insuranceRate = parseDecimal(Setting::get('social_insurance_contribution_rate', 10.5));
+            $insuranceAmount = parseDecimal(Setting::get('social_insurance_contribution_amount', 5500000));
+            
+            // Tính BHXH: X% của Y (không phụ thuộc vào totalBeforeInsurance)
+            $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        }
         
-        // Tính BHXH: X% của Y (không phụ thuộc vào totalBeforeInsurance)
-        $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
-        
-        $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (' . $insuranceRate . '%):');
+        $insuranceLabel = $insuranceDeduction > 0 ? 'TRỪ BHXH (' . $insuranceRate . '%):' : 'TRỪ BHXH (Chưa đóng):';
+        $sheet->setCellValue('A' . $insuranceRow, $insuranceLabel);
         $sheet->mergeCells('A' . $insuranceRow . ':D' . $insuranceRow);
         $sheet->getStyle('A' . $insuranceRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $insuranceRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);

@@ -76,6 +76,13 @@ class UserService
                 $data['avatar'] = ImageHelper::upload($request->file('avatar'));
             }
 
+            // Handle checkbox fields - if not present in request, set to false
+            if (!isset($data['has_insurance'])) {
+                $data['has_insurance'] = false;
+            } else {
+                $data['has_insurance'] = (bool) $data['has_insurance'];
+            }
+            
             // Set role and position
             $data['role'] = $isDriver ? User::ROLE_DRIVER : ($request->is_admin ? User::ROLE_ADMIN : User::ROLE_STAFF);
             if ($isDriver) {
@@ -154,10 +161,19 @@ class UserService
         } else {
             unset($data['avatar']);
         }
+        
+        // Handle checkbox fields - if not present in request, set to false
+        if (!isset($data['has_insurance'])) {
+            $data['has_insurance'] = false;
+        } else {
+            $data['has_insurance'] = (bool) $data['has_insurance'];
+        }
+        
         if ($request->is_admin) {
             $data['role'] = User::ROLE_ADMIN;
         }
 
+        // dd($data);
         // Update user
         $user = $this->userRepository->update($user->id, $data);
 
@@ -295,12 +311,16 @@ class UserService
         // Calculate insurance deduction: X% của Y (từ settings)
         $totalBeforeInsurance = ($salaryBase + $totalAllowance + $totalBonus) - ( $totalPenalty);
         
-        // Lấy settings từ database và parse decimal
-        $insuranceRate = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_rate', 10.5));
-        $insuranceAmount = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_amount', 5500000));
-        
-        // Tính BHXH: X% của Y (không phụ thuộc vào totalBeforeInsurance)
-        $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        // Kiểm tra xem user có đóng bảo hiểm không
+        $insuranceDeduction = 0;
+        if ($user->shouldPayInsuranceForPeriod($startDate, $endDate)) {
+            // Lấy settings từ database và parse decimal
+            $insuranceRate = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_rate', 10.5));
+            $insuranceAmount = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_amount', 5500000));
+            
+            // Tính BHXH: X% của Y (không phụ thuộc vào totalBeforeInsurance)
+            $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        }
         
         // dd($totalBeforeInsurance, $insuranceDeduction, $salaryBase,$totalAllowance,$totalBonus, $totalOtherDeduction, $totalPenalty);
         // Calculate total salary - updated formula

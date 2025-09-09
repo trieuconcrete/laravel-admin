@@ -71,6 +71,8 @@ class UpdateUserRequest extends FormRequest
                     'address' => 'nullable|max:100',
                     'tab' => 'nullable|string',
                     'join_date' => 'nullable|' . $this->getSystemDateFormatRule(),
+                    'has_insurance' => 'nullable|boolean',
+                    'insurance_start_date' => 'nullable|' . $this->getSystemDateFormatRule() . '|required_if:has_insurance,true',
                 ];
                 break;
             case Constants::USER_ACTION_CHANGE_LICENSE:
@@ -84,6 +86,8 @@ class UpdateUserRequest extends FormRequest
                     'license_status' => 'nullable',
                     'tab' => 'nullable|string',
                     'address' => 'nullable|max:100',
+                    'has_insurance' => 'nullable|boolean',
+                    'insurance_start_date' => 'nullable|' . $this->getSystemDateFormatRule() . '|required_if:has_insurance,true',
                 ];
                 break;
             case Constants::USER_ACTION_CHANGE_PASSWORD:
@@ -108,6 +112,7 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'phone.required' => 'Vui lòng nhập số điện thoại',
+            'insurance_start_date.required_if' => 'Vui lòng nhập ngày bắt đầu đóng bảo hiểm khi có đóng bảo hiểm',
             'phone.regex' => 'Số điện thoại không đúng định dạng',
             'phone.unique' => 'Số điện thoại đã tồn tại',
             'email.email' => 'Email không đúng định dạng',

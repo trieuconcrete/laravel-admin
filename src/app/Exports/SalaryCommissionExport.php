@@ -23,6 +23,7 @@ use App\Models\SalaryAdvanceRequest;
 use App\Constants;
 use App\Enum\SalaryType;
 use Illuminate\Support\Facades\Log;
+use App\Services\SalaryService;
 
 class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
 {
@@ -30,7 +31,9 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
     protected $shipments;
     protected $month;
     protected $deductionTypes;
-
+    protected $startDate;
+    protected $endDate;
+    protected $salaryService;
     /**
      * @param User $user
      * @param Collection $shipments
@@ -41,6 +44,13 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $this->user = $user;
         $this->shipments = $shipments;
         $this->month = $month;
+        $this->salaryService = app(SalaryService::class);
+        
+        // Calculate start and end dates from month
+        list($year, $monthNum) = explode('-', $month);
+        $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$monthNum, (int)$year);
+        $this->startDate = $periodDates['start_date'];
+        $this->endDate = $periodDates['end_date'];
         
         // Get deduction types and limit to prevent Excel errors
         $allDeductionTypes = ShipmentDeductionType::where('status', 'active')->get();
@@ -530,11 +540,9 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $totalRow = $row;
         
         // Get salary advance data for the month
-        $startDate = Carbon::parse($this->month)->startOfMonth();
-        $endDate = Carbon::parse($this->month)->endOfMonth();
-        $totalTypeSalary = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
-        $totalTypeBonus = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
-        $totalTypePenalty = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
+        $totalTypeSalary = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $this->startDate, $this->endDate);
+        $totalTypeBonus = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $this->startDate, $this->endDate);
+        $totalTypePenalty = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $this->startDate, $this->endDate);
         
         // Bỏ row LƯƠNG DOANH SỐ (X%) theo yêu cầu
         // $baseSalaryRow = $row++; // Không tăng row nữa
@@ -707,14 +715,25 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         // Y: settings.social_insurance_contribution_amount ?? 5500000
         $insuranceRow = $row++;
         
-        // Lấy settings từ database và parse decimal
-        $insuranceRate = parseDecimal(Setting::get('social_insurance_contribution_rate', 10.5));
-        $insuranceAmount = parseDecimal(Setting::get('social_insurance_contribution_amount', 5500000));
+        // Kiểm tra xem user có phải đóng bảo hiểm cho period này không
+        $insuranceDeduction = 0;
+        $insuranceRate = 0;
+        $insuranceAmount = 0;
         
-        // Tính BHXH: X% của Y
-        $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        if ($this->user->shouldPayInsuranceForPeriod($this->startDate, $this->endDate)) {
+            // Lấy settings từ database và parse decimal
+            $insuranceRate = parseDecimal(Setting::get('social_insurance_contribution_rate', 10.5));
+            $insuranceAmount = parseDecimal(Setting::get('social_insurance_contribution_amount', 5500000));
+            
+            // Tính BHXH: X% của Y
+            $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        }
         
-        $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (' . $insuranceRate . '%) - Mức đóng lương cơ bản: ' . number_format($insuranceAmount) . ' đ');
+        if ($insuranceDeduction > 0) {
+            $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (' . $insuranceRate . '%) - Mức đóng lương cơ bản: ' . number_format($insuranceAmount) . ' đ');
+        } else {
+            $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (Chưa đóng)');
+        }
         $sheet->mergeCells('A' . $insuranceRow . ':J' . $insuranceRow);
         $sheet->getStyle('A' . $insuranceRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $insuranceRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
@@ -728,6 +747,10 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Debug log cho BHXH và Tổng lương còn lại
         Log::info('Debug Final Calculation', [
+            'user_id' => $this->user->id,
+            'has_insurance' => $this->user->has_insurance,
+            'insurance_start_date' => $this->user->insurance_start_date,
+            'should_pay_insurance' => $this->user->shouldPayInsuranceForPeriod($this->startDate, $this->endDate),
             'totalSalary' => $totalSalary,
             'insuranceRate' => $insuranceRate,
             'insuranceAmount' => $insuranceAmount,
@@ -735,7 +758,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
             'totalTypePenalty' => $totalTypePenalty,
             'totalTypeSalary' => $totalTypeSalary,
             'totalSalaryRemaining' => $totalSalaryRemaining,
-            'bhxh_calculation' => $insuranceRate . '% của ' . $insuranceAmount . ' = ' . $insuranceDeduction,
+            'bhxh_calculation' => $insuranceDeduction > 0 ? ($insuranceRate . '% của ' . $insuranceAmount . ' = ' . $insuranceDeduction) : 'Không đóng bảo hiểm',
             'remaining_calculation' => $totalSalary . ' - (' . $insuranceDeduction . ' + ' . $totalTypePenalty . ' + ' . $totalTypeSalary . ') = ' . $totalSalaryRemaining
         ]);
         

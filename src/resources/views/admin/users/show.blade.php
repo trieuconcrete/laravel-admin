@@ -158,6 +158,29 @@
                                                     @enderror
                                                 </div>
                                             </div>
+                                            <div class="col-xxl-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Bảo hiểm xã hội</label>
+                                                    <div class="form-check form-check-secondary">
+                                                        <input class="form-check-input" type="checkbox" value="1" id="hasInsurance" name="has_insurance" {{ old('has_insurance', $user->has_insurance) ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="hasInsurance">
+                                                            Có đóng bảo hiểm
+                                                        </label>
+                                                    </div>
+                                                    @error('has_insurance')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-xxl-6" id="insuranceStartDateContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
+                                                <div class="mb-3">
+                                                    <label for="insuranceStartDate" class="form-label">Ngày bắt đầu đóng bảo hiểm</label>
+                                                    <input type="date" class="form-control" name="insurance_start_date" id="insuranceStartDate" value="{{ old('insurance_start_date', $user->insurance_start_date?->format('Y-m-d')) }}">
+                                                    @error('insurance_start_date')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
                                             @if($user->role === 'driver')
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
@@ -1728,6 +1751,22 @@
         
         // Trigger change event on page load để set đúng trạng thái
         $('#salaryType').trigger('change');
+        
+        // Handle insurance checkbox
+        $('#hasInsurance').on('change', function() {
+            const insuranceStartDateContainer = $('#insuranceStartDateContainer');
+            const insuranceStartDateInput = $('#insuranceStartDate');
+            
+            if ($(this).is(':checked')) {
+                insuranceStartDateContainer.show();
+            } else {
+                insuranceStartDateContainer.hide();
+                insuranceStartDateInput.val(''); // Clear the date when unchecked
+            }
+        });
+        
+        // Trigger change event on page load để set đúng trạng thái cho insurance
+        $('#hasInsurance').trigger('change');
     });
 </script>
 @endpush
