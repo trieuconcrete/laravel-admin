@@ -57,10 +57,10 @@ class ProfileController extends Controller
             $user->email = $request->input('email');
             $user->save();
 
-            return redirect()->route('admin.profile.show')->with('success', 'Profile updated successfully!');
+            return redirect()->route('admin.profile.show')->with('success', 'Cập nhật hồ sơ thành công!');
         } catch (\Exception $e) {
             return redirect()->route('admin.profile.show')
-                ->with('error', 'Update failed: ' . $e->getMessage())
+                ->with('error', 'Cập nhật hồ sơ thất bại: ' . $e->getMessage())
                 ->with('activeTab', 'personalDetails');
         }
     }
@@ -72,7 +72,7 @@ class ProfileController extends Controller
         $validator = validator($request->all(), [
             'current_password' => ['required', function ($attribute, $value, $fail) use ($user) {
                 if (!Hash::check($value, $user->password)) {
-                    $fail('The current password is incorrect.');
+                    $fail('Mật khẩu hiện tại không đúng.');
                 }
             }],
             'new_password' => 'required|string|min:8|confirmed',
@@ -88,6 +88,6 @@ class ProfileController extends Controller
         $user->password = Hash::make($request->new_password);
         $user->save();
 
-        return redirect()->route('admin.profile.show')->with('success', 'Password changed successfully!');
+        return redirect()->route('admin.profile.show')->with('success', 'Thay đổi mật khẩu thành công!');
     }
 }

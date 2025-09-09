@@ -38,6 +38,6 @@ class ResetPasswordController extends Controller
 
         return $status === Password::PASSWORD_RESET
             ? redirect()->route('admin.dashboard')->with('success', 'Đã cập nhật mật khẩu mới.')
-            : back()->withErrors(['email' => 'Reset password thất bại.']);
+            : back()->withErrors(['email' => 'Đặt lại mật khẩu thất bại.']);
     }
 }
