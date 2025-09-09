@@ -357,7 +357,7 @@
                                     <!--end col-->
                                     <div class="col-lg-6">
                                         <div class="mb-4">
-                                            <label class="block text-gray-700">Hình ảnh bằng lái</label>
+                                            <label class="block text-gray-700">Hình ảnh GPLX</label>
                                             <input type="file" name="license_file" id="license_file_input" class="form-control mt-1 border p-2 rounded">
                                             @if(!(isset($user->license) && $user->license->license_file) && session()->has('_license_file_temp'))
                                                 <img id="license_file_preview" src="{{ session('_license_file_temp') }}" class="w-24 h-24 rounded-full mt-4" alt="License Preview">

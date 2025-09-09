@@ -101,14 +101,7 @@ class UserService
 
             // If is driver, create driver license
             if ($isDriver) {
-                $this->driverLicenseRepository->create([
-                    'user_id' => $user->id,
-                    'license_type' => $request->license_type,
-                    'expiry_date' => $request->license_expire_date,
-                    'license_number' => null,
-                    'issue_date' => Carbon::today(),
-                    'issued_by' => null
-                ]);
+                $this->createDriverLicense($user, $request);
             }
 
             // Assign position
@@ -221,6 +214,32 @@ class UserService
         }
 
         $license->fill($licenseData)->save();
+    }
+    
+    /**
+     * Create driver license for a new user
+     * @param \App\Models\User $user
+     * @param \Illuminate\Http\Request $request
+     * @return void
+     */
+    protected function createDriverLicense(User $user, Request $request): void
+    {
+        $licenseData = [
+            'user_id' => $user->id,
+            'license_number' => $request->license_number,
+            'license_type' => $request->license_type,
+            'issue_date' => $request->issue_date,
+            'expiry_date' => $request->license_expire_date,
+            'issued_by' => $request->issued_by,
+            'status' => $request->license_status ?? DriverLicense::STATUS_VALID,
+        ];
+
+        // Handle license file upload
+        if ($request->hasFile('license_file')) {
+            $licenseData['license_file'] = ImageHelper::upload($request->file('license_file'), 'licenses');
+        }
+
+        $this->driverLicenseRepository->create($licenseData);
     }
     
     /**
@@ -370,7 +389,8 @@ class UserService
         return [
             'positions' => Position::active()->pluck('name', 'id'),
             'licenses' => DriverLicense::getCarLicenseTypes(),
-            'statuses' => EnumUserStatus::options()
+            'statuses' => EnumUserStatus::options(),
+            'licenseStatuses' => DriverLicense::getStatuses()
         ];
     }
 

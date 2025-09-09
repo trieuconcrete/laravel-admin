@@ -77,7 +77,8 @@ class UserController extends Controller
             'users' => $users,
             'positions' => $listingData['positions'],
             'licenses' => $listingData['licenses'],
-            'statuses' => $listingData['statuses']
+            'statuses' => $listingData['statuses'],
+            'licenseStatuses' => $listingData['licenseStatuses']
         ]);
     }
 
