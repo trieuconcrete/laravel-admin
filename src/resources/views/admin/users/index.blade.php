@@ -150,7 +150,7 @@
 <div class="modal fade add-driver-model" tabindex="-1" role="dialog" aria-labelledby="addDriverModel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="add-driver-form" action="{{ route('admin.users.store') }}" method="POST">
+            <form id="add-driver-form" action="{{ route('admin.users.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title" id="addDriverModel">Thêm tài xế</h5>
@@ -184,21 +184,6 @@
                             <label class="form-label">Email</label>
                             <input type="email" name="email" class="form-control" placeholder="Nhập email">
                             <div class="text-danger error" data-field="email"></div>
-                        </div>
-                        <div class="col-xxl-6">
-                            <label class="form-label">Loại bằng lái <span class="text-danger">*</span></label>
-                            <select name="license_type" class="form-control">
-                                <option value="">Chọn bằng lái</option>
-                                @foreach ($licenses as $key => $val)
-                                    <option value="{{ $key }}">{{ $val }}</option>
-                                @endforeach
-                            </select>
-                            <div class="text-danger error" data-field="license_type"></div>
-                        </div>
-                        <div class="col-xxl-6">
-                            <label class="form-label">Hạn bằng lái </label>
-                            <input type="date" name="license_expire_date" class="form-control">
-                            <div class="text-danger error" data-field="license_expire_date"></div>
                         </div>
                         <div class="col-xxl-6">
                             <label class="form-label">Ngày sinh </label>
@@ -254,6 +239,53 @@
                             <label class="form-label">Ghi chú</label>
                             <textarea name="notes" rows="3" class="form-control" placeholder="Nhập ghi chú"></textarea>
                             <div class="text-danger error" data-field="notes"></div>
+                        </div>
+                        <hr>
+                        <span class="fs-4 mt-0">Thông tin bằng lái</span>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Số bằng lái</label>
+                            <input type="text" name="license_number" class="form-control" placeholder="Nhập số bằng lái">
+                            <div class="text-danger error" data-field="license_number"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Loại bằng lái</label>
+                            <select name="license_type" class="form-control">
+                                <option value="">Chọn bằng lái</option>
+                                @foreach ($licenses as $key => $val)
+                                    <option value="{{ $key }}">{{ $val }}</option>
+                                @endforeach
+                            </select>
+                            <div class="text-danger error" data-field="license_type"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Ngày cấp bằng lái </label>
+                            <input type="date" name="issue_date" class="form-control">
+                            <div class="text-danger error" data-field="issue_date"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Hạn bằng lái </label>
+                            <input type="date" name="license_expire_date" class="form-control">
+                            <div class="text-danger error" data-field="license_expire_date"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Nơi cấp bằng lái</label>
+                            <input type="text" name="issued_by" class="form-control" placeholder="Nhập nơi cấp">
+                            <div class="text-danger error" data-field="issued_by"></div>
+                        </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Trạng thái bằng lái</label>
+                            <select name="license_status" class="form-select">
+                                @foreach($licenseStatuses as $key => $label)
+                                    <option value="{{ $key }}">{{ $label }}</option>
+                                @endforeach
+                            </select>
+                            <div class="text-danger error" data-field="license_status"></div>
+                        </div>
+                        <div class="col-lg-12">
+                            <label class="form-label">Hình ảnh GPLX</label>
+                            <input type="file" name="license_file" id="license_file_input_create" class="form-control mt-1 border p-2 rounded">
+                            <img id="license_file_preview_create" src="{{ asset('no-image.jpeg') }}" class="w-24 h-24 rounded mt-4" alt="License Preview" style="max-width: 150px; max-height: 150px;">
+                            <div class="text-danger error" data-field="license_file"></div>
                         </div>
                         <div class="col-lg-12">
                             <div class="hstack gap-2 justify-content-end mt-3">
@@ -451,6 +483,12 @@
 
                             // Reset form
                             $form[0].reset();
+                            
+                            // Reset license file preview if exists
+                            const licensePreview = $form.find('#license_file_preview_create');
+                            if (licensePreview.length) {
+                                licensePreview.attr('src', "{{ asset('no-image.jpeg') }}");
+                            }
 
                             // 
                             Swal.fire({
@@ -588,6 +626,30 @@
         
         // Trigger change event on page load để set đúng trạng thái cho insurance
         $('#hasInsurance').trigger('change');
+    });
+    
+    // Handle license file preview for create form
+    document.addEventListener('DOMContentLoaded', function() {
+        const licenseFileInput = document.getElementById('license_file_input_create');
+        const licenseFilePreview = document.getElementById('license_file_preview_create');
+        
+        if (licenseFileInput && licenseFilePreview) {
+            licenseFileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                
+                if (file) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        licenseFilePreview.src = e.target.result;
+                    }
+                    
+                    reader.readAsDataURL(file);
+                } else {
+                    licenseFilePreview.src = "{{ asset('no-image.jpeg') }}";
+                }
+            });
+        }
     });
 </script>
 @endpush

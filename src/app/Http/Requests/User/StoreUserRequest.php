@@ -69,8 +69,13 @@ class StoreUserRequest extends FormRequest
         // case license
         if ($this->has('license_type')) {
             return array_merge($common, [
+                'license_number' => ['required', 'string', 'max:50'],
                 'license_type' => ['required', 'string'],
+                'issue_date' => ['nullable', $this->getSystemDateFormatRule()],
                 'license_expire_date' => ['nullable', $this->getSystemDateFormatRule()],
+                'issued_by' => ['nullable', 'string', 'max:255'],
+                'license_status' => ['nullable', 'string'],
+                'license_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             ]);
         }
 
@@ -93,6 +98,9 @@ class StoreUserRequest extends FormRequest
             'full_name.required' => 'Vui lòng nhập họ tên tài xế',
             'position.required' => 'Vui lòng chọn vị trí',
             'license_type.required' => 'Vui lòng chọn loại bằng lái',
+            'license_number.required' => 'Vui lòng nhập số bằng lái',
+            'license_file.mimes' => 'File bằng lái phải có định dạng: jpeg, png, jpg, gif',
+            'license_file.max' => 'File bằng lái không được vượt quá 2MB',
             'status.required' => 'Vui lòng chọn trạng thái',
         ];
     }
