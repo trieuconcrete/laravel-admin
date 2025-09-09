@@ -69,12 +69,16 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
         }
         // dd($totalOtherCosts);
         // Tính BHXH theo cách mới: X% của Y (không phụ thuộc vào lương cơ bản)
-        // Lấy settings từ database và parse decimal
-        $insuranceRate = (float) Setting::get('social_insurance_contribution_rate', 10.5);
-        $insuranceAmount = (float) Setting::get('social_insurance_contribution_amount', 5500000);
-        
-        // Tính BHXH: X% của Y (không phụ thuộc vào lương cơ bản)
-        $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        // Kiểm tra xem user có đóng bảo hiểm không
+        $insuranceDeduction = 0;
+        if ($this->user->shouldPayInsuranceForPeriod($startDate, $endDate)) {
+            // Lấy settings từ database và parse decimal
+            $insuranceRate = (float) Setting::get('social_insurance_contribution_rate', 10.5);
+            $insuranceAmount = (float) Setting::get('social_insurance_contribution_amount', 5500000);
+            
+            // Tính BHXH: X% của Y (không phụ thuộc vào lương cơ bản)
+            $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        }
         
         $totalPaid = 0; // You can calculate actual advance payments here
         

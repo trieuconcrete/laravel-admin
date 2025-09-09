@@ -62,6 +62,8 @@ class StoreUserRequest extends FormRequest
             'gender' => 'nullable',
             'address' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
+            'has_insurance' => ['nullable', 'boolean'],
+            'insurance_start_date' => ['nullable', $this->getSystemDateFormatRule(), 'required_if:has_insurance,true'],
         ];
 
         // case license
@@ -82,6 +84,7 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'phone.required' => 'Vui lòng nhập số điện thoại',
+            'insurance_start_date.required_if' => 'Vui lòng nhập ngày bắt đầu đóng bảo hiểm khi có đóng bảo hiểm',
             'phone.regex' => 'Số điện thoại không đúng định dạng',
             'phone.unique' => 'Số điện thoại đã tồn tại',
             'email.email' => 'Email không đúng định dạng',

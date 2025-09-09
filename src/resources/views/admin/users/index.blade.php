@@ -70,6 +70,7 @@
                                         <th class="">SĐT</th>
                                         <th class="">EMAIL</th>
                                         <th class="">Lương cơ bản</th>
+                                        <th class="">Bảo hiểm</th>
                                         <th class="">Trạng thái</th>
                                     </tr>
                                 </thead>
@@ -114,6 +115,17 @@
                                             <td class="">{{ $user->phone }}</td>
                                             <td class="">{{ $user->email }}</td>
                                             <td class="">{{ number_format($user->salary_base) }}</td>
+                                            <td class="">
+                                                @if ($user->hasInsurance())
+                                                    <span class="badge bg-success-subtle text-success">
+                                                        {{ $user->getInsuranceStatusLabel() }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-danger-subtle text-danger">
+                                                        {{ $user->getInsuranceStatusLabel() }}
+                                                    </span>
+                                                @endif
+                                            </td>
                                             <td class="">
                                                 @if ($user->status) <span class="badge bg-success-subtle text-success">Đang làm việc</span>
                                                 @else
@@ -348,6 +360,20 @@
                                     <option value="0">Nữ</option>
                             </select>
                         </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Bảo hiểm xã hội</label>
+                            <div class="form-check form-check-secondary mb-3">
+                                <input class="form-check-input" type="checkbox" value="1" id="hasInsurance" name="has_insurance" checked>
+                                <label class="form-check-label" for="hasInsurance">
+                                    Có đóng bảo hiểm
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-xxl-6" id="insuranceStartDateContainer">
+                            <label class="form-label">Ngày bắt đầu đóng bảo hiểm</label>
+                            <input type="date" name="insurance_start_date" class="form-control">
+                            <div class="text-danger error" data-field="insurance_start_date"></div>
+                        </div>
                         <div class="col-lg-12">
                             <label class="form-label">Địa chỉ </label>
                             <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ">
@@ -546,6 +572,22 @@
         
         // Trigger change event on page load để set đúng trạng thái
         $('#salaryTypeCreate').trigger('change');
+        
+        // Handle insurance checkbox for create form
+        $('#hasInsurance').on('change', function() {
+            const insuranceStartDateContainer = $('#insuranceStartDateContainer');
+            const insuranceStartDateInput = insuranceStartDateContainer.find('input[name="insurance_start_date"]');
+            
+            if ($(this).is(':checked')) {
+                insuranceStartDateContainer.show();
+            } else {
+                insuranceStartDateContainer.hide();
+                insuranceStartDateInput.val(''); // Clear the date when unchecked
+            }
+        });
+        
+        // Trigger change event on page load để set đúng trạng thái cho insurance
+        $('#hasInsurance').trigger('change');
     });
 </script>
 @endpush
