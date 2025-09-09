@@ -13,7 +13,11 @@ class DeductionTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        DeductionType::truncate();
+        // Skip truncation if called from DataSeederMaster (tables already truncated with FK checks disabled)
+        if (!app()->has('seeder.skip_truncate')) {
+            DeductionType::truncate();
+        }
+        
         $deductionTypes = [
             [
                 'type_name' => 'Bảo hiểm xã hội',
