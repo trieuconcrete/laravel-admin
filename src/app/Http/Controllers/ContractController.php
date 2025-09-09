@@ -20,7 +20,7 @@ class ContractController extends Controller
     public function store(Request $request)
     {
         try {
-            return redirect()->route('admin.contracts.index')->with('success', 'Tạo người dùng thành công.');
+            return redirect()->route('admin.contracts.index')->with('success', 'Tạo hợp đồng thành công.');
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
@@ -39,7 +39,7 @@ class ContractController extends Controller
     public function update(Request $request, Contract $contract)
     {
         try {
-            return redirect()->route('admin.contracts.index')->with('success', 'Cập nhật người dùng thành công.');
+            return redirect()->route('admin.contracts.index')->with('success', 'Cập nhật hợp đồng thành công.');
         } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
@@ -47,6 +47,6 @@ class ContractController extends Controller
 
     public function destroy(Contract $contract)
     {
-        return back()->with('success', 'Xoá người dùng thành công.');
+        return back()->with('success', 'Xóa hợp đồng thành công.');
     }
 }

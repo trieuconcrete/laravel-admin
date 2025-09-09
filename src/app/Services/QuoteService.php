@@ -201,7 +201,7 @@ class QuoteService
             
             return true;
         } catch (\Exception $e) {
-            \Log::error('Failed to send quote email: ' . $e->getMessage());
+            \Log::error('Gửi email báo giá thất bại: ' . $e->getMessage());
             return false;
         }
     }
@@ -274,7 +274,7 @@ class QuoteService
 
             return $quote;
         } catch (\Throwable $e) {
-            Log::error('Quote creation failed', ['error' => $e->getMessage()]);
+            Log::error('Tạo báo giá thất bại', ['error' => $e->getMessage()]);
             throw $e;
         }
     }
@@ -313,7 +313,7 @@ class QuoteService
 
             return $quote;
         } catch (\Throwable $e) {
-            Log::error('Quote update failed', ['error' => $e->getMessage()]);
+            Log::error('Cập nhật báo giá thất bại', ['error' => $e->getMessage()]);
             throw $e;
         }
     }

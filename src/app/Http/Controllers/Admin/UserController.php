@@ -106,7 +106,7 @@ class UserController extends Controller
             return response()->json(['message' => 'Tạo người dùng thành công.'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('User creation failed', ['error' => $e->getMessage()]);
+            Log::error('Tạo người dùng thất bại', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'Đã xảy ra lỗi: ' . $e->getMessage()], 500);
         }
     }
@@ -228,7 +228,7 @@ class UserController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('User update failed', ['error' => $e->getMessage()]);
+            Log::error('Cập nhật người dùng thất bại', ['error' => $e->getMessage()]);
             return redirect()->back()->withInput()->with('active_tab', $request->input('tab'));
         }
     }
@@ -243,7 +243,7 @@ class UserController extends Controller
         $this->authorize('delete', $user);
 
         $user->delete();
-        return back()->with('success', 'Xoá người dùng thành công.');
+        return back()->with('success', 'Xóa người dùng thành công.');
     }
 
     /**
@@ -353,7 +353,7 @@ class UserController extends Controller
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Create salary advance request failed', ['error' => $e->getMessage()]);
+            Log::error('Tạo yêu cầu ứng lương thất bại', ['error' => $e->getMessage()]);
             
             return response()->json([
                 'success' => false,
