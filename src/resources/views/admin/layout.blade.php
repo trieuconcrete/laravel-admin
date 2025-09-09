@@ -191,6 +191,17 @@
                         }
                     }
                 });
+
+                // Common modal configuration - Prevent closing when clicking outside
+                $('.modal').each(function() {
+                    // Only apply to modals that don't already have backdrop configuration
+                    if (!$(this).attr('data-bs-backdrop')) {
+                        $(this).attr('data-bs-backdrop', 'static');
+                    }
+                    if (!$(this).attr('data-bs-keyboard')) {
+                        $(this).attr('data-bs-keyboard', 'false');
+                    }
+                });
             });
 
             document.addEventListener('DOMContentLoaded', function () {
