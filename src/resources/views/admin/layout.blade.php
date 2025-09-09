@@ -205,29 +205,46 @@
             });
 
             document.addEventListener('DOMContentLoaded', function () {
-                // Lấy định dạng placeholder từ PHP để đảm bảo nhất quán
-                const dateFormatPlaceholder = '{{ \App\Helpers\DateHelper::getDateFormatPlaceholder() }}';
-                const systemDateFormat = '{{ \App\Helpers\DateHelper::getSystemDateFormat() }}';
+                // Set system date format to dd/mm/YYYY
+                const dateFormatPlaceholder = 'dd/mm/YYYY';
+                const systemDateFormat = 'd/m/Y';
                 
                 document.querySelectorAll('input[type="date"]').forEach(function (input) {
                     // Lưu giá trị ban đầu
                     const originalValue = input.value;
                     
-                    // Lấy định dạng từ thuộc tính data nếu có, mặc định là Y-m-d
-                    const dateFormat = input.getAttribute('data-date-format') || "Y-m-d";
+                    // Lấy định dạng từ thuộc tính data nếu có, mặc định là d/m/Y
+                    const dateFormat = input.getAttribute('data-date-format') || "d/m/Y";
                     
                     // Chuyển từ input type="date" sang input type="text" để sử dụng flatpickr
                     input.type = 'text';
-                    input.placeholder = dateFormatPlaceholder; // Sử dụng định dạng từ cài đặt hệ thống
+                    input.placeholder = dateFormatPlaceholder; // Sử dụng định dạng dd/mm/YYYY
                     
-                    // Khởi tạo flatpickr với định dạng phù hợp
+                    // Khởi tạo flatpickr với định dạng dd/mm/YYYY
                     flatpickr(input, {
-                        dateFormat: systemDateFormat,
+                        dateFormat: systemDateFormat, // d/m/Y format for flatpickr
                         allowInput: true,
                         defaultDate: originalValue || null,
-                        // Đảm bảo giá trị được parse đúng
+                        // Đảm bảo giá trị được parse đúng với định dạng dd/mm/YYYY
                         parseDate: (datestr, format) => {
+                            if (datestr) {
+                                // Parse date in dd/mm/YYYY format
+                                const parts = datestr.split('/');
+                                if (parts.length === 3) {
+                                    const day = parseInt(parts[0], 10);
+                                    const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+                                    const year = parseInt(parts[2], 10);
+                                    return new Date(year, month, day);
+                                }
+                            }
                             return new Date(datestr);
+                        },
+                        // Format date as dd/mm/YYYY when displaying
+                        formatDate: (date, format) => {
+                            const day = String(date.getDate()).padStart(2, '0');
+                            const month = String(date.getMonth() + 1).padStart(2, '0');
+                            const year = date.getFullYear();
+                            return `${day}/${month}/${year}`;
                         }
                     });
                 });
