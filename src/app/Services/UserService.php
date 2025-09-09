@@ -76,6 +76,13 @@ class UserService
                 $data['avatar'] = ImageHelper::upload($request->file('avatar'));
             }
 
+            // Handle checkbox fields - if not present in request, set to false
+            if (!isset($data['has_insurance'])) {
+                $data['has_insurance'] = false;
+            } else {
+                $data['has_insurance'] = (bool) $data['has_insurance'];
+            }
+            
             // Set role and position
             $data['role'] = $isDriver ? User::ROLE_DRIVER : ($request->is_admin ? User::ROLE_ADMIN : User::ROLE_STAFF);
             if ($isDriver) {
@@ -94,14 +101,7 @@ class UserService
 
             // If is driver, create driver license
             if ($isDriver) {
-                $this->driverLicenseRepository->create([
-                    'user_id' => $user->id,
-                    'license_type' => $request->license_type,
-                    'expiry_date' => $request->license_expire_date,
-                    'license_number' => null,
-                    'issue_date' => Carbon::today(),
-                    'issued_by' => null
-                ]);
+                $this->createDriverLicense($user, $request);
             }
 
             // Assign position
@@ -154,10 +154,19 @@ class UserService
         } else {
             unset($data['avatar']);
         }
+        
+        // Handle checkbox fields - if not present in request, set to false
+        if (!isset($data['has_insurance'])) {
+            $data['has_insurance'] = false;
+        } else {
+            $data['has_insurance'] = (bool) $data['has_insurance'];
+        }
+        
         if ($request->is_admin) {
             $data['role'] = User::ROLE_ADMIN;
         }
 
+        // dd($data);
         // Update user
         $user = $this->userRepository->update($user->id, $data);
 
@@ -205,6 +214,32 @@ class UserService
         }
 
         $license->fill($licenseData)->save();
+    }
+    
+    /**
+     * Create driver license for a new user
+     * @param \App\Models\User $user
+     * @param \Illuminate\Http\Request $request
+     * @return void
+     */
+    protected function createDriverLicense(User $user, Request $request): void
+    {
+        $licenseData = [
+            'user_id' => $user->id,
+            'license_number' => $request->license_number,
+            'license_type' => $request->license_type,
+            'issue_date' => $request->issue_date,
+            'expiry_date' => $request->license_expire_date,
+            'issued_by' => $request->issued_by,
+            'status' => $request->license_status ?? DriverLicense::STATUS_VALID,
+        ];
+
+        // Handle license file upload
+        if ($request->hasFile('license_file')) {
+            $licenseData['license_file'] = ImageHelper::upload($request->file('license_file'), 'licenses');
+        }
+
+        $this->driverLicenseRepository->create($licenseData);
     }
     
     /**
@@ -295,12 +330,16 @@ class UserService
         // Calculate insurance deduction: X% của Y (từ settings)
         $totalBeforeInsurance = ($salaryBase + $totalAllowance + $totalBonus) - ( $totalPenalty);
         
-        // Lấy settings từ database và parse decimal
-        $insuranceRate = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_rate', 10.5));
-        $insuranceAmount = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_amount', 5500000));
-        
-        // Tính BHXH: X% của Y (không phụ thuộc vào totalBeforeInsurance)
-        $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        // Kiểm tra xem user có đóng bảo hiểm không
+        $insuranceDeduction = 0;
+        if ($user->shouldPayInsuranceForPeriod($startDate, $endDate)) {
+            // Lấy settings từ database và parse decimal
+            $insuranceRate = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_rate', 10.5));
+            $insuranceAmount = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_amount', 5500000));
+            
+            // Tính BHXH: X% của Y (không phụ thuộc vào totalBeforeInsurance)
+            $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
+        }
         
         // dd($totalBeforeInsurance, $insuranceDeduction, $salaryBase,$totalAllowance,$totalBonus, $totalOtherDeduction, $totalPenalty);
         // Calculate total salary - updated formula
@@ -350,7 +389,8 @@ class UserService
         return [
             'positions' => Position::active()->pluck('name', 'id'),
             'licenses' => DriverLicense::getCarLicenseTypes(),
-            'statuses' => EnumUserStatus::options()
+            'statuses' => EnumUserStatus::options(),
+            'licenseStatuses' => DriverLicense::getStatuses()
         ];
     }
 

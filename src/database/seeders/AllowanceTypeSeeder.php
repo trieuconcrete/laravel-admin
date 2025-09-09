@@ -13,7 +13,11 @@ class AllowanceTypeSeeder extends Seeder
      */
     public function run(): void
     {
-        AllowanceType::truncate();
+        // Skip truncation if called from DataSeederMaster (tables already truncated with FK checks disabled)
+        if (!app()->has('seeder.skip_truncate')) {
+            AllowanceType::truncate();
+        }
+        
         $allowanceTypes = [
             [
                 'type_name' => 'Phụ cấp xăng xe',

@@ -158,6 +158,29 @@
                                                     @enderror
                                                 </div>
                                             </div>
+                                            <div class="col-xxl-6">
+                                                <div class="mb-3">
+                                                    <label class="form-label">Bảo hiểm xã hội</label>
+                                                    <div class="form-check form-check-secondary">
+                                                        <input class="form-check-input" type="checkbox" value="1" id="hasInsurance" name="has_insurance" {{ old('has_insurance', $user->has_insurance) ? 'checked' : '' }}>
+                                                        <label class="form-check-label" for="hasInsurance">
+                                                            Có đóng bảo hiểm
+                                                        </label>
+                                                    </div>
+                                                    @error('has_insurance')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-xxl-6" id="insuranceStartDateContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
+                                                <div class="mb-3">
+                                                    <label for="insuranceStartDate" class="form-label">Ngày bắt đầu đóng bảo hiểm</label>
+                                                    <input type="date" class="form-control" name="insurance_start_date" id="insuranceStartDate" value="{{ old('insurance_start_date', $user->insurance_start_date?->format('Y-m-d')) }}">
+                                                    @error('insurance_start_date')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
                                             @if($user->role === 'driver')
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
@@ -334,7 +357,7 @@
                                     <!--end col-->
                                     <div class="col-lg-6">
                                         <div class="mb-4">
-                                            <label class="block text-gray-700">Hình ảnh bằng lái</label>
+                                            <label class="block text-gray-700">Hình ảnh GPLX</label>
                                             <input type="file" name="license_file" id="license_file_input" class="form-control mt-1 border p-2 rounded">
                                             @if(!(isset($user->license) && $user->license->license_file) && session()->has('_license_file_temp'))
                                                 <img id="license_file_preview" src="{{ session('_license_file_temp') }}" class="w-24 h-24 rounded-full mt-4" alt="License Preview">
@@ -1728,6 +1751,22 @@
         
         // Trigger change event on page load để set đúng trạng thái
         $('#salaryType').trigger('change');
+        
+        // Handle insurance checkbox
+        $('#hasInsurance').on('change', function() {
+            const insuranceStartDateContainer = $('#insuranceStartDateContainer');
+            const insuranceStartDateInput = $('#insuranceStartDate');
+            
+            if ($(this).is(':checked')) {
+                insuranceStartDateContainer.show();
+            } else {
+                insuranceStartDateContainer.hide();
+                insuranceStartDateInput.val(''); // Clear the date when unchecked
+            }
+        });
+        
+        // Trigger change event on page load để set đúng trạng thái cho insurance
+        $('#hasInsurance').trigger('change');
     });
 </script>
 @endpush

@@ -62,13 +62,20 @@ class StoreUserRequest extends FormRequest
             'gender' => 'nullable',
             'address' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
+            'has_insurance' => ['nullable', 'boolean'],
+            'insurance_start_date' => ['nullable', $this->getSystemDateFormatRule(), 'required_if:has_insurance,true'],
         ];
 
         // case license
         if ($this->has('license_type')) {
             return array_merge($common, [
+                'license_number' => ['required', 'string', 'max:50'],
                 'license_type' => ['required', 'string'],
+                'issue_date' => ['nullable', $this->getSystemDateFormatRule()],
                 'license_expire_date' => ['nullable', $this->getSystemDateFormatRule()],
+                'issued_by' => ['nullable', 'string', 'max:255'],
+                'license_status' => ['nullable', 'string'],
+                'license_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
             ]);
         }
 
@@ -82,6 +89,7 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'phone.required' => 'Vui lòng nhập số điện thoại',
+            'insurance_start_date.required_if' => 'Vui lòng nhập ngày bắt đầu đóng bảo hiểm khi có đóng bảo hiểm',
             'phone.regex' => 'Số điện thoại không đúng định dạng',
             'phone.unique' => 'Số điện thoại đã tồn tại',
             'email.email' => 'Email không đúng định dạng',
@@ -90,6 +98,9 @@ class StoreUserRequest extends FormRequest
             'full_name.required' => 'Vui lòng nhập họ tên tài xế',
             'position.required' => 'Vui lòng chọn vị trí',
             'license_type.required' => 'Vui lòng chọn loại bằng lái',
+            'license_number.required' => 'Vui lòng nhập số bằng lái',
+            'license_file.mimes' => 'File bằng lái phải có định dạng: jpeg, png, jpg, gif',
+            'license_file.max' => 'File bằng lái không được vượt quá 2MB',
             'status.required' => 'Vui lòng chọn trạng thái',
         ];
     }

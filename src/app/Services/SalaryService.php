@@ -391,7 +391,7 @@ class SalaryService
         $totalBeforeInsurance = ($baseSalary + $totalAllowance + $totalTypeBonus) - ($totalTypeSalary + $totalTypePenalty);
         
         // Calculate social insurance based on settings
-        $socialInsurance = $this->calculateSocialInsurance($totalBeforeInsurance);
+        $socialInsurance = $this->calculateSocialInsurance($totalBeforeInsurance, $user, $salaryPeriod->start_date, $salaryPeriod->end_date);
         
         // Calculate final salary
         $totalSalary = $totalBeforeInsurance;
@@ -459,7 +459,7 @@ class SalaryService
         $totalBeforeInsurance = ($baseSalary + $totalAllowance + $totalTypeBonus) - ($totalTypePenalty);
         
         // Calculate social insurance based on settings
-        $socialInsurance = $this->calculateSocialInsurance($totalBeforeInsurance);
+        $socialInsurance = $this->calculateSocialInsurance($totalBeforeInsurance, $user, $salaryPeriod->start_date, $salaryPeriod->end_date);
         
         // Calculate final salary
         $totalSalary = $totalBeforeInsurance;
@@ -507,10 +507,18 @@ class SalaryService
      * Y: settings.social_insurance_contribution_amount ?? 5500000
      * 
      * @param float $amount (không sử dụng nữa, chỉ giữ để tương thích)
+     * @param \App\Models\User|null $user
+     * @param \Carbon\Carbon|null $startDate
+     * @param \Carbon\Carbon|null $endDate
      * @return float
      */
-    protected function calculateSocialInsurance(float $amount): float
+    protected function calculateSocialInsurance(float $amount, ?\App\Models\User $user = null, ?\Carbon\Carbon $startDate = null, ?\Carbon\Carbon $endDate = null): float
     {
+        // Nếu có user và không đóng bảo hiểm, trả về 0
+        if ($user && !$user->shouldPayInsuranceForPeriod($startDate ?? now()->startOfMonth(), $endDate ?? now()->endOfMonth())) {
+            return 0;
+        }
+        
         // Lấy settings từ database thông qua SettingService và parse decimal
         $rate = parseDecimal($this->settingService->get('social_insurance_contribution_rate', 10.5));
         $insuranceAmount = parseDecimal($this->settingService->get('social_insurance_contribution_amount', 5500000));

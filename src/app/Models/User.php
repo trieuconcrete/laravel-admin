@@ -57,7 +57,9 @@ class User extends Authenticatable
         'salary_advance_amount',
         'join_date',
         'salary_type',
-        'salary_by_percent'
+        'salary_by_percent',
+        'has_insurance',
+        'insurance_start_date'
     ];
 
     /**
@@ -81,6 +83,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'salary_type' => SalaryType::class,
+            'has_insurance' => 'boolean',
+            'insurance_start_date' => 'date',
         ];
     }
 
@@ -405,5 +409,69 @@ class User extends Authenticatable
         } else {
             $this->salary_by_percent = null;
         }
+    }
+
+    /**
+     * Check if user has insurance
+     *
+     * @return bool
+     */
+    public function hasInsurance(): bool
+    {
+        return $this->has_insurance ?? true; // Default to true for backward compatibility
+    }
+
+    /**
+     * Check if user should pay insurance for a specific period
+     * 
+     * @param \Carbon\Carbon $startDate
+     * @param \Carbon\Carbon $endDate
+     * @return bool
+     */
+    public function shouldPayInsuranceForPeriod(\Carbon\Carbon $startDate, \Carbon\Carbon $endDate): bool
+    {
+        if (!$this->hasInsurance()) {
+            return false;
+        }
+
+        // If no insurance start date, assume they should pay
+        if (!$this->insurance_start_date) {
+            return true;
+        }
+
+        // Check if insurance start date is before or during the period
+        return $this->insurance_start_date->lte($endDate);
+    }
+
+    /**
+     * Get insurance status label
+     *
+     * @return string
+     */
+    public function getInsuranceStatusLabel(): string
+    {
+        if (!$this->hasInsurance()) {
+            return 'Chưa đóng bảo hiểm';
+        }
+
+        if ($this->insurance_start_date) {
+            return 'Đã đóng bảo hiểm từ ' . $this->insurance_start_date->format('d/m/Y');
+        }
+
+        return 'Đã đóng bảo hiểm';
+    }
+
+    /**
+     * Get insurance status color for UI
+     *
+     * @return string
+     */
+    public function getInsuranceStatusColor(): string
+    {
+        if (!$this->hasInsurance()) {
+            return 'danger';
+        }
+
+        return 'success';
     }
 }

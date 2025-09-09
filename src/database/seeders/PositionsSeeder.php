@@ -13,7 +13,11 @@ class PositionsSeeder extends Seeder
      */
     public function run(): void
     {
-        Position::truncate();
+        // Skip truncation if called from DataSeederMaster (tables already truncated with FK checks disabled)
+        if (!app()->has('seeder.skip_truncate')) {
+            Position::truncate();
+        }
+        
         $positions = [
             [
                 'name' => 'Giám đốc',
