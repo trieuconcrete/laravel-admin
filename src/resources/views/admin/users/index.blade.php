@@ -248,7 +248,7 @@
                             <div class="text-danger error" data-field="license_number"></div>
                         </div>
                         <div class="col-xxl-6">
-                            <label class="form-label">Loại bằng lái</label>
+                            <label class="form-label">Loại bằng lái<span class="text-danger">*</span></label>
                             <select name="license_type" class="form-control">
                                 <option value="">Chọn bằng lái</option>
                                 @foreach ($licenses as $key => $val)
