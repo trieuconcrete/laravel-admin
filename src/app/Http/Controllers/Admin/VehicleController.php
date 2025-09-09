@@ -88,11 +88,11 @@ class VehicleController extends Controller
 
             DB::commit();
 
-            return response()->json(['message' => 'Vehicle created successfully.'], 200);
+            return response()->json(['message' => 'Tạo phương tiện thành công.'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Vehicle creation failed', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Something went wrong: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Đã xảy ra lỗi: ' . $e->getMessage()], 500);
         }
     }
 
@@ -152,11 +152,11 @@ class VehicleController extends Controller
 
             DB::commit();
             
-            return redirect()->route('admin.vehicles.index')->with('success', 'Vehicle updated successfully.');
+            return redirect()->route('admin.vehicles.index')->with('success', 'Cập nhật phương tiện thành công.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Vehicle update failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
     }
 
@@ -169,9 +169,9 @@ class VehicleController extends Controller
     {
         try {
             $vehicle->delete();
-            return back()->with('success', 'Vehicle deleted successfully.');
+            return back()->with('success', 'Xoá phương tiện thành công.');
         } catch (\Exception $e) {
-            return back()->withInput()->with('error', 'Something went wrong: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
     }
 

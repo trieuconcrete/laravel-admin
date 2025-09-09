@@ -89,7 +89,7 @@ class UserService
             // Create user
             $user = $this->userRepository->create($data);
             if (!$user) {
-                throw new \Exception('Create user failed');
+                throw new \Exception('Tạo người dùng thất bại');
             }
 
             // If is driver, create driver license
@@ -121,7 +121,7 @@ class UserService
 
             return $user;
         } catch (\Throwable $e) {
-            Log::error('User creation failed', ['error' => $e->getMessage()]);
+            Log::error('Tạo người dùng thất bại', ['error' => $e->getMessage()]);
             throw $e;
         }
     }
@@ -487,7 +487,7 @@ class UserService
             // Get the user
             $user = $salaryAdvanceRequest->user;
             if (!$user) {
-                Log::error('User not found for salary payment request', ['request_id' => $salaryAdvanceRequest->id]);
+                Log::error('Không tìm thấy người dùng cho yêu cầu thanh toán lương', ['request_id' => $salaryAdvanceRequest->id]);
                 return;
             }
             
@@ -499,7 +499,7 @@ class UserService
             $syncResult = $this->salaryService->syncSalaryForUser($user, $monthFormat);
             
             if (!$syncResult['success']) {
-                Log::error('Failed to sync salary data for payment request', [
+                Log::error('Đồng bộ dữ liệu lương cho yêu cầu thanh toán thất bại', [
                     'request_id' => $salaryAdvanceRequest->id,
                     'user_id' => $user->id,
                     'month' => $monthFormat,
@@ -512,7 +512,7 @@ class UserService
             $salaryDetailId = $syncResult['salary_detail_id'];
             
             if (!$salaryDetailId) {
-                Log::error('Salary detail ID not found in sync result', [
+                Log::error('Không tìm thấy ID chi tiết lương trong kết quả đồng bộ', [
                     'request_id' => $salaryAdvanceRequest->id,
                     'user_id' => $user->id,
                     'month' => $monthFormat,
