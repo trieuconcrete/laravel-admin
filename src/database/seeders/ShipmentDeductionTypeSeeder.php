@@ -30,27 +30,30 @@ class ShipmentDeductionTypeSeeder extends Seeder
         ];
 
         foreach ($expenseTypes as $key => $name) {
-            ShipmentDeductionType::create([
+            ShipmentDeductionType::updateOrCreate([
                 'name' => $name,
                 'type' => ShipmentDeductionType::TYPE_EXPENSE,
+            ], [
                 'status' => 'active',
                 'order' => $key + 1,
             ]);
         }
 
         foreach ($carRentalexpenseTypes as $key => $name) {
-            ShipmentDeductionType::create([
+            ShipmentDeductionType::updateOrCreate([
                 'name' => $name,
                 'type' => ShipmentDeductionType::TYPE_CAR_RENTAL_EXPENSE,
+            ], [
                 'status' => 'active',
                 'order' => $key + 1,
             ]);
         }
 
         foreach ($driverAndBusboyTypes as $key => $name) {
-            ShipmentDeductionType::create([
+            ShipmentDeductionType::updateOrCreate([
                 'name' => $name,
                 'type' => ShipmentDeductionType::TYPE_DRIVER,
+            ], [
                 'status' => 'active',
                 'order' => $key + 1,
             ]);
@@ -58,12 +61,13 @@ class ShipmentDeductionTypeSeeder extends Seeder
 
 
         $busDriverTypes = [
-            'BỐC XẾP', 'PHÍ CẦU ĐƯỜNG', 'PHỤ CẤP CHỦ NHẬT', 'PHỤ CẤP ĐI XA', 'PHỤ CẤP SỚM/ĐÊM', 'PHỤ CẤP LƠ', 'PHỤ CẤP CƠM TỐI', 'PHỤ CẤP KHÁC',
+            'BỐC XẾP', 'PHÍ CẦU ĐƯỜNG', 'PHỤ CẤP CHỦ NHẬT', 'PHỤ CẤP ĐI XA', 'PHỤ CẤP SỚM/ĐÊM', 'PHỤ CẤP LƠ', 'PHỤ CẤP CƠM TỐI', 'PHỤ CẤP CƠM NGÀY', 'PHỤ CẤP KHÁC',
         ];
         foreach ($busDriverTypes as $key => $name) {
-            ShipmentDeductionType::create([
+            ShipmentDeductionType::updateOrCreate([
                 'name' => $name,
                 'type' => ShipmentDeductionType::TYPE_BUS_DRIVER,
+            ], [
                 'status' => 'active',
                 'order' => $key + 1,
             ]);
