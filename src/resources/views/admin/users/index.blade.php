@@ -71,6 +71,7 @@
                                         <th class="">EMAIL</th>
                                         <th class="">Lương cơ bản</th>
                                         <th class="">Bảo hiểm</th>
+                                        <th class="">Mức lương đóng BHXH</th>
                                         <th class="">Trạng thái</th>
                                     </tr>
                                 </thead>
@@ -125,6 +126,9 @@
                                                         {{ $user->getInsuranceStatusLabel() }}
                                                     </span>
                                                 @endif
+                                            </td>
+                                            <td class="">
+                                                <span class="text-muted">{{ $user->getSocialInsuranceAmountLabel() }}</span>
                                             </td>
                                             <td class="">
                                                 @if ($user->status) <span class="badge bg-success-subtle text-success">Đang làm việc</span>
@@ -406,6 +410,12 @@
                             <input type="date" name="insurance_start_date" class="form-control">
                             <div class="text-danger error" data-field="insurance_start_date"></div>
                         </div>
+                        <div class="col-xxl-6" id="socialInsuranceAmountContainer" style="display: none;">
+                            <label class="form-label">Mức lương đóng BHXH (VND)</label>
+                            <input type="text" name="social_insurance_amount" class="form-control" placeholder="Nhập mức lương đóng BHXH" data-mask="000,000,000">
+                            <div class="text-danger error" data-field="social_insurance_amount"></div>
+                            <small class="text-muted">Để trống sẽ sử dụng mức lương mặc định từ hệ thống</small>
+                        </div>
                         <div class="col-lg-12">
                             <label class="form-label">Địa chỉ </label>
                             <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ">
@@ -615,12 +625,17 @@
         $('#hasInsurance').on('change', function() {
             const insuranceStartDateContainer = $('#insuranceStartDateContainer');
             const insuranceStartDateInput = insuranceStartDateContainer.find('input[name="insurance_start_date"]');
+            const socialInsuranceAmountContainer = $('#socialInsuranceAmountContainer');
+            const socialInsuranceAmountInput = socialInsuranceAmountContainer.find('input[name="social_insurance_amount"]');
             
             if ($(this).is(':checked')) {
                 insuranceStartDateContainer.show();
+                socialInsuranceAmountContainer.show();
             } else {
                 insuranceStartDateContainer.hide();
                 insuranceStartDateInput.val(''); // Clear the date when unchecked
+                socialInsuranceAmountContainer.hide();
+                socialInsuranceAmountInput.val(''); // Clear the amount when unchecked
             }
         });
         

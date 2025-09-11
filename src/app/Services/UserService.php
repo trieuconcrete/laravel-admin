@@ -67,6 +67,9 @@ class UserService
 
             // Format salary
             $data['salary_base'] = $request->salary_base ? str_replace(',', '', $request->salary_base) : 0;
+            
+            // Format social insurance amount
+            $data['social_insurance_amount'] = $request->social_insurance_amount ? str_replace(',', '', $request->social_insurance_amount) : null;
 
             // Generate password
             $data['password'] = Hash::make($data['password'] ?? 'password');
@@ -139,6 +142,7 @@ class UserService
         // handle salary
         if ($request->user_action == Constants::USER_ACTION_CHANGE_INFORMATION) {
             $data['salary_base'] = $request->salary_base ? str_replace(',', '', $request->salary_base) : 0;
+            $data['social_insurance_amount'] = $request->social_insurance_amount ? str_replace(',', '', $request->social_insurance_amount) : null;
         }
 
         // Handle password
@@ -335,7 +339,9 @@ class UserService
         if ($user->shouldPayInsuranceForPeriod($startDate, $endDate)) {
             // Lấy settings từ database và parse decimal
             $insuranceRate = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_rate', 10.5));
-            $insuranceAmount = parseDecimal(\App\Models\Setting::get('social_insurance_contribution_amount', 5500000));
+            
+            // Sử dụng mức lương đóng BHXH cá nhân
+            $insuranceAmount = $user->getSocialInsuranceAmount();
             
             // Tính BHXH: X% của Y (không phụ thuộc vào totalBeforeInsurance)
             $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);

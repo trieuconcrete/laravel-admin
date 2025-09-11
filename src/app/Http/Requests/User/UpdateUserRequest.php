@@ -34,6 +34,12 @@ class UpdateUserRequest extends FormRequest
                 'salary_base' => str_replace(',', '', $this->salary_base),
             ]);
         }
+        
+        if ($this->social_insurance_amount) {
+            $this->merge([
+                'social_insurance_amount' => str_replace(',', '', $this->social_insurance_amount),
+            ]);
+        }
     }
 
     /**
@@ -73,6 +79,7 @@ class UpdateUserRequest extends FormRequest
                     'join_date' => 'nullable|' . $this->getSystemDateFormatRule(),
                     'has_insurance' => 'nullable|boolean',
                     'insurance_start_date' => 'nullable|' . $this->getSystemDateFormatRule() . '|required_if:has_insurance,true',
+                    'social_insurance_amount' => 'nullable|numeric|min:0',
                 ];
                 break;
             case Constants::USER_ACTION_CHANGE_LICENSE:
@@ -88,6 +95,7 @@ class UpdateUserRequest extends FormRequest
                     'address' => 'nullable|max:100',
                     'has_insurance' => 'nullable|boolean',
                     'insurance_start_date' => 'nullable|' . $this->getSystemDateFormatRule() . '|required_if:has_insurance,true',
+                    'social_insurance_amount' => 'nullable|numeric|min:0',
                 ];
                 break;
             case Constants::USER_ACTION_CHANGE_PASSWORD:

@@ -74,7 +74,9 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
         if ($this->user->shouldPayInsuranceForPeriod($startDate, $endDate)) {
             // Lấy settings từ database và parse decimal
             $insuranceRate = (float) Setting::get('social_insurance_contribution_rate', 10.5);
-            $insuranceAmount = (float) Setting::get('social_insurance_contribution_amount', 5500000);
+            
+            // Sử dụng mức lương đóng BHXH cá nhân
+            $insuranceAmount = $this->user->getSocialInsuranceAmount();
             
             // Tính BHXH: X% của Y (không phụ thuộc vào lương cơ bản)
             $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
