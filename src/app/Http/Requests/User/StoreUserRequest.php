@@ -69,8 +69,8 @@ class StoreUserRequest extends FormRequest
         // case license
         if ($this->has('license_type')) {
             return array_merge($common, [
-                'license_number' => ['required', 'string', 'max:50'],
-                'license_type' => ['required', 'string'],
+                'license_number' => ['nullable', 'string', 'max:50'],
+                'license_type' => ['nullable', 'string'],
                 'issue_date' => ['nullable', $this->getSystemDateFormatRule()],
                 'license_expire_date' => ['nullable', $this->getSystemDateFormatRule()],
                 'issued_by' => ['nullable', 'string', 'max:255'],
