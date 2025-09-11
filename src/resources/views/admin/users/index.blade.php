@@ -234,6 +234,26 @@
                             <div class="text-danger error" data-field="salary_by_percent"></div>
                             <small class="text-muted">Phần trăm lương theo doanh số (áp dụng cho tài xế ăn lương doanh số)</small>
                         </div>
+                        <div class="col-xxl-6">
+                            <label class="form-label">Bảo hiểm xã hội</label>
+                            <div class="form-check form-check-secondary mb-3">
+                                <input class="form-check-input" type="checkbox" value="1" id="hasInsuranceDriver" name="has_insurance" checked>
+                                <label class="form-check-label" for="hasInsuranceDriver">
+                                    Có đóng bảo hiểm
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-xxl-6" id="insuranceStartDateContainerDriver">
+                            <label class="form-label">Ngày bắt đầu đóng bảo hiểm</label>
+                            <input type="date" name="insurance_start_date" class="form-control">
+                            <div class="text-danger error" data-field="insurance_start_date"></div>
+                        </div>
+                        <div class="col-xxl-6" id="socialInsuranceAmountContainerDriver" style="display: none;">
+                            <label class="form-label">Mức lương đóng BHXH (VND)</label>
+                            <input type="text" name="social_insurance_amount" class="form-control" placeholder="Nhập mức lương đóng BHXH" data-mask="000,000,000">
+                            <div class="text-danger error" data-field="social_insurance_amount"></div>
+                            <small class="text-muted">Để trống sẽ sử dụng mức lương mặc định từ hệ thống</small>
+                        </div>
                         <div class="col-lg-12">
                             <label class="form-label">Địa chỉ </label>
                             <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ">
@@ -244,7 +264,6 @@
                             <textarea name="notes" rows="3" class="form-control" placeholder="Nhập ghi chú"></textarea>
                             <div class="text-danger error" data-field="notes"></div>
                         </div>
-                        <hr>
                         <span class="fs-4 mt-0">Thông tin bằng lái</span>
                         <div class="col-xxl-6">
                             <label class="form-label">Số bằng lái</label>
@@ -641,6 +660,36 @@
         
         // Trigger change event on page load để set đúng trạng thái cho insurance
         $('#hasInsurance').trigger('change');
+        
+        // Handle insurance checkbox for driver form
+        $('#hasInsuranceDriver').on('change', function() {
+            const insuranceStartDateContainer = $('#insuranceStartDateContainerDriver');
+            const insuranceStartDateInput = insuranceStartDateContainer.find('input[name="insurance_start_date"]');
+            const socialInsuranceAmountContainer = $('#socialInsuranceAmountContainerDriver');
+            const socialInsuranceAmountInput = socialInsuranceAmountContainer.find('input[name="social_insurance_amount"]');
+            
+            if ($(this).is(':checked')) {
+                insuranceStartDateContainer.show();
+                socialInsuranceAmountContainer.show();
+            } else {
+                insuranceStartDateContainer.hide();
+                insuranceStartDateInput.val(''); // Clear the date when unchecked
+                socialInsuranceAmountContainer.hide();
+                socialInsuranceAmountInput.val(''); // Clear the amount when unchecked
+            }
+        });
+        
+        // Trigger change event on page load để set đúng trạng thái cho insurance driver
+        $('#hasInsuranceDriver').trigger('change');
+        
+        // Format social insurance amount on input change
+        $('input[name="social_insurance_amount"]').on('input', function() {
+            formatSalaryAsInteger($(this));
+        });
+        // Format on change (for when value is set programmatically)
+        $('input[name="social_insurance_amount"]').on('change', function() {
+            formatSalaryAsInteger($(this));
+        });
     });
     
     // Handle license file preview for create form
