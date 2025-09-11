@@ -46,16 +46,17 @@ class TopbandShipmentExport extends BaseShipmentExport
             'B' => 'Ngày',
             'C' => 'Số xe',
             'D' => 'Điểm đi',
-            'E' => 'Điểm đến',
-            'F' => 'Số tấn',
+            'E' => 'Địa chỉ',
+            'F' => 'Điểm đến',
             'G' => 'Địa chỉ',
-            'H' => 'Loại hàng',
-            'I' => 'TTGT',
-            'J' => 'Đơn giá',
-            'K' => 'Phụ thu kết hợp',
-            'L' => 'Phí bốc xếp',
-            'M' => 'Thành tiền',
-            'N' => 'Ghi chú'
+            'H' => 'Số tấn',
+            'I' => 'Loại hàng',
+            'J' => 'TTGT',
+            'K' => 'Đơn giá',
+            'L' => 'Phụ thu kết hợp',
+            'M' => 'Phí bốc xếp',
+            'N' => 'Thành tiền',
+            'O' => 'Ghi chú'
         ];
     }
 
@@ -131,16 +132,17 @@ class TopbandShipmentExport extends BaseShipmentExport
         $sheet->setCellValue('B' . $row, $shipment['departure_time']); // Ngày
         $sheet->setCellValue('C' . $row, $shipment['plate_number'] ?? ''); // Số xe
         $sheet->setCellValue('D' . $row, $shipment['origin']); // Điểm đi
-        $sheet->setCellValue('E' . $row, $shipment['destination']); // Điểm đến
-        $sheet->setCellValue('F' . $row, $shipment['cargo_weight'] ?? ''); // Số tấn
-        $sheet->setCellValue('G' . $row, $shipment['company'] ?? ''); // Địa chỉ
-        $sheet->setCellValue('H' . $row, $shipment['goods_name'] ?? ''); // Loại hàng
-        $sheet->setCellValue('I' . $row, ''); // TTGT
-        $sheet->setCellValue('J' . $row, $shipment['unit_price'] ?? 0); // Đơn giá
-        $sheet->setCellValue('K' . $row, $shipment['total_combined_surcharge'] ?? 0); // Phụ thu kết hợp
-        $sheet->setCellValue('L' . $row, $shipment['total_combined_cargo_handling'] ?? 0); // Phí bốc xếp
-        $sheet->setCellValue('M' . $row, $shipment['total_amount']); // Thành tiền
-        $sheet->setCellValue('N' . $row, $shipment['notes'] ?? ''); // Ghi chú
+        $sheet->setCellValue('E' . $row, $shipment['company'] ?? ''); // Địa chỉ
+        $sheet->setCellValue('F' . $row, $shipment['destination']); // Điểm đến
+        $sheet->setCellValue('G' . $row, $shipment['address_destination'] ?? ''); // Địa chỉ
+        $sheet->setCellValue('H' . $row, $shipment['cargo_weight'] ?? ''); // Số tấn
+        $sheet->setCellValue('I' . $row, $shipment['goods_name'] ?? ''); // Loại hàng
+        $sheet->setCellValue('J' . $row, ''); // TTGT
+        $sheet->setCellValue('K' . $row, $shipment['unit_price'] ?? 0); // Đơn giá
+        $sheet->setCellValue('L' . $row, $shipment['total_combined_surcharge'] ?? 0); // Phụ thu kết hợp
+        $sheet->setCellValue('M' . $row, $shipment['total_combined_cargo_handling'] ?? 0); // Phí bốc xếp
+        $sheet->setCellValue('N' . $row, $shipment['total_amount']); // Thành tiền
+        $sheet->setCellValue('O' . $row, $shipment['notes'] ?? ''); // Ghi chú
     }
 
     /**
@@ -210,16 +212,17 @@ class TopbandShipmentExport extends BaseShipmentExport
         $sheet->getColumnDimension('B')->setWidth(15);  // Ngày
         $sheet->getColumnDimension('C')->setWidth(12);  // Số xe
         $sheet->getColumnDimension('D')->setWidth(15);  // Điểm đi
-        $sheet->getColumnDimension('E')->setWidth(15);  // Điểm đến
-        $sheet->getColumnDimension('F')->setWidth(12);  // Số tấn
+        $sheet->getColumnDimension('E')->setWidth(15);  // Địa chỉ
+        $sheet->getColumnDimension('F')->setWidth(15);  // Điểm đến
         $sheet->getColumnDimension('G')->setWidth(15);  // Địa chỉ
-        $sheet->getColumnDimension('H')->setWidth(20);  // Loại hàng
-        $sheet->getColumnDimension('I')->setWidth(15);  // TTGT
-        $sheet->getColumnDimension('J')->setWidth(15);  // Đơn giá
-        $sheet->getColumnDimension('K')->setWidth(15);  // Phụ thu kết hợp
-        $sheet->getColumnDimension('L')->setWidth(15);  // Phí bốc xếp
-        $sheet->getColumnDimension('M')->setWidth(15);  // Thành tiền
-        $sheet->getColumnDimension('N')->setWidth(20);  // Ghi chú
+        $sheet->getColumnDimension('H')->setWidth(12);  // Số tấn
+        $sheet->getColumnDimension('I')->setWidth(20);  // Loại hàng
+        $sheet->getColumnDimension('J')->setWidth(15);  // TTGT
+        $sheet->getColumnDimension('K')->setWidth(15);  // Đơn giá
+        $sheet->getColumnDimension('L')->setWidth(15);  // Phụ thu kết hợp
+        $sheet->getColumnDimension('M')->setWidth(15);  // Phí bốc xếp
+        $sheet->getColumnDimension('N')->setWidth(15);  // Thành tiền
+        $sheet->getColumnDimension('O')->setWidth(20);  // Ghi chú
     }
 
     /**
