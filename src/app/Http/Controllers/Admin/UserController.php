@@ -171,7 +171,7 @@ class UserController extends Controller
                 'success' => true,
                 'salaryData' => view('admin.users.partials.salary-table', compact(
                     'salaryBase', 'totalAllowance', 'totalBonus', 'totalPenalty', 
-                    'totalOtherDeduction', 'insuranceDeduction', 'totalSalary', 'totalPaid'
+                    'totalOtherDeduction', 'insuranceDeduction', 'totalSalary', 'totalPaid', 'user'
                 ))->render(),
                 'chartData' => [
                     'series' => $chartSeries,

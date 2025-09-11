@@ -23,7 +23,7 @@
     <td class="text-end fw-semibold" data-salary="total-before-deduction">{{ number_format($salaryBase + $totalAllowance + $totalBonus) }} đ</td>
 </tr>
 <tr class="border-bottom">
-                                                <td class="fw-medium">Trừ BHXH ({{ \App\Models\Setting::get('social_insurance_contribution_rate', 10.5) }}%)<small class="text-muted">(Mức đóng lương cơ bản: {{ \App\Models\Setting::get('social_insurance_contribution_amount', 5500000) }} đ)</small></td>
+                                                <td class="fw-medium">Trừ BHXH ({{ \App\Models\Setting::get('social_insurance_contribution_rate', 10.5) }}%)<small class="text-muted">(Mức đóng lương cơ bản: {{ number_format($user->getSocialInsuranceAmount()) }} đ)</small></td>
     <td class="text-end text-danger" data-salary="insurance">- {{ number_format($insuranceDeduction) }} đ</td>
 </tr>
 <tr class="border-bottom">
