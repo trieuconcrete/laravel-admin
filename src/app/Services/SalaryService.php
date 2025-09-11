@@ -521,7 +521,10 @@ class SalaryService
         
         // Lấy settings từ database thông qua SettingService và parse decimal
         $rate = parseDecimal($this->settingService->get('social_insurance_contribution_rate', 10.5));
-        $insuranceAmount = parseDecimal($this->settingService->get('social_insurance_contribution_amount', 5500000));
+        
+        // Sử dụng mức lương đóng BHXH cá nhân nếu có user, ngược lại dùng setting
+        $insuranceAmount = $user ? $user->getSocialInsuranceAmount() : 
+                          parseDecimal($this->settingService->get('social_insurance_contribution_amount', 5500000));
         
         // Tính BHXH: X% của Y (không phụ thuộc vào $amount)
         return $insuranceAmount * ($rate / 100);

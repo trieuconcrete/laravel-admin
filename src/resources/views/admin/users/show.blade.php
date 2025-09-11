@@ -172,13 +172,27 @@
                                                     @enderror
                                                 </div>
                                             </div>
-                                            <div class="col-xxl-6" id="insuranceStartDateContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
-                                                <div class="mb-3">
-                                                    <label for="insuranceStartDate" class="form-label">Ngày bắt đầu đóng bảo hiểm</label>
-                                                    <input type="date" class="form-control" name="insurance_start_date" id="insuranceStartDate" value="{{ old('insurance_start_date', $user->insurance_start_date?->format('Y-m-d')) }}">
-                                                    @error('insurance_start_date')
-                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                                    @enderror
+                                            <div class="row">
+                                                <div class="col-xxl-6" id="insuranceStartDateContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
+                                                    <div class="mb-3">
+                                                        <label for="insuranceStartDate" class="form-label">Ngày bắt đầu đóng bảo hiểm</label>
+                                                        <input type="date" class="form-control" name="insurance_start_date" id="insuranceStartDate" value="{{ old('insurance_start_date', $user->insurance_start_date?->format('Y-m-d')) }}">
+                                                        @error('insurance_start_date')
+                                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                                <div class="col-xxl-6" id="socialInsuranceAmountContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
+                                                    <div class="mb-3">
+                                                        <label for="socialInsuranceAmount" class="form-label">Mức lương đóng BHXH (VND)</label>
+                                                        <input type="text" class="form-control" name="social_insurance_amount" id="socialInsuranceAmount" 
+                                                            value="{{ old('social_insurance_amount', $user->social_insurance_amount ? number_format($user->social_insurance_amount, 0, ',', ',') : '') }}" 
+                                                            placeholder="Nhập mức lương đóng BHXH" data-mask="000,000,000">
+                                                        @error('social_insurance_amount')
+                                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                        @enderror
+                                                        <small class="text-muted">Để trống sẽ sử dụng mức lương mặc định từ hệ thống</small>
+                                                    </div>
                                                 </div>
                                             </div>
                                             @if($user->role === 'driver')
@@ -601,7 +615,7 @@
                                                             <td class="text-end fw-semibold" data-salary="total-before-deduction">{{ number_format($salaryBase + $totalAllowance + $totalBonus) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom">
-                                                            <td class="fw-medium">Trừ BHXH ({{ \App\Models\Setting::get('social_insurance_contribution_rate', 10.5) }}%)<small class="text-muted">(Mức đóng lương cơ bản: {{ number_format(\App\Models\Setting::get('social_insurance_contribution_amount', 5500000)) }} đ)</small></td>
+                                                            <td class="fw-medium">Trừ BHXH ({{ \App\Models\Setting::get('social_insurance_contribution_rate', 10.5) }}%)<small class="text-muted">(Mức đóng lương cơ bản: {{ number_format($user->getSocialInsuranceAmount()) }} đ)</small></td>
                                                             <td class="text-end text-danger" data-salary="insurance">- {{ number_format($insuranceDeduction) }} đ</td>
                                                         </tr>
                                                         <tr class="border-bottom">
@@ -1060,6 +1074,15 @@
     }
 
     // Format on input change
+    $('input[name="social_insurance_amount"]').on('input', function() {
+        formatSalaryAsInteger($(this));
+    });
+    // Format on change (for when value is set programmatically)
+    $('input[name="social_insurance_amount"]').on('change', function() {
+        formatSalaryAsInteger($(this));
+    });
+
+    // Format on input change
     $('input[name="salary_base"]').on('input', function() {
         formatSalaryAsInteger($(this));
     });
@@ -1067,6 +1090,7 @@
     // Format on page load
     $(document).ready(function() {
         formatSalaryAsInteger($('input[name="salary_base"]'));
+        formatSalaryAsInteger($('input[name="social_insurance_amount"]'));
     });
     
     // Format on change (for when value is set programmatically)
@@ -1756,12 +1780,17 @@
         $('#hasInsurance').on('change', function() {
             const insuranceStartDateContainer = $('#insuranceStartDateContainer');
             const insuranceStartDateInput = $('#insuranceStartDate');
+            const socialInsuranceAmountContainer = $('#socialInsuranceAmountContainer');
+            const socialInsuranceAmountInput = $('#socialInsuranceAmount');
             
             if ($(this).is(':checked')) {
                 insuranceStartDateContainer.show();
+                socialInsuranceAmountContainer.show();
             } else {
                 insuranceStartDateContainer.hide();
                 insuranceStartDateInput.val(''); // Clear the date when unchecked
+                socialInsuranceAmountContainer.hide();
+                socialInsuranceAmountInput.val(''); // Clear the amount when unchecked
             }
         });
         

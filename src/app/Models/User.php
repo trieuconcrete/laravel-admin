@@ -59,7 +59,8 @@ class User extends Authenticatable
         'salary_type',
         'salary_by_percent',
         'has_insurance',
-        'insurance_start_date'
+        'insurance_start_date',
+        'social_insurance_amount'
     ];
 
     /**
@@ -85,6 +86,7 @@ class User extends Authenticatable
             'salary_type' => SalaryType::class,
             'has_insurance' => 'boolean',
             'insurance_start_date' => 'date',
+            'social_insurance_amount' => 'decimal:0',
         ];
     }
 
@@ -473,5 +475,34 @@ class User extends Authenticatable
         }
 
         return 'success';
+    }
+
+    /**
+     * Get social insurance amount for this user
+     * If not set, fallback to system setting
+     *
+     * @return float
+     */
+    public function getSocialInsuranceAmount(): float
+    {
+        if ($this->social_insurance_amount !== null) {
+            return (float) $this->social_insurance_amount;
+        }
+
+        // Fallback to system setting
+        return parseDecimal(\App\Models\Setting::get('social_insurance_contribution_amount', 5500000));
+    }
+
+    /**
+     * Get social insurance amount label for display
+     *
+     * @return string
+     */
+    public function getSocialInsuranceAmountLabel(): string
+    {
+        $amount = $this->getSocialInsuranceAmount();
+        $isCustom = $this->social_insurance_amount !== null;
+        
+        return number_format($amount) . ' đ' . ($isCustom ? ' (Cá nhân)' : ' (Hệ thống)');
     }
 }

@@ -606,7 +606,9 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         if ($this->user->shouldPayInsuranceForPeriod($this->startDate, $this->endDate)) {
             // Lấy settings từ database và parse decimal
             $insuranceRate = parseDecimal(Setting::get('social_insurance_contribution_rate', 10.5));
-            $insuranceAmount = parseDecimal(Setting::get('social_insurance_contribution_amount', 5500000));
+            
+            // Sử dụng mức lương đóng BHXH cá nhân
+            $insuranceAmount = $this->user->getSocialInsuranceAmount();
             
             // Tính BHXH: X% của Y (không phụ thuộc vào totalBeforeInsurance)
             $insuranceDeduction = $insuranceAmount * ($insuranceRate / 100);
