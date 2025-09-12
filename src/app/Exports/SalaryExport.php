@@ -34,6 +34,8 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
     protected $endDate;
     protected $salaryService;
 
+    protected $typeShipmentDeduction;
+
     /**
      * @param User $user
      * @param Collection $shipments
@@ -51,32 +53,12 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$monthNum, (int)$year);
         $this->startDate = $periodDates['start_date'];
         $this->endDate = $periodDates['end_date'];
-        
-        // Get deduction types and limit to prevent Excel errors
-        $allDeductionTypes = ShipmentDeductionType::where('status', 'active')->get();
-        
-        // Check for duplicate names
-        $allNames = $allDeductionTypes->pluck('name')->toArray();
-        $duplicateNames = array_diff_assoc($allNames, array_unique($allNames));
-        
-        if (!empty($duplicateNames)) {
-            Log::warning('Found duplicate deduction type names', [
-                'duplicate_names' => array_values($duplicateNames),
-                'total_types' => $allDeductionTypes->count(),
-                'unique_names' => count(array_unique($allNames))
-            ]);
-        }
-        
-        // Limit to maximum 690 deduction types (5 base + 690 deduction + 1 notes = 696 total, under 702 limit)
-        if ($allDeductionTypes->count() > 690) {
-            Log::warning('Too many deduction types, limiting to 690 to prevent Excel errors', [
-                'total_types' => $allDeductionTypes->count(),
-                'limited_to' => 690
-            ]);
-            $this->deductionTypes = $allDeductionTypes->take(690)->keyBy('id');
-        } else {
-            $this->deductionTypes = $allDeductionTypes->keyBy('id');
-        }
+
+        $this->typeShipmentDeduction = $user->isDriver() ? ShipmentDeductionType::TYPE_DRIVER : ShipmentDeductionType::TYPE_BUS_DRIVER;
+        $this->deductionTypes = ShipmentDeductionType::where('status', 'active')
+            ->where('type', $this->typeShipmentDeduction)
+            ->get()
+            ->keyBy('id');
     }
 
     /**
@@ -165,7 +147,11 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         $deductionTypeNames = $this->deductionTypes->pluck('name')->unique()->values()->toArray();
         
         // Add GHI CHÚ as the last column header
-        $notesHeader = ['GHI CHÚ'];
+        if ($this->user->isDriver()) {
+            $notesHeader = ['PHỤ CẤP LƠ', 'GHI CHÚ'];
+        } else {
+            $notesHeader = ['GHI CHÚ'];
+        }
         
         // Calculate the number of columns for the title merge
         $totalColumns = count($baseHeaders) + count($deductionTypeNames) + count($notesHeader); // Added column for notes
@@ -184,23 +170,7 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
             $deductionColumns[$deductionTypeName] = $columnLetter;
             $colIndex++;
         }
-        
-        // Debug logging for deduction columns
-        Log::info('SalaryExport DeductionColumns', [
-            'deductionColumns' => $deductionColumns,
-            'total_deduction_types' => count($this->deductionTypes),
-            'unique_deduction_types' => count($uniqueDeductionTypes),
-            'duplicates_removed' => count($this->deductionTypes) - count($uniqueDeductionTypes)
-        ]);
-        
-        // Debug logging
-        Log::info('SalaryExport Debug', [
-            'baseHeaders' => count($baseHeaders),
-            'deductionTypeNames' => count($deductionTypeNames),
-            'notesHeader' => count($notesHeader),
-            'totalColumns' => $totalColumns
-        ]);
-        
+
         // Validate total columns to prevent Excel errors (max 702 columns = 26*27)
         if ($totalColumns > 702) {
             throw new \Exception("Quá nhiều cột: {$totalColumns}. Excel chỉ hỗ trợ tối đa 702 cột (ZZ).");
@@ -211,6 +181,9 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Calculate the notes column letter (last column)
         $notesColumnLetter = $this->getColumnLetter($totalColumns);
+        
+        // If driver, the assistant column is immediately before notes
+        $assistantColumnLetter = $this->user->isDriver() ? $this->getColumnLetter($totalColumns - 1) : null;
         
         // Debug logging for column letters
         Log::info('SalaryExport Column Letters', [
@@ -281,6 +254,17 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
             throw new \Exception("Ký tự cột notes không hợp lệ: '{$notesColumnLetter}'");
         }
         $sheet->getColumnDimension($notesColumnLetter)->setWidth(15); // GHI CHÚ
+        
+        // Set width for assistant column if driver
+        if ($assistantColumnLetter) {
+            if (!preg_match('/^[A-Z]+$/', $assistantColumnLetter)) {
+                Log::error('Invalid assistant column letter', [
+                    'assistantColumnLetter' => $assistantColumnLetter
+                ]);
+                throw new \Exception("Ký tự cột phụ cấp lơ không hợp lệ: '{$assistantColumnLetter}'");
+            }
+            $sheet->getColumnDimension($assistantColumnLetter)->setWidth(15); // PHỤ CẤP LƠ
+        }
         
         // Validate last header column letter
         if (!preg_match('/^[A-Z]+$/', $lastHeaderColumn)) {
@@ -359,6 +343,7 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
             return Carbon::parse($shipment->departure_time)->format('Y-m-d');
         });
         
+        $totalAssistantAmount = 0;
         foreach ($groupedShipments as $date => $dateShipments) {
             foreach ($dateShipments as $shipment) {
                 $sheet->setCellValue('A' . $row, $count);
@@ -370,8 +355,9 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
                 // Get all deductions for this shipment (both driver_and_busboy and expense types)
                 $deductions = ShipmentDeduction::where('shipment_id', $shipment->id)
                     ->get();
-                
+                $shipmentNotes = null;
                 // Fill in deduction values
+                $oldNotes = null;
                 foreach ($deductions as $deduction) {
                     $deductionType = $this->deductionTypes[$deduction->shipment_deduction_type_id] ?? null;
                     if ($deductionType && isset($deductionColumns[$deductionType->name])) {
@@ -390,12 +376,32 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
                         $sheet->setCellValue($col . $row, $deduction->amount);
                         $sheet->getStyle($col . $row)->getNumberFormat()->setFormatCode('#,##0');
                     }
+
+                    if ($deduction->notes && $deduction->notes != $oldNotes) {
+                        $shipmentNotes .= $deduction->notes . "\n";
+                        $oldNotes = $deduction->notes;
+                    }
                 }
-                
+
+                if ($this->user->isDriver() && $assistantColumnLetter) {
+                    // Get all deductions for this shipment (both driver_and_busboy and expense types)
+                    $assistantAmount = ShipmentDeduction::where('shipment_id', $shipment->id)
+                        ->where('user_id', $this->user->id)
+                        ->whereHas('shipmentDeductionType', function($query) {
+                            $query->where('type', ShipmentDeductionType::TYPE_BUS_DRIVER);
+                        })
+                        ->get()
+                        ->sum('amount');
+                    $totalAssistantAmount += $assistantAmount;
+                    // Populate assistant column (right before notes). Replace value as needed.
+                    $sheet->setCellValue($assistantColumnLetter . $row, $assistantAmount);
+                    $sheet->getStyle($assistantColumnLetter . $row)->getNumberFormat()->setFormatCode('#,##0');
+                }
+
                 // Add notes from shipment to the notes column
                 // Validate notes column letter before using
                 if (preg_match('/^[A-Z]+$/', $notesColumnLetter)) {
-                    $sheet->setCellValue($notesColumnLetter . $row, $shipment->notes);
+                    $sheet->setCellValue($notesColumnLetter . $row, $shipmentNotes);
                 } else {
                     Log::error('Invalid notes column letter in data loop', [
                         'notesColumnLetter' => $notesColumnLetter,
@@ -447,6 +453,11 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
             }
             $sheet->setCellValue($column . $totalRow, $columnSum);
             $sheet->getStyle($column . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
+        }
+
+        if ($this->user->isDriver() && $assistantColumnLetter) {
+            $sheet->setCellValue($assistantColumnLetter . $totalRow, $totalAssistantAmount);
+            $sheet->getStyle($assistantColumnLetter . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
         }
         
         // Add empty cell in notes column for the total row
