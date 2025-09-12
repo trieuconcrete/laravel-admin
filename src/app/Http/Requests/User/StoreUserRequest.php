@@ -30,12 +30,6 @@ class StoreUserRequest extends FormRequest
                 'salary_base' => str_replace(',', '', $this->salary_base),
             ]);
         }
-        
-        if ($this->social_insurance_amount) {
-            $this->merge([
-                'social_insurance_amount' => str_replace(',', '', $this->social_insurance_amount),
-            ]);
-        }
     }
 
     /**
@@ -70,7 +64,6 @@ class StoreUserRequest extends FormRequest
             'notes' => ['nullable', 'string'],
             'has_insurance' => ['nullable', 'boolean'],
             'insurance_start_date' => ['nullable', $this->getSystemDateFormatRule(), 'required_if:has_insurance,true'],
-            'social_insurance_amount' => ['nullable', 'numeric', 'min:0'],
         ];
 
         // case license
