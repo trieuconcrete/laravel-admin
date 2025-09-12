@@ -186,7 +186,7 @@ class ShipmentController extends Controller
         $userPXs = User::whereIn('role', ['driver', 'assistant', 'helper', 'staff'])
             ->where('status', UserStatus::ACTIVE)
             ->whereHas('position', function ($query) {
-                $query->whereIn('code', [Position::POSITION_PX, Position::POSITION_TX]);
+                $query->whereIn('code', [Position::POSITION_PX]);
             })
             ->pluck('full_name', 'id')
             ->toArray();
