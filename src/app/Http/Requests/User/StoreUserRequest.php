@@ -30,12 +30,6 @@ class StoreUserRequest extends FormRequest
                 'salary_base' => str_replace(',', '', $this->salary_base),
             ]);
         }
-        
-        if ($this->social_insurance_amount) {
-            $this->merge([
-                'social_insurance_amount' => str_replace(',', '', $this->social_insurance_amount),
-            ]);
-        }
     }
 
     /**
