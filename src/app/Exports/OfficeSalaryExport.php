@@ -49,7 +49,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
         
         // Calculate lunch allowance
         $dailyLunchAllowance = $this->user->getDailyLunchAllowance();
-        $lunchAllowance = $this->user->getMonthlyLunchAllowance();
+        $lunchAllowance = $workingDays * $dailyLunchAllowance;
         $totalTypeSalary = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
         $totalTypeBonus = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
         $totalTypePenalty = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
