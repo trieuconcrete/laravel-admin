@@ -147,11 +147,7 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         $deductionTypeNames = $this->deductionTypes->pluck('name')->unique()->values()->toArray();
         
         // Add GHI CHÚ as the last column header
-        if ($this->user->isDriver()) {
-            $notesHeader = ['PHỤ CẤP LƠ', 'GHI CHÚ'];
-        } else {
-            $notesHeader = ['GHI CHÚ'];
-        }
+        $notesHeader = ['GHI CHÚ'];
         
         // Calculate the number of columns for the title merge
         $totalColumns = count($baseHeaders) + count($deductionTypeNames) + count($notesHeader); // Added column for notes
