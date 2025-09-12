@@ -506,4 +506,13 @@ class User extends Authenticatable
         
         return number_format($amount) . ' đ' . ($isCustom ? ' (Cá nhân)' : ' (Hệ thống)');
     }
+
+    /**
+     * Summary of isDriver
+     * @return bool
+     */
+    public function isDriver(): bool
+    {
+        return $this->role == self::ROLE_DRIVER;
+    }
 }
