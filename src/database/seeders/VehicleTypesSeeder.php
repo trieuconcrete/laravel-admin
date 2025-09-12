@@ -4,6 +4,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Vehicle;
+use App\Models\VehicleType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -15,11 +17,7 @@ class VehicleTypesSeeder extends Seeder
      */
     public function run(): void
     {
-        // Skip truncation if called from DataSeederMaster (tables already truncated with FK checks disabled)
-        if (!app()->has('seeder.skip_truncate')) {
-            DB::table('vehicle_types')->truncate();
-        }
-        
+        // Skip truncation if called from DataSeederMaster (tables already truncated with FK checks disabled)        
         $vehicleTypes = [
             [
                 'name' => 'Xe tải nhỏ',
@@ -80,12 +78,17 @@ class VehicleTypesSeeder extends Seeder
             [
                 'name' => 'Xe máy',
                 'description' => 'Xe máy chuyển phát nhanh cho các gói hàng nhỏ'
+            ],
+            [
+                'name' => 'Xe hơi 7 chỗ',
+                'description' => 'Xe hơi 7 chỗ cho gia đình hoặc nhóm nhỏ'
             ]
         ];
 
         foreach ($vehicleTypes as $vehicleType) {
-            DB::table('vehicle_types')->insert([
-                'name' => $vehicleType['name'],
+            VehicleType::updateOrCreate([
+                'name' => $vehicleType['name']
+            ], [
                 'description' => $vehicleType['description'],
                 'created_at' => now(),
                 'updated_at' => now()
