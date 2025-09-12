@@ -254,6 +254,11 @@
                             <div class="text-danger error" data-field="social_insurance_amount"></div>
                             <small class="text-muted">Để trống sẽ sử dụng mức lương mặc định từ hệ thống</small>
                         </div>
+                        <div class="col-xxl-6" id="socialInsuranceNumberContainerDriver" style="display: none;">
+                            <label class="form-label">Số bảo hiểm</label>
+                            <input type="text" name="social_insurance_number" class="form-control" placeholder="Nhập số bảo hiểm xã hội">
+                            <div class="text-danger error" data-field="social_insurance_number"></div>
+                        </div>
                         <div class="col-lg-12">
                             <label class="form-label">Địa chỉ </label>
                             <input type="text" name="address" class="form-control" placeholder="Nhập địa chỉ">
@@ -434,6 +439,11 @@
                             <input type="text" name="social_insurance_amount" class="form-control" placeholder="Nhập mức lương đóng BHXH" data-mask="000,000,000">
                             <div class="text-danger error" data-field="social_insurance_amount"></div>
                             <small class="text-muted">Để trống sẽ sử dụng mức lương mặc định từ hệ thống</small>
+                        </div>
+                        <div class="col-xxl-6" id="socialInsuranceNumberContainer" style="display: none;">
+                            <label class="form-label">Số bảo hiểm</label>
+                            <input type="text" name="social_insurance_number" class="form-control" placeholder="Nhập số bảo hiểm xã hội">
+                            <div class="text-danger error" data-field="social_insurance_number"></div>
                         </div>
                         <div class="col-lg-12">
                             <label class="form-label">Địa chỉ </label>
@@ -646,15 +656,20 @@
             const insuranceStartDateInput = insuranceStartDateContainer.find('input[name="insurance_start_date"]');
             const socialInsuranceAmountContainer = $('#socialInsuranceAmountContainer');
             const socialInsuranceAmountInput = socialInsuranceAmountContainer.find('input[name="social_insurance_amount"]');
+            const socialInsuranceNumberContainer = $('#socialInsuranceNumberContainer');
+            const socialInsuranceNumberInput = socialInsuranceNumberContainer.find('input[name="social_insurance_number"]');
             
             if ($(this).is(':checked')) {
                 insuranceStartDateContainer.show();
                 socialInsuranceAmountContainer.show();
+                socialInsuranceNumberContainer.show();
             } else {
                 insuranceStartDateContainer.hide();
                 insuranceStartDateInput.val(''); // Clear the date when unchecked
                 socialInsuranceAmountContainer.hide();
                 socialInsuranceAmountInput.val(''); // Clear the amount when unchecked
+                socialInsuranceNumberContainer.hide();
+                socialInsuranceNumberInput.val(''); // Clear the number when unchecked
             }
         });
         
@@ -667,15 +682,20 @@
             const insuranceStartDateInput = insuranceStartDateContainer.find('input[name="insurance_start_date"]');
             const socialInsuranceAmountContainer = $('#socialInsuranceAmountContainerDriver');
             const socialInsuranceAmountInput = socialInsuranceAmountContainer.find('input[name="social_insurance_amount"]');
+            const socialInsuranceNumberContainer = $('#socialInsuranceNumberContainerDriver');
+            const socialInsuranceNumberInput = socialInsuranceNumberContainer.find('input[name="social_insurance_number"]');
             
             if ($(this).is(':checked')) {
                 insuranceStartDateContainer.show();
                 socialInsuranceAmountContainer.show();
+                socialInsuranceNumberContainer.show();
             } else {
                 insuranceStartDateContainer.hide();
                 insuranceStartDateInput.val(''); // Clear the date when unchecked
                 socialInsuranceAmountContainer.hide();
                 socialInsuranceAmountInput.val(''); // Clear the amount when unchecked
+                socialInsuranceNumberContainer.hide();
+                socialInsuranceNumberInput.val(''); // Clear the number when unchecked
             }
         });
         

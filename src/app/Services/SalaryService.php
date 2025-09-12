@@ -382,7 +382,8 @@ class SalaryService
             }
         } else {
             // Role khác: Phụ cấp = PHỤ CẤP CƠM NGÀY + tổng chi phí khác
-            $lunchAllowance = 22 * 35000; // 22 ngày × 35,000 VND
+            $workingDays = getWorkingDaysInMonth($salaryPeriod->start_date, $salaryPeriod->end_date);
+            $lunchAllowance = $workingDays * 35000; // Số ngày làm việc × 35,000 VND
             $otherCosts = $user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_OTHER, $salaryPeriod->start_date, $salaryPeriod->end_date)->sum('amount') ?? 0;
             $totalAllowance = $lunchAllowance + $otherCosts;
         }
@@ -445,7 +446,8 @@ class SalaryService
             }
         } else {
             // Role khác: Phụ cấp = PHỤ CẤP CƠM NGÀY + tổng chi phí khác
-            $lunchAllowance = 22 * 35000; // 22 ngày × 35,000 VND
+            $workingDays = getWorkingDaysInMonth($salaryPeriod->start_date, $salaryPeriod->end_date);
+            $lunchAllowance = $workingDays * 35000; // Số ngày làm việc × 35,000 VND
             $otherCosts = $user->getSalaryAdvanceRequestByType(SalaryAdvanceRequest::TYPE_OTHER, $salaryPeriod->start_date, $salaryPeriod->end_date)->sum('amount') ?? 0;
             $totalAllowance = $lunchAllowance + $otherCosts;
         }

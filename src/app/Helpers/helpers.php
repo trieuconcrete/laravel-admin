@@ -159,3 +159,20 @@ function parseDecimal($value): float
     // Fallback về 0 nếu không parse được
     return 0.0;
 }
+
+/**
+ * Calculate working days in a month (26-27 days depending on the month)
+ * 
+ * @param \Carbon\Carbon $startDate
+ * @param \Carbon\Carbon $endDate
+ * @return int
+ */
+function getWorkingDaysInMonth(\Carbon\Carbon $startDate, \Carbon\Carbon $endDate): int
+{
+    // Calculate the number of days in the month
+    $daysInMonth = $startDate->daysInMonth;
+    
+    // Return 26 or 27 days based on the month length
+    // Most months have 30-31 days, so we use 26-27 working days
+    return $daysInMonth >= 31 ? 27 : 26;
+}
