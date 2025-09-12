@@ -147,11 +147,7 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         $deductionTypeNames = $this->deductionTypes->pluck('name')->unique()->values()->toArray();
         
         // Add GHI CHÚ as the last column header
-        if ($this->user->isDriver()) {
-            $notesHeader = ['PHỤ CẤP LƠ', 'GHI CHÚ'];
-        } else {
-            $notesHeader = ['GHI CHÚ'];
-        }
+        $notesHeader = ['GHI CHÚ'];
         
         // Calculate the number of columns for the title merge
         $totalColumns = count($baseHeaders) + count($deductionTypeNames) + count($notesHeader); // Added column for notes
@@ -181,9 +177,6 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Calculate the notes column letter (last column)
         $notesColumnLetter = $this->getColumnLetter($totalColumns);
-        
-        // If driver, the assistant column is immediately before notes
-        $assistantColumnLetter = $this->user->isDriver() ? $this->getColumnLetter($totalColumns - 1) : null;
         
         // Debug logging for column letters
         Log::info('SalaryExport Column Letters', [
@@ -254,17 +247,6 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
             throw new \Exception("Ký tự cột notes không hợp lệ: '{$notesColumnLetter}'");
         }
         $sheet->getColumnDimension($notesColumnLetter)->setWidth(15); // GHI CHÚ
-        
-        // Set width for assistant column if driver
-        if ($assistantColumnLetter) {
-            if (!preg_match('/^[A-Z]+$/', $assistantColumnLetter)) {
-                Log::error('Invalid assistant column letter', [
-                    'assistantColumnLetter' => $assistantColumnLetter
-                ]);
-                throw new \Exception("Ký tự cột phụ cấp lơ không hợp lệ: '{$assistantColumnLetter}'");
-            }
-            $sheet->getColumnDimension($assistantColumnLetter)->setWidth(15); // PHỤ CẤP LƠ
-        }
         
         // Validate last header column letter
         if (!preg_match('/^[A-Z]+$/', $lastHeaderColumn)) {
@@ -352,8 +334,13 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
                 $sheet->setCellValue('D' . $row, $shipment->destination);
                 $sheet->setCellValue('E' . $row, '');
                 
+                $typeShipmentDeduction = $this->typeShipmentDeduction;
+
                 // Get all deductions for this shipment (both driver_and_busboy and expense types)
                 $deductions = ShipmentDeduction::where('shipment_id', $shipment->id)
+                    ->whereHas('shipmentDeductionType', function($query) use ($typeShipmentDeduction) {
+                        $query->where('type', $typeShipmentDeduction);
+                    })
                     ->get();
                 $shipmentNotes = null;
                 // Fill in deduction values
@@ -383,20 +370,7 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
                     }
                 }
 
-                if ($this->user->isDriver() && $assistantColumnLetter) {
-                    // Get all deductions for this shipment (both driver_and_busboy and expense types)
-                    $assistantAmount = ShipmentDeduction::where('shipment_id', $shipment->id)
-                        ->where('user_id', $this->user->id)
-                        ->whereHas('shipmentDeductionType', function($query) {
-                            $query->where('type', ShipmentDeductionType::TYPE_BUS_DRIVER);
-                        })
-                        ->get()
-                        ->sum('amount');
-                    $totalAssistantAmount += $assistantAmount;
-                    // Populate assistant column (right before notes). Replace value as needed.
-                    $sheet->setCellValue($assistantColumnLetter . $row, $assistantAmount);
-                    $sheet->getStyle($assistantColumnLetter . $row)->getNumberFormat()->setFormatCode('#,##0');
-                }
+                // Removed assistant column handling
 
                 // Add notes from shipment to the notes column
                 // Validate notes column letter before using
@@ -455,10 +429,7 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
             $sheet->getStyle($column . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
         }
 
-        if ($this->user->isDriver() && $assistantColumnLetter) {
-            $sheet->setCellValue($assistantColumnLetter . $totalRow, $totalAssistantAmount);
-            $sheet->getStyle($assistantColumnLetter . $totalRow)->getNumberFormat()->setFormatCode('#,##0');
-        }
+        // Removed assistant column total
         
         // Add empty cell in notes column for the total row
         $sheet->setCellValue($notesColumnLetter . $totalRow, '');
