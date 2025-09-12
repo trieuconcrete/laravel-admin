@@ -37,9 +37,9 @@ class Shipment extends Model
         'company',
         'company2', 
         'company3',
-        'address_destination',  // điểm đến công ty 1
-        'address_destination2', // điểm đến công ty 2
-        'address_destination3', // điểm đến công ty 3
+        'comp_destination',  // điểm đến công ty 1
+        'comp_destination2', // điểm đến công ty 2
+        'comp_destination3', // điểm đến công ty 3
         'departure_time', // thời gian khởi hành
         'estimated_arrival_time', // thời gian đến
         'cargo_weight', // trọng lượng hàng hóa

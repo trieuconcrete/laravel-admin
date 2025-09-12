@@ -146,36 +146,15 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Add user information
         $userFullName = $this->user->full_name;
-        $licenseNumber = $this->user->license ? $this->user->license->license_number : '';
+        $licenseNumber = $this->user->vehicle->first() ? $this->user->vehicle->first()->plate_number : null;
+        $capacity = $this->user->vehicle->first() ? $this->user->vehicle->first()->capacity : null;
         $userInfo = 'HỌ VÀ TÊN: ' . $userFullName;
-        if (!empty($licenseNumber)) {
-            $userInfo .= ' (XE ' . $licenseNumber . ')';
+        if ($licenseNumber) {
+            $licenseInfo = ' (XE ' . $licenseNumber;
+            $userInfo .= $capacity ? $licenseInfo . ' - ' . $capacity . ' tấn)' : $licenseInfo . ')';
         }
         $sheet->setCellValue('A6', $userInfo);
         $sheet->getStyle('A6')->getFont()->setBold(true)->setSize(12);
-        
-        // Create deduction columns mapping early to use throughout the method
-        $deductionColumns = [];
-        $colIndex = 0;
-        
-        // Get unique deduction type names to avoid duplicates
-        $uniqueDeductionTypes = $this->deductionTypes->pluck('name')->unique()->values();
-        
-        foreach ($uniqueDeductionTypes as $deductionTypeName) {
-            // Start from column F (6th column), so we need column number 6 + colIndex
-            $columnNumber = 6 + $colIndex; // F=6, G=7, H=8, etc.
-            $columnLetter = $this->getColumnLetter($columnNumber);
-            $deductionColumns[$deductionTypeName] = $columnLetter;
-            $colIndex++;
-        }
-        
-        // Debug logging for deduction columns
-        Log::info('SalaryExport DeductionColumns', [
-            'deductionColumns' => $deductionColumns,
-            'total_deduction_types' => count($this->deductionTypes),
-            'unique_deduction_types' => count($uniqueDeductionTypes),
-            'duplicates_removed' => count($this->deductionTypes) - count($uniqueDeductionTypes)
-        ]);
         
         // Base headers for fixed columns
         $baseHeaders = [
@@ -190,6 +169,29 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Calculate the number of columns for the title merge
         $totalColumns = count($baseHeaders) + count($deductionTypeNames) + count($notesHeader); // Added column for notes
+        
+        // Create deduction columns mapping
+        $deductionColumns = [];
+        $colIndex = 0;
+        
+        // Get unique deduction type names to avoid duplicates
+        $uniqueDeductionTypes = $this->deductionTypes->pluck('name')->unique()->values();
+        
+        foreach ($uniqueDeductionTypes as $deductionTypeName) {
+            // Start from column after base headers (6th column), so we need column number 6 + colIndex
+            $columnNumber = count($baseHeaders) + 1 + $colIndex; // F=6, G=7, H=8, etc.
+            $columnLetter = $this->getColumnLetter($columnNumber);
+            $deductionColumns[$deductionTypeName] = $columnLetter;
+            $colIndex++;
+        }
+        
+        // Debug logging for deduction columns
+        Log::info('SalaryExport DeductionColumns', [
+            'deductionColumns' => $deductionColumns,
+            'total_deduction_types' => count($this->deductionTypes),
+            'unique_deduction_types' => count($uniqueDeductionTypes),
+            'duplicates_removed' => count($this->deductionTypes) - count($uniqueDeductionTypes)
+        ]);
         
         // Debug logging
         Log::info('SalaryExport Debug', [
@@ -207,8 +209,8 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         // Calculate the last header column letter
         $lastHeaderColumn = $this->getColumnLetter($totalColumns);
         
-        // Calculate the notes column letter (after all deduction columns)
-        $notesColumnLetter = $this->getColumnLetter(count($baseHeaders) + count($deductionTypeNames));
+        // Calculate the notes column letter (last column)
+        $notesColumnLetter = $this->getColumnLetter($totalColumns);
         
         // Debug logging for column letters
         Log::info('SalaryExport Column Letters', [
@@ -237,10 +239,11 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         );
         
         // Set headers
-        $col = 'A';
+        $colIndex = 1;
         foreach ($headers as $header) {
-            $sheet->setCellValue($col . '8', $header);
-            $col++;
+            $colLetter = $this->getColumnLetter($colIndex);
+            $sheet->setCellValue($colLetter . '8', $header);
+            $colIndex++;
         }
         
         // Set column widths

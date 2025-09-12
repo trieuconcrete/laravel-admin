@@ -182,18 +182,29 @@
                                                         @enderror
                                                     </div>
                                                 </div>
-                                                <div class="col-xxl-6" id="socialInsuranceAmountContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
-                                                    <div class="mb-3">
-                                                        <label for="socialInsuranceAmount" class="form-label">Mức lương đóng BHXH (VND)</label>
-                                                        <input type="text" class="form-control" name="social_insurance_amount" id="socialInsuranceAmount" 
-                                                            value="{{ old('social_insurance_amount', $user->social_insurance_amount ? number_format($user->social_insurance_amount, 0, ',', ',') : '') }}" 
-                                                            placeholder="Nhập mức lương đóng BHXH" data-mask="000,000,000">
-                                                        @error('social_insurance_amount')
-                                                            <p class="text-danger text-sm mt-1">{{ $message }}</p>
-                                                        @enderror
-                                                        <small class="text-muted">Để trống sẽ sử dụng mức lương mặc định từ hệ thống</small>
-                                                    </div>
+                                            <div class="col-xxl-6" id="socialInsuranceAmountContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
+                                                <div class="mb-3">
+                                                    <label for="socialInsuranceAmount" class="form-label">Mức lương đóng BHXH (VND)</label>
+                                                    <input type="text" class="form-control" name="social_insurance_amount" id="socialInsuranceAmount" 
+                                                           value="{{ old('social_insurance_amount', $user->social_insurance_amount ? number_format($user->social_insurance_amount, 0, ',', ',') : '') }}" 
+                                                           placeholder="Nhập mức lương đóng BHXH" data-mask="000,000,000">
+                                                    @error('social_insurance_amount')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                    <small class="text-muted">Để trống sẽ sử dụng mức lương mặc định từ hệ thống</small>
                                                 </div>
+                                            </div>
+                                            <div class="col-xxl-6" id="socialInsuranceNumberContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
+                                                <div class="mb-3">
+                                                    <label for="socialInsuranceNumber" class="form-label">Số bảo hiểm</label>
+                                                    <input type="text" class="form-control" name="social_insurance_number" id="socialInsuranceNumber" 
+                                                           value="{{ old('social_insurance_number', $user->social_insurance_number ?? '') }}" 
+                                                           placeholder="Nhập số bảo hiểm xã hội">
+                                                    @error('social_insurance_number')
+                                                        <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                    @enderror
+                                                </div>
+                                            </div>
                                             </div>
                                             @if($user->role === 'driver')
                                             <div class="col-xxl-6">
@@ -224,8 +235,6 @@
                                                     <label for="lunchAllowance" class="form-label">Trợ cấp ăn trưa</label>
                                                     <div class="form-control-plaintext">
                                                         <strong>{{ number_format($user->getDailyLunchAllowance()) }} đ/ngày</strong>
-                                                        <br>
-                                                        <small class="text-muted">Tổng: {{ number_format($user->getMonthlyLunchAllowance()) }} đ/tháng (22 ngày làm việc)</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -593,7 +602,7 @@
                                                                     <i class="bx bx-info-circle text-info ms-1" 
                                                                        data-bs-toggle="tooltip" 
                                                                        data-bs-placement="top" 
-                                                                       title="Phụ cấp cơm ngày: 770,00  (22 ngày × 35,000 đ) và các chi phí khác"></i>
+                                                                       title="Phụ cấp cơm ngày (26 hoặc 27 ( tùy tháng ) × 35,000 đ) và các chi phí khác"></i>
                                                                 @endif
                                                             </td>
                                                             <td class="text-end" data-salary="allowance">{{ number_format($totalAllowance) }} đ</td>
@@ -1782,15 +1791,20 @@
             const insuranceStartDateInput = $('#insuranceStartDate');
             const socialInsuranceAmountContainer = $('#socialInsuranceAmountContainer');
             const socialInsuranceAmountInput = $('#socialInsuranceAmount');
+            const socialInsuranceNumberContainer = $('#socialInsuranceNumberContainer');
+            const socialInsuranceNumberInput = $('#socialInsuranceNumber');
             
             if ($(this).is(':checked')) {
                 insuranceStartDateContainer.show();
                 socialInsuranceAmountContainer.show();
+                socialInsuranceNumberContainer.show();
             } else {
                 insuranceStartDateContainer.hide();
                 insuranceStartDateInput.val(''); // Clear the date when unchecked
                 socialInsuranceAmountContainer.hide();
                 socialInsuranceAmountInput.val(''); // Clear the amount when unchecked
+                socialInsuranceNumberContainer.hide();
+                socialInsuranceNumberInput.val(''); // Clear the number when unchecked
             }
         });
         
