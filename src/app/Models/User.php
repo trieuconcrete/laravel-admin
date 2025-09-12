@@ -60,7 +60,8 @@ class User extends Authenticatable
         'salary_by_percent',
         'has_insurance',
         'insurance_start_date',
-        'social_insurance_amount'
+        'social_insurance_amount',
+        'social_insurance_number'
     ];
 
     /**
@@ -127,9 +128,9 @@ class User extends Authenticatable
         return $this->hasOne(DriverLicense::class, 'user_id');
     }
 
-    public function vehicle(): BelongsTo
+    public function vehicle()
     {
-        return $this->belongsTo(Vehicle::class, 'vehicle_id');
+        return $this->hasMany(Vehicle::class, 'driver_id');
     }
 
     /**

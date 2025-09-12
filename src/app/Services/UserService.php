@@ -70,6 +70,9 @@ class UserService
             
             // Format social insurance amount
             $data['social_insurance_amount'] = $request->social_insurance_amount ? str_replace(',', '', $request->social_insurance_amount) : null;
+            
+            // Handle social insurance number
+            $data['social_insurance_number'] = $request->social_insurance_number;
 
             // Generate password
             $data['password'] = Hash::make($data['password'] ?? 'password');
@@ -143,6 +146,7 @@ class UserService
         if ($request->user_action == Constants::USER_ACTION_CHANGE_INFORMATION) {
             $data['salary_base'] = $request->salary_base ? str_replace(',', '', $request->salary_base) : 0;
             $data['social_insurance_amount'] = $request->social_insurance_amount ? str_replace(',', '', $request->social_insurance_amount) : null;
+            $data['social_insurance_number'] = $request->social_insurance_number;
         }
 
         // Handle password
@@ -303,7 +307,8 @@ class UserService
             $totalAllowance = array_sum(array_column($salaryDetails, 'allowance')) ?? 0;
         } else {
             // Role khác: Trợ cấp = PHỤ CẤP CƠM NGÀY + tổng chi phí khác
-            $lunchAllowance = 22 * 35000; // 22 ngày × 35,000 VND
+            $workingDays = getWorkingDaysInMonth($startDate, $endDate);
+            $lunchAllowance = $workingDays * 35000; // Số ngày làm việc × 35,000 VND
             $otherCosts = $user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_OTHER, $startDate, $endDate)->sum('amount') ?? 0;
             $totalAllowance = $lunchAllowance + $otherCosts;
         }
@@ -366,7 +371,7 @@ class UserService
             'totalTripValue' => $totalTripValue, // tổng giá trị chuyến xe
             'commissionAmount' => $commissionAmount, // số tiền hoa hồng
             'allowanceBreakdown' => $user->role === 'driver' ? null : [
-                'lunchAllowance' => 22 * 35000,
+                'lunchAllowance' => getWorkingDaysInMonth($startDate, $endDate) * 35000,
                 'otherCosts' => $user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_OTHER, $startDate, $endDate)->sum('amount') ?? 0,
                 'otherCostsDetails' => $user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_OTHER, $startDate, $endDate)
             ]

@@ -37,19 +37,19 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
         // Get user salary base
         $salaryBase = $this->user->salary_base ?? 0;
         
-        // Calculate working days (22 days)
-        $workingDays = 22;
-        
-        // Calculate lunch allowance
-        $dailyLunchAllowance = $this->user->getDailyLunchAllowance();
-        $lunchAllowance = $this->user->getMonthlyLunchAllowance();
-        
         // Get salary advance data for the month
         // Sử dụng logic tính ngày mới từ SalaryService (issue #197)
         list($month, $year) = explode('/', $this->month);
         $periodDates = $this->salaryService->calculateSalaryPeriodDates((int)$month, (int)$year);
         $startDate = $periodDates['start_date'];
         $endDate = $periodDates['end_date'];
+        
+        // Calculate working days (26-27 days depending on month)
+        $workingDays = getWorkingDaysInMonth($startDate, $endDate);
+        
+        // Calculate lunch allowance
+        $dailyLunchAllowance = $this->user->getDailyLunchAllowance();
+        $lunchAllowance = $this->user->getMonthlyLunchAllowance();
         $totalTypeSalary = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
         $totalTypeBonus = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
         $totalTypePenalty = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
@@ -124,7 +124,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
 
         // Table headers - THIS IS THE IMPORTANT ROW
         $data[] = [
-            '',
+            'MÔ TẢ',
             'LƯƠNG CƠ BẢN',
             'PHỤ CẤP CƠM NGÀY',
             'TỔNG LƯƠNG',
@@ -251,7 +251,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
     public function columnWidths(): array
     {
         return [
-            'A' => 35, // NGÀY
+            'A' => 35, // MÔ TẢ
             'B' => 20, // LƯƠNG CƠ BẢN
             'C' => 22, // PHỤ CẤP CƠM NGÀY
             'D' => 20, // TỔNG LƯƠNG
