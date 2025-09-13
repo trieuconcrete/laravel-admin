@@ -48,7 +48,7 @@ class ShipmentRepository extends BaseRepository implements ShipmentRepositoryInt
             $q->where('customer_id', $filters['customer_id']);
         });
         return $query->with(['driver', 'vehicle', 'goods', 'shipmentDeductions.shipmentDeductionType'])
-            ->orderByDesc('created_at')
+            ->orderByDesc('departure_time')
             ->orderByDesc('updated_at')
             ->paginate($perPage ?? $this->getPaginationLimit());
     }
