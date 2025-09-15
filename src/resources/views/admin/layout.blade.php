@@ -33,14 +33,14 @@
         <!-- custom Css-->
         <link href="{{ asset('assets/css/custom.min.css') }}" rel="stylesheet" type="text/css" />
         <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet" type="text/css" />
-        
+
         <style>
             .highlight-error {
                 border-color: #ff3d60 !important;
                 box-shadow: 0 0 0 0.15rem rgba(255, 61, 96, 0.25) !important;
                 animation: pulse-error 1.5s ease-in-out;
             }
-            
+
             @keyframes pulse-error {
                 0% { box-shadow: 0 0 0 0 rgba(255, 61, 96, 0.4); }
                 70% { box-shadow: 0 0 0 10px rgba(255, 61, 96, 0); }
@@ -53,7 +53,10 @@
 
         <!-- Optional: Flatpickr Material Blue theme -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
-        
+
+         <!-- Select2 CSS -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
         <!-- Page-specific CSS -->
         @stack('styles')
     </head>
@@ -62,7 +65,7 @@
 
         <!-- Begin page -->
         <div id="layout-wrapper">
-        
+
             @include('admin.partials.header')
             <!-- ========== App Menu ========== -->
             @include('admin.partials.sidebar')
@@ -92,7 +95,7 @@
 
                 @include('admin.partials.footer')
 
-                
+
             </div>
             <!-- end main content-->
 
@@ -151,9 +154,16 @@
         <!-- App js -->
         <script src="{{ asset('assets/js/app.js') }}"></script>
         <script src="{{ asset('assets/js/common.js') }}"></script>
+        <script src="{{ asset('assets/js/helpers.js') }}"></script>
 
         <!-- Flatpickr JS -->
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+        <!-- Select2 JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+            <!-- Tiny MCE -->
+        <script src="https://cdn.tiny.cloud/1/{{ config('services.tinymce.key') }}/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 
         <script>
             // Tự động ẩn alert sau 3 giây
@@ -174,7 +184,7 @@
         <script>
             $(document).ready(function() {
                 var currentUrl = window.location.href;
-        
+
                 $('li.nav-item a').each(function() {
                     if (this.href === currentUrl) {
                         // 1. Active <a> current
@@ -208,18 +218,18 @@
                 // Lấy định dạng placeholder từ PHP để đảm bảo nhất quán
                 const dateFormatPlaceholder = '{{ \App\Helpers\DateHelper::getDateFormatPlaceholder() }}';
                 const systemDateFormat = '{{ \App\Helpers\DateHelper::getSystemDateFormat() }}';
-                
+
                 document.querySelectorAll('input[type="date"]').forEach(function (input) {
                     // Lưu giá trị ban đầu
                     const originalValue = input.value;
-                    
+
                     // Lấy định dạng từ thuộc tính data nếu có, mặc định là Y-m-d
                     const dateFormat = input.getAttribute('data-date-format') || "Y-m-d";
-                    
+
                     // Chuyển từ input type="date" sang input type="text" để sử dụng flatpickr
                     input.type = 'text';
                     input.placeholder = dateFormatPlaceholder; // Sử dụng định dạng từ cài đặt hệ thống
-                    
+
                     // Khởi tạo flatpickr với định dạng phù hợp
                     flatpickr(input, {
                         dateFormat: systemDateFormat,
@@ -232,6 +242,22 @@
                     });
                 });
             });
+
+            function showToast(icon, message) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: icon,
+                    title: message,
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    didOpen: (toast) => {
+                        toast.addEventListener('mouseenter', Swal.stopTimer)
+                        toast.addEventListener('mouseleave', Swal.resumeTimer)
+                    }
+                });
+            }
         </script>
 
         <!-- Page-specific JS -->
