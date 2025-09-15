@@ -1,5 +1,6 @@
 FROM php:8.2-fpm
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpng-dev \
@@ -7,18 +8,14 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
-    zip unzip git curl supervisor
-
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
-
-RUN apt-get update && apt-get install -y \
     libzip-dev \
-    zip \
-    unzip \
-    && docker-php-ext-configure zip \
-    && docker-php-ext-install zip
+    zip unzip git curl supervisor \
+    && rm -rf /var/lib/apt/lists/*
 
-# redis extension
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+
+# Install redis extension
 RUN pecl install redis \
     && docker-php-ext-enable redis
 
