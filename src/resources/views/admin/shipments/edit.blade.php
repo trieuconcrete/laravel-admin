@@ -404,16 +404,16 @@
                                                 <hr>
                                                 <div class="mb-3">
                                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                                        <label class="form-label mb-0">Tài xế</label>
+                                                        <label class="form-label mb-0 fs-5">TÀI XẾ</label>
                                                         <button type="button" class="btn btn-sm btn-outline-primary" id="addPersonBtn">
                                                             <i class="fas fa-plus me-1"></i>Thêm tài xế
                                                         </button>
                                                     </div>
                                                     <div class="table-responsive">
-                                                        <table class="table table-sm" id="personTable">
+                                                        <table class="table table-hover table-striped align-middle table-nowrap mb-0" id="personTable">
                                                             <thead>
                                                                 <tr>
-                                                                    <th>Nhân sự <span class="text-danger">*</span></th>
+                                                                    <th style="padding-right:100px;">Nhân sự <span class="text-danger">*</span></th>
                                                                     <th>Lái chính </th>
                                                                     @foreach($personDeductionTypes as $type)
                                                                         <th>{{ $type->name }}</th>
@@ -514,16 +514,16 @@
                                                 <hr>
                                                 <div class="mb-3">
                                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                                        <label class="form-label mb-0">Lơ xe</label>
+                                                        <label class="form-label mb-0 fs-5">LƠ XE</label>
                                                         <button type="button" class="btn btn-sm btn-outline-primary" id="addPersonPxBtn">
                                                             <i class="fas fa-plus me-1"></i>Thêm lơ xe
                                                         </button>
                                                     </div>
                                                     <div class="table-responsive">
-                                                        <table class="table table-sm" id="personPxTable">
+                                                        <table class="table table-hover table-striped align-middle table-nowrap mb-0" id="personPxTable">
                                                             <thead>
                                                                 <tr>
-                                                                    <th>Nhân sự <span class="text-danger">*</span></th>
+                                                                    <th style="padding-right:100px;">Nhân sự <span class="text-danger">*</span></th>
                                                                     @foreach($subPersonDeductionTypes as $type)
                                                                         <th>{{ $type->name }}</th>
                                                                     @endforeach
