@@ -33,14 +33,14 @@
         <!-- custom Css-->
         <link href="{{ asset('assets/css/custom.min.css') }}" rel="stylesheet" type="text/css" />
         <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet" type="text/css" />
-        
+
         <style>
             .highlight-error {
                 border-color: #ff3d60 !important;
                 box-shadow: 0 0 0 0.15rem rgba(255, 61, 96, 0.25) !important;
                 animation: pulse-error 1.5s ease-in-out;
             }
-            
+
             @keyframes pulse-error {
                 0% { box-shadow: 0 0 0 0 rgba(255, 61, 96, 0.4); }
                 70% { box-shadow: 0 0 0 10px rgba(255, 61, 96, 0); }
@@ -53,7 +53,7 @@
 
         <!-- Optional: Flatpickr Material Blue theme -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
-        
+
         <!-- Page-specific CSS -->
         @stack('styles')
     </head>
@@ -62,7 +62,7 @@
 
         <!-- Begin page -->
         <div id="layout-wrapper">
-        
+
             @include('admin.partials.header')
             <!-- ========== App Menu ========== -->
             @include('admin.partials.sidebar')
@@ -92,7 +92,7 @@
 
                 @include('admin.partials.footer')
 
-                
+
             </div>
             <!-- end main content-->
 
@@ -151,6 +151,7 @@
         <!-- App js -->
         <script src="{{ asset('assets/js/app.js') }}"></script>
         <script src="{{ asset('assets/js/common.js') }}"></script>
+        <script src="{{ asset('assets/js/format-date.js') }}"></script>
 
         <!-- Flatpickr JS -->
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -174,7 +175,7 @@
         <script>
             $(document).ready(function() {
                 var currentUrl = window.location.href;
-        
+
                 $('li.nav-item a').each(function() {
                     if (this.href === currentUrl) {
                         // 1. Active <a> current
@@ -201,52 +202,6 @@
                     if (!$(this).attr('data-bs-keyboard')) {
                         $(this).attr('data-bs-keyboard', 'false');
                     }
-                });
-            });
-
-            document.addEventListener('DOMContentLoaded', function () {
-                // Set system date format to dd/mm/YYYY
-                const dateFormatPlaceholder = 'dd/mm/YYYY';
-                const systemDateFormat = 'd/m/Y';
-                
-                document.querySelectorAll('input[type="date"]').forEach(function (input) {
-                    // Lưu giá trị ban đầu
-                    const originalValue = input.value;
-                    
-                    // Lấy định dạng từ thuộc tính data nếu có, mặc định là d/m/Y
-                    const dateFormat = input.getAttribute('data-date-format') || "d/m/Y";
-                    
-                    // Chuyển từ input type="date" sang input type="text" để sử dụng flatpickr
-                    input.type = 'text';
-                    input.placeholder = dateFormatPlaceholder; // Sử dụng định dạng dd/mm/YYYY
-                    
-                    // Khởi tạo flatpickr với định dạng dd/mm/YYYY
-                    flatpickr(input, {
-                        dateFormat: systemDateFormat, // d/m/Y format for flatpickr
-                        allowInput: true,
-                        defaultDate: originalValue || null,
-                        // Đảm bảo giá trị được parse đúng với định dạng dd/mm/YYYY
-                        parseDate: (datestr, format) => {
-                            if (datestr) {
-                                // Parse date in dd/mm/YYYY format
-                                const parts = datestr.split('/');
-                                if (parts.length === 3) {
-                                    const day = parseInt(parts[0], 10);
-                                    const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
-                                    const year = parseInt(parts[2], 10);
-                                    return new Date(year, month, day);
-                                }
-                            }
-                            return new Date(datestr);
-                        },
-                        // Format date as dd/mm/YYYY when displaying
-                        formatDate: (date, format) => {
-                            const day = String(date.getDate()).padStart(2, '0');
-                            const month = String(date.getMonth() + 1).padStart(2, '0');
-                            const year = date.getFullYear();
-                            return `${day}/${month}/${year}`;
-                        }
-                    });
                 });
             });
         </script>
