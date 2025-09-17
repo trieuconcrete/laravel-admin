@@ -54,6 +54,9 @@
         <!-- Optional: Flatpickr Material Blue theme -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 
+         <!-- Select2 CSS -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+
         <!-- Page-specific CSS -->
         @stack('styles')
     </head>
@@ -152,9 +155,16 @@
         <script src="{{ asset('assets/js/app.js') }}"></script>
         <script src="{{ asset('assets/js/common.js') }}"></script>
         <script src="{{ asset('assets/js/format-date.js') }}"></script>
+        <script src="{{ asset('assets/js/helpers.js') }}"></script>
 
         <!-- Flatpickr JS -->
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+        <!-- Select2 JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
+            <!-- Tiny MCE -->
+        <script src="https://cdn.tiny.cloud/1/{{ config('services.tinymce.key') }}/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
 
         <script>
             // Tự động ẩn alert sau 3 giây
