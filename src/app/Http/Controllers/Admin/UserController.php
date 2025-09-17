@@ -143,12 +143,13 @@ class UserController extends Controller
 
         $totalOtherDeduction = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
         $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
+        $totalRequestOther = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_OTHER, $startDate, $endDate);
+        $totalBonus += $totalRequestOther;
         $totalPenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
         $totalPaid = $user->getTotalSalaryPayments($startDate, $endDate);
         
         // Get salary payment status
         $paymentStatusData = $this->userService->getSalaryPaymentStatus($user, $selectedMonth);
-        
         
         // Extract data from service responses
         extract($salaryData);
