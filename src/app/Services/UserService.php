@@ -297,6 +297,9 @@ class UserService
         
         $totalOtherDeduction = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $startDate, $endDate);
         $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
+        // Get TYPE_OTHER requests for detailed display
+        $otherRequests = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_OTHER, $startDate, $endDate);
+        $totalBonus += $otherRequests;
         $totalPenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
         $totalPaid = $user->getTotalSalaryPayments($startDate, $endDate);
         
