@@ -75,6 +75,8 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
                         ->where('status', 'active');
                 }]);
             }, 'vehicle'])
+            ->orderByDesc('departure_time')
+            ->orderByDesc('updated_at')
             ->get();
     }
 }
