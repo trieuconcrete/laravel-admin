@@ -373,6 +373,8 @@ class SalaryService
         $totalTypeSalary = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $salaryPeriod->start_date, $salaryPeriod->end_date);
         $totalTypeBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $salaryPeriod->start_date, $salaryPeriod->end_date);
         $totalTypePenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $salaryPeriod->start_date, $salaryPeriod->end_date);
+        $totalTypeOther = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_OTHER, $salaryPeriod->start_date, $salaryPeriod->end_date);
+        $totalTypePayment = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PAYMENT, $salaryPeriod->start_date, $salaryPeriod->end_date);
         
         // Process shipment deductions for allowances
         if ($user->role === 'driver') {
@@ -388,6 +390,7 @@ class SalaryService
             $totalAllowance = $lunchAllowance + $otherCosts;
         }
         
+        $totalAllowance += ($totalTypeOther + $totalTypePayment);
         // Calculate total before insurance
         $totalBeforeInsurance = ($baseSalary + $totalAllowance + $totalTypeBonus) - ($totalTypeSalary + $totalTypePenalty);
         
@@ -407,7 +410,9 @@ class SalaryService
             'netSalary' => $netSalary,
             'totalTypeSalary' => $totalTypeSalary,
             'totalTypeBonus' => $totalTypeBonus,
-            'totalTypePenalty' => $totalTypePenalty
+            'totalTypePenalty' => $totalTypePenalty,
+            'totalTypeOther' => $totalTypeOther,
+            'totalTypePayment' => $totalTypePayment
         ];
     }
 
@@ -428,6 +433,8 @@ class SalaryService
         $totalTypeSalary = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $salaryPeriod->start_date, $salaryPeriod->end_date);
         $totalTypeBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $salaryPeriod->start_date, $salaryPeriod->end_date);
         $totalTypePenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $salaryPeriod->start_date, $salaryPeriod->end_date);
+        $totalTypeOther = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_OTHER, $salaryPeriod->start_date, $salaryPeriod->end_date);
+        $totalTypePayment = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PAYMENT, $salaryPeriod->start_date, $salaryPeriod->end_date);
         
         // Calculate total trip value and allowances
         foreach ($shipments as $shipment) {
@@ -452,6 +459,7 @@ class SalaryService
             $totalAllowance = $lunchAllowance + $otherCosts;
         }
         
+        $totalAllowance += ($totalTypeOther + $totalTypePayment);
         // Lương cơ bản = X% của tổng giá trị chuyến xe (X từ user.salary_by_percent)
         $commissionRate = $user->getSalaryByPercent() / 100; // Convert percentage to decimal
         $baseSalary = $totalTripValue * $commissionRate;
@@ -477,7 +485,9 @@ class SalaryService
             'netSalary' => $netSalary,
             'totalTypeSalary' => $totalTypeSalary,
             'totalTypeBonus' => $totalTypeBonus,
-            'totalTypePenalty' => $totalTypePenalty
+            'totalTypePenalty' => $totalTypePenalty,
+            'totalTypeOther' => $totalTypeOther,
+            'totalTypePayment' => $totalTypePayment
         ];
     }
 

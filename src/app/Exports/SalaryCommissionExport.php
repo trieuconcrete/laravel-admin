@@ -557,6 +557,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $totalTypeBonus = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $this->startDate, $this->endDate);
         $totalTypePenalty = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $this->startDate, $this->endDate);
         $totalTypeOther = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_OTHER, $this->startDate, $this->endDate);
+        $totalTypePayment = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PAYMENT, $this->startDate, $this->endDate);
         
         // Bỏ row LƯƠNG DOANH SỐ (X%) theo yêu cầu
         // $baseSalaryRow = $row++; // Không tăng row nữa
@@ -613,7 +614,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         }
         
         // TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY = ({$this->user->getSalaryByPercent()}% của sum(THÀNH TIỀN)) + Tổng trợ cấp của user
-        $totalSalary = $commissionSalary + $totalUserSpecificDeductions + $totalTypeBonus + $totalTypeOther;
+        $totalSalary = $commissionSalary + $totalUserSpecificDeductions + $totalTypeBonus + $totalTypeOther + $totalTypePayment;
         
         // Debug log
         Log::info('Debug TotalSalary Calculation', [
@@ -683,11 +684,11 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
 
         // Add THƯỞNG row
         $otherRequest = $row++;
-        $sheet->setCellValue('A' . $otherRequest, value: 'TRỢ CẤP (YÊU CẦU KHÁC):');
+        $sheet->setCellValue('A' . $otherRequest, value: 'TRỢ CẤP (YÊU CẦU KHÁC + THANH TOÁN LƯƠNG):');
         $sheet->mergeCells('A' . $otherRequest . ':K' . $otherRequest);
         $sheet->getStyle('A' . $otherRequest)->getFont()->setBold(true);
         $sheet->getStyle('A' . $otherRequest)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('L' . $otherRequest, $totalTypeOther);
+        $sheet->setCellValue('L' . $otherRequest, $totalTypeOther + $totalTypePayment);
         $sheet->getStyle('L' . $otherRequest)->getNumberFormat()->setFormatCode('#,##0');
         
         // Highlight THƯỞNG row (no background color)

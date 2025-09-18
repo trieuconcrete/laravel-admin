@@ -232,22 +232,6 @@ class User extends Authenticatable
     }
 
     /**
-     * Get total amount of salary payments (payment type) for a date range
-     *
-     * @param mixed $startDate
-     * @param mixed $endDate
-     * @return float
-     */
-    public function getTotalSalaryPayments($startDate, $endDate)
-    {
-        return $this->salaryAdvanceRequests()
-            ->where('type', SalaryAdvanceRequest::TYPE_PAYMENT)
-            ->whereBetween('advance_month', [$startDate, $endDate])
-            ->whereIn('status', ['approved', SalaryAdvanceRequest::STATUS_PAID])
-            ->sum('amount');
-    }
-
-    /**
      * Check if salary is fully paid for a specific month
      *
      * @param string $month Format: m/Y (e.g., 07/2025)
@@ -289,7 +273,7 @@ class User extends Authenticatable
         }
 
         // Get total paid amount for this month
-        $totalPaid = $this->getTotalSalaryPayments($startDate, $endDate);
+        $totalPaid = 0;
 
         // Calculate remaining amount
         $netSalary = $salaryDetail->net_salary ?? 0;

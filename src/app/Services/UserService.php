@@ -301,7 +301,8 @@ class UserService
         $otherRequests = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_OTHER, $startDate, $endDate);
         // $totalBonus += $otherRequests;
         $totalPenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
-        $totalPaid = $user->getTotalSalaryPayments($startDate, $endDate);
+        $totalTypePayment = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PAYMENT, $startDate, $endDate);
+        $totalPaid = 0;
         
         // Tính trợ cấp theo role
         $totalAllowance = 0;
@@ -316,8 +317,7 @@ class UserService
             $totalAllowance = $lunchAllowance + $otherCosts;
         }
         
-
-        $totalAllowance += $otherRequests;
+        $totalAllowance += ($otherRequests + $totalTypePayment);
         // Tính lương cơ bản theo loại lương
         $salaryType = $user->salary_type?->value ?? 1; // 1: BASIC_SALARY, 2: COMMISSION_SALARY
         $salaryBase = 0;
@@ -477,12 +477,6 @@ class UserService
         }
         
         $salaryAdvanceRequest = $this->salaryAdvanceRequestRepository->create($data);
-        
-        // Check if this is a payment request with approved/paid status
-        if ($salaryAdvanceRequest->type === SalaryAdvanceRequest::TYPE_PAYMENT && 
-            in_array($salaryAdvanceRequest->status, [SalaryAdvanceRequest::STATUS_APPROVED, SalaryAdvanceRequest::STATUS_PAID])) {
-            $this->processSalaryPayment($salaryAdvanceRequest);
-        }
         
         return $salaryAdvanceRequest;
     }

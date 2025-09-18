@@ -478,6 +478,7 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         $totalTypeBonus = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $this->startDate, $this->endDate);
         $totalTypePenalty = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $this->startDate, $this->endDate);
         $totalTypeOther = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_OTHER, $this->startDate, $this->endDate);
+        $totalTypePayment = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PAYMENT, $this->startDate, $this->endDate);
         
         // Add LƯƠNG CƠ BẢN row (base salary with deduction sums)
         $baseSalaryRow = $row++;
@@ -522,8 +523,8 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Add TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY row
         $totalSalaryRow = $row++;
-        $totalSalary = $this->user->salary_base + $totalDeductions + $totalTypeOther + $totalTypeBonus;
-        $sheet->setCellValue('A' . $totalSalaryRow, 'TỔNG LƯƠNG CB + PHỤ CẤP TÀI + TRỢ CẤP (YÊU CẦU KHÁC) + CƠM NGÀY:');
+        $totalSalary = $this->user->salary_base + $totalDeductions + $totalTypeOther + $totalTypeBonus + $totalTypePayment;
+        $sheet->setCellValue('A' . $totalSalaryRow, 'TỔNG LƯƠNG CB + PHỤ CẤP TÀI + TRỢ CẤP (YÊU CẦU KHÁC) + THANH TOÁN LƯƠNG+ CƠM NGÀY:');
         $sheet->mergeCells('A' . $totalSalaryRow . ':D' . $totalSalaryRow);
         $sheet->getStyle('A' . $totalSalaryRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $totalSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
@@ -583,7 +584,7 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->setCellValue($notesColumnLetter . $penaltyRow, '');
         
         // Calculate total before insurance
-        $totalBeforeInsurance = ($this->user->salary_base + $totalDeductions + $totalTypeBonus + $totalTypeOther) - ($totalTypeSalary + $totalTypePenalty);
+        $totalBeforeInsurance = ($this->user->salary_base + $totalDeductions + $totalTypeBonus + $totalTypeOther + $totalTypePayment) - ($totalTypeSalary + $totalTypePenalty);
         
         // Add TRỪ BHXH row
         $insuranceRow = $row++;
