@@ -299,7 +299,7 @@ class UserService
         $totalBonus = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $startDate, $endDate);
         // Get TYPE_OTHER requests for detailed display
         $otherRequests = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_OTHER, $startDate, $endDate);
-        $totalBonus += $otherRequests;
+        // $totalBonus += $otherRequests;
         $totalPenalty = $user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $startDate, $endDate);
         $totalPaid = $user->getTotalSalaryPayments($startDate, $endDate);
         
@@ -316,6 +316,8 @@ class UserService
             $totalAllowance = $lunchAllowance + $otherCosts;
         }
         
+
+        $totalAllowance += $otherRequests;
         // Tính lương cơ bản theo loại lương
         $salaryType = $user->salary_type?->value ?? 1; // 1: BASIC_SALARY, 2: COMMISSION_SALARY
         $salaryBase = 0;
