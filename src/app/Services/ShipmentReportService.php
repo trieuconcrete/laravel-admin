@@ -120,6 +120,8 @@ class ShipmentReportService
                 ->whereBetween('departure_time', [$startDate, $endDate])
                 ->where('status', 'completed')
                 ->with(['customer', 'vehicle', 'vehicle.vehicleType', 'driver', 'goods'])
+                ->orderByDesc('departure_time')
+                ->orderByDesc('updated_at')
                 ->get()
                 ->map(function ($shipment) use ($shipmentType) {
                     return [
