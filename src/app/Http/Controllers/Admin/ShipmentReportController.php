@@ -121,7 +121,10 @@ class ShipmentReportController extends Controller
             $query->where('shipment_type', $shipmentType);
         }
 
-        $shipments = $query->get()
+        $shipments = $query
+            ->orderByDesc('departure_time')
+            ->orderByDesc('updated_at')
+            ->get()
             ->map(function ($shipment) use ($shipmentType) {
                 // Nếu không có shipment_type, sử dụng loại từ database
                 $currentShipmentType = $shipmentType ?: $shipment->shipment_type;

@@ -189,6 +189,27 @@
                                                         @error('address_destination')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
                                                 </div>
+                                                <!-- Tên hàng hóa row -->
+                                                <div class="row mb-3">
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Tên hàng hóa 1</label>
+                                                        <input type="text" class="form-control" placeholder="Nhập tên hàng hóa 1" name="product_name1" value="{{ old('product_name1') }}">
+                                                        @error('product_name1')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Tên hàng hóa 2</label>
+                                                        <input type="text" class="form-control" placeholder="Nhập tên hàng hóa 2" name="product_name2" value="{{ old('product_name2') }}">
+                                                        @error('product_name2')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Tên hàng hóa 3</label>
+                                                        <input type="text" class="form-control" placeholder="Nhập tên hàng hóa 3" name="product_name3" value="{{ old('product_name3') }}">
+                                                        @error('product_name3')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <!-- Empty column for alignment -->
+                                                    </div>
+                                                </div>
                                                 <div class="row mb-3">
                                                     <div class="col-md-3">
                                                         {{--  <label class="form-label">Điểm đi 2</label>  --}}
@@ -231,7 +252,7 @@
                                             <!-- End -->
                                             <div class="mb-3 bg-light p-3" id="goodsSection">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <label class="form-label fs-5 mb-0">Danh sách hàng hóa</label>
+                                                    <label class="form-label fs-5 mb-0">Danh sách hàng hóa <small class="text-muted text-sm-start">Cho xe nâng</small></label>
                                                     <button type="button" class="btn btn-sm btn-outline-primary" id="addGoodBtn">
                                                         <i class="fas fa-plus me-1"></i>Thêm hàng hóa
                                                     </button>
