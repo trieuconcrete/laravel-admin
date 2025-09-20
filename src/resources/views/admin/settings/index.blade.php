@@ -88,7 +88,7 @@
             tabs.forEach(tab => {
                 tab.addEventListener('shown.bs.tab', function(e) {
                     const tabId = e.target.getAttribute('aria-controls');
-                    const url = new URL(window.location);
+                    const url = new URL(window.location.origin + window.location.pathname);
                     url.searchParams.set('tab', tabId);
                     window.history.pushState({}, '', url);
                 });
