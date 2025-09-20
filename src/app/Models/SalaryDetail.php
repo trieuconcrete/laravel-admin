@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\User;
 use App\Enum\SalaryType;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Log;
 
 class SalaryDetail extends Model
@@ -144,6 +146,19 @@ class SalaryDetail extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    protected function paymentDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
     /**
      * Lấy thông tin người phê duyệt bảng lương.
      */
@@ -157,7 +172,7 @@ class SalaryDetail extends Model
      */
     public function calculateTotalSalary()
     {
-        return $this->base_salary + $this->fuel_allowance + $this->meal_allowance + 
+        return $this->base_salary + $this->fuel_allowance + $this->meal_allowance +
                $this->other_allowance + $this->bonus - $this->penalty;
     }
 
@@ -166,9 +181,9 @@ class SalaryDetail extends Model
      */
     public function calculateNetSalary()
     {
-        $netSalary = $this->total_salary - $this->social_insurance - $this->health_insurance - 
+        $netSalary = $this->total_salary - $this->social_insurance - $this->health_insurance -
                      $this->income_tax - $this->other_deduction;
-        
+
         // Debug log để kiểm tra giá trị
         \Log::info('SalaryDetail calculateNetSalary Debug', [
             'salary_id' => $this->salary_id,
@@ -180,7 +195,7 @@ class SalaryDetail extends Model
             'calculated_net_salary' => $netSalary,
             'final_net_salary' => max(0, $netSalary)
         ]);
-        
+
         // Đảm bảo lương thực nhận không âm
         return max(0, $netSalary);
     }
@@ -237,7 +252,7 @@ class SalaryDetail extends Model
 
     /**
      * Get commission percentage for this salary detail
-     * 
+     *
      * @return float
      */
     public function getCommissionPercentage(): float
@@ -246,14 +261,14 @@ class SalaryDetail extends Model
         if (!$this->isCommissionSalaryType()) {
             return 0;
         }
-        
+
         // Return giá trị salary_by_percent, mặc định 12% nếu null
         return (float) ($this->salary_by_percent ?? 12.00);
     }
 
     /**
      * Set commission percentage (chỉ cho commission salary type)
-     * 
+     *
      * @param float|null $percent
      * @return void
      */

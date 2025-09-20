@@ -34,6 +34,9 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
     protected $startDate;
     protected $endDate;
     protected $salaryService;
+
+    protected $typeShipmentDeduction;
+
     /**
      * @param User $user
      * @param Collection $shipments
@@ -77,6 +80,8 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         } else {
             $this->deductionTypes = $allDeductionTypes->keyBy('id');
         }
+
+        $this->typeShipmentDeduction = $user->isDriver() ? ShipmentDeductionType::TYPE_DRIVER : ShipmentDeductionType::TYPE_BUS_DRIVER;
     }
 
     /**
@@ -155,10 +160,12 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Add user information
         $userFullName = $this->user->full_name;
-        $licenseNumber = $this->user->license ? $this->user->license->license_number : '';
+        $licenseNumber = $this->user->vehicle->first() ? $this->user->vehicle->first()->plate_number : null;
+        $capacity = $this->user->vehicle->first() ? $this->user->vehicle->first()->capacity : null;
         $userInfo = 'HỌ VÀ TÊN: ' . $userFullName;
-        if (!empty($licenseNumber)) {
-            $userInfo .= ' (XE ' . $licenseNumber . ')';
+        if ($licenseNumber) {
+            $licenseInfo = ' (XE ' . $licenseNumber;
+            $userInfo .= $capacity ? $licenseInfo . ' - ' . $capacity . ' tấn)' : $licenseInfo . ')';
         }
         $userInfo .= ' - LƯƠNG DOANH SỐ (' . $this->user->getSalaryByPercent() . '%)';
         $sheet->setCellValue('A6', $userInfo);
@@ -173,7 +180,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         
         foreach ($uniqueDeductionTypes as $deductionTypeName) {
             // Start from column L (12th column), so we need column number 12 + colIndex
-            $columnNumber = 12 + $colIndex; // L=12, M=13, N=14, etc.
+            $columnNumber = 13 + $colIndex; // M=13, N=14, O=15, etc. (shift due to added base column)
             $columnLetter = $this->getColumnLetter($columnNumber);
             $deductionColumns[$deductionTypeName] = $columnLetter;
             $colIndex++;
@@ -189,7 +196,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Base headers for fixed columns
         $baseHeaders = [
-            'STT', 'NGÀY', 'CÔNG TY', 'ĐIỂM ĐI', 'ĐIỂM ĐẾN', 'HÀNG HÓA', 'KM', 'GIÁ CHO TÀI XẾ', 'KHỐI LƯỢNG THỰC TẾ(KG)', 'THÀNH TIỀN(bao gồm cẩu)', 'THÀNH TIỀN'
+            'STT', 'NGÀY', 'CÔNG TY', 'ĐIỂM ĐI', 'ĐIỂM ĐẾN', 'HÀNG HÓA', 'KM', 'GIÁ CHO TÀI XẾ', 'ĐƠN GIÁ CẨU', 'KHỐI LƯỢNG THỰC TẾ(KG)', 'THÀNH TIỀN(bao gồm cẩu)', 'THÀNH TIỀN'
         ];
         
         // Get all deduction type names for dynamic headers (remove duplicates)
@@ -271,9 +278,10 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->getColumnDimension('F')->setWidth(15); // HÀNG HÓA
         $sheet->getColumnDimension('G')->setWidth(10); // KM
         $sheet->getColumnDimension('H')->setWidth(15); // GIÁ CHO TÀI XẾ
-        $sheet->getColumnDimension('I')->setWidth(20); // KHỐI LƯỢNG THỰC TẾ(KG)
-        $sheet->getColumnDimension('J')->setWidth(20); // THÀNH TIỀN(bao gồm cẩu)
-        $sheet->getColumnDimension('K')->setWidth(15); // THÀNH TIỀN
+        $sheet->getColumnDimension('I')->setWidth(15); // ĐƠN GIÁ CẨU
+        $sheet->getColumnDimension('J')->setWidth(20); // KHỐI LƯỢNG THỰC TẾ(KG)
+        $sheet->getColumnDimension('K')->setWidth(20); // THÀNH TIỀN(bao gồm cẩu)
+        $sheet->getColumnDimension('L')->setWidth(15); // THÀNH TIỀN
         
         // Set widths for dynamic deduction columns
         foreach ($deductionColumns as $name => $columnLetter) {
@@ -355,14 +363,15 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
                 // Hiển thị unit_price_for_driver, nếu null/0 thì hiển thị unit_price để tham khảo
                 $displayPrice = $shipment->unit_price_for_driver ?? $shipment->unit_price ?? '-';
                 $sheet->setCellValue('H' . $row, $displayPrice); // GIÁ CHO TÀI XẾ
-                $sheet->setCellValue('I' . $row, $shipment->actual_weight ?? '-'); // KHỐI LƯỢNG THỰC TẾ(KG)
+                $sheet->setCellValue('I' . $row, ''); // ĐƠN GIÁ CẨU (rỗng)
+                $sheet->setCellValue('J' . $row, $shipment->cargo_weight ?? '-'); // KHỐI LƯỢNG THỰC TẾ(KG)
                 
                 // THÀNH TIỀN(bao gồm cẩu) = (Giá chuyến cho tài xế × Số lượng chuyến) + Chi phí chuyến xe
                 // Chỉ sử dụng unit_price_for_driver, nếu null hoặc 0 thì giữ 0
                 $unitPrice = (float)($shipment->unit_price_for_driver ?? 0);
                 $tripCount = (int)($shipment->trip_count ?? 1);
                 $tripValue = $unitPrice * $tripCount;
-                
+
                 // Tính chi phí chuyến xe (expense type)
                 $expenseCosts = ShipmentDeduction::where('shipment_id', $shipment->id)
                     ->whereHas('shipmentDeductionType', function($query) {
@@ -371,14 +380,14 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
                     ->sum('amount');
                 
                 $totalWithCrane = $tripValue + $expenseCosts;
-                $sheet->setCellValue('J' . $row, $totalWithCrane);
+                $sheet->setCellValue('K' . $row, $totalWithCrane);
                 
                 // THÀNH TIỀN = (Giá chuyến × Số lượng chuyến) - chỉ giá trị chuyến xe
                 $totalAmount = $tripValue;
-                $sheet->setCellValue('K' . $row, $totalAmount);
+                $sheet->setCellValue('L' . $row, $totalAmount);
                 
+                $typeShipmentDeduction = $this->typeShipmentDeduction;
 
-                
                 // Get all deductions for this shipment
                 // 1. User-specific deductions (driver_and_busboy types)
                 $userDeductions = ShipmentDeduction::where('shipment_id', $shipment->id)
@@ -395,6 +404,9 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
                 // Merge both types of deductions
                 $deductions = $userDeductions->merge($expenseDeductions);
                 
+                $shipmentNotes = null;
+                // Fill in deduction values
+                $oldNotes = null;
                 // Fill in deduction values
                 foreach ($deductions as $deduction) {
                     $deductionType = $this->deductionTypes[$deduction->shipment_deduction_type_id] ?? null;
@@ -414,23 +426,24 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
                         $sheet->setCellValue($col . $row, $deduction->amount);
                         $sheet->getStyle($col . $row)->getNumberFormat()->setFormatCode('#,##0');
                     }
-                }
-                
 
+                    if ($deduction->notes && $deduction->notes != $oldNotes) {
+                        $shipmentNotes .= $deduction->notes . "\n";
+                        $oldNotes = $deduction->notes;
+                    }
+                }
                 
                 // Format number columns
                 $sheet->getStyle('G' . $row)->getNumberFormat()->setFormatCode('#,##0'); // KM
                 $sheet->getStyle('H' . $row)->getNumberFormat()->setFormatCode('#,##0'); // GIÁ
-                $sheet->getStyle('I' . $row)->getNumberFormat()->setFormatCode('#,##0'); // KHỐI LƯỢNG THỰC TẾ(KG)
-                $sheet->getStyle('J' . $row)->getNumberFormat()->setFormatCode('#,##0'); // THÀNH TIỀN(bao gồm cẩu)
-                $sheet->getStyle('K' . $row)->getNumberFormat()->setFormatCode('#,##0'); // THÀNH TIỀN
-                
-
+                // KHỐI LƯỢNG THỰC TẾ(KG) - không format để giữ nguyên số thập phân
+                $sheet->getStyle('K' . $row)->getNumberFormat()->setFormatCode('#,##0'); // THÀNH TIỀN(bao gồm cẩu)
+                $sheet->getStyle('L' . $row)->getNumberFormat()->setFormatCode('#,##0'); // THÀNH TIỀN
                 
                 // Add notes from shipment to the notes column
                 // Validate notes column letter before using
                 if (preg_match('/^[A-Z]+$/', $notesColumnLetter)) {
-                    $sheet->setCellValue($notesColumnLetter . $row, $shipment->notes);
+                    $sheet->setCellValue($notesColumnLetter . $row, $shipmentNotes);
                     
                     // Debug log cho shipment 57
                     if ($shipment->id == 57) {
@@ -543,6 +556,8 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $totalTypeSalary = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_SALARY, $this->startDate, $this->endDate);
         $totalTypeBonus = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_BONUS, $this->startDate, $this->endDate);
         $totalTypePenalty = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PENALTY, $this->startDate, $this->endDate);
+        $totalTypeOther = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_OTHER, $this->startDate, $this->endDate);
+        $totalTypePayment = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PAYMENT, $this->startDate, $this->endDate);
         
         // Bỏ row LƯƠNG DOANH SỐ (X%) theo yêu cầu
         // $baseSalaryRow = $row++; // Không tăng row nữa
@@ -599,7 +614,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         }
         
         // TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY = ({$this->user->getSalaryByPercent()}% của sum(THÀNH TIỀN)) + Tổng trợ cấp của user
-        $totalSalary = $commissionSalary + $totalUserSpecificDeductions;
+        $totalSalary = $commissionSalary + $totalUserSpecificDeductions + $totalTypeBonus + $totalTypeOther + $totalTypePayment;
         
         // Debug log
         Log::info('Debug TotalSalary Calculation', [
@@ -620,14 +635,14 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
             if ($amount > 0) { // Chỉ hiển thị những loại có số tiền > 0
                 $deductionRow = $row++;
                 $sheet->setCellValue('A' . $deductionRow, $deductionName . ':');
-                $sheet->mergeCells('A' . $deductionRow . ':J' . $deductionRow);
+                $sheet->mergeCells('A' . $deductionRow . ':K' . $deductionRow);
                 $sheet->getStyle('A' . $deductionRow)->getFont()->setBold(true);
                 $sheet->getStyle('A' . $deductionRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-                $sheet->setCellValue('K' . $deductionRow, $amount);
-                $sheet->getStyle('K' . $deductionRow)->getNumberFormat()->setFormatCode('#,##0');
+                $sheet->setCellValue('L' . $deductionRow, $amount);
+                $sheet->getStyle('L' . $deductionRow)->getNumberFormat()->setFormatCode('#,##0');
                 
                 // Highlight deduction row with light blue background
-                $sheet->getStyle('A' . $deductionRow . ':K' . $deductionRow)->applyFromArray([
+                $sheet->getStyle('A' . $deductionRow . ':L' . $deductionRow)->applyFromArray([
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
                         // 'color' => ['rgb' => 'E6F3FF'], // Light blue
@@ -642,54 +657,69 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         // Thêm dòng TỔNG LƯƠNG DT (salary_by_percent)
         $commissionSalaryRow = $row++;
         $sheet->setCellValue('A' . $commissionSalaryRow, 'TỔNG LƯƠNG DT (' . $this->user->getSalaryByPercent() . '%):');
-        $sheet->mergeCells('A' . $commissionSalaryRow . ':J' . $commissionSalaryRow);
+        $sheet->mergeCells('A' . $commissionSalaryRow . ':K' . $commissionSalaryRow);
         $sheet->getStyle('A' . $commissionSalaryRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $commissionSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('K' . $commissionSalaryRow, $commissionSalary);
-        $sheet->getStyle('K' . $commissionSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->setCellValue('L' . $commissionSalaryRow, $commissionSalary);
+        $sheet->getStyle('L' . $commissionSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
         
         // Highlight TỔNG LƯƠNG DT row (no background color)
         
         // Add empty cell in notes column for the commission salary row
         $sheet->setCellValue($notesColumnLetter . $commissionSalaryRow, '');
+
+        // Add THƯỞNG row
+        $bonusRow = $row++;
+        $sheet->setCellValue('A' . $bonusRow, 'THƯỞNG:');
+        $sheet->mergeCells('A' . $bonusRow . ':K' . $bonusRow);
+        $sheet->getStyle('A' . $bonusRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $bonusRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('L' . $bonusRow, $totalTypeBonus);
+        $sheet->getStyle('L' . $bonusRow)->getNumberFormat()->setFormatCode('#,##0');
+        
+        // Highlight THƯỞNG row (no background color)
+        
+        // Add empty cell in notes column for the bonus row
+        $sheet->setCellValue($notesColumnLetter . $bonusRow, '');
+
+        // Add THƯỞNG row
+        $otherRequest = $row++;
+        $sheet->setCellValue('A' . $otherRequest, value: 'TRỢ CẤP (YÊU CẦU KHÁC + THANH TOÁN LƯƠNG):');
+        $sheet->mergeCells('A' . $otherRequest . ':K' . $otherRequest);
+        $sheet->getStyle('A' . $otherRequest)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $otherRequest)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('L' . $otherRequest, $totalTypeOther + $totalTypePayment);
+        $sheet->getStyle('L' . $otherRequest)->getNumberFormat()->setFormatCode('#,##0');
+        
+        // Highlight THƯỞNG row (no background color)
+        
+        // Add empty cell in notes column for the bonus row
+        $sheet->setCellValue($notesColumnLetter . $otherRequest, '');
         
         // Thêm dòng TỔNG LƯƠNG (commission + phụ cấp)
         $totalSalaryRow = $row++;
         $sheet->setCellValue('A' . $totalSalaryRow, 'TỔNG LƯƠNG:');
-        $sheet->mergeCells('A' . $totalSalaryRow . ':J' . $totalSalaryRow);
+        $sheet->mergeCells('A' . $totalSalaryRow . ':K' . $totalSalaryRow);
         $sheet->getStyle('A' . $totalSalaryRow)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF0000'));
         $sheet->getStyle('A' . $totalSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('K' . $totalSalaryRow, $totalSalary);
-        $sheet->getStyle('K' . $totalSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
-        $sheet->getStyle('K' . $totalSalaryRow)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF0000'));
+        $sheet->setCellValue('L' . $totalSalaryRow, $totalSalary);
+        $sheet->getStyle('L' . $totalSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('L' . $totalSalaryRow)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF0000'));
         
         // Highlight TỔNG LƯƠNG row (no background color)
         
         // Add empty cell in notes column for the total salary row
         $sheet->setCellValue($notesColumnLetter . $totalSalaryRow, '');
         
-        // Add THƯỞNG row
-        $bonusRow = $row++;
-        $sheet->setCellValue('A' . $bonusRow, 'THƯỞNG:');
-        $sheet->mergeCells('A' . $bonusRow . ':J' . $bonusRow);
-        $sheet->getStyle('A' . $bonusRow)->getFont()->setBold(true);
-        $sheet->getStyle('A' . $bonusRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('K' . $bonusRow, $totalTypeBonus);
-        $sheet->getStyle('K' . $bonusRow)->getNumberFormat()->setFormatCode('#,##0');
-        
-        // Highlight THƯỞNG row (no background color)
-        
-        // Add empty cell in notes column for the bonus row
-        $sheet->setCellValue($notesColumnLetter . $bonusRow, '');
         
         // Add ĐÃ ỨNG LƯƠNG row
         $advanceSalaryRow = $row++;
         $sheet->setCellValue('A' . $advanceSalaryRow, 'TRỪ ỨNG LƯƠNG:');
-        $sheet->mergeCells('A' . $advanceSalaryRow . ':J' . $advanceSalaryRow);
+        $sheet->mergeCells('A' . $advanceSalaryRow . ':K' . $advanceSalaryRow);
         $sheet->getStyle('A' . $advanceSalaryRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $advanceSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('K' . $advanceSalaryRow, $totalTypeSalary);
-        $sheet->getStyle('K' . $advanceSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->setCellValue('L' . $advanceSalaryRow, $totalTypeSalary);
+        $sheet->getStyle('L' . $advanceSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
         
         // Highlight TỔNG ỨNG LƯƠNG row (no background color)
         
@@ -699,11 +729,11 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         // Add PHẠT row
         $penaltyRow = $row++;
         $sheet->setCellValue('A' . $penaltyRow, 'TRỪ PHẠT:');
-        $sheet->mergeCells('A' . $penaltyRow . ':J' . $penaltyRow);
+        $sheet->mergeCells('A' . $penaltyRow . ':K' . $penaltyRow);
         $sheet->getStyle('A' . $penaltyRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $penaltyRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('K' . $penaltyRow, $totalTypePenalty);
-        $sheet->getStyle('K' . $penaltyRow)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->setCellValue('L' . $penaltyRow, $totalTypePenalty);
+        $sheet->getStyle('L' . $penaltyRow)->getNumberFormat()->setFormatCode('#,##0');
         
         // Highlight PHẠT row (no background color)
         
@@ -736,11 +766,11 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         } else {
             $sheet->setCellValue('A' . $insuranceRow, 'TRỪ BHXH (Chưa đóng)');
         }
-        $sheet->mergeCells('A' . $insuranceRow . ':J' . $insuranceRow);
+        $sheet->mergeCells('A' . $insuranceRow . ':K' . $insuranceRow);
         $sheet->getStyle('A' . $insuranceRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $insuranceRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('K' . $insuranceRow, $insuranceDeduction);
-        $sheet->getStyle('K' . $insuranceRow)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->setCellValue('L' . $insuranceRow, $insuranceDeduction);
+        $sheet->getStyle('L' . $insuranceRow)->getNumberFormat()->setFormatCode('#,##0');
         
         // TỔNG LƯƠNG CÒN LẠI: (TỔNG LƯƠNG DS + PHỤ CẤP TÀI + CƠM NGÀY) - (TRỪ BHXH + TRỪ PHẠT + TRỪ ỨNG LƯƠNG)
         // BHXH = X% của Y (từ settings), không phụ thuộc vào totalSalary
@@ -765,18 +795,18 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         ]);
         
         $sheet->setCellValue('A' . $remainingSalaryRow, 'THỰC LÃNH:');
-        $sheet->mergeCells('A' . $remainingSalaryRow . ':J' . $remainingSalaryRow);
+        $sheet->mergeCells('A' . $remainingSalaryRow . ':K' . $remainingSalaryRow);
         $sheet->getStyle('A' . $remainingSalaryRow)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF0000'));
         $sheet->getStyle('A' . $remainingSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('K' . $remainingSalaryRow, $totalSalaryRemaining);
-        $sheet->getStyle('K' . $remainingSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
-        $sheet->getStyle('K' . $remainingSalaryRow)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF0000'));
+        $sheet->setCellValue('L' . $remainingSalaryRow, $totalSalaryRemaining);
+        $sheet->getStyle('L' . $remainingSalaryRow)->getNumberFormat()->setFormatCode('#,##0');
+        $sheet->getStyle('L' . $remainingSalaryRow)->getFont()->setBold(true)->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF0000'));
         
         // Style the additional calculation rows (separate from the main table)
         // Bắt đầu từ dòng đầu tiên của phụ cấp (nếu có) hoặc từ commissionSalaryRow
         $calculationStartRow = isset($deductionDetails) && !empty($deductionDetails) ? ($commissionSalaryRow - count(array_filter($deductionDetails, function($amount) { return $amount > 0; }))) : $commissionSalaryRow;
         $calculationEndRow = $remainingSalaryRow;
-        $calculationRange = 'A' . $calculationStartRow . ':K' . $calculationEndRow;
+        $calculationRange = 'A' . $calculationStartRow . ':L' . $calculationEndRow;
         $sheet->getStyle($calculationRange)->applyFromArray([
             'borders' => [
                 'allBorders' => [
@@ -817,7 +847,7 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         $sheet->getStyle('D9:E' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // ĐIỂM ĐI, ĐIỂM ĐẾN
         $sheet->getStyle('F9:F' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT); // HÀNG HÓA
         $sheet->getStyle('G9:G' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT); // KM
-        $sheet->getStyle('H9:K' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT); // GIÁ, KHỐI LƯỢNG, THÀNH TIỀN
+        $sheet->getStyle('H9:L' . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT); // GIÁ, ĐƠN GIÁ CẨU, KHỐI LƯỢNG, THÀNH TIỀN
         
         // Set alignment for notes column
         $sheet->getStyle($notesColumnLetter . '9:' . $notesColumnLetter . $totalRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);

@@ -19,6 +19,29 @@ document.addEventListener('DOMContentLoaded', function () {
         return input;
     }
 
+    // Function to parse YYYY-MM-DD to Date object
+    function parseISODate(isoDateStr) {
+        if (!isoDateStr) return null;
+
+        const match = isoDateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!match) return null;
+
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10);
+        const day = parseInt(match[3], 10);
+
+        return new Date(year, month - 1, day);
+    }
+
+    // Function to format Date to dd/mm/yyyy
+    function formatDateToDisplay(date) {
+        if (!date) return '';
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
     // Function to validate date format and actual date
     function validateDateFormat(dateStr) {
         // Check if it matches dd/MM/yyyy pattern exactly
@@ -99,23 +122,47 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Track all date inputs for form submission
+    const dateInputs = [];
+
     document.querySelectorAll('input[type="date"]').forEach(function (input) {
-        // Lưu giá trị ban đầu
+        // Add to tracking array
+        dateInputs.push(input);
+
+        // Lưu giá trị ban đầu và parse nó
         const originalValue = input.value;
         let isValidating = false;
         let lastValidValue = '';
+
+        // Parse giá trị ban đầu từ YYYY-MM-DD thành Date object
+        let initialDate = null;
+        let initialDisplayValue = '';
+
+        if (originalValue) {
+            initialDate = parseISODate(originalValue);
+            if (initialDate) {
+                initialDisplayValue = formatDateToDisplay(initialDate);
+                lastValidValue = initialDisplayValue;
+            }
+        }
 
         // Chuyển từ input type="date" sang input type="text" để sử dụng flatpickr
         input.type = 'text';
         input.placeholder = dateFormatPlaceholder;
 
+        // Hiển thị giá trị ban đầu đã được format
+        if (initialDisplayValue) {
+            input.value = initialDisplayValue;
+        }
+
         let flatpickrInstance = null;
 
         // Khởi tạo flatpickr
         flatpickrInstance = flatpickr(input, {
-            dateFormat: systemDateFormat,
             allowInput: true,
-            defaultDate: originalValue || null,
+            altInput: false, // Tắt altInput để tránh conflict
+            dateFormat: "Y-m-d",   // Format gửi về backend: 2025-09-17
+            defaultDate: initialDate, // Sử dụng Date object đã parse
             parseDate: (datestr, format) => {
                 if (datestr && !isValidating) {
                     // Only parse if it's a valid date format
@@ -127,6 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 return null; // Return null for invalid dates to prevent auto-correction
             },
             formatDate: (date, format) => {
+                // Format cho display (dd/mm/yyyy)
                 const day = String(date.getDate()).padStart(2, '0');
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const year = date.getFullYear();
@@ -134,16 +182,21 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             onChange: function (selectedDates, dateStr, instance) {
                 if (selectedDates.length > 0 && !isValidating) {
-                    // Only accept if it's from calendar selection, not from input parsing
-                    const formattedDate = instance.formatDate(selectedDates[0],
-                        systemDateFormat);
+                    // Format date for display
+                    const formattedDate = formatDateToDisplay(selectedDates[0]);
+                    input.value = formattedDate;
                     lastValidValue = formattedDate;
                     showError(input, '');
+
+                    // Set the actual value in YYYY-MM-DD format for form submission
+                    const year = selectedDates[0].getFullYear();
+                    const month = String(selectedDates[0].getMonth() + 1).padStart(2, '0');
+                    const day = String(selectedDates[0].getDate()).padStart(2, '0');
+                    input.setAttribute('data-backend-value', `${year}-${month}-${day}`);
                 }
             },
             onClose: function (selectedDates, dateStr, instance) {
                 // Prevent flatpickr from clearing invalid input on close
-                // This ensures invalid dates stay visible when calendar closes
                 return false;
             },
             onReady: function (selectedDates, dateStr, instance) {
@@ -154,6 +207,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 instance.input.addEventListener('blur', function (e) {
                     e.stopImmediatePropagation();
                 }, true);
+
+                // Set initial data-backend-value if we have initialDate
+                if (initialDate) {
+                    const year = initialDate.getFullYear();
+                    const month = String(initialDate.getMonth() + 1).padStart(2, '0');
+                    const day = String(initialDate.getDate()).padStart(2, '0');
+                    input.setAttribute('data-backend-value', `${year}-${month}-${day}`);
+                }
             }
         });
 
@@ -178,6 +239,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (value.length === 0) {
                 // Empty input, no error
                 showError(input, '');
+                input.removeAttribute('data-backend-value');
             } else if (value.length > 10) {
                 // Prevent input longer than 10 characters
                 e.target.value = value.substring(0, 10);
@@ -189,11 +251,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     lastValidValue = value;
                     flatpickrInstance.setDate(validation.date, false);
                     showError(input, '');
+
+                    // Set the actual value in YYYY-MM-DD format for form submission
+                    const year = validation.date.getFullYear();
+                    const month = String(validation.date.getMonth() + 1).padStart(2, '0');
+                    const day = String(validation.date.getDate()).padStart(2, '0');
+                    input.setAttribute('data-backend-value', `${year}-${month}-${day}`);
                 } else {
                     showError(input, validation.message);
+                    input.removeAttribute('data-backend-value');
                 }
             } else {
                 // Partial input, check for obvious errors
+                input.removeAttribute('data-backend-value');
 
                 // Check if input contains only digits (and slashes if formatted)
                 if (!/^[\d\/]*$/.test(value)) {
@@ -247,6 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (currentValue === '') {
                 showError(input, '');
                 lastValidValue = '';
+                input.removeAttribute('data-backend-value');
                 return;
             }
 
@@ -256,6 +327,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (currentValue.length !== 10) {
                     showError(input, 'Định dạng phải là dd/mm/yyyy');
+                    input.removeAttribute('data-backend-value');
                     return;
                 }
 
@@ -263,14 +335,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!validation.valid) {
                     showError(input, validation.message);
                     input.value = currentValue; // giữ nguyên text sai
+                    input.removeAttribute('data-backend-value');
                 } else {
                     showError(input, '');
                     lastValidValue = currentValue;
                     flatpickrInstance.setDate(validation.date, false);
+
+                    // Set the actual value in YYYY-MM-DD format for form submission
+                    const year = validation.date.getFullYear();
+                    const month = String(validation.date.getMonth() + 1).padStart(2, '0');
+                    const day = String(validation.date.getDate()).padStart(2, '0');
+                    input.setAttribute('data-backend-value', `${year}-${month}-${day}`);
                 }
             }, 0);
         });
-
 
         // Handle keydown for better UX - only allow numbers and specific keys
         input.addEventListener('keydown', function (e) {
@@ -313,8 +391,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         flatpickrInstance.setDate(validation.date, false);
                         showError(input, '');
                         lastValidValue = formatted;
+
+                        // Set the actual value in YYYY-MM-DD format for form submission
+                        const year = validation.date.getFullYear();
+                        const month = String(validation.date.getMonth() + 1).padStart(2, '0');
+                        const day = String(validation.date.getDate()).padStart(2, '0');
+                        input.setAttribute('data-backend-value', `${year}-${month}-${day}`);
                     } else {
                         showError(input, validation.message);
+                        input.removeAttribute('data-backend-value');
                     }
                 } else if (value.length > 10) {
                     // Trim if too long
@@ -322,5 +407,51 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }, 0);
         });
+
+        // Add method to get the actual value for form submission
+        input.getValue = function () {
+            return this.getAttribute('data-backend-value') || '';
+        };
     });
+
+    // Intercept form submission to convert date format
+    document.addEventListener('submit', function (e) {
+        const form = e.target;
+
+        // Find all date inputs in this form
+        const formDateInputs = dateInputs.filter(input => form.contains(input));
+
+        // Create hidden inputs for backend values
+        const hiddenInputs = [];
+
+        formDateInputs.forEach(input => {
+            const backendValue = input.getAttribute('data-backend-value');
+
+            if (backendValue && input.name) {
+                // Create hidden input with the backend value
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = input.name;
+                hiddenInput.value = backendValue;
+
+                // Remove name from original input to prevent conflict
+                input.removeAttribute('name');
+
+                // Add hidden input to form
+                form.appendChild(hiddenInput);
+                hiddenInputs.push(hiddenInput);
+            }
+        });
+
+        // Store reference for cleanup
+        form._dateHiddenInputs = hiddenInputs;
+    });
+
+    // Cleanup function (optional, for SPA or dynamic forms)
+    window.cleanupDateInputs = function (form) {
+        if (form._dateHiddenInputs) {
+            form._dateHiddenInputs.forEach(input => input.remove());
+            form._dateHiddenInputs = null;
+        }
+    };
 });

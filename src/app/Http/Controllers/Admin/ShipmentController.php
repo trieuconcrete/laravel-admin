@@ -127,8 +127,8 @@ class ShipmentController extends Controller
     public function store(ShipmentRequest $request)
     {
         try {
-            $this->shipmentService->createShipment($request->validated());
-            return redirect()->route('admin.shipments.index')->with('success', 'Tạo chuyến hàng thành công.');
+            $shipment = $this->shipmentService->createShipment($request->validated());
+            return redirect()->route('admin.shipments.edit', $shipment)->with('success', 'Tạo chuyến hàng thành công.');
         } catch (\Exception $e) {
             Log::error('Tạo chuyến hàng thất bại: '. $e->getMessage());
             return back()->withInput()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
@@ -243,7 +243,7 @@ class ShipmentController extends Controller
                 ]);
             }
             $this->shipmentService->update($shipment, $request->validated());
-            return redirect()->route('admin.shipments.index')->with('success', 'Cập nhật chuyến hàng thành công.');
+            return redirect()->route('admin.shipments.edit', $shipment)->with('success', 'Cập nhật chuyến hàng thành công.');
         } catch (\Exception $e) {
             Log::error('Cập nhật chuyến hàng thất bại: '. $e->getMessage());
             return back()->withInput()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());

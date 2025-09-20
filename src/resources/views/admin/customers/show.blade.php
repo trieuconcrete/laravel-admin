@@ -133,7 +133,7 @@
                                         <div class="mb-3">
                                             <label for="fullnameInput" class="form-label">Ngày thành lập</label>
                                             <input type="date" class="form-control" name="establishment_date"
-                                                value="@formatDateForInput($customer?->establishment_date)">
+                                                value="{{ $customer->establishment_date }}">
                                             @error('establishment_date')
                                                 <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                             @enderror
@@ -582,7 +582,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const activeTabParam = urlParams.get('active_tab');
             const activeTab = activeTabParam || '{{ $activeTab ?? "generalInfo" }}';
-            
+
             // Activate the correct tab
             if (activeTab) {
                 // Remove active class from all tabs and panes
@@ -590,15 +590,15 @@
                 document.querySelectorAll('.tab-pane').forEach(pane => {
                     pane.classList.remove('show', 'active');
                 });
-                
+
                 // Add active class to the correct tab and pane
                 const targetTab = document.querySelector(`[data-bs-target="#${activeTab}"]`);
                 const targetPane = document.getElementById(activeTab);
-                
+
                 if (targetTab) targetTab.classList.add('active');
                 if (targetPane) targetPane.classList.add('show', 'active');
             }
-            
+
             // Handle tab activation to ensure data is loaded when monthly report tab is clicked
             const tabLinks = document.querySelectorAll('.nav-link');
             if (tabLinks) {
@@ -724,12 +724,6 @@
                             document.getElementById('totalAmountWithTax').textContent = numberFormat(totalAmountWithTax);
                         } else {
                             // No data found
-                            tableBody.innerHTML = '<tr><td colspan="12" class="text-center">Không có dữ liệu chuyến xe trong tháng này</td></tr>';
-
-                            // Reset footer totals
-                            document.getElementById('totalTrips').textContent = '0';
-                            document.getElementById('totalWeight').textContent = '0';
-                            document.getElementById('totalCombinedFees').textContent = '0';
                             document.getElementById('grandTotal').textContent = '0';
                             document.getElementById('amountWithTax').textContent = '0';
                             document.getElementById('totalAmountWithTax').textContent = '0';
@@ -809,13 +803,13 @@
                 console.log('Parameters:', { startDate, endDate, shipmentType });
                 console.log('Start date type:', typeof startDate);
                 console.log('End date type:', typeof endDate);
-                
+
                 // Build query parameters - if shipmentType is empty, don't include it in query
                 const queryParams = new URLSearchParams({
                     statement_start_date: startDate,
                     statement_end_date: endDate
                 });
-                
+
                 if (shipmentType && shipmentType !== '') {
                     queryParams.append('shipment_type', shipmentType);
                 }
@@ -857,17 +851,17 @@
                         if (data.success) {
                             console.log('=== API call successful ===');
                             console.log('Calling updateTableWithData with:', data.data);
-                            
+
                             // Update table with data
                             updateTableWithData(data.data);
-                            
+
                             // Load debt summary after updating table (tổng công nợ từ trước đến nay)
                             loadDebtSummary();
-                            
+
                             // Show success message
                             const shipmentType = document.querySelector('select[name="shipment_type"]').value;
                             const typeLabel = shipmentType && shipmentType !== '' ? getShipmentTypeLabel(shipmentType) : 'Tất cả các loại';
-                            
+
                             // Swal.fire({
                             //     icon: 'success',
                             //     title: 'Thành công',
@@ -912,29 +906,29 @@
                 monthSelect.addEventListener('change', function() {
                     const selectedMonth = this.value;
                     console.log('Month dropdown changed to:', selectedMonth);
-                    
+
                     if (selectedMonth && selectedMonth !== '') {
                         // Calculate start and end date for the selected month
                         const [year, month] = selectedMonth.split('-');
-                        const startDate = `${year}-${month}-01`;
+                        const startDate = `${year}/${month}/01`;
                         // Fix: month is 1-indexed for Date constructor, so we need to use month-1 for current month
                         const lastDay = new Date(year, month, 0).getDate();
-                        const endDate = `${year}-${month}-${lastDay}`;
-                        
+                        const endDate = `${year}/${month}/${lastDay}`;
+
                         console.log('Calculated dates:', { startDate, endDate, year, month, lastDay });
-                        
+
                         // Update date inputs
                         document.querySelector('input[name="statement_start_date"]').value = startDate;
                         document.querySelector('input[name="statement_end_date"]').value = endDate;
-                        
+
                         // Get current shipment type
                         const shipmentType = document.querySelector('select[name="shipment_type"]').value;
-                        
+
                         console.log('Shipment type:', shipmentType);
-                        
+
                         // Perform search automatically (with or without shipment type)
                         performSearch(startDate, endDate, shipmentType);
-                        
+
                         // Load debt summary after search (tổng công nợ từ trước đến nay)
                         loadDebtSummary();
                     } else {
@@ -943,13 +937,13 @@
                         const currentDate = new Date();
                         const year = currentDate.getFullYear();
                         const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-                        const startDate = `${year}-${month}-01`;
+                        const startDate = `${year}/${month}/01`;
                         const lastDay = new Date(year, month, 0).getDate();
-                        const endDate = `${year}-${month}-${lastDay}`;
-                        
+                        const endDate = `${year}/${month}/${lastDay}`;
+
                         document.querySelector('input[name="statement_start_date"]').value = startDate;
                         document.querySelector('input[name="statement_end_date"]').value = endDate;
-                        
+
                         // Auto-search with all types when no specific type is selected
                         performSearch(startDate, endDate, '');
                     }
@@ -987,10 +981,10 @@
 
                     // Perform search
                     performSearch(startDate, endDate, shipmentType);
-                    
+
                     // Load debt summary after search (tổng công nợ từ trước đến nay)
                     loadDebtSummary();
-                    
+
                     console.log('Search button clicked');
                 });
             }
@@ -998,7 +992,7 @@
             // Function to load debt summary from API (tổng công nợ từ trước đến nay)
             function loadDebtSummary() {
                 const customerId = {{ $customer->id }};
-                
+
                 // Call API to get debt summary (không cần tham số thời gian)
                 // Luôn lấy tổng công nợ từ trước đến nay, không phụ thuộc vào thời gian search
                 fetch(`{{ route('admin.customers.debt-summary', $customer) }}`, {
@@ -1029,15 +1023,15 @@
                 const debtLabelEl = document.getElementById('debtLabel');
                 const debtNoteEl = document.getElementById('debtNote');
                 const refundNoteEl = document.getElementById('refundNote');
-                
+
                 if (totalReportedEl) totalReportedEl.textContent = numberFormat(debtSummary.total_reported);
                 if (totalPaidEl) totalPaidEl.textContent = numberFormat(debtSummary.total_paid);
                 if (remainingDebtEl) remainingDebtEl.textContent = numberFormat(Math.abs(debtSummary.remaining_debt));
-                
+
                 // Update debt label and note based on debt type
                 if (debtSummary.is_refund_case) {
                     if (refundNoteEl) refundNoteEl.classList.remove('d-none');
-                    
+
                     if (debtSummary.debt_type === 'customer_owes') {
                         if (debtLabelEl) debtLabelEl.textContent = 'Còn nợ';
                         if (debtNoteEl) debtNoteEl.textContent = '(*) Có điều chỉnh';
@@ -1049,7 +1043,7 @@
                     }
                 } else {
                     if (refundNoteEl) refundNoteEl.classList.add('d-none');
-                    
+
                     if (debtSummary.debt_type === 'customer_owes') {
                         if (debtLabelEl) debtLabelEl.textContent = 'Còn nợ';
                         if (debtNoteEl) debtNoteEl.textContent = '';
@@ -1075,7 +1069,7 @@
                 const tableFoot = document.querySelector('#monthlyReportTable tfoot');
                 console.log('Table body element:', tableBody);
                 console.log('Table foot element:', tableFoot);
-                
+
                 tableBody.innerHTML = '';
 
                 if (shipments.length === 0) {
@@ -1102,7 +1096,7 @@
 
                 shipments.forEach(shipment => {
                     const row = document.createElement('tr');
-                    
+
                     totalTrips += parseInt(shipment.trip_count) || 0;
                     totalWeight += parseFloat(shipment.cargo_weight) || 0;
                     totalCombinedFees += parseFloat(shipment.combined_fees) || 0;
@@ -1177,7 +1171,7 @@
                         });
                         return;
                     }
-                    
+
                     // Debug log
                     console.log('Debug summarize button:', {
                         startDate,
@@ -1200,7 +1194,7 @@
 
                     // Get shipment type label
                     const shipmentTypeLabel = getShipmentTypeLabel(shipmentType);
-                    
+
                     // Show confirmation dialog
                     Swal.fire({
                         title: 'Xác nhận tổng kết bảng kê?',
@@ -1251,7 +1245,7 @@
                                             shipmentType,
                                             shipmentTypeLabel: getShipmentTypeLabel(shipmentType)
                                         });
-                                        
+
                                         Swal.fire({
                                             icon: 'success',
                                             title: 'Thành công',
@@ -1330,7 +1324,7 @@
 
                     // Get shipment type label
                     const shipmentTypeLabel = getShipmentTypeLabel(shipmentType);
-                    
+
                     // Prepare Swal options based on shipment type
                     const swalOptions = {
                         title: 'Xác nhận xuất bảng kê?',
@@ -1369,7 +1363,7 @@
                             });
                         };
                     }
-                    
+
                     // Show confirmation dialog
                     Swal.fire(swalOptions).then((result) => {
                         console.log('Export confirmation result:', result);
@@ -1391,7 +1385,7 @@
                                     });
 
                                     const downloadUrl = `{{ route('admin.shipment-reports.export', $customer) }}?${params.toString()}`;
-                                    
+
                                     // Create a temporary link and trigger download
                                     const link = document.createElement('a');
                                     link.href = downloadUrl;
@@ -1791,35 +1785,35 @@
                 const monthSelect = document.getElementById('month');
                 console.log('Month select element:', monthSelect);
                 console.log('Month select value:', monthSelect ? monthSelect.value : 'null');
-                
+
                 // Always set default dates to current month first
                 const currentDate = new Date();
                 const year = currentDate.getFullYear();
                 const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-                const startDate = `${year}-${month}-01`;
+                const startDate = `${year}/${month}/01`;
                 const lastDay = new Date(year, month, 0).getDate();
-                const endDate = `${year}-${month}-${lastDay}`;
-                
+                const endDate = `${year}/${month}/${lastDay}`;
+
                 console.log('Current date info:', { currentDate, year, month, startDate, lastDay, endDate });
-                
+
                 // Get input elements
                 const startDateInput = document.getElementById('statement_start_date');
                 const endDateInput = document.getElementById('statement_end_date');
-                
+
                 console.log('Input elements:', { startDateInput, endDateInput });
-                
+
                 if (startDateInput && endDateInput) {
                     console.log('Setting default dates:', startDate, 'to', endDate);
                     startDateInput.value = startDate;
                     endDateInput.value = endDate;
-                    
+
                     // Verify values were set
                     console.log('After setting - Start date value:', startDateInput.value);
                     console.log('After setting - End date value:', endDateInput.value);
                 } else {
                     console.error('Input elements not found!');
                 }
-                
+
                 // Check if month select has a meaningful value and trigger change event
                 if (monthSelect && monthSelect.value && monthSelect.value !== '' && !monthSelect.dataset.loaded) {
                     console.log('Month select has value, triggering change event for month:', monthSelect.value);
@@ -1830,10 +1824,10 @@
                     // Auto-search with all types when no specific month is selected
                     performSearch(startDate, endDate, '');
                 }
-                
+
                 // Load initial debt summary (tổng công nợ từ trước đến nay)
                 loadDebtSummary();
-                
+
                 // Mark that we've already handled the initial load
                 window.initialLoadHandled = true;
             });
@@ -1841,15 +1835,15 @@
             // Additional backup: Use setTimeout to ensure everything is ready (only if initial load not handled)
             setTimeout(function() {
                 console.log('=== Timeout check for auto-load ===');
-                
+
                 // Check if initial load has already been handled
                 if (window.initialLoadHandled === true) {
                     console.log('Timeout - initial load already handled, skipping');
                     return;
                 }
-                
+
                 const monthSelect = document.getElementById('month');
-                
+
                 // Check if month select has a meaningful value and not loaded yet
                 if (monthSelect && monthSelect.value && monthSelect.value !== '' && !monthSelect.dataset.loaded) {
                     console.log('Timeout - triggering change event for month:', monthSelect.value);
@@ -1859,7 +1853,7 @@
                     // If no month selected or empty value, check if we need to set default dates
                     const startDateInput = document.getElementById('statement_start_date');
                     const endDateInput = document.getElementById('statement_end_date');
-                    
+
                     if (!startDateInput.value || !endDateInput.value) {
                         console.log('Timeout - setting default dates but not searching');
                         const currentDate = new Date();
@@ -1868,22 +1862,22 @@
                         const startDate = `${year}-${month}-01`;
                         const lastDay = new Date(year, month, 0).getDate();
                         const endDate = `${year}-${month}-${lastDay}`;
-                        
+
                         startDateInput.value = startDate;
                         endDateInput.value = endDate;
-                        
+
                         console.log('Dates set, waiting for user to select shipment_type and click search');
                     } else {
                         console.log('Timeout - dates already set, auto-searching with all types');
                         performSearch(startDateInput.value, endDateInput.value, '');
                     }
                 }
-                
+
                 // Mark that we've handled the load (even if it's from timeout)
                 window.initialLoadHandled = true;
             }, 1000);
 
-            
+
             // Handle payment button clicks
             const transactionModal = document.getElementById('transactionModal');
             const shipmentReportIdInput = document.getElementById('shipment_report_id');
@@ -1894,7 +1888,7 @@
             transactionModal.addEventListener('show.bs.modal', function(event) {
                 // Button that triggered the modal
                 const button = event.relatedTarget;
-                
+
                 // Get shipment_report_id and amount from the parent row's data attributes
                 const row = button.closest('tr');
                 const shipmentId = row.getAttribute('data-debt');
@@ -1909,7 +1903,7 @@
                 if (notesInput) {
                     notesInput.value = 'Công nợ #' + shipmentId + '\nLoại: ' + notes;
                 }
-                
+
                 if (amountInput && amount) {
                     // Format amount with commas for display
                     const formattedAmount = parseInt(amount).toLocaleString('en-US');

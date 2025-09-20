@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class CarRentalVehicle extends Model
 {
@@ -95,6 +96,19 @@ class CarRentalVehicle extends Model
     public function vehicle(): BelongsTo
     {
         return $this->belongsTo(Vehicle::class, 'vehicle_id');
+    }
+
+    protected function estimatedArrivalTime(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
     }
 
     /**
