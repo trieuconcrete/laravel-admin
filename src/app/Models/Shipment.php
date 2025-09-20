@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Enum\UserStatus;
 use App\Models\ShipmentDeductionType;
 use App\Traits\HasCompletedStatus;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,7 +37,7 @@ class Shipment extends Model
         'destination2', // điểm đến 2
         'destination3', // điểm đến 2
         'company',
-        'company2', 
+        'company2',
         'company3',
         'address_destination',  // điểm đến địa chỉ 1
         'address_destination2', // điểm đến địa chỉ 2
@@ -60,7 +62,7 @@ class Shipment extends Model
         'shipment_type', // 1: Khách chạy theo chuyến, 2: Khách thuê xe tháng, 3: Xe nâng, 4: Xe đường dài bắc-nam
         'created_by',
         'updated_by',
-        
+
         // Từ CarRentalVehicleLog
         'car_rental_id',
         'shipment_report_id', // ID báo cáo chuyến hàng
@@ -97,10 +99,10 @@ class Shipment extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
-        
+
         // Từ CarRentalVehicleLog
         'start_time' => 'string', // time
-        'end_time' => 'string',   // time  
+        'end_time' => 'string',   // time
         'run_date' => 'date',
         'overtime_hours' => 'decimal:2',
         'start_odometer' => 'decimal:2',
@@ -273,6 +275,32 @@ class Shipment extends Model
         return $this->hasMany(ShipmentDeductionType::class);
     }
 
+    protected function departureTime(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
+    protected function estimatedArrivalTime(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
     /**
      * Scope để lọc shipment theo trạng thái
      */
@@ -347,7 +375,7 @@ class Shipment extends Model
                   });
             });
         }
-        
+
         return $query;
     }
 
@@ -374,7 +402,7 @@ class Shipment extends Model
     {
         $transportValue = $this->distance * $this->unit_price;
         $craneValue = $this->has_crane_service ? $this->crane_price : 0;
-        
+
         return $transportValue + $craneValue;
     }
 
@@ -393,9 +421,9 @@ class Shipment extends Model
      */
     public function isDelayed()
     {
-        return $this->status === 'delayed' || 
-               ($this->status === 'in_transit' && 
-                $this->estimated_arrival_time && 
+        return $this->status === 'delayed' ||
+               ($this->status === 'in_transit' &&
+                $this->estimated_arrival_time &&
                 now()->gt($this->estimated_arrival_time));
     }
 
@@ -406,11 +434,11 @@ class Shipment extends Model
     {
         $this->status = $status;
         $this->updated_by = $userId;
-        
+
         if ($notes) {
             $this->notes = $notes;
         }
-        
+
         return $this->save();
     }
 
@@ -422,7 +450,7 @@ class Shipment extends Model
         $prefix = 'SHP';
         $date = now()->format('ymd');
         $random = strtoupper(substr(md5(microtime()), 0, 4));
-        
+
         return $prefix . $date . $random;
     }
 
@@ -442,11 +470,11 @@ class Shipment extends Model
             ->whereNotNull('user_id')
             ->where('is_main_driver', true)
             ->first();
-            
+
         if ($mainDriver) {
             return $mainDriver->user;
         }
-        
+
         // Nếu không có main driver, lấy tài xế đầu tiên
         $firstDriver = $this->shipmentDeductions()
             ->whereHas('shipmentDeductionType', function($query) {
@@ -457,7 +485,7 @@ class Shipment extends Model
             })
             ->whereNotNull('user_id')
             ->first();
-            
+
         return $firstDriver ? $firstDriver->user : null;
     }
 
@@ -476,7 +504,7 @@ class Shipment extends Model
             ->whereNotNull('user_id')
             ->where('is_main_driver', true)
             ->first();
-            
+
         return $mainDriverDeduction ? $mainDriverDeduction->user : null;
     }
 
@@ -514,17 +542,17 @@ class Shipment extends Model
         if ($driver) {
             return $driver->full_name;
         }
-        
+
         // Fallback to direct driver relationship
         if ($this->driver) {
             return $this->driver->full_name;
         }
-        
+
         // Fallback to co-driver
         if ($this->coDriver) {
             return $this->coDriver->full_name;
         }
-        
+
         return 'Xe HPL thuê';
     }
 
@@ -601,7 +629,7 @@ class Shipment extends Model
     }
 
     /**
-     * Lấy tổng tiền Bốc 
+     * Lấy tổng tiền Bốc
      * @return float
      */
     public function getTotalCombinedCargoHandlingAttribute()
@@ -625,16 +653,16 @@ class Shipment extends Model
         if (!$this->start_time || !$this->end_time) {
             return 0;
         }
-        
+
         try {
             $start = \Carbon\Carbon::createFromFormat('H:i:s', $this->start_time);
             $end = \Carbon\Carbon::createFromFormat('H:i:s', $this->end_time);
-            
+
             // Nếu end_time nhỏ hơn start_time, có nghĩa là qua ngày
             if ($end->lt($start)) {
                 $end->addDay();
             }
-            
+
             return $start->diffInHours($end);
         } catch (\Exception $e) {
             return 0;
@@ -649,7 +677,7 @@ class Shipment extends Model
         if (!$this->start_odometer || !$this->end_odometer) {
             return $this->distance; // Fallback to manual distance
         }
-        
+
         return $this->end_odometer - $this->start_odometer;
     }
 

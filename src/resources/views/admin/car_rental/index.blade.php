@@ -191,7 +191,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Khách hàng <span class="text-danger">*</span></label>
-                            <select class="form-select js-example-basic-single" name="customer_id">
+                            <select class="form-select" name="customer_id">
                                 <option value="">Chọn khách hàng</option>
                                 @foreach ($customers as $key => $customer)
                                     <option value="{{ $key }}">{{ $customer }}</option>
@@ -495,7 +495,7 @@
 
             // Hiển thị modal tổng kết
             $('#debtSummaryModal').modal('show');
-            
+
             // Cập nhật thông tin trong modal
             $('#debtSummaryModal #carRentalId').val(carRentalId);
             $('#debtSummaryModal #carRentalType').val(carRentalType);
@@ -539,11 +539,11 @@
                 },
                 success: function(response) {
                     Swal.close();
-                    
+
                     if (response.success) {
                         // Đóng modal tổng kết
                         $('#debtSummaryModal').modal('hide');
-                        
+
                         // Hiển thị thông báo thành công
                         Swal.fire({
                             title: "Thành công!",
@@ -564,12 +564,12 @@
                 },
                 error: function(xhr) {
                     Swal.close();
-                    
+
                     let errorMessage = "Đã xảy ra lỗi khi tổng kết công nợ";
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
                     }
-                    
+
                     Swal.fire({
                         title: "Lỗi",
                         text: errorMessage,

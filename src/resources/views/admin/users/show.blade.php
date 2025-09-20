@@ -148,7 +148,7 @@
                                                 </div>
                                             </div>
                                             <!--end col-->
-                                            
+
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
                                                     <label for="salaryBase" class="form-label">Lương cơ bản </label>
@@ -176,7 +176,7 @@
                                                 <div class="col-xxl-6" id="insuranceStartDateContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
                                                     <div class="mb-3">
                                                         <label for="insuranceStartDate" class="form-label">Ngày bắt đầu đóng bảo hiểm</label>
-                                                        <input type="date" class="form-control" name="insurance_start_date" id="insuranceStartDate" value="{{ old('insurance_start_date', $user->insurance_start_date?->format('Y-m-d')) }}">
+                                                        <input type="date" class="form-control" name="insurance_start_date" id="insuranceStartDate" value="{{ old('insurance_start_date', $user->insurance_start_date) }}">
                                                         @error('insurance_start_date')
                                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                                         @enderror
@@ -185,8 +185,8 @@
                                             <div class="col-xxl-6" id="socialInsuranceAmountContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
                                                 <div class="mb-3">
                                                     <label for="socialInsuranceAmount" class="form-label">Mức lương đóng BHXH (VND)</label>
-                                                    <input type="text" class="form-control" name="social_insurance_amount" id="socialInsuranceAmount" 
-                                                           value="{{ old('social_insurance_amount', $user->social_insurance_amount ? number_format($user->social_insurance_amount, 0, ',', ',') : '') }}" 
+                                                    <input type="text" class="form-control" name="social_insurance_amount" id="socialInsuranceAmount"
+                                                           value="{{ old('social_insurance_amount', $user->social_insurance_amount ? number_format($user->social_insurance_amount, 0, ',', ',') : '') }}"
                                                            placeholder="Nhập mức lương đóng BHXH" data-mask="000,000,000">
                                                     @error('social_insurance_amount')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -197,8 +197,8 @@
                                             <div class="col-xxl-6" id="socialInsuranceNumberContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
                                                 <div class="mb-3">
                                                     <label for="socialInsuranceNumber" class="form-label">Số bảo hiểm</label>
-                                                    <input type="text" class="form-control" name="social_insurance_number" id="socialInsuranceNumber" 
-                                                           value="{{ old('social_insurance_number', $user->social_insurance_number ?? '') }}" 
+                                                    <input type="text" class="form-control" name="social_insurance_number" id="socialInsuranceNumber"
+                                                           value="{{ old('social_insurance_number', $user->social_insurance_number ?? '') }}"
                                                            placeholder="Nhập số bảo hiểm xã hội">
                                                     @error('social_insurance_number')
                                                         <p class="text-danger text-sm mt-1">{{ $message }}</p>
@@ -228,7 +228,7 @@
                                                 </div>
                                             </div>
                                             @endif
-                                            
+
                                             @if($user->isEligibleForLunchAllowance())
                                             <div class="col-xxl-6">
                                                 <div class="mb-3">
@@ -324,7 +324,7 @@
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
                                             <label for="date" class="form-label">Ngày cấp </label>
-                                            <input 
+                                            <input
                                                 type="date"
                                                 class="form-control"
                                                 name="issue_date"
@@ -339,7 +339,7 @@
                                     <div class="col-xxl-6">
                                         <div class="mb-3">
                                             <label for="date" class="form-label">Ngày hết hạn </label>
-                                            <input 
+                                            <input
                                                 type="date"
                                                 class="form-control"
                                                 name="expiry_date"
@@ -415,7 +415,7 @@
                                     </select>
                                 </div>
                             </form>
-                            
+
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead class="table-light">
@@ -496,7 +496,7 @@
 
                                 // Find the salary period for the selected month
                                 $salaryPeriod = \App\Models\SalaryPeriod::where('period_name', 'Kỳ lương tháng '.$selectedMonth)->first();
-                                
+
                                 // Find the salary detail for this user and period if period exists
                                 $salaryDetail = null;
                                 if ($salaryPeriod) {
@@ -505,7 +505,7 @@
                                         ->first();
                                 }
                             @endphp
-                            
+
                             <div class="row mb-4">
                                 <div class="col-lg-6">
                                     <div class="card salary-section">
@@ -540,18 +540,18 @@
                                                                 $monthsList = months_list(); // fallback mặc định 12 tháng gần nhất
                                                             }
                                                         @endphp
-                                                        <select class="form-select form-select-sm" name="month" id="salaryMonth" onchange="document.getElementById('salaryMonthForm').submit();">                                                            
+                                                        <select class="form-select form-select-sm" name="month" id="salaryMonth" onchange="document.getElementById('salaryMonthForm').submit();">
                                                             @foreach($monthsList as $month)
                                                                 <option value="{{ $month }}" {{ $selectedMonth == $month ? 'selected' : '' }}>{{ $month }}</option>
                                                             @endforeach
                                                         </select>
-                                                        
+
                                                         @if($user->isEligibleForLunchAllowance())
                                                         <button type="button" id="export-office-salary-btn" class="btn btn-sm btn-success d-inline-flex align-items-center" style="white-space: nowrap;">
                                                             <i class="ri-file-excel-2-line me-1"></i>
                                                             Xuất Bảng Lương Văn Phòng
                                                         </button>
-                                                        @else 
+                                                        @else
                                                         <button type="button" id="export-salary-btn" class="btn btn-sm btn-success d-inline-flex align-items-center" style="white-space: nowrap;">
                                                             <i class="ri-file-excel-2-line me-1"></i>
                                                             Xuất Bảng Lương
@@ -562,14 +562,14 @@
                                                             Yêu Cầu
                                                         </button>
                                                         @if($salaryDetail)
-                                                            <button type="button" class="btn btn-sm btn-info d-inline-flex align-items-center process-payment" 
+                                                            <button type="button" class="btn btn-sm btn-info d-inline-flex align-items-center process-payment"
                                                                 data-salary-id="{{ $salaryDetail->salary_id }}"
                                                                 style="white-space: nowrap;">
                                                                 <i class="ri-currency-fill me-1"></i>
                                                                 {{ $salaryDetail->status === 'paid' ? 'Thanh toán lại' : 'Thanh toán' }}
                                                             </button>
                                                         @else
-                                                            <button type="button" class="btn btn-sm btn-secondary d-inline-flex align-items-center" 
+                                                            <button type="button" class="btn btn-sm btn-secondary d-inline-flex align-items-center"
                                                                 style="white-space: nowrap;"
                                                                 disabled>
                                                                 <i class="ri-information-line me-1"></i>
@@ -599,9 +599,9 @@
                                                             <td class="fw-medium">
                                                                 Trợ cấp
                                                                 @if($user->isEligibleForLunchAllowance())
-                                                                    <i class="bx bx-info-circle text-info ms-1" 
-                                                                       data-bs-toggle="tooltip" 
-                                                                       data-bs-placement="top" 
+                                                                    <i class="bx bx-info-circle text-info ms-1"
+                                                                       data-bs-toggle="tooltip"
+                                                                       data-bs-placement="top"
                                                                        title="Phụ cấp cơm ngày (26 hoặc 27 ( tùy tháng ) × 35,000 đ) và các chi phí khác"></i>
                                                                 @endif
                                                             </td>
@@ -649,7 +649,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div class="col-lg-6">
                                     <div class="card">
                                         <div class="card-header bg-soft-success">
@@ -710,7 +710,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <hr>
                             <h5 class="mb-2">Chi tiết bảng lương</h5>
                             <div class="table-responsive">
@@ -967,16 +967,16 @@
         font-size: 12px !important;
         line-height: 1.4 !important;
     }
-    
+
     .tooltip.show {
         opacity: 1 !important;
     }
-    
+
     .bx-info-circle {
         cursor: help;
         transition: color 0.2s ease;
     }
-    
+
     .bx-info-circle:hover {
         color: #0d6efd !important;
     }
@@ -992,14 +992,14 @@
         input.addEventListener('input', function(e) {
             // Remove non-numeric characters except decimal point
             let value = this.value.replace(/[^0-9.]/g, '');
-            
+
             // Ensure only one decimal point
             const decimalPoints = value.match(/\./g);
             if (decimalPoints && decimalPoints.length > 1) {
                 const parts = value.split('.');
                 value = parts[0] + '.' + parts.slice(1).join('');
             }
-            
+
             // Format with thousand separators
             if (value) {
                 // Split by decimal point
@@ -1009,14 +1009,14 @@
                 // Join back with decimal part if it exists
                 value = parts.join('.');
             }
-            
+
             this.value = value;
-            
+
             // Store the raw numeric value in a data attribute for form submission
             this.dataset.rawValue = this.value.replace(/,/g, '');
         });
     });
-    
+
     // Handle form submission to use raw numeric values
     document.getElementById('salaryAdvanceRequestForm').addEventListener('submit', function(e) {
         const amountInput = this.querySelector('input[name="amount"]');
@@ -1027,28 +1027,28 @@
 
     document.getElementById('avatarInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
-    
+
         if (file) {
             const reader = new FileReader();
-            
+
             reader.onload = function(e) {
                 document.getElementById('avatarPreview').src = e.target.result;
             }
-            
+
             reader.readAsDataURL(file);
         }
     });
 
     document.getElementById('license_file_input').addEventListener('change', function(event) {
         const file = event.target.files[0];
-    
+
         if (file) {
             const reader = new FileReader();
-            
+
             reader.onload = function(e) {
                 document.getElementById('license_file_preview').src = e.target.result;
             }
-            
+
             reader.readAsDataURL(file);
         }
     });
@@ -1056,19 +1056,19 @@
     function formatSalaryAsInteger(input) {
         // Get the value from the input
         let value = input.val();
-        
+
         // First convert the value to a proper number to handle decimal points correctly
         // Remove all commas first
         value = value.replace(/,/g, '');
-        
+
         // Try to parse as float to handle decimal values
         let numValue = parseFloat(value);
-        
+
         // If it's a valid number, convert to integer and format
         if (!isNaN(numValue)) {
             // Convert to integer (remove decimal part)
             let intValue = Math.floor(numValue);
-            
+
             // Format with commas for thousands
             let formatted = intValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             input.val(formatted);
@@ -1101,7 +1101,7 @@
         formatSalaryAsInteger($('input[name="salary_base"]'));
         formatSalaryAsInteger($('input[name="social_insurance_amount"]'));
     });
-    
+
     // Format on change (for when value is set programmatically)
     $('input[name="salary_base"]').on('change', function() {
         formatSalaryAsInteger($(this));
@@ -1121,7 +1121,7 @@
         if (!results[2]) return '';
         return decodeURIComponent(results[2].replace(/\+/g, ' '));
     }
-    
+
     let activeTab = getParameterByName('tab') || @json(session('active_tab'));
     if (activeTab) {
         $('.nav-tabs-custom .nav-link').removeClass('active');
@@ -1136,7 +1136,7 @@
         // Kiểm tra xem có dữ liệu lương không
         const hasSalaryData = {{ count($salaryDetails) > 0 ? 'true' : 'false' }};
         const hasSalaryBase = {{ $salaryBase > 0 ? 'true' : 'false' }};
-        
+
         if (!hasSalaryData && !hasSalaryBase) {
             Swal.fire({
                 title: 'Không có dữ liệu!',
@@ -1149,7 +1149,7 @@
             });
             return;
         }
-        
+
         Swal.fire({
             title: 'Xác nhận xuất bảng lương?',
             text: 'Bạn có chắc chắn muốn xuất bảng lương tháng {{ $selectedMonth }} của {{ $user->full_name }} không?',
@@ -1246,7 +1246,7 @@
             },
             labels: [
                 @if($salaryType == 2)
-                    'Lương doanh số ({{ $user->getSalaryByPercent() }}%)', 
+                    'Lương doanh số ({{ $user->getSalaryByPercent() }}%)',
                 @else
                     'Lương cơ bản',
                 @endif
@@ -1310,7 +1310,7 @@
                 }
             }]
         };
-        
+
         // Clear existing chart if any
         const chartContainer = document.querySelector("#salary_chart");
         if (chartContainer) {
@@ -1320,19 +1320,19 @@
             }
             chartContainer.innerHTML = '';
         }
-        
+
         var chart = new ApexCharts(chartContainer, options);
         chart.render();
-        
+
         // Store chart instance globally for updates
         window.salaryChart = chart;
-        
+
         // Initialize tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl)
         });
-        
+
         // Format number inputs
         $('.number-format').on('input', function() {
             let value = $(this).val().replace(/\D/g, '');
@@ -1341,17 +1341,17 @@
                 $(this).val(value);
             }
         });
-        
+
         // Handle checkbox for paying remaining amount
         $(document).on('change', '#payRemainingAmount, #payRemainingAmountEdit', function() {
             const isChecked = $(this).is(':checked');
             const amountInput = $(this).closest('.modal-body').find('input[name="amount"]');
-            
+
             if (isChecked) {
                 // Get remaining amount from the label text
                 const labelText = $(this).next('label').text();
                 const remainingAmountMatch = labelText.match(/(\d{1,3}(,\d{3})*)/);
-                
+
                 if (remainingAmountMatch) {
                     const remainingAmount = remainingAmountMatch[0].replace(/,/g, '');
                     amountInput.val(parseInt(remainingAmount).toLocaleString('vi-VN'));
@@ -1361,13 +1361,13 @@
                 amountInput.val('');
             }
         });
-        
+
         // Handle type selection to show/hide remaining amount checkbox
         $(document).on('change', 'select[name="type"]', function() {
             const selectedType = $(this).val();
             const modalBody = $(this).closest('.modal-body');
             const payRemainingCheckbox = modalBody.find('#payRemainingCheckbox, #payRemainingCheckboxEdit');
-            
+
             if (selectedType === 'payment') {
                 payRemainingCheckbox.show();
             } else {
@@ -1377,39 +1377,39 @@
                 modalBody.find('input[name="amount"]').val('');
             }
         });
-        
+
         // Initialize checkbox visibility on modal open
         $(document).on('shown.bs.modal', '#salaryAdvanceModal, #editSalaryAdvanceModal', function() {
             const modalBody = $(this).find('.modal-body');
             const selectedType = modalBody.find('select[name="type"]').val();
             const payRemainingCheckbox = modalBody.find('#payRemainingCheckbox, #payRemainingCheckboxEdit');
-            
+
             if (selectedType === 'payment') {
                 payRemainingCheckbox.show();
             } else {
                 payRemainingCheckbox.hide();
             }
         });
-        
+
         // Handle salary advance request form submission
         $('#salaryAdvanceRequestForm').on('submit', function(e) {
             e.preventDefault();
-            
+
             const form = $(this);
             const submitBtn = $('#submitSalaryAdvanceRequest');
             const errorContainer = $('#salaryAdvanceRequestError');
-            
+
             // Disable submit button and show loading
             submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang xử lý...');
             errorContainer.hide();
-            
+
             $.ajax({
                 url: form.attr('action'),
                 type: 'POST',
                 data: form.serialize(),
                 dataType: 'json',
                 success: function(response) {
-                    
+
                     // Show success message
                     Swal.fire({
                         icon: 'success',
@@ -1434,17 +1434,17 @@
                 error: function(xhr) {
                     // Enable submit button
                     submitBtn.prop('disabled', false).text('Tạo');
-                    
+
                     // Show error message
                     if (xhr.status === 422) {
                         // Validation errors
                         let errors = xhr.responseJSON.errors;
                         let errorMessage = '<ul class="mb-0">';
-                        
+
                         $.each(errors, function(key, value) {
                             errorMessage += '<li>' + value[0] + '</li>';
                         });
-                        
+
                         errorMessage += '</ul>';
                         errorContainer.html(errorMessage).show();
                     } else {
@@ -1454,7 +1454,7 @@
                 }
             });
         });
-        
+
         // Include the salary advance requests container in the salary tab
         // Find the salary tab content
         const salaryTabContent = document.querySelector('#salary');
@@ -1467,7 +1467,7 @@
                 container.className = 'mt-4';
                 salaryTabContent.appendChild(container);
             }
-            
+
             // Load salary advance requests
             refreshSalaryAdvanceRequests();
         }
@@ -1477,7 +1477,7 @@
     $(document).on('click', '.process-payment', function() {
         const button = $(this);
         const salaryId = button.data('salary-id');
-        
+
         Swal.fire({
             title: 'Xác nhận thanh toán',
             text: 'Bạn có chắc chắn muốn thanh toán lương này?',
@@ -1496,7 +1496,7 @@
             if (result.isConfirmed) {
                 // Show loading state
                 button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Đang xử lý...');
-                
+
                 // Make AJAX request
                 $.ajax({
                     url: '{{ url("admin/salary") }}/' + salaryId + '/pay',
@@ -1535,14 +1535,14 @@
                     error: function(xhr) {
                         const response = xhr.responseJSON;
                         const errorMessage = response && response.message ? response.message : 'Đã xảy ra lỗi khi xử lý yêu cầu.';
-                        
+
                         Swal.fire({
                             icon: 'error',
                             title: 'Lỗi!',
                             text: errorMessage,
                             confirmButtonText: 'Đóng'
                         });
-                        
+
                         // Re-enable button with appropriate text
                         const buttonText = button.hasClass('btn-success') ? 'Thanh toán lại' : 'Thanh toán';
                         button.prop('disabled', false).html('<i class="ri-currency-fill me-1"></i>' + buttonText);
@@ -1556,14 +1556,14 @@
     function refreshSalaryDetails() {
         const selectedMonth = document.getElementById('salaryMonth')?.value || '{{ $selectedMonth }}';
         const userId = {{ $user->id }};
-        
+
         // Show loading state
         const salarySection = document.querySelector('.salary-section');
         if (salarySection) {
             salarySection.style.opacity = '0.6';
             salarySection.style.pointerEvents = 'none';
         }
-        
+
         // Make AJAX request to get updated salary data
         $.ajax({
             url: '{{ route("admin.users.show", $user->id) }}',
@@ -1575,29 +1575,29 @@
             success: function(response) {
                 // Debug log (remove in production)
                 console.log('AJAX response:', response);
-                
+
                 // Update salary table
                 const salaryTable = document.querySelector('.salary-table tbody');
                 if (salaryTable && response.salaryData) {
                     salaryTable.innerHTML = response.salaryData;
                 }
-                
+
                 // Update salary chart
                 if (response.chartData) {
                     updateSalaryChart(response.chartData);
                 }
-                
+
                 // Update salary summary
                 if (response.summaryData) {
                     updateSalarySummary(response.summaryData);
                 }
-                
+
                 // Re-enable section
                 if (salarySection) {
                     salarySection.style.opacity = '1';
                     salarySection.style.pointerEvents = 'auto';
                 }
-                
+
                 {{--  // Show success message
                 Swal.fire({
                     icon: 'success',
@@ -1614,7 +1614,7 @@
                     salarySection.style.opacity = '1';
                     salarySection.style.pointerEvents = 'auto';
                 }
-                
+
                 // Show error message
                 Swal.fire({
                     icon: 'error',
@@ -1625,7 +1625,7 @@
             }
         });
     }
-    
+
     // Function to update salary chart
     function updateSalaryChart(chartData) {
         try {
@@ -1633,30 +1633,30 @@
                 console.error('Salary chart not initialized');
                 return;
             }
-            
+
             if (!chartData || !chartData.series) {
                 console.error('Invalid chart data provided');
                 return;
             }
-            
+
             // Ensure all series values are numbers
             const sanitizedSeries = chartData.series.map(value => {
                 const numValue = parseFloat(value) || 0;
                 return Math.max(0, numValue); // Ensure non-negative values
             });
-            
+
             // Check if all values are zero (no data)
             const hasData = sanitizedSeries.some(value => value > 0);
-            
+
             if (!hasData) {
                 // If no data, show a message or hide chart
                 console.log('No salary data available for chart');
                 return;
             }
-            
+
             // Update series data with sanitized values
             window.salaryChart.updateSeries(sanitizedSeries);
-            
+
             // Update labels if provided
             if (chartData.labels) {
                 window.salaryChart.updateOptions({
@@ -1693,7 +1693,7 @@
                     }
                 });
             }
-            
+
             // Debug log (remove in production)
             console.log('Chart updated with data:', {
                 series: sanitizedSeries,
@@ -1704,7 +1704,7 @@
             console.error('Error updating salary chart:', error);
         }
     }
-    
+
     // Function to update salary summary
     function updateSalarySummary(summaryData) {
         // Update salary base
@@ -1714,7 +1714,7 @@
                 salaryBaseElement.textContent = new Intl.NumberFormat('vi-VN').format(summaryData.salaryBase) + ' đ';
             }
         }
-        
+
         // Update total allowance
         if (summaryData.totalAllowance !== undefined) {
             const totalAllowanceElement = document.querySelector('[data-salary="allowance"]');
@@ -1722,7 +1722,7 @@
                 totalAllowanceElement.textContent = new Intl.NumberFormat('vi-VN').format(summaryData.totalAllowance) + ' đ';
             }
         }
-        
+
         // Update total salary
         if (summaryData.totalSalary !== undefined) {
             const totalSalaryElement = document.querySelector('[data-salary="total"]');
@@ -1730,7 +1730,7 @@
                 totalSalaryElement.textContent = new Intl.NumberFormat('vi-VN').format(summaryData.totalSalary) + ' đ';
             }
         }
-        
+
         // Update other salary components
         if (summaryData.insuranceDeduction !== undefined) {
             const insuranceElement = document.querySelector('[data-salary="insurance"]');
@@ -1738,14 +1738,14 @@
                 insuranceElement.textContent = new Intl.NumberFormat('vi-VN').format(summaryData.insuranceDeduction) + ' đ';
             }
         }
-        
+
         if (summaryData.totalOtherDeduction !== undefined) {
             const otherDeductionElement = document.querySelector('[data-salary="other-deduction"]');
             if (otherDeductionElement) {
                 otherDeductionElement.textContent = new Intl.NumberFormat('vi-VN').format(summaryData.totalOtherDeduction) + ' đ';
             }
         }
-        
+
         if (summaryData.totalPenalty !== undefined) {
             const penaltyElement = document.querySelector('[data-salary="penalty"]');
             if (penaltyElement) {
@@ -1764,12 +1764,12 @@
                 template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner" style="max-width: 300px; text-align: left;"></div></div>'
             });
         });
-        
+
         $('#salaryType').on('change', function() {
             const salaryType = $(this).val();
             const salaryByPercentContainer = $('#salaryByPercentContainer');
             const salaryByPercentInput = $('input[name="salary_by_percent"]');
-            
+
             if (salaryType === '2') { // Tài xế ăn lương doanh số
                 salaryByPercentContainer.show();
                 // Set default value nếu input rỗng
@@ -1781,10 +1781,10 @@
                 salaryByPercentInput.val(''); // Clear value khi hide
             }
         });
-        
+
         // Trigger change event on page load để set đúng trạng thái
         $('#salaryType').trigger('change');
-        
+
         // Handle insurance checkbox
         $('#hasInsurance').on('change', function() {
             const insuranceStartDateContainer = $('#insuranceStartDateContainer');
@@ -1793,7 +1793,7 @@
             const socialInsuranceAmountInput = $('#socialInsuranceAmount');
             const socialInsuranceNumberContainer = $('#socialInsuranceNumberContainer');
             const socialInsuranceNumberInput = $('#socialInsuranceNumber');
-            
+
             if ($(this).is(':checked')) {
                 insuranceStartDateContainer.show();
                 socialInsuranceAmountContainer.show();
@@ -1807,7 +1807,7 @@
                 socialInsuranceNumberInput.val(''); // Clear the number when unchecked
             }
         });
-        
+
         // Trigger change event on page load để set đúng trạng thái cho insurance
         $('#hasInsurance').trigger('change');
     });
