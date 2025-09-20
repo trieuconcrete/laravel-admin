@@ -130,15 +130,20 @@ class TopbandShipmentExport extends BaseShipmentExport
      */
     protected function addDataRow(Worksheet $sheet, int $row, int $index, array $shipment)
     {
+        $productNamesString = $this->formatProductNames($shipment, $sheet, $row);
+        $destinationsString = $this->formatDestinations($shipment, $sheet, $row);
+        $originAddressesString = $this->formatOriginAddresses($shipment, $sheet, $row);
+        $destinationAddressesString = $this->formatDestinationAddresses($shipment, $sheet, $row);
+
         $sheet->setCellValue('A' . $row, $index + 1);
         $sheet->setCellValue('B' . $row, $shipment['departure_time']); // Ngày
         $sheet->setCellValue('C' . $row, $shipment['plate_number'] ?? ''); // Số xe
         $sheet->setCellValue('D' . $row, $shipment['origin']); // Điểm đi
-        $sheet->setCellValue('E' . $row, $shipment['company'] ?? ''); // Địa chỉ
-        $sheet->setCellValue('F' . $row, $shipment['destination']); // Điểm đến
-        $sheet->setCellValue('G' . $row, $shipment['address_destination'] ?? ''); // Địa chỉ
+        $sheet->setCellValue('E' . $row, $originAddressesString); // Địa chỉ điểm đi
+        $sheet->setCellValue('F' . $row, $destinationsString); // Điểm đến
+        $sheet->setCellValue('G' . $row, $destinationAddressesString); // Địa chỉ điểm đến
         $sheet->setCellValue('H' . $row, $shipment['cargo_weight'] ?? ''); // Số tấn
-        $sheet->setCellValue('I' . $row, $shipment['goods_name'] ?? ''); // Loại hàng
+        $sheet->setCellValue('I' . $row, $productNamesString); // Loại hàng
         $sheet->setCellValue('J' . $row, ''); // TTGT
         $sheet->setCellValue('K' . $row, ''); // Bộ phận
         $sheet->setCellValue('L' . $row, ''); // Người gửi
@@ -147,6 +152,133 @@ class TopbandShipmentExport extends BaseShipmentExport
         $sheet->setCellValue('O' . $row, $shipment['total_combined_cargo_handling'] ?? 0); // Phí bốc xếp
         $sheet->setCellValue('P' . $row, $shipment['total_amount']); // Thành tiền
         $sheet->setCellValue('Q' . $row, $shipment['notes'] ?? ''); // Ghi chú
+        
+        // Calculate maximum line count to set proper row height
+        $maxLines = max(
+            substr_count($productNamesString, "\n") + 1,
+            substr_count($destinationsString, "\n") + 1,
+            substr_count($originAddressesString, "\n") + 1,
+            substr_count($destinationAddressesString, "\n") + 1,
+            1 // minimum 1 line
+        );
+        
+        if ($maxLines > 1) {
+            $calculatedHeight = $maxLines * 15; // 15 points per line
+            $sheet->getRowDimension($row)->setRowHeight($calculatedHeight);
+        }
+    }
+
+    protected function formatProductNames($shipment, $sheet, $row): string
+    {
+        // Tạo product names với break line
+        $productNames = [];
+        // Thêm product_name nếu có
+        if (!empty($shipment['product_name'])) {
+            $productNames[] = '- ' . trim($shipment['product_name']);
+        }
+        // Thêm product_name2 nếu có
+        if (!empty($shipment['product_name2'])) {
+            $productNames[] = '- ' . trim($shipment['product_name2']);
+        }
+        // Thêm product_name3 nếu có (giả sử bạn muốn thêm product_name3 thay vì duplicate product_name2)
+        if (!empty($shipment['product_name3'])) {
+            $productNames[] = '- ' . trim($shipment['product_name3']);
+        }
+
+        // Thiết lập wrap text cho column I (product names)
+        $sheet->getStyle('I' . $row)->getAlignment()->setWrapText(true);
+
+        return implode("\n", array_filter($productNames));
+    }
+
+    /**
+     * Format destinations with line breaks
+     * @param array $shipment
+     * @param Worksheet $sheet
+     * @param int $row
+     * @return string
+     */
+    protected function formatDestinations($shipment, $sheet, $row): string
+    {
+        $destinations = [];
+        
+        // Thêm destination nếu có
+        if (!empty($shipment['destination'])) {
+            $destinations[] = '- ' . trim($shipment['destination']);
+        }
+        // Thêm destination2 nếu có
+        if (!empty($shipment['destination2'])) {
+            $destinations[] = '- ' . trim($shipment['destination2']);
+        }
+        // Thêm destination3 nếu có
+        if (!empty($shipment['destination3'])) {
+            $destinations[] = '- ' . trim($shipment['destination3']);
+        }
+
+        // Thiết lập wrap text cho column F (destinations)
+        $sheet->getStyle('F' . $row)->getAlignment()->setWrapText(true);
+        
+        return implode("\n", array_filter($destinations));
+    }
+
+    /**
+     * Format origin addresses with line breaks
+     * @param array $shipment
+     * @param Worksheet $sheet
+     * @param int $row
+     * @return string
+     */
+    protected function formatOriginAddresses($shipment, $sheet, $row): string
+    {
+        $originAddresses = [];
+        
+        // Thêm address_origin nếu có
+        if (!empty($shipment['address_origin'])) {
+            $originAddresses[] = '- ' . trim($shipment['address_origin']);
+        }
+        // Thêm address_origin2 nếu có
+        if (!empty($shipment['address_origin2'])) {
+            $originAddresses[] = '- ' . trim($shipment['address_origin2']);
+        }
+        // Thêm address_origin3 nếu có
+        if (!empty($shipment['address_origin3'])) {
+            $originAddresses[] = '- ' . trim($shipment['address_origin3']);
+        }
+
+        // Thiết lập wrap text cho column E (origin addresses)
+        $sheet->getStyle('E' . $row)->getAlignment()->setWrapText(true);
+        
+        return implode("\n", array_filter($originAddresses));
+    }
+
+    /**
+     * Format destination addresses with line breaks
+     * @param array $shipment
+     * @param Worksheet $sheet
+     * @param int $row
+     * @return string
+     */
+    protected function formatDestinationAddresses($shipment, $sheet, $row): string
+    {
+        $destinationAddresses = [];
+        
+        // Thêm address_destination nếu có
+        if (!empty($shipment['address_destination'])) {
+            $destinationAddresses[] = '- ' . trim($shipment['address_destination']);
+        }
+        // Thêm address_destination2 nếu có
+        if (!empty($shipment['address_destination2'])) {
+            $destinationAddresses[] = '- ' . trim($shipment['address_destination2']);
+        }
+        // Thêm address_destination3 nếu có
+        if (!empty($shipment['address_destination3'])) {
+            $destinationAddresses[] = '- ' . trim($shipment['address_destination3']);
+        }
+
+        // Thiết lập wrap text cho column G (destination addresses)
+        $sheet->getStyle('G' . $row)->getAlignment()->setWrapText(true);
+        
+        return implode("\n", array_filter($destinationAddresses));
     }
 
     /**
@@ -215,12 +347,12 @@ class TopbandShipmentExport extends BaseShipmentExport
         $sheet->getColumnDimension('A')->setWidth(5);   // STT
         $sheet->getColumnDimension('B')->setWidth(15);  // Ngày
         $sheet->getColumnDimension('C')->setWidth(12);  // Số xe
-        $sheet->getColumnDimension('D')->setWidth(15);  // Điểm đi
-        $sheet->getColumnDimension('E')->setWidth(15);  // Địa chỉ
-        $sheet->getColumnDimension('F')->setWidth(15);  // Điểm đến
-        $sheet->getColumnDimension('G')->setWidth(15);  // Địa chỉ
+        $sheet->getColumnDimension('D')->setWidth(20);  // Điểm đi (origin)
+        $sheet->getColumnDimension('E')->setWidth(25);  // Địa chỉ điểm đi (multi-line origin addresses)
+        $sheet->getColumnDimension('F')->setWidth(25);  // Điểm đến (multi-line destinations)
+        $sheet->getColumnDimension('G')->setWidth(25);  // Địa chỉ điểm đến (multi-line destination addresses)
         $sheet->getColumnDimension('H')->setWidth(12);  // Số tấn
-        $sheet->getColumnDimension('I')->setWidth(20);  // Loại hàng
+        $sheet->getColumnDimension('I')->setWidth(30);  // Loại hàng (multi-line product names)
         $sheet->getColumnDimension('J')->setWidth(15);  // TTGT
         $sheet->getColumnDimension('K')->setWidth(15);  // Bộ phận
         $sheet->getColumnDimension('L')->setWidth(15);  // Người gửi
@@ -246,7 +378,11 @@ class TopbandShipmentExport extends BaseShipmentExport
         $sheet->getStyle('A7:A' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('B7:B' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
         $sheet->getStyle('C7:C' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('F7:F' . ($row - 1))->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+        $sheet->getStyle('E1:E' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->getStyle('F1:F' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->getStyle('G1:G' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
+        $sheet->getStyle('I1:I' . ($row - 1))->getAlignment()->setVertical(Alignment::VERTICAL_TOP);
     }
 
     /**

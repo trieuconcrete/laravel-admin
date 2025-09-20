@@ -130,7 +130,7 @@ class ShipmentReportService
                         'vehicle_plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : '',
                         'departure_time' => $shipment->departure_time->format('d/m/Y'),
                         'origin' => $shipment->origin,
-                        'destination' => $shipment->destination,
+                        
                         'trip_count' => $shipment->trip_count ?? 1,
                         'distance' => $shipment->distance ?? 0,
                         'unit_price' => $shipment->unit_price ?? 0,
@@ -144,8 +144,18 @@ class ShipmentReportService
                         'shipment_report_id' => $shipment->shipment_report_id,
                         'goods_name' =>  $shipment->goods->pluck('name')->implode(', '),
                         'goods_notes' =>  $shipment->goods->pluck('notes')->implode(', '),
-                        'company' => $shipment->company ?? '',
-                        'address_destination' => $shipment->address_destination ?? '',
+                        'destination' => $shipment->destination, // điểm đến
+                        'destination2' => $shipment->destination2 ?? '',
+                        'destination3' => $shipment->destination3 ?? '',
+                        'address_origin' => $shipment->address_origin ?? '', // địa chỉ điểm đi
+                        'address_origin2' => $shipment->address_origin2 ?? '',
+                        'address_origin3' => $shipment->address_origin3 ?? '',
+                        'address_destination' => $shipment->address_destination ?? '', // địa chỉ điểm đến
+                        'address_destination2' => $shipment->address_destination2 ?? '',
+                        'address_destination3' => $shipment->address_destination3 ?? '',
+                        'product_name' => $shipment->product_name ?? '', // Tên hàng
+                        'product_name2' => $shipment->product_name2 ?? '',
+                        'product_name3' => $shipment->product_name3 ?? '',
                         'notes' => $shipment->notes,
                         'status' => $shipment->status,
                         'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : '',
