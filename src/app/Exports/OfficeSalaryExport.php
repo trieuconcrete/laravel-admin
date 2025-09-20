@@ -57,6 +57,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
         // Get TYPE_OTHER requests for detailed display
         $otherRequests = $this->user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_OTHER, $startDate, $endDate);
         // dd($otherRequests);
+        $paymentRequests = $this->user->getTotalSalaryAdvancesRequest(SalaryAdvanceRequest::TYPE_PAYMENT, $startDate, $endDate);
         // Calculate totals from actual data
         $totalBonus = $totalTypeBonus;
         $totalPenalty = $totalTypePenalty;
@@ -90,7 +91,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
         
         // Tính T.TIỀN LƯƠNG CÒN LẠI theo công thức:
         // = (TỔNG LƯƠNG + CHI PHÍ KHÁC) - (TIỀN PHẠT + TRỪ BHXH + TIỀN ỨNG)
-        $netSalary = ($totalSalary + $totalOtherCosts) - ($totalPenalty + $insuranceDeduction + $totalOtherDeduction);
+        $netSalary = ($totalSalary + $totalOtherCosts + $paymentRequests) - ($totalPenalty + $insuranceDeduction + $totalOtherDeduction);
 
         $this->salaryData = [
             'salaryBase' => $salaryBase,
@@ -105,7 +106,8 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
             'totalSalary' => $totalSalary,
             'netSalary' => $netSalary,
             'otherRequests' => $otherRequests,
-            'totalOtherCosts' => $totalOtherCosts
+            'totalOtherCosts' => $totalOtherCosts,
+            'totalPaymentRequest' => $paymentRequests
         ];
     }
 
@@ -127,6 +129,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
             'MÔ TẢ',
             'LƯƠNG CƠ BẢN',
             'PHỤ CẤP CƠM NGÀY',
+            'TRỢ CẤP',
             'TỔNG LƯƠNG',
             'CHI PHÍ KHÁC',
             'TIỀN PHẠT',
@@ -141,7 +144,21 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
             'LƯƠNG CƠ BẢN',
             number_format($this->salaryData['salaryBase']),
             '',
+            '',
             number_format($this->salaryData['salaryBase']),
+            '',
+            '',
+            '',
+            '',
+            '',
+            ''
+        ];
+        $data[] = [
+            'TRỢ CẤP',
+            '',
+            '',
+            number_format($this->salaryData['totalPaymentRequest']),
+            '',
             '',
             '',
             '',
@@ -156,6 +173,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 'CƠM TRƯA (' . $this->salaryData['workingDays'] . ' X ' . number_format($this->salaryData['dailyLunchAllowance']) . ')',
                 '',
                 number_format($this->salaryData['lunchAllowance']),
+                '',
                 number_format($this->salaryData['lunchAllowance']),
                 '',
                 '',
@@ -173,6 +191,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 '',
                 '',
                 '',
+                '',
                 number_format($this->salaryData['totalBonus']),
                 '',
                 '',
@@ -186,6 +205,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
         if ($this->salaryData['totalPenalty'] > 0) {
             $data[] = [
                 'TIỀN PHẠT',
+                '',
                 '',
                 '',
                 '',
@@ -208,6 +228,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
                 '',
                 '',
                 '',
+                '',
                 number_format($this->salaryData['totalOtherDeduction']),
                 ''
             ];
@@ -218,6 +239,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
             foreach ($this->salaryData['otherRequests'] as $otherRequest) {
                 $data[] = [
                     $otherRequest->reason, // Column A: Reason
+                    '',
                     '',
                     '',
                     '',
@@ -236,6 +258,7 @@ class OfficeSalaryExport implements FromArray, WithStyles, WithColumnWidths, Wit
             'TỔNG CỘNG',
             number_format($this->salaryData['salaryBase']),
             number_format($this->salaryData['lunchAllowance']),
+            number_format($this->salaryData['totalPaymentRequest']),
             number_format($this->salaryData['totalSalary']),
             number_format($this->salaryData['totalOtherCosts']), // Cộng bonus + other costs
             number_format($this->salaryData['totalPenalty']), // Column F: TIỀN PHẠT

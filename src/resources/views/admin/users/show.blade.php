@@ -604,6 +604,7 @@
                                                                        data-bs-placement="top"
                                                                        title="Phụ cấp cơm ngày (26 hoặc 27 ( tùy tháng ) × 35,000 đ) và các chi phí khác"></i>
                                                                 @endif
+                                                                <small class="d-block text-muted">(Bao gồm: thanh toán lương, yêu cầu khác và cơm nếu có)</small>
                                                             </td>
                                                             <td class="text-end" data-salary="allowance">{{ number_format($totalAllowance) }} đ</td>
                                                         </tr>
@@ -819,20 +820,6 @@
                         <div class="col-md-6">
                             <label class="form-label">Số tiền <span class="text-danger">*</span></label>
                             <input class="form-control number-format" type="text" placeholder="Số tiền" name="amount" required />
-                            @if(isset($paymentStatusData))
-                                @php
-                                    $remainingAmount = $paymentStatusData['payment_status']['remaining_amount'] ?? 0;
-                                @endphp
-                                @if($remainingAmount > 0)
-                                <div class="form-check mt-2" id="payRemainingCheckbox" style="display: none;">
-                                    <input class="form-check-input" type="checkbox" id="payRemainingAmount" name="pay_remaining_amount">
-                                    <label class="form-check-label text-primary" for="payRemainingAmount">
-                                        <i class="ri-money-dollar-circle-line me-1"></i>
-                                        Thanh toán số tiền còn lại: <strong>{{ number_format($remainingAmount) }} đ</strong>
-                                    </label>
-                                </div>
-                                @endif
-                            @endif
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Ngày yêu cầu <span class="text-danger">*</span></label>
@@ -903,20 +890,6 @@
                         <div class="col-md-6">
                             <label class="form-label">Số tiền <span class="text-danger">*</span></label>
                             <input class="form-control number-format" type="text" placeholder="Số tiền" name="amount" required />
-                            @if(isset($paymentStatusData))
-                                @php
-                                    $remainingAmount = $paymentStatusData['payment_status']['remaining_amount'] ?? 0;
-                                @endphp
-                                @if($remainingAmount > 0)
-                                <div class="form-check mt-2" id="payRemainingCheckboxEdit" style="display: none;">
-                                    <input class="form-check-input" type="checkbox" id="payRemainingAmountEdit" name="pay_remaining_amount">
-                                    <label class="form-check-label text-primary" for="payRemainingAmountEdit">
-                                        <i class="ri-money-dollar-circle-line me-1"></i>
-                                        Thanh toán số tiền còn lại: <strong>{{ number_format($remainingAmount) }} đ</strong>
-                                    </label>
-                                </div>
-                                @endif
-                            @endif
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Ngày yêu cầu <span class="text-danger">*</span></label>
