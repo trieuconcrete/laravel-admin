@@ -207,7 +207,6 @@ class WoojinShipmentExport extends BaseShipmentExport
      */
     protected function setNumberFormats(Worksheet $sheet, int $row)
     {
-        $sheet->getStyle('F14:F' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
         $sheet->getStyle('G14' . ':' . $this->lastColumn . '' . ($row - 1))->getNumberFormat()->setFormatCode('#,##0');
         
         // Set text alignment
