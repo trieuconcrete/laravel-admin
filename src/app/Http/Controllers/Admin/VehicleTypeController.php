@@ -30,7 +30,7 @@ class VehicleTypeController extends Controller
         // Sorting
         $sortBy = $request->get('sort_by', 'vehicle_type_id');
         $sortDirection = $request->get('sort_direction', 'asc');
-        
+
         if (in_array($sortBy, ['vehicle_type_id', 'name', 'status', 'created_at', 'updated_at'])) {
             $query->orderBy($sortBy, $sortDirection);
         } else {
@@ -69,7 +69,7 @@ class VehicleTypeController extends Controller
             $vehicleType = VehicleType::create([
                 'name' => $request->name,
                 'description' => $request->description,
-                'status' => $request->has('status') ? 1 : 0,
+                'status' => $request->has('status') ? $request->status : 0,
             ]);
 
             return response()->json([
@@ -100,7 +100,7 @@ class VehicleTypeController extends Controller
     {
         try {
             $vehicleType = VehicleType::findOrFail($id);
-            
+
             return response()->json([
                 'success' => true,
                 'data' => $vehicleType
@@ -120,7 +120,7 @@ class VehicleTypeController extends Controller
     {
         try {
             $vehicleType = VehicleType::findOrFail($id);
-            
+
             $request->validate([
                 'name' => 'required|string|max:255|unique:vehicle_types,name,' . $id . ',vehicle_type_id',
                 'description' => 'nullable|string|max:1000',
@@ -135,7 +135,7 @@ class VehicleTypeController extends Controller
             $vehicleType->update([
                 'name' => $request->name,
                 'description' => $request->description,
-                'status' => $request->has('status') ? 1 : 0,
+                'status' => $request->has('status') ? $request->status : 0,
             ]);
 
             return response()->json([
@@ -166,7 +166,7 @@ class VehicleTypeController extends Controller
     {
         try {
             $vehicleType = VehicleType::findOrFail($id);
-            
+
             // Kiểm tra xem có xe nào đang sử dụng loại xe này không
             if ($vehicleType->vehicles()->exists()) {
                 return response()->json([
@@ -222,7 +222,7 @@ class VehicleTypeController extends Controller
     {
         try {
             $query = VehicleType::where('status', 1)->orderBy('name');
-            
+
             if ($request->filled('search')) {
                 $query->where('name', 'like', '%' . $request->search . '%');
             }
