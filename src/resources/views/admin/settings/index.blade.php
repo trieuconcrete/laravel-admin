@@ -45,7 +45,7 @@
                                 <i class="fas fa-building mr-1"></i> Thông tin công ty
                             </a>
                         </li>
-                        <li class="nav-item" role="presentation">
+                        {{-- <li class="nav-item" role="presentation">
                             <a class="nav-link {{ $activeTab == 'system' ? 'active' : '' }}" id="system-tab" data-bs-toggle="tab" href="#system" role="tab" aria-controls="system" aria-selected="{{ $activeTab == 'system' ? 'true' : 'false' }}">
                                 <i class="fas fa-cogs mr-1"></i> Hệ thống
                             </a>
@@ -54,7 +54,7 @@
                             <a class="nav-link {{ $activeTab == 'shipment' ? 'active' : '' }}" id="shipment-tab" data-bs-toggle="tab" href="#shipment" role="tab" aria-controls="shipment" aria-selected="{{ $activeTab == 'shipment' ? 'true' : 'false' }}">
                                 <i class="fas fa-truck mr-1"></i> Vận chuyển
                             </a>
-                        </li>
+                        </li> --}}
                         <li class="nav-item" role="presentation">
                             <a class="nav-link {{ $activeTab == 'shipment-fee' ? 'active' : '' }}" id="fee-tab" data-bs-toggle="tab" href="#shipment-fee" role="tab" aria-controls="shipment-fee" aria-selected="{{ $activeTab == 'shipment-fee' ? 'true' : 'false' }}">
                                 <i class="fas fa-bell mr-1"></i> Chi phí chuyến xe
