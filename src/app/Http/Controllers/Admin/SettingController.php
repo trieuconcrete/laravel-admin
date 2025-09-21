@@ -36,9 +36,9 @@ class SettingController extends Controller
      */
     public function index(Request $request)
     {
-        $activeTab = $request->get('group', $request->get('tab', session('last_active_tab', 'company')));
+        $activeTab = $request->query('tab', 'company');
         $groups = ['company', 'system', 'shipment', 'shipment-fee', 'vehicle-types', 'notifications'];
-        
+
         $settings = [];
         foreach ($groups as $group) {
             if (!in_array($group, ['shipment-fee', 'vehicle-types'])) {
@@ -63,7 +63,7 @@ class SettingController extends Controller
 
         $sortBy = $request->get('sort_by', 'order');
         $sortDirection = $request->get('sort_direction', 'asc');
-        
+
         if (in_array($sortBy, ['id', 'name', 'type', 'status', 'order', 'created_at', 'updated_at'])) {
             $deductionQuery->orderBy($sortBy, $sortDirection);
         } else {
@@ -85,7 +85,7 @@ class SettingController extends Controller
 
         $vehicleSortBy = $request->get('sort_by', 'vehicle_type_id');
         $vehicleSortDirection = $request->get('sort_direction', 'asc');
-        
+
         if (in_array($vehicleSortBy, ['vehicle_type_id', 'name', 'status', 'created_at', 'updated_at'])) {
             $vehicleQuery->orderBy($vehicleSortBy, $vehicleSortDirection);
         } else {
@@ -109,9 +109,9 @@ class SettingController extends Controller
         }
 
         return view('admin.settings.index', compact(
-            'settings', 
-            'activeTab', 
-            'groups', 
+            'settings',
+            'activeTab',
+            'groups',
             'deductionTypes',
             'vehicleTypes'
         ));
@@ -127,7 +127,7 @@ class SettingController extends Controller
     {
         try {
             session(['last_active_tab' => $tab]);
-            
+
             // Lấy dữ liệu theo group từ request
             $companySettings = $request->input('company', []);
             if (isset($companySettings['social_insurance_contribution_amount'])) {
@@ -136,33 +136,33 @@ class SettingController extends Controller
             $systemSettings = $request->input('system', []);
             $shipmentSettings = $request->input('shipment', []);
             $notificationSettings = $request->input('notifications', []);
-            
+
             // Xử lý từng nhóm cài đặt
             $this->processGroupSettings($companySettings, 'company');
             $this->processGroupSettings($systemSettings, 'system');
             $this->processGroupSettings($shipmentSettings, 'shipment');
             $this->processGroupSettings($notificationSettings, 'notifications');
-            
+
             // Xử lý upload file logo nếu có
             if ($request->hasFile('company') && isset($request->file('company')['company_logo'])) {
                 $file = $request->file('company')['company_logo'];
                 $path = \App\Helpers\ImageHelper::upload($file, 'settings');
                 $this->settingService->set('company_logo', $path, 'company', 'string', 'Logo công ty');
             }
-            
+
             // Xóa cache
             $this->settingService->clearCache();
-            
+
             // Nếu thay đổi múi giờ, cập nhật cấu hình ứng dụng
             if (isset($systemSettings['timezone'])) {
                 config(['app.timezone' => $systemSettings['timezone']]);
             }
-            
+
             return redirect()->route('admin.settings.index')->withFragment($tab)
                 ->with('success', 'Cài đặt đã được cập nhật thành công.');
         } catch (\Exception $e) {
             Log::error('Lỗi khi cập nhật cài đặt: ' . $e->getMessage());
-            
+
             return redirect()->back()->withInput()
                 ->with('error', 'Đã xảy ra lỗi khi cập nhật cài đặt: ' . $e->getMessage());
         }
@@ -178,12 +178,12 @@ class SettingController extends Controller
         try {
             $this->settingService->initDefaultSettings();
             $this->settingService->clearCache();
-            
+
             return redirect()->route('admin.settings.index')
                 ->with('success', 'Cài đặt đã được khôi phục về mặc định.');
         } catch (\Exception $e) {
             Log::error('Lỗi khi khôi phục cài đặt mặc định: ' . $e->getMessage());
-            
+
             return redirect()->back()
                 ->with('error', 'Đã xảy ra lỗi khi khôi phục cài đặt mặc định: ' . $e->getMessage());
         }
@@ -201,12 +201,12 @@ class SettingController extends Controller
             Artisan::call('cache:clear');
             Artisan::call('config:clear');
             Artisan::call('view:clear');
-            
+
             return redirect()->route('admin.settings.index')
                 ->with('success', 'Cache đã được xóa thành công.');
         } catch (\Exception $e) {
             Log::error('Lỗi khi xóa cache: ' . $e->getMessage());
-            
+
             return redirect()->back()
                 ->with('error', 'Đã xảy ra lỗi khi xóa cache: ' . $e->getMessage());
         }
@@ -223,16 +223,16 @@ class SettingController extends Controller
     {
         foreach ($settings as $key => $value) {
             $setting = $this->settingService->settingRepository->getByKey($key);
-            
+
             // Xác định type và description
             $type = 'string'; // Mặc định là string
             $description = null;
-            
+
             if ($setting) {
                 // Nếu setting đã tồn tại, lấy thông tin từ setting
                 $type = $setting->type;
                 $description = $setting->description;
-                
+
                 // Xử lý giá trị dựa trên loại
                 switch ($type) {
                     case 'boolean':
@@ -257,7 +257,7 @@ class SettingController extends Controller
                         break;
                 }
             }
-            
+
             // Lưu hoặc cập nhật setting
             $this->settingService->set($key, $value, $group, $type, $description);
         }
