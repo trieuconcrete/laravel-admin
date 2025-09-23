@@ -682,19 +682,38 @@ class SalaryCommissionExport implements WithTitle, WithStyles, ShouldAutoSize
         // Add empty cell in notes column for the bonus row
         $sheet->setCellValue($notesColumnLetter . $bonusRow, '');
 
-        // Add THƯỞNG row
-        $otherRequest = $row++;
-        $sheet->setCellValue('A' . $otherRequest, value: 'TRỢ CẤP (YÊU CẦU KHÁC + THANH TOÁN LƯƠNG):');
-        $sheet->mergeCells('A' . $otherRequest . ':K' . $otherRequest);
-        $sheet->getStyle('A' . $otherRequest)->getFont()->setBold(true);
-        $sheet->getStyle('A' . $otherRequest)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
-        $sheet->setCellValue('L' . $otherRequest, $totalTypeOther + $totalTypePayment);
-        $sheet->getStyle('L' . $otherRequest)->getNumberFormat()->setFormatCode('#,##0');
-        
-        // Highlight THƯỞNG row (no background color)
-        
-        // Add empty cell in notes column for the bonus row
-        $sheet->setCellValue($notesColumnLetter . $otherRequest, '');
+        $salaryTypeOthers = $this->user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_OTHER, $this->startDate, $this->endDate);
+        foreach ($salaryTypeOthers as $key => $salaryTypeOther) {
+            $otherRequest = $row++;
+            $sheet->setCellValue('A' . $otherRequest, $salaryTypeOther->reason ?? ("PHỤ CẤP KHÁC " . $key + 1));
+            $sheet->mergeCells('A' . $otherRequest . ':K' . $otherRequest);
+            $sheet->getStyle('A' . $otherRequest)->getFont()->setBold(true);
+            $sheet->getStyle('A' . $otherRequest)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            $sheet->setCellValue('L' . $otherRequest, $salaryTypeOther->amount ?? 0);
+            $sheet->getStyle('L' . $otherRequest)->getNumberFormat()->setFormatCode('#,##0');
+            
+            // Highlight THƯỞNG row (no background color)
+            
+            // Add empty cell in notes column for the bonus row
+            $sheet->setCellValue($notesColumnLetter . $otherRequest, '');
+        }
+
+        $salaryTypePayments = $this->user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_PAYMENT, $this->startDate, $this->endDate);
+        foreach ($salaryTypePayments as $key => $salaryTypePayment) {
+            // Add TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY row
+            $salaryTypePaymentRow = $row++;
+            $sheet->setCellValue('A' . $salaryTypePaymentRow, $salaryTypeOther->reason ?? ("THANh TOÁN LƯƠNG " . $key + 1));
+            $sheet->mergeCells('A' . $salaryTypePaymentRow . ':K' . $salaryTypePaymentRow);
+            $sheet->getStyle('A' . $salaryTypePaymentRow)->getFont()->setBold(true);
+            $sheet->getStyle('A' . $salaryTypePaymentRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            $sheet->setCellValue('L' . $salaryTypePaymentRow, $salaryTypePayment->amount);
+            $sheet->getStyle('L' . $salaryTypePaymentRow)->getNumberFormat()->setFormatCode('#,##0');
+            
+            // Highlight THƯỞNG row (no background color)
+            
+            // Add empty cell in notes column for the bonus row
+            $sheet->setCellValue($notesColumnLetter . $salaryTypePaymentRow, '');
+        }
         
         // Thêm dòng TỔNG LƯƠNG (commission + phụ cấp)
         $totalSalaryRow = $row++;
