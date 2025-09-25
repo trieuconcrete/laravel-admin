@@ -68,22 +68,22 @@
                     <div class="col-md-2">
                         <select id="status-filter" class="form-select">
                             <option value="">Tất cả trạng thái</option>
-                            <option value="1">Hoạt động</option>
-                            <option value="0">Không hoạt động</option>
+                            <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Hoạt động</option>
+                            <option value="0" {{ request('status') == '0' ? 'selected' : '' }}>Không hoạt động</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <select id="sort-by" class="form-select">
-                            <option value="vehicle_type_id">ID</option>
-                            <option value="name">Tên</option>
-                            <option value="status">Trạng thái</option>
-                            <option value="created_at">Ngày tạo</option>
+                            <option value="vehicle_type_id" {{ request('sort_by') == 'vehicle_type_id' ? 'selected' : '' }}>ID</option>
+                            <option value="name" {{ request('sort_by') == 'name' ? 'selected' : '' }}>Tên</option>
+                            <option value="status" {{ request('sort_by') == 'status' ? 'selected' : '' }}>Trạng thái</option>
+                            <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Ngày tạo</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <select id="sort-direction" class="form-select">
-                            <option value="asc">Tăng dần</option>
-                            <option value="desc">Giảm dần</option>
+                            <option value="asc" {{ request('sort_by') == 'asc' ? 'selected' : '' }}>Tăng dần</option>
+                            <option value="desc" {{ request('sort_by') == 'desc' ? 'selected' : '' }}>Giảm dần</option>
                         </select>
                     </div>
                     <div class="col-md-3">
@@ -166,7 +166,7 @@
                         của {{ $vehicleTypes->total() }} kết quả
                     </div>
                     <div class="dataTables_paginate">
-                        {{ $vehicleTypes->links() }}
+                        {{ $vehicleTypes->appends(array_merge(request()->except('page'), ['tab' => 'vehicle-types']))->links() }}
                     </div>
                 </div>
             </div>

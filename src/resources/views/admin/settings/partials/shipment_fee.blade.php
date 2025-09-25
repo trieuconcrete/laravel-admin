@@ -1,6 +1,6 @@
 <!-- Filters -->
-<form method="GET" action="{{ route('admin.settings.index', 'shipment-fee') }}#shipment-fee" class="mb-4">
-    <input type="hidden" name="group" id="settingGroup" value="shipment-fee">
+<form method="GET" action="{{ route('admin.settings.index', 'shipment-fee') }}" class="mb-4">
+    <input type="hidden" name="tab" value="shipment-fee">
     <div class="row g-3">
         <div class="col-md-3">
             <select name="type" class="form-select">
@@ -95,5 +95,5 @@
 </div>
 <!-- Pagination -->
 <div class="d-flex justify-content-center">
-    {{ $deductionTypes->links() }}
+    {{ $deductionTypes->appends(array_merge(request()->except('page'), ['tab' => 'shipment-fee']))->links() }}
 </div>

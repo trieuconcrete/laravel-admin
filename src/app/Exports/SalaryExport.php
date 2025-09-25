@@ -500,7 +500,6 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         // Add empty cell in notes column for the base salary row
         $sheet->setCellValue($notesColumnLetter . $baseSalaryRow, '');
 
-
         // Add THƯỞNG row
         $bonusRow = $row++;
         $sheet->setCellValue('A' . $bonusRow, 'THƯỞNG:');
@@ -520,11 +519,78 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Add empty cell in notes column for the bonus row
         $sheet->setCellValue($notesColumnLetter . $bonusRow, '');
+
+        $salaryTypeOthers = $this->user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_OTHER, $this->startDate, $this->endDate);
+        foreach ($salaryTypeOthers as $key => $salaryTypeOther) {
+            // Add TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY row
+            $salaryTypeOtherRow = $row++;
+            $sheet->setCellValue('A' . $salaryTypeOtherRow, $salaryTypeOther->reason ?? ("PHỤ CẤP KHÁC " . $key + 1));
+            $sheet->mergeCells('A' . $salaryTypeOtherRow . ':D' . $salaryTypeOtherRow);
+            $sheet->getStyle('A' . $salaryTypeOtherRow)->getFont()->setBold(true);
+            $sheet->getStyle('A' . $salaryTypeOtherRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            $sheet->setCellValue('E' . $salaryTypeOtherRow, $salaryTypeOther->amount ?? 0);
+            $sheet->getStyle('E' . $salaryTypeOtherRow)->getNumberFormat()->setFormatCode('#,##0');
+            
+            // Highlight TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY row with yellow background
+            $sheet->getStyle('A' . $salaryTypeOtherRow . ':E' . $salaryTypeOtherRow)->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'color' => ['rgb' => 'FFFF00'],
+                ],
+            ]);
+            
+            // Add empty cell in notes column for the total salary row
+            $sheet->setCellValue($notesColumnLetter . $salaryTypeOtherRow, '');
+        }
+
+        $salaryTypePayments = $this->user->getSalaryAdvancesRequestByType(SalaryAdvanceRequest::TYPE_PAYMENT, $this->startDate, $this->endDate);
+        foreach ($salaryTypePayments as $key => $salaryTypePayment) {
+            // Add TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY row
+            $salaryTypePaymentRow = $row++;
+            $sheet->setCellValue('A' . $salaryTypePaymentRow, $salaryTypePayment->reason ?? ("THANh TOÁN LƯƠNG " . $key + 1));
+            $sheet->mergeCells('A' . $salaryTypePaymentRow . ':D' . $salaryTypePaymentRow);
+            $sheet->getStyle('A' . $salaryTypePaymentRow)->getFont()->setBold(true);
+            $sheet->getStyle('A' . $salaryTypePaymentRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+            $sheet->setCellValue('E' . $salaryTypePaymentRow, $salaryTypePayment->amount);
+            $sheet->getStyle('E' . $salaryTypePaymentRow)->getNumberFormat()->setFormatCode('#,##0');
+            
+            // Highlight TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY row with yellow background
+            $sheet->getStyle('A' . $salaryTypePaymentRow . ':E' . $salaryTypePaymentRow)->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'color' => ['rgb' => 'FFFF00'],
+                ],
+            ]);
+            
+            // Add empty cell in notes column for the total salary row
+            $sheet->setCellValue($notesColumnLetter . $salaryTypePaymentRow, '');
+        }
+
+        // Add TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY row
+        $totalDeductionRow = $row++;
+        // $totalSalary = $this->user->salary_base + $totalDeductions + $totalTypeOther + $totalTypeBonus + $totalTypePayment;
+        $sheet->setCellValue('A' . $totalDeductionRow, 'TỔNG PHỤ CẤP XE:');
+        $sheet->mergeCells('A' . $totalDeductionRow . ':D' . $totalDeductionRow);
+        $sheet->getStyle('A' . $totalDeductionRow)->getFont()->setBold(true);
+        $sheet->getStyle('A' . $totalDeductionRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+        $sheet->setCellValue('E' . $totalDeductionRow, $totalDeductions);
+        $sheet->getStyle('E' . $totalDeductionRow)->getNumberFormat()->setFormatCode('#,##0');
+        
+        // Highlight TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY row with yellow background
+        $sheet->getStyle('A' . $totalDeductionRow . ':E' . $totalDeductionRow)->applyFromArray([
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'color' => ['rgb' => 'FFFF00'],
+            ],
+        ]);
+        
+        // Add empty cell in notes column for the total salary row
+        $sheet->setCellValue($notesColumnLetter . $totalDeductionRow, '');
         
         // Add TỔNG LƯƠNG CB + PHỤ CẤP TÀI + CƠM NGÀY row
         $totalSalaryRow = $row++;
         $totalSalary = $this->user->salary_base + $totalDeductions + $totalTypeOther + $totalTypeBonus + $totalTypePayment;
-        $sheet->setCellValue('A' . $totalSalaryRow, 'TỔNG LƯƠNG CB + PHỤ CẤP TÀI + TRỢ CẤP (YÊU CẦU KHÁC) + THANH TOÁN LƯƠNG+ CƠM NGÀY:');
+        $sheet->setCellValue('A' . $totalSalaryRow, 'TỔNG LƯƠNG:');
         $sheet->mergeCells('A' . $totalSalaryRow . ':D' . $totalSalaryRow);
         $sheet->getStyle('A' . $totalSalaryRow)->getFont()->setBold(true);
         $sheet->getStyle('A' . $totalSalaryRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
@@ -541,7 +607,6 @@ class SalaryExport implements WithTitle, WithStyles, ShouldAutoSize
         
         // Add empty cell in notes column for the total salary row
         $sheet->setCellValue($notesColumnLetter . $totalSalaryRow, '');
-        
         
         // Add ĐÃ ỨNG LƯƠNG row
         $advanceSalaryRow = $row++;
