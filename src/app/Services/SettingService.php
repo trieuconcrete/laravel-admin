@@ -168,11 +168,11 @@ class SettingService
     {
         try {
             // Cài đặt thông tin công ty
-            $this->set('company_name', 'Công ty Vận tải HPL', 'company', 'string', 'Tên công ty');
-            $this->set('company_address', '123 Đường ABC, Quận XYZ, TP. HCM', 'company', 'string', 'Địa chỉ công ty');
-            $this->set('company_phone', '0123456789', 'company', 'string', 'Số điện thoại công ty');
+            $this->set('company_name', 'CÔNG TY TNHH MTV VẬN TẢI HOÀNG PHÚ LONG', 'company', 'string', 'Tên công ty');
+            $this->set('company_address', 'Số 216 ,Tổ 4, Ấp 7, Xã Long Thành, Tinh Đồng Nai', 'company', 'string', 'Địa chỉ công ty');
+            $this->set('company_phone', '0917.712.195', 'company', 'string', 'Số điện thoại công ty');
             $this->set('company_email', 'info@vantaihpl.com', 'company', 'string', 'Email công ty');
-            $this->set('company_tax_code', '0123456789', 'company', 'string', 'Mã số thuế');
+            $this->set('company_tax_code', '3603231556', 'company', 'string', 'Mã số thuế');
             $this->set('company_logo', 'images/logo.png', 'company', 'string', 'Logo công ty');
             $this->set('social_insurance_contribution_amount', '5500000', 'company', 'integer', 'số tiền đóng BHXH');
             $this->set('social_insurance_contribution_rate', '10,5', 'company', 'float', 'Mức đóng BHXH(%)');
