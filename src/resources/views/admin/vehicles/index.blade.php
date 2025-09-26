@@ -93,9 +93,9 @@
                                     <tr>
                                         <td>
                                             <div class="btn-group">
-                                                <button 
-                                                    class="btn btn-sm btn-outline-primary btn-show-vehicle" 
-                                                    data-bs-toggle="modal" 
+                                                <button
+                                                    class="btn btn-sm btn-outline-primary btn-show-vehicle"
+                                                    data-bs-toggle="modal"
                                                     data-bs-target="#detailModal"
                                                     data-id="{{ $vehicle->vehicle_id }}"
                                                 >
@@ -106,7 +106,7 @@
                                                         data-vehicle-id="{{ $vehicle->id }}">
                                                     Xóa
                                                 </button>
-                                                
+
                                                 <form action="{{ route('admin.vehicles.destroy', $vehicle) }}"
                                                     method="POST"
                                                     class="delete-vehicle-form"
@@ -121,10 +121,10 @@
                                         <td>{{ optional($vehicle->driver)->full_name }}</td>
                                         <td>{{ $vehicle->capacity }}</td>
                                         <td class="py-2 px-4">
-                                            <span 
+                                            <span
                                                 class="
-                                                    status-indicator 
-                                                    status-active 
+                                                    status-indicator
+                                                    status-active
                                                     text-{{ $vehicle->getStatusBadgeClassAttribute() }}
                                                 "
                                             >
@@ -150,7 +150,7 @@
                                                 $vehicleInspection = $vehicle->getLatestDocument(\App\Models\VehicleDocument::TYPE_INSPECTION);
                                             @endphp
                                             @if ($vehicleInspection && $vehicleInspection->expiry_date)
-                                                @if ($vehicle->isDocumentExpired(\App\Models\VehicleDocument::TYPE_INSPECTION)) 
+                                                @if ($vehicle->isDocumentExpired(\App\Models\VehicleDocument::TYPE_INSPECTION))
                                                     <span class="badge bg-danger-subtle text-danger">
                                                         Hết hạn (@formatDate($vehicleInspection->expiry_date))
                                                     </span>
@@ -164,7 +164,7 @@
                                                 $vehicleInsurance = $vehicle->getLatestDocument(\App\Models\VehicleDocument::TYPE_INSURANCE);
                                             @endphp
                                             @if ($vehicleInsurance && $vehicleInsurance->expiry_date)
-                                                @if ($vehicle->isDocumentExpired(\App\Models\VehicleDocument::TYPE_INSURANCE)) 
+                                                @if ($vehicle->isDocumentExpired(\App\Models\VehicleDocument::TYPE_INSURANCE))
                                                     <span class="badge bg-danger-subtle text-danger">
                                                         Hết hạn (@formatDate($vehicleInsurance->expiry_date))
                                                     </span>
@@ -214,7 +214,7 @@
                         <hr>
                         <h6>Thông tin khách hàng cho thuê xe</h6>
                         <small class="badge bg-danger-subtle text-danger mb-1">Bạn có thể chọn 1 khách hàng hoặc nhập thông tin khách hàng mới</small>
-                        
+
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Chọn đối tác</label>
@@ -317,7 +317,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ngày hết hạn</label>
-                                <input type="date" class="form-control" name="documents[0][expiry_date]" value="@formatDateForInput(old('documents.0.expiry_date'))">
+                                <input type="date" class="form-control" name="documents[0][expiry_date]" value="{{ old('documents.0.expiry_date') }}">
                                 <div class="text-danger error" data-field="documents.0.expiry_date"></div>
                             </div>
                         </div>
@@ -337,7 +337,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ngày hết hạn </label>
-                                <input type="date" class="form-control" name="documents[1][expiry_date]" value="@formatDateForInput(old('documents.1.expiry_date'))">
+                                <input type="date" class="form-control" name="documents[1][expiry_date]" value="{{ old('documents.1.expiry_date') }}">
                                 <div class="text-danger error" data-field="documents.1.expiry_date"></div>
                             </div>
                         </div>
@@ -391,7 +391,7 @@
             const customerPhoneField = $('#modalCustomerPhone');
             const customerEmailField = $('#modalCustomerEmail');
             const customerAddressField = $('#modalCustomerAddress');
-            
+
             if (customerId) {
                 // Fetch customer data via AJAX
                 $.ajax({
@@ -408,13 +408,13 @@
                         customerPhoneField.val(data.phone);
                         customerEmailField.val(data.email);
                         customerAddressField.val(data.address);
-                        
+
                         // Disable input fields when customer is selected
                         customerNameField.prop('disabled', true);
                         customerPhoneField.prop('disabled', true);
                         customerEmailField.prop('disabled', true);
                         customerAddressField.prop('disabled', true);
-                        
+
                         // Clear validation errors
                         $('.error[data-field="customer_name"]').text('');
                         $('.error[data-field="customer_phone"]').text('');
@@ -431,7 +431,7 @@
                 customerPhoneField.val('');
                 customerEmailField.val('');
                 customerAddressField.val('');
-                
+
                 // Enable input fields when no customer is selected
                 customerNameField.prop('disabled', false);
                 customerPhoneField.prop('disabled', false);
@@ -443,46 +443,46 @@
         // Frontend validation for modal form
         $('#add-vehicle-form').on('submit', function(e) {
             let isValid = true;
-            
+
             // Clear previous errors
             $('.error').text('');
-            
+
             // Validate car rental fields if checkbox is checked
             if ($('#modalIsCarRental').is(':checked')) {
                 const customerId = $('#modalCustomerId').val();
                 const customerName = $('#modalCustomerName').val().trim();
                 const customerPhone = $('#modalCustomerPhone').val().trim();
                 const customerEmail = $('#modalCustomerEmail').val().trim();
-                
+
                 // If no customer selected, validate required fields
                 if (!customerId) {
                     if (!customerName) {
                         $('.error[data-field="customer_name"]').text('Tên khách hàng là bắt buộc');
                         isValid = false;
                     }
-                    
+
                     if (!customerPhone) {
                         $('.error[data-field="customer_phone"]').text('Số điện thoại khách hàng là bắt buộc');
                         isValid = false;
                     }
-                    
+
                     // if (!customerEmail) {
                     //     $('.error[data-field="customer_email"]').text('Email khách hàng là bắt buộc');
                     //     isValid = false;
-                    // } else 
+                    // } else
                     if (!isValidEmail(customerEmail)) {
                         $('.error[data-field="customer_email"]').text('Email không đúng định dạng');
                         isValid = false;
                     }
                 }
             }
-            
+
             if (!isValid) {
                 e.preventDefault();
                 return false;
             }
         });
-        
+
         // Email validation function
         function isValidEmail(email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -498,10 +498,10 @@
 
         $('.delete-vehicle-btn').click(function (e) {
             e.preventDefault();
-    
+
             const vehicleId = $(this).data('vehicle-id');
             const form = $('#delete-form-' + vehicleId);
-    
+
             Swal.fire({
                 title: 'Bạn chắc chắn muốn xóa?',
                 // text: "Hành động này không thể hoàn tác!",
@@ -526,6 +526,8 @@
 
                     const url = $form.attr('action');
                     const formData = new FormData(this);
+                    formData.set('documents[0][expiry_date]', $form.find('input[name="documents[0][expiry_date]"]').data('backend-value') || '');
+                    formData.set('documents[1][expiry_date]', $form.find('input[name="documents[1][expiry_date]"]').data('backend-value') || '');
 
                     // Xóa lỗi cũ
                     $form.find('.error').text('');
@@ -549,7 +551,7 @@
                             // Reset form
                             $form[0].reset();
 
-                            // 
+                            //
                             Swal.fire({
                                 title: "Tạo thành công!",
                                 icon: "success",
@@ -579,14 +581,14 @@
         $('.btn-show-vehicle').on('click', function () {
             let id = $(this).data('id');
             let modal = $('#detailModal');
-            
+
             $('#detailContentModal').html('<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></div>');
-            
+
             $('#editDetailBtn').data('id', id);
 
             // show modal
             modal.modal('show');
-            
+
             $.ajax({
                 url: `/admin/vehicles/${id}`,
                 type: 'GET',

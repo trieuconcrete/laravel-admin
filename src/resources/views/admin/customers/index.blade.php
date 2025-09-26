@@ -279,6 +279,7 @@
 
                     const url = $form.attr('action');
                     const formData = new FormData(this);
+                    formData.set('establishment_date', $form.find('input[name="establishment_date"]').data('backend-value') || '');
 
                     // Xóa lỗi cũ
                     $form.find('.error').text('');
@@ -302,7 +303,7 @@
                             // Reset form
                             $form[0].reset();
 
-                            // 
+                            //
                             Swal.fire({
                                 title: "Tạo thành công!",
                                 icon: "success",
@@ -335,9 +336,9 @@
 
         $('.delete-user-btn').click(function (e) {
             e.preventDefault();
-    
+
             var form = $(this).closest('.delete-user-form');
-    
+
             Swal.fire({
                 title: 'Bạn chắc chắn muốn xóa?',
                 // text: "Hành động này không thể hoàn tác!",
