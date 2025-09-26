@@ -191,7 +191,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Khách hàng <span class="text-danger">*</span></label>
-                            <select class="form-select js-example-basic-single" name="customer_id">
+                            <select class="form-select" name="customer_id">
                                 <option value="">Chọn khách hàng</option>
                                 @foreach ($customers as $key => $customer)
                                     <option value="{{ $key }}">{{ $customer }}</option>
@@ -213,13 +213,15 @@
                         <div class="col-md-6">
                             <div class="mb-4">
                                 <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control date-input" name="start_date" required>
+                                <input type="date" class="form-control date-input" name="start_date">
+                                <div class="text-danger error" data-field="start_date"></div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-4">
                                 <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control date-input" name="end_date" required>
+                                <input type="date" class="form-control date-input" name="end_date">
+                                <div class="text-danger error" data-field="end_date"></div>
                             </div>
                         </div>
                     </div>
@@ -228,7 +230,8 @@
                         <div class="col-md-6">
                             <div class="mb-4">
                                 <label class="form-label">Phí thuê xe theo tháng <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control number" name="monthly_rental_fee" required>
+                                <input type="text" class="form-control number" name="monthly_rental_fee">
+                                <div class="text-danger error" data-field="monthly_rental_fee"></div>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -411,79 +414,62 @@
             });
         });
 
-        $(document).ready(function () {
-            const hasOldVehicles = {{ count(old('vehicles', [])) > 0 ? 'true' : 'false' }};
+        $(document).ready(function() {
+            const $form = $('#add-car-rental-form');
+            if ($form.length) {
+                $form.on('submit', function(e) {
+                    e.preventDefault();
 
-            if (!hasOldVehicles) {
-                addVehicleRow();
-            }
+                    const url = $form.attr('action');
+                    const formData = new FormData(this);
 
-            $('#add-vehicle-btn').on('click', addVehicleRow);
+                    $form.find('.error').text('');
 
-            $('#vehicle-rows').on('click', '.remove-row', removeVehicleRow);
+                    $.ajax({
+                        url: url,
+                        method: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                            'Accept': 'application/json',
+                        },
+                        success: function(data) {
+                            const modalElement = $form.closest('.modal');
+                            const modal = bootstrap.Modal.getInstance(modalElement[0]);
+                            if (modal) modal.hide();
 
-            ['#add-car-rental-form'].forEach(function (formSelector) {
-                const $form = $(formSelector);
-                if ($form.length) {
-                    $form.on('submit', function (e) {
-                        e.preventDefault();
+                            $form[0].reset();
 
-                        const url = $form.attr('action');
-                        const formData = new FormData(this);
-
-                        // Xóa lỗi cũ
-                        $form.find('.error').text('');
-
-                        $.ajax({
-                            url: url
-                            , method: 'POST'
-                            , data: formData
-                            , contentType: false
-                            , processData: false
-                            , headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                                    'content')
-                                , 'Accept': 'application/json'
-                                ,
-                            }
-                            , success: function (data) {
-                                // close modal
-                                const modalElement = $form.closest('.modal');
-                                const modal = bootstrap.Modal.getInstance(modalElement[
-                                    0]);
-                                if (modal) modal.hide();
-
-                                // Reset form
-                                $form[0].reset();
-
-                                //
-                                Swal.fire({
-                                    title: "Tạo thành công!"
-                                    , icon: "success"
-                                    , draggable: true
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        // Reload table
+                            Swal.fire({
+                                title: "Tạo thành công!",
+                                icon: "success",
+                                draggable: true
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    if (typeof driverTable !== 'undefined') {
+                                        driverTable.ajax.reload();
+                                    } else {
                                         location.reload();
                                     }
-                                });
-                            }
-                            , error: function (xhr) {
-                                if (xhr.status === 422) {
-                                    const errors = xhr.responseJSON.errors;
-                                    $.each(errors, function (field, messages) {
-                                        $form.find(
-                                            `.error[data-field="${field}"]`)
-                                            .text(messages[0]);
-                                    });
-                                } else {
-                                    console.error('Có lỗi xảy ra:', xhr);
                                 }
+                            });
+                        },
+                        error: function(xhr) {
+                            if (xhr.status === 422) {
+                                const errors = xhr.responseJSON.errors;
+                                $.each(errors, function(field, messages) {
+                                    $form.find(`.error[data-field="${field}"]`).text(
+                                        messages[0]);
+                                });
+                            } else {
+                                console.error('Có lỗi xảy ra:', xhr);
                             }
-                        });
+                        }
                     });
-                }
-            });
+                });
+            }
         });
 
         // Tổng kết công nợ
@@ -495,7 +481,7 @@
 
             // Hiển thị modal tổng kết
             $('#debtSummaryModal').modal('show');
-            
+
             // Cập nhật thông tin trong modal
             $('#debtSummaryModal #carRentalId').val(carRentalId);
             $('#debtSummaryModal #carRentalType').val(carRentalType);
@@ -539,11 +525,11 @@
                 },
                 success: function(response) {
                     Swal.close();
-                    
+
                     if (response.success) {
                         // Đóng modal tổng kết
                         $('#debtSummaryModal').modal('hide');
-                        
+
                         // Hiển thị thông báo thành công
                         Swal.fire({
                             title: "Thành công!",
@@ -564,12 +550,12 @@
                 },
                 error: function(xhr) {
                     Swal.close();
-                    
+
                     let errorMessage = "Đã xảy ra lỗi khi tổng kết công nợ";
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage = xhr.responseJSON.message;
                     }
-                    
+
                     Swal.fire({
                         title: "Lỗi",
                         text: errorMessage,

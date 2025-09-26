@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -96,6 +98,22 @@ class VehicleDocument extends Model
             self::TYPE_OWNERSHIP => 'Giấy tờ sở hữu',
             self::TYPE_OTHER => 'Khác'
         ];
+    }
+
+    protected function issueDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
+            set: fn ($value) => $value ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d') : null,
+        );
+    }
+
+    protected function expiryDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
+            set: fn ($value) => $value ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d') : null,
+        );
     }
 
     /**
@@ -212,8 +230,8 @@ class VehicleDocument extends Model
      */
     public function isExpiringSoon($days = 30)
     {
-        return $this->expiry_date 
-            && $this->expiry_date > now() 
+        return $this->expiry_date
+            && $this->expiry_date > now()
             && $this->expiry_date <= now()->addDays($days);
     }
 
@@ -231,7 +249,7 @@ class VehicleDocument extends Model
         } elseif ($this->status !== self::STATUS_REVOKED) {
             $this->status = self::STATUS_VALID;
         }
-        
+
         return $this->save();
     }
 
@@ -244,11 +262,11 @@ class VehicleDocument extends Model
     public function revoke($reason = null)
     {
         $this->status = self::STATUS_REVOKED;
-        
+
         if ($reason) {
             $this->notes = ($this->notes ?? '') . "\nLý do thu hồi: " . $reason;
         }
-        
+
         return $this->save();
     }
 
@@ -262,7 +280,7 @@ class VehicleDocument extends Model
         if (!$this->expiry_date) {
             return null;
         }
-        
+
         return now()->diffInDays($this->expiry_date, false);
     }
 

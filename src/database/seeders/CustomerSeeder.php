@@ -1,4 +1,3 @@
-
 <?php
 
 namespace Database\Seeders;
@@ -21,7 +20,7 @@ class CustomerSeeder extends Seeder
 
         // Tạo mẫu khách hàng doanh nghiệp
         $this->createBusinessCustomers();
-        
+
         // Tạo mẫu khách hàng cá nhân
         $this->createIndividualCustomers();
 

@@ -78,7 +78,6 @@ class StoreCustomerRequest extends FormRequest
             ],
             'establishment_date' => [
                 'nullable',
-                $this->getSystemDateFormatRule(),
                 'before_or_equal:today'
             ],
             'website' => [
@@ -95,7 +94,7 @@ class StoreCustomerRequest extends FormRequest
                 'required',
                 // 'boolean'
             ],
-            
+
             // Thông tin người liên hệ chính (cho doanh nghiệp)
             'primary_contact_name' => [
                 'nullable',
@@ -139,33 +138,33 @@ class StoreCustomerRequest extends FormRequest
             'name.required' => 'Tên khách hàng là bắt buộc.',
             'name.min' => 'Tên khách hàng phải có ít nhất 2 ký tự.',
             'name.max' => 'Tên khách hàng không được vượt quá 255 ký tự.',
-            
+
             'type.required' => 'Loại khách hàng là bắt buộc.',
             'type.in' => 'Loại khách hàng không hợp lệ.',
-            
+
             'phone.required' => 'Số điện thoại là bắt buộc.',
             'phone.regex' => 'Số điện thoại không đúng định dạng.',
             'phone.min' => 'Số điện thoại phải có ít nhất 10 số.',
             'phone.max' => 'Số điện thoại không được vượt quá 15 số.',
             'phone.unique' => 'Số điện thoại này đã được sử dụng.',
-            
+
             'email.email' => 'Email không đúng định dạng.',
             'email.unique' => 'Email này đã được sử dụng.',
-            
+
             'tax_code.unique' => 'Mã số thuế này đã được sử dụng.',
-            
+
             'establishment_date.date' => 'Ngày thành lập không đúng định dạng.',
             'establishment_date.before_or_equal' => 'Ngày thành lập không được là ngày trong tương lai.',
-            
+
             'website.url' => 'Website phải là URL hợp lệ.',
-            
+
             'is_active.required' => 'Trạng thái là bắt buộc.',
             'is_active.boolean' => 'Trạng thái không hợp lệ.',
-            
+
             'primary_contact_name.required_if' => 'Tên người liên hệ chính là bắt buộc đối với doanh nghiệp.',
             'primary_contact_phone.regex' => 'Số điện thoại người liên hệ không đúng định dạng.',
             'primary_contact_email.email' => 'Email người liên hệ không đúng định dạng.',
-            
+
             'document_file.file' => 'Tệp đính kèm phải là một tệp hợp lệ.',
             'document_file.mimes' => 'Tệp đính kèm phải có định dạng: pdf, doc, docx, xls, xlsx, jpg, jpeg, png.',
             'document_file.max' => 'Tệp đính kèm không được vượt quá 10MB.',
@@ -213,7 +212,7 @@ class StoreCustomerRequest extends FormRequest
                     $validator->errors()->add('tax_code', 'Mã số thuế là bắt buộc đối với doanh nghiệp.');
                 }
             }
-            
+
             // Validation: Kiểm tra định dạng mã số thuế (nếu có)
             if ($this->input('tax_code')) {
                 $taxCode = $this->input('tax_code');

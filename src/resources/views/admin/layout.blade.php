@@ -154,6 +154,7 @@
         <!-- App js -->
         <script src="{{ asset('assets/js/app.js') }}"></script>
         <script src="{{ asset('assets/js/common.js') }}"></script>
+        <script src="{{ asset('assets/js/format-date.js') }}"></script>
         <script src="{{ asset('assets/js/helpers.js') }}"></script>
 
         <!-- Flatpickr JS -->
@@ -213,51 +214,6 @@
                     }
                 });
             });
-
-            document.addEventListener('DOMContentLoaded', function () {
-                // Lấy định dạng placeholder từ PHP để đảm bảo nhất quán
-                const dateFormatPlaceholder = '{{ \App\Helpers\DateHelper::getDateFormatPlaceholder() }}';
-                const systemDateFormat = '{{ \App\Helpers\DateHelper::getSystemDateFormat() }}';
-
-                document.querySelectorAll('input[type="date"]').forEach(function (input) {
-                    // Lưu giá trị ban đầu
-                    const originalValue = input.value;
-
-                    // Lấy định dạng từ thuộc tính data nếu có, mặc định là Y-m-d
-                    const dateFormat = input.getAttribute('data-date-format') || "Y-m-d";
-
-                    // Chuyển từ input type="date" sang input type="text" để sử dụng flatpickr
-                    input.type = 'text';
-                    input.placeholder = dateFormatPlaceholder; // Sử dụng định dạng từ cài đặt hệ thống
-
-                    // Khởi tạo flatpickr với định dạng phù hợp
-                    flatpickr(input, {
-                        dateFormat: systemDateFormat,
-                        allowInput: true,
-                        defaultDate: originalValue || null,
-                        // Đảm bảo giá trị được parse đúng
-                        parseDate: (datestr, format) => {
-                            return new Date(datestr);
-                        }
-                    });
-                });
-            });
-
-            function showToast(icon, message) {
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: icon,
-                    title: message,
-                    showConfirmButton: false,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.addEventListener('mouseenter', Swal.stopTimer)
-                        toast.addEventListener('mouseleave', Swal.resumeTimer)
-                    }
-                });
-            }
         </script>
 
         <!-- Page-specific JS -->

@@ -15,7 +15,7 @@
                             <div class="row g-3 mb-0 align-items-center">
                                 <div class="col-auto">
                                     <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary">
-                                        <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe 
+                                        <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe
                                     </a>
                                 </div>
                                 <!--end col-->
@@ -31,13 +31,13 @@
             @php
                 // Đếm tổng số chuyến xe
                 $totalShipments = $shipments->total();
-                
+
                 // Đếm số chuyến xe đang vận chuyển
                 $inTransitCount = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_IN_TRANSIT)->count();
-                
+
                 // Đếm số chuyến xe chờ xác nhận
                 $pendingCount = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_PENDING)->count();
-                
+
                 // Đếm số chuyến xe hoàn thành trong tháng hiện tại
                 $startOfMonth = now()->startOfMonth();
                 $endOfMonth = now()->endOfMonth();
@@ -45,7 +45,7 @@
                     ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
                     ->count();
             @endphp
-            
+
             <div class="row mb-4">
                 <div class="col-md-6 col-lg-3 mb-3">
                     <div class="card card-dashboard h-100" style="border-left-color: #4e73df;">
@@ -125,13 +125,13 @@
                             <div class="col-md-2">
                                 <div class="input-group">
                                     <span class="input-group-text">Từ</span>
-                                    <input type="date" class="form-control" id="startDateFilter" name="departure_time" value="@formatDateForInput(request('departure_time'))">
+                                    <input type="date" class="form-control" id="startDateFilter" name="departure_time" value="{{request('departure_time')}}">
                                 </div>
                             </div>
                             <div class="col-md-2">
                                 <div class="input-group">
                                     <span class="input-group-text">Đến</span>
-                                    <input type="date" class="form-control" id="endDateFilter" name="estimated_arrival_time" value="@formatDateForInput(request('estimated_arrival_time'))">
+                                    <input type="date" class="form-control" id="endDateFilter" name="estimated_arrival_time" value="{{request('estimated_arrival_time')}}">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -177,7 +177,7 @@
                                                     data-shipment-id="{{ $shipment->id }}">
                                                 Xóa
                                             </button>
-                                            
+
                                             <form action="{{ route('admin.shipments.destroy', $shipment) }}"
                                                 method="POST"
                                                 class="delete-shipment-form"
@@ -245,10 +245,10 @@
     $(document).ready(function () {
         $('.delete-shipment-btn').click(function (e) {
             e.preventDefault();
-    
+
             const shipmentId = $(this).data('shipment-id');
             const form = $('#delete-form-' + shipmentId);
-    
+
             Swal.fire({
                 title: 'Bạn chắc chắn muốn xóa?',
                 // text: "Hành động này không thể hoàn tác!",

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -82,6 +84,45 @@ class Contract extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
+    protected function startDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
+    /**
+     * end_date accessor + mutator
+     */
+    protected function endDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
+    protected function signingDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
     /**
      * Quan hệ với người phê duyệt
      */
@@ -133,7 +174,7 @@ class Contract extends Model
                   });
             });
         }
-        
+
         return $query;
     }
 
@@ -161,7 +202,7 @@ class Contract extends Model
         if (!$this->end_date || !$this->isActive()) {
             return null;
         }
-        
+
         return now()->diffInDays($this->end_date, false);
     }
 

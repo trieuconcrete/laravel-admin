@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -60,7 +62,7 @@ class CarRental extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
-        'end_working_hour' => 'string',   // time  
+        'end_working_hour' => 'string',   // time
         'start_working_hour' => 'string', // time
     ];
 
@@ -171,6 +173,31 @@ class CarRental extends Model
         };
     }
 
+    protected function startDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
+    protected function endDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
     /**
      * Scope a query to only include pending rentals.
      */
@@ -229,15 +256,15 @@ class CarRental extends Model
     {
         // Lấy phí thuê xe hàng tháng
         $monthlyRentalFee = $this->monthly_rental_fee ?? 0;
-        
+
         // Tính tổng phí làm thêm giờ từ tất cả vehicle logs
         $totalOvertimeCost = 0;
         $shipments = Shipment::where('car_rental_id', $this->id)->get();
-        
+
         foreach ($shipments as $log) {
             $totalOvertimeCost += $log->total_overtime_cost ?? 0;
         }
-        
+
         // Tính tổng phí cầu đường
         $totalTollFees = 0;
         foreach ($shipments as $log) {
@@ -249,7 +276,7 @@ class CarRental extends Model
                 }
             }
         }
-        
+
         // Tính tổng phí bãi xe
         $totalParkingFees = $shipments->sum('parking_fee') ?? 0;
         $totalParkingFeesWithoutVat = ($totalParkingFees + $totalTollFees) / (1 + $vatRate);
@@ -259,7 +286,7 @@ class CarRental extends Model
 
         // Tính tổng km đã chạy
         $totalDistance = $this->shipments->sum('actual_distance');
-        
+
         // Tính phí vượt giới hạn km
         $overDistanceFee = 0;
         $maxDistance = $this->max_distance;
@@ -269,7 +296,7 @@ class CarRental extends Model
         if ($maxDistance && $maxDistance > 0 && $totalDistance > $maxDistance) {
             $overDistanceFee = ($totalDistance - $maxDistance) * $overDistanceFeePerKm;
         }
-        
+
         // Tính subtotal (tổng trước thuế)
         if ($this->type == 1) {
             // Loại thuê xe theo chuyến
@@ -280,10 +307,10 @@ class CarRental extends Model
         }
         // Tính thuế VAT
         $vatAmount = $subtotal * $vatRate;
-        
+
         // Tính tổng cộng sau thuế
         $totalWithVat = $subtotal + $vatAmount;
-        
+
         return [
             'monthly_rental_fee' => $monthlyRentalFee,
             'total_overtime_cost' => $totalOvertimeCost,
@@ -388,7 +415,7 @@ class CarRental extends Model
      *
      * @return float
      */
-    public function getOvertimeFeePerHourUnitAttribute()    
+    public function getOvertimeFeePerHourUnitAttribute()
     {
         return $this->overtime_fee_per_hour ?? self::OVERTIME_FEE_PER_HOUR_DEFAULT;
     }
@@ -434,29 +461,29 @@ class CarRental extends Model
 
     /**
      * Tính tổng công nợ của khách hàng (tổng tiền phải trả)
-     * 
+     *
      * @return array
      */
     public function calculateTotalDebt(): array
     {
         // Lấy thông tin cơ bản
         $monthlyRentalFee = $this->monthly_rental_fee ?? 0;
-        
+
         // Tính tổng phí làm thêm giờ từ shipments
         $totalOvertimeCost = $this->shipments()->sum('total_overtime_cost') ?? 0;
-        
+
         // Tính tổng phí cầu đường từ shipments
         $totalTollFees = 0;
         foreach ($this->shipments as $shipment) {
             $totalTollFees += $shipment->tollFees->sum('fee_amount') ?? 0;
         }
-        
+
         // Tính tổng phí bãi xe từ shipments
         $totalParkingFees = $this->shipments()->sum('parking_fee') ?? 0;
-        
+
         // Tính tổng km đã chạy từ shipments
         $totalDistance = $this->shipments()->sum('distance') ?? 0;
-        
+
         // Tính phí vượt giới hạn km
         $overDistanceFee = 0;
         $maxDistance = $this->max_distance;
@@ -465,23 +492,23 @@ class CarRental extends Model
         if ($maxDistance && $maxDistance > 0 && $totalDistance > $maxDistance) {
             $overDistanceFee = ($totalDistance - $maxDistance) * $overDistanceFeePerKm;
         }
-        
+
         // Tính subtotal (tổng trước thuế)
         $subtotal = $monthlyRentalFee + $totalOvertimeCost + $totalTollFees + $totalParkingFees + $overDistanceFee;
-        
+
         // Tính thuế VAT (mặc định 8%)
         $vatRate = 0.08; // Có thể thay đổi thành field trong database sau
         $vatAmount = $subtotal * $vatRate;
-        
+
         // Tính tổng cộng sau thuế
         $totalWithVat = $subtotal + $vatAmount;
-        
+
         // Tính số tiền đã thanh toán (nếu có)
         $paidAmount = 0; // Cần implement payment tracking sau
-        
+
         // Tính công nợ còn lại
         $remainingDebt = $totalWithVat - $paidAmount;
-        
+
         return [
             'monthly_rental_fee' => $monthlyRentalFee,
             'total_overtime_cost' => $totalOvertimeCost,

@@ -21,9 +21,9 @@ class StoreQuoteRequest extends FormRequest
     {
         return [
             'customer_id' => 'required',
-            'pickup_datetime' => 'required|' . $this->getSystemDateFormatRule(),
+            'pickup_datetime' => 'required|',
             'status' => 'required',
-            'valid_until' => 'nullable|after_or_equal:pickup_datetime|' . $this->getSystemDateFormatRule(),
+            'valid_until' => 'nullable|after_or_equal:pickup_datetime|',
             'cargo_description' => 'nullable|string',
             'notes' => 'nullable|string',
             'document_file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx|max:10240'
@@ -49,4 +49,4 @@ class StoreQuoteRequest extends FormRequest
             'document_file.max' => 'File đính kèm không được vượt quá 10MB'
         ];
     }
-} 
+}
