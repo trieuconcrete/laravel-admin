@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -192,7 +193,7 @@ class Vehicle extends Model
     public function isDocumentExpired($documentType)
     {
         $document = $this->getLatestDocument($documentType);
-        
+
         if (!$document || !$document->expiry_date) {
             return true;
         }

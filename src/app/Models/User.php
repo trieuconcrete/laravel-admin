@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends Authenticatable
 {
@@ -90,6 +91,56 @@ class User extends Authenticatable
             'insurance_start_date' => 'date',
             'social_insurance_amount' => 'decimal:0',
         ];
+    }
+
+    protected function birthday(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
+    protected function joinDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
+    protected function idNumberIssuanceDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
+    protected function insuranceStartDate(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
     }
 
     /**
@@ -216,7 +267,7 @@ class User extends Authenticatable
 
     /**
      * Get salary advance requests by type for a date range
-     * 
+     *
      * @param mixed $type
      * @param mixed $startDate
      * @param mixed $endDate
@@ -416,7 +467,7 @@ class User extends Authenticatable
 
     /**
      * Check if user should pay insurance for a specific period
-     * 
+     *
      * @param \Carbon\Carbon $startDate
      * @param \Carbon\Carbon $endDate
      * @return bool
@@ -433,7 +484,7 @@ class User extends Authenticatable
         }
 
         // Check if insurance start date is before or during the period
-        return $this->insurance_start_date->lte($endDate);
+        return Carbon::createFromFormat('Y-m-d', $this->insurance_start_date)->lte($endDate);
     }
 
     /**
@@ -448,7 +499,7 @@ class User extends Authenticatable
         }
 
         if ($this->insurance_start_date) {
-            return 'Đã đóng bảo hiểm từ ' . $this->insurance_start_date->format('d/m/Y');
+            return 'Đã đóng bảo hiểm từ ' . $this->insurance_start_date;
         }
 
         return 'Đã đóng bảo hiểm';
@@ -493,7 +544,7 @@ class User extends Authenticatable
     {
         $amount = $this->getSocialInsuranceAmount();
         $isCustom = $this->social_insurance_amount !== null;
-        
+
         return number_format($amount) . ' đ' . ($isCustom ? ' (Cá nhân)' : ' (Hệ thống)');
     }
 

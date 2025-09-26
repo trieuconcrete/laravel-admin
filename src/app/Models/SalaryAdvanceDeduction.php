@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class SalaryAdvanceDeduction extends Model
 {
@@ -88,6 +89,19 @@ class SalaryAdvanceDeduction extends Model
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    protected function deductionMonth(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
     }
 
     /**
@@ -178,7 +192,7 @@ class SalaryAdvanceDeduction extends Model
         // Update parent request status after creating deduction
         static::created(function ($deduction) {
             $request = $deduction->salaryAdvanceRequest;
-            
+
             // Check if fully deducted
             if ($request->isFullyDeducted()) {
                 $request->update(['status' => SalaryAdvanceRequest::STATUS_DEDUCTED]);
@@ -189,7 +203,7 @@ class SalaryAdvanceDeduction extends Model
         static::creating(function ($deduction) {
             $request = $deduction->salaryAdvanceRequest;
             $remainingAmount = $request->remaining_amount;
-            
+
             if ($deduction->deduction_amount > $remainingAmount) {
                 $deduction->deduction_amount = $remainingAmount;
             }

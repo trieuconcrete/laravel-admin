@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class SalaryAdvanceRequest extends Model
 {
@@ -87,7 +88,7 @@ class SalaryAdvanceRequest extends Model
         ];
     }
 
-    
+
     /**
      * Get all available types
      *
@@ -191,6 +192,19 @@ class SalaryAdvanceRequest extends Model
         };
     }
 
+    protected function advanceMonth(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value
+                ? Carbon::parse($value)->format('Y-m-d')
+                : null,
+
+            set: fn ($value) => $value
+                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
+                : null,
+        );
+    }
+
     /**
      * Get total deducted amount
      *
@@ -271,7 +285,7 @@ class SalaryAdvanceRequest extends Model
     public static function generateRequestCode($type = self::TYPE_SALARY)
     {
         $date = now()->format('ymd');
-        
+
         // Get prefix based on request type
         $prefix = match ($type) {
             self::TYPE_SALARY => 'UL',
@@ -280,19 +294,19 @@ class SalaryAdvanceRequest extends Model
             self::TYPE_PAYMENT => 'TTL',
             default => 'UL',
         };
-        
+
         // Find the last request with the same prefix and date
         $lastRequest = self::where('request_code', 'like', $prefix . $date . '%')
                            ->orderBy('id', 'desc')
                            ->first();
-        
+
         // Check for existing requests with the same prefix
         if ($lastRequest && preg_match('/' . $prefix . $date . '(\d{5})/', $lastRequest->request_code, $matches)) {
             $sequence = intval($matches[1]) + 1;
         } else {
             $sequence = 1;
         }
-        
+
         return $prefix . $date . str_pad($sequence, 5, '0', STR_PAD_LEFT);
     }
 
@@ -308,7 +322,7 @@ class SalaryAdvanceRequest extends Model
             if (empty($request->request_code)) {
                 $request->request_code = self::generateRequestCode($request->type);
             }
-            
+
             if (empty($request->request_date)) {
                 $request->request_date = Carbon::now();
             }
