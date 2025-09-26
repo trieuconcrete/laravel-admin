@@ -100,7 +100,7 @@ class ShipmentReportService
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error summarizing report: ' . $e->getMessage());
-            
+
             return [
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi tổng kết bảng kê: ' . $e->getMessage()
@@ -128,9 +128,9 @@ class ShipmentReportService
                         'id' => $shipment->id,
                         'shipment_code' => $shipment->shipment_code,
                         'vehicle_plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : '',
-                        'departure_time' => $shipment->departure_time->format('d/m/Y'),
+                        'departure_time' => $shipment->departure_time,
                         'origin' => $shipment->origin,
-                        
+
                         'trip_count' => $shipment->trip_count ?? 1,
                         'distance' => $shipment->distance ?? 0,
                         'unit_price' => $shipment->unit_price ?? 0,
@@ -183,7 +183,7 @@ class ShipmentReportService
 
         } catch (\Exception $e) {
             Log::error('Error exporting report: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi xuất Excel: ' . $e->getMessage()
@@ -194,7 +194,7 @@ class ShipmentReportService
     /**
      * Lấy export class dựa trên shipment type
      */
-    private function getExportClass($shipmentType, $templateType)   
+    private function getExportClass($shipmentType, $templateType)
     {
         switch ($shipmentType) {
             case 1:
@@ -240,7 +240,7 @@ class ShipmentReportService
         $startDateStr = date('Y-m-d', strtotime($startDate));
         $endDateStr = date('Y-m-d', strtotime($endDate));
         $typeNames = [1 => 'theo_chuyen', 2 => 'thue_thang', 3 => 'xe_nang', 4 => 'duong_dai'];
-        
+
         return "Bang_ke_{$customerName}_{$typeNames[$shipmentType]}_{$startDateStr}_{$endDateStr}.xlsx";
     }
-} 
+}

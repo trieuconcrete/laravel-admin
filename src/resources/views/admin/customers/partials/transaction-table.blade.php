@@ -16,7 +16,7 @@
         <tbody>
             @forelse($transactions as $transaction)
             <tr>
-                <td>@formatDate($transaction->payment_date)</td>
+                <td>{{ format_date($transaction->payment_date, 'd/m/Y') }}</td>
                 <td class="{{ $transaction->type == \App\Models\Transaction::TYPE_INCOME ? 'text-success' : 'text-danger' }}">
                     {{ number_format($transaction->amount) }} VNĐ
                 </td>
@@ -44,16 +44,16 @@
                 <td>{{ $transaction->notes ?: $transaction->description }}</td>
                 <td>
                     <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-outline-primary edit-transaction" 
-                            data-id="{{ $transaction->id }}" 
-                            data-amount="{{ $transaction->amount }}" 
-                            data-payment-date="@formatDateForInput($transaction->payment_date)" 
-                            data-payment-method="{{ $transaction->method }}" 
+                        <button type="button" class="btn btn-sm btn-outline-primary edit-transaction"
+                            data-id="{{ $transaction->id }}"
+                            data-amount="{{ $transaction->amount }}"
+                            data-payment-date="@formatDateForInput($transaction->payment_date)"
+                            data-payment-method="{{ $transaction->method }}"
                             data-notes="{{ $transaction->notes }}"
-                            data-bs-toggle="modal" 
+                            data-bs-toggle="modal"
                             data-bs-target="#editTransactionModal">Sửa</button>
-                        <button type="button" class="btn btn-sm btn-outline-danger delete-transaction" 
-                            data-id="{{ $transaction->id }}" 
+                        <button type="button" class="btn btn-sm btn-outline-danger delete-transaction"
+                            data-id="{{ $transaction->id }}"
                             data-customer-id="{{ $customer->id }}">Xóa</button>
                     </div>
                 </td>

@@ -81,14 +81,14 @@
                                             <td class=" flex gap-2">
                                                 <div class="btn-group">
                                                     <a href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-outline-primary">Chi tiết</a>
-                                                    
+
                                                     @if ($user->role !== \App\Models\User::ROLE_ADMIN)
                                                         <button type="button"
                                                                 class="btn btn-sm btn-outline-danger delete-user-btn"
                                                                 data-user-id="{{ $user->id }}">
                                                             Xóa
                                                         </button>
-                                                        
+
                                                         <form action="{{ route('admin.users.destroy', $user->id) }}"
                                                             method="POST"
                                                             class="delete-user-form"
@@ -500,6 +500,12 @@
 
                     const url = $form.attr('action');
                     const formData = new FormData(this);
+                    formData.set('id_number_issuance_date', $form.find('input[name="id_number_issuance_date"]').data('backend-value') || '');
+                    formData.set('birthday', $form.find('input[name="birthday"]').data('backend-value') || '');
+                    formData.set('join_date', $form.find('input[name="join_date"]').data('backend-value') || '');
+                    formData.set('insurance_start_date', $form.find('input[name="insurance_start_date"]').data('backend-value') || '');
+                    formData.set('issue_date', $form.find('input[name="issue_date"]').data('backend-value') || '');
+                    formData.set('license_expire_date', $form.find('input[name="license_expire_date"]').data('backend-value') || '');
 
                     // Xóa lỗi cũ
                     $form.find('.error').text('');
@@ -522,14 +528,14 @@
 
                             // Reset form
                             $form[0].reset();
-                            
+
                             // Reset license file preview if exists
                             const licensePreview = $form.find('#license_file_preview_create');
                             if (licensePreview.length) {
                                 licensePreview.attr('src', "{{ asset('no-image.jpeg') }}");
                             }
 
-                            // 
+                            //
                             Swal.fire({
                                 title: "Tạo thành công!",
                                 icon: "success",
@@ -634,7 +640,7 @@
             const salaryType = $(this).val();
             const salaryByPercentContainer = $('#salaryByPercentContainerCreate');
             const salaryByPercentInput = salaryByPercentContainer.find('input[name="salary_by_percent"]');
-            
+
             if (salaryType === '2') { // Tài xế ăn lương doanh số
                 salaryByPercentContainer.show();
                 // Set default value nếu input rỗng
@@ -646,10 +652,10 @@
                 salaryByPercentInput.val(''); // Clear value khi hide
             }
         });
-        
+
         // Trigger change event on page load để set đúng trạng thái
         $('#salaryTypeCreate').trigger('change');
-        
+
         // Handle insurance checkbox for create form
         $('#hasInsurance').on('change', function() {
             const insuranceStartDateContainer = $('#insuranceStartDateContainer');
@@ -658,7 +664,7 @@
             const socialInsuranceAmountInput = socialInsuranceAmountContainer.find('input[name="social_insurance_amount"]');
             const socialInsuranceNumberContainer = $('#socialInsuranceNumberContainer');
             const socialInsuranceNumberInput = socialInsuranceNumberContainer.find('input[name="social_insurance_number"]');
-            
+
             if ($(this).is(':checked')) {
                 insuranceStartDateContainer.show();
                 socialInsuranceAmountContainer.show();
@@ -672,10 +678,10 @@
                 socialInsuranceNumberInput.val(''); // Clear the number when unchecked
             }
         });
-        
+
         // Trigger change event on page load để set đúng trạng thái cho insurance
         $('#hasInsurance').trigger('change');
-        
+
         // Handle insurance checkbox for driver form
         $('#hasInsuranceDriver').on('change', function() {
             const insuranceStartDateContainer = $('#insuranceStartDateContainerDriver');
@@ -684,7 +690,7 @@
             const socialInsuranceAmountInput = socialInsuranceAmountContainer.find('input[name="social_insurance_amount"]');
             const socialInsuranceNumberContainer = $('#socialInsuranceNumberContainerDriver');
             const socialInsuranceNumberInput = socialInsuranceNumberContainer.find('input[name="social_insurance_number"]');
-            
+
             if ($(this).is(':checked')) {
                 insuranceStartDateContainer.show();
                 socialInsuranceAmountContainer.show();
@@ -698,10 +704,10 @@
                 socialInsuranceNumberInput.val(''); // Clear the number when unchecked
             }
         });
-        
+
         // Trigger change event on page load để set đúng trạng thái cho insurance driver
         $('#hasInsuranceDriver').trigger('change');
-        
+
         // Format social insurance amount on input change
         $('input[name="social_insurance_amount"]').on('input', function() {
             formatSalaryAsInteger($(this));
@@ -711,23 +717,23 @@
             formatSalaryAsInteger($(this));
         });
     });
-    
+
     // Handle license file preview for create form
     document.addEventListener('DOMContentLoaded', function() {
         const licenseFileInput = document.getElementById('license_file_input_create');
         const licenseFilePreview = document.getElementById('license_file_preview_create');
-        
+
         if (licenseFileInput && licenseFilePreview) {
             licenseFileInput.addEventListener('change', function(event) {
                 const file = event.target.files[0];
-                
+
                 if (file) {
                     const reader = new FileReader();
-                    
+
                     reader.onload = function(e) {
                         licenseFilePreview.src = e.target.result;
                     }
-                    
+
                     reader.readAsDataURL(file);
                 } else {
                     licenseFilePreview.src = "{{ asset('no-image.jpeg') }}";

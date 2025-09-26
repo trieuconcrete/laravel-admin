@@ -59,19 +59,6 @@ class Customer extends Model
         'deleted_at' => 'datetime',
     ];
 
-    protected function establishmentDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value
-                ? Carbon::parse($value)->format('Y-m-d')
-                : null,
-
-            set: fn ($value) => $value
-                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
-                : null,
-        );
-    }
-
     public function getDocumentFileUrlAttribute()
     {
         if ($this->document_file) {

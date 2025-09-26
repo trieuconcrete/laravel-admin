@@ -78,6 +78,7 @@ class StoreCustomerRequest extends FormRequest
             ],
             'establishment_date' => [
                 'nullable',
+                'date',
                 'before_or_equal:today'
             ],
             'website' => [
