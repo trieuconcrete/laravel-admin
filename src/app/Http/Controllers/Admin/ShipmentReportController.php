@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ShipmentReport\SummarizeReportRequest;
 use App\Services\ShipmentReportService;
 use App\Models\Customer;
+use App\Models\Shipment;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
@@ -105,18 +107,25 @@ class ShipmentReportController extends Controller
     public function getReportData(Request $request, Customer $customer): JsonResponse
     {
         $request->validate([
-            'statement_start_date' => 'required|date',
-            'statement_end_date' => 'required|date|after_or_equal:statement_start_date',
-            'shipment_type' => 'nullable|integer|in:1,2,3,4',
+            'statement_start_date' => 'nullable|sometimes|date',
+            'statement_end_date'   => 'nullable|sometimes|date|after_or_equal:statement_start_date',
+            'shipment_type'        => 'nullable|integer|in:1,2,3,4',
         ]);
 
         $shipmentType = $request->shipment_type;
 
-        $query = \App\Models\Shipment::where('customer_id', $customer->id)
-            ->whereBetween('departure_time', [$request->statement_start_date, $request->statement_end_date])
+        $query = Shipment::where('customer_id', $customer->id)
             ->where('status', 'completed');
 
-        // Nếu có shipment_type thì filter theo loại, nếu không thì lấy tất cả
+        if ($request->statement_start_date) {
+            $query->where('departure_time', '>=', $request->statement_start_date);
+        }
+
+        if ($request->statement_end_date) {
+            $query->where('departure_time', '<=', $request->statement_end_date);
+        }
+
+        // Nếu có shipment_type, thêm điều kiện
         if ($shipmentType) {
             $query->where('shipment_type', $shipmentType);
         }
@@ -132,7 +141,7 @@ class ShipmentReportController extends Controller
                 return [
                     'id' => $shipment->id,
                     'shipment_code' => $shipment->shipment_code,
-                    'departure_time' => $shipment->departure_time,
+                    'departure_time' => Carbon::parse($shipment->departure_time)->format('d/m/Y'),
                     'origin' => $shipment->origin,
                     'destination' => $shipment->destination,
                     'trip_count' => $shipment->trip_count ?? 1,

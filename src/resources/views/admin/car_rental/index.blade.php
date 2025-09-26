@@ -422,6 +422,8 @@
 
                     const url = $form.attr('action');
                     const formData = new FormData(this);
+                    formData.set('start_date', $form.find('input[name="start_date"]').data('backend-value'));
+                    formData.set('end_date', $form.find('input[name="end_date"]').data('backend-value'));
 
                     $form.find('.error').text('');
 

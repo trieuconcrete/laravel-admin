@@ -15,20 +15,20 @@
         </thead>
         <tbody>
             @foreach ($shipmentReports as $shipmentReport)
-                <tr data-debt="{{ $shipmentReport->id }}" 
-                    data-amount="{{ $shipmentReport->total_amount }}" 
+                <tr data-debt="{{ $shipmentReport->id }}"
+                    data-amount="{{ $shipmentReport->total_amount }}"
                     data-notes="{{ $shipmentReport->getShipmentTypeLabel() }}">
                     <td>
                         <div class="btn-group">
                             <a href="#" data-bs-toggle="modal" data-bs-target="#transactionModal" class="btn btn-sm btn-outline-primary">Thanh toán</a>
                         </div>
                     </td>
-                    <td>{{ $shipmentReport->monthly }}</td>
+                    <td>{{ format_date($shipmentReport->monthly, 'm/Y') }}</td>
                     <td>{{ number_format($shipmentReport->total_amount) }}</td>
                     <td>{{ $shipmentReport->getShipmentTypeLabel() }}</td>
-                    <td>@formatDate($shipmentReport->statement_start_date)</td>
-                    <td>@formatDate($shipmentReport->statement_end_date)</td>
-                    <td>@formatDate($shipmentReport->created_at)</td>
+                    <td>{{ format_date($shipmentReport->statement_start_date, 'd/m/Y') }}</td>
+                    <td>{{ format_date($shipmentReport->statement_end_date, 'd/m/Y') }}</td>
+                    <td>{{ format_date($shipmentReport->created_at, 'd/m/Y') }}</td>
                 </tr>
             @endforeach
         </tbody>

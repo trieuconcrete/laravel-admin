@@ -900,94 +900,25 @@
                 }
             }
 
-            // Handle month dropdown change
-            const monthSelect = document.getElementById('month');
-            if (monthSelect) {
-                monthSelect.addEventListener('change', function() {
-                    const selectedMonth = this.value;
-                    console.log('Month dropdown changed to:', selectedMonth);
-
-                    if (selectedMonth && selectedMonth !== '') {
-                        // Calculate start and end date for the selected month
-                        const [year, month] = selectedMonth.split('-');
-                        const startDate = `${year}/${month}/01`;
-                        // Fix: month is 1-indexed for Date constructor, so we need to use month-1 for current month
-                        const lastDay = new Date(year, month, 0).getDate();
-                        const endDate = `${year}/${month}/${lastDay}`;
-
-                        console.log('Calculated dates:', { startDate, endDate, year, month, lastDay });
-
-                        // Update date inputs
-                        document.querySelector('input[name="statement_start_date"]').value = startDate;
-                        document.querySelector('input[name="statement_end_date"]').value = endDate;
-
-                        // Get current shipment type
-                        const shipmentType = document.querySelector('select[name="shipment_type"]').value;
-
-                        console.log('Shipment type:', shipmentType);
-
-                        // Perform search automatically (with or without shipment type)
-                        performSearch(startDate, endDate, shipmentType);
-
-                        // Load debt summary after search (tổng công nợ từ trước đến nay)
-                        loadDebtSummary();
-                    } else {
-                        // If "Chọn ngày tùy ý" is selected, set current month dates but don't search
-                        console.log('"Chọn ngày tùy ý" selected, setting current month dates');
-                        const currentDate = new Date();
-                        const year = currentDate.getFullYear();
-                        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-                        const startDate = `${year}/${month}/01`;
-                        const lastDay = new Date(year, month, 0).getDate();
-                        const endDate = `${year}/${month}/${lastDay}`;
-
-                        document.querySelector('input[name="statement_start_date"]').value = startDate;
-                        document.querySelector('input[name="statement_end_date"]').value = endDate;
-
-                        // Auto-search with all types when no specific type is selected
-                        performSearch(startDate, endDate, '');
-                    }
-                });
-            }
-
             // Handle search shipments button click
-            const searchButton = document.getElementById('searchShipments');
-            if (searchButton) {
-                searchButton.addEventListener('click', function () {
-                    // Validate form fields
-                    const startDate = document.querySelector('input[name="statement_start_date"]').value;
-                    const endDate = document.querySelector('input[name="statement_end_date"]').value;
-                    const shipmentType = document.querySelector('select[name="shipment_type"]').value;
+            $('#searchShipments').on('click', function () {
+                const startDate = $('#statement_start_date').attr('data-backend-value') || '';
+                const endDate = $('#statement_end_date').attr('data-backend-value') || '';
+                const shipmentType = $('#shipment_type').val();
 
-                    if (!startDate || !endDate) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi',
-                            text: 'Vui lòng điền đầy đủ thông tin: Ngày bắt đầu và Ngày kết thúc.'
-                        });
-                        return;
-                    }
+                if (new Date(startDate) > new Date(endDate)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.'
+                    });
+                    return;
+                }
 
-                    if (new Date(startDate) > new Date(endDate)) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi',
-                            text: 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.'
-                        });
-                        return;
-                    }
+                performSearch(startDate, endDate, shipmentType);
 
-
-
-                    // Perform search
-                    performSearch(startDate, endDate, shipmentType);
-
-                    // Load debt summary after search (tổng công nợ từ trước đến nay)
-                    loadDebtSummary();
-
-                    console.log('Search button clicked');
-                });
-            }
+                loadDebtSummary();
+            });
 
             // Function to load debt summary from API (tổng công nợ từ trước đến nay)
             function loadDebtSummary() {
@@ -1145,111 +1076,88 @@
             }
 
             // Handle summarize report button click
-            const summarizeButton = document.getElementById('summarizeReport');
-            if (summarizeButton) {
-                summarizeButton.addEventListener('click', function () {
-                    // Get selected dates and shipment type
-                    const startDate = document.getElementById('statement_start_date').value;
-                    const endDate = document.getElementById('statement_end_date').value;
-                    const shipmentType = document.querySelector('select[name="shipment_type"]').value;
+            $('#summarizeReport').on('click', function () {
+                const startDate = $('#statement_start_date').data('backend-value');
+                const endDate = $('#statement_end_date').data('backend-value');
+                const shipmentType = $('#shipment_type').val();
+                const monthSelect = $('#month')[0];
+                const customerId = {{ $customer->id }};
 
-                    if (!startDate || !endDate) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi',
-                            text: 'Vui lòng chọn ngày bắt đầu và ngày kết thúc để tổng kết.'
-                        });
-                        return;
-                    }
-
-                    // Bắt buộc phải chọn loại chuyến xe
-                    if (!shipmentType || shipmentType === '') {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi',
-                            text: 'Vui lòng chọn loại chuyến xe để tổng kết.'
-                        });
-                        return;
-                    }
-
-                    // Debug log
-                    console.log('Debug summarize button:', {
-                        startDate,
-                        endDate,
-                        shipmentType,
-                        shipmentTypeType: typeof shipmentType,
-                        shipmentTypeLength: shipmentType ? shipmentType.length : 'null'
-                    });
-
-                    if (new Date(startDate) > new Date(endDate)) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi',
-                            text: 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.'
-                        });
-                        return;
-                    }
-
-                    const customerId = {{ $customer->id }};
-
-                    // Get shipment type label
-                    const shipmentTypeLabel = getShipmentTypeLabel(shipmentType);
-
-                    // Show confirmation dialog
+                // Validate
+                if (!startDate || !endDate) {
                     Swal.fire({
-                        title: 'Xác nhận tổng kết bảng kê?',
-                        html: `
-                            <div class="text-start">
-                                <p><strong>Thời gian:</strong> ${startDate} - ${endDate}</p>
-                                <p><strong>Loại chuyến xe:</strong> ${shipmentTypeLabel}</p>
-                                <p class="text-warning"><i class="las la-exclamation-triangle"></i> Chỉ tổng kết cho loại chuyến xe này</p>
-                            </div>
-                        `,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Tổng kết',
-                        cancelButtonText: 'Hủy',
-                        customClass: {
-                            confirmButton: 'btn btn-secondary',
-                            cancelButton: 'btn btn-light'
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Disable button and show loading state
-                            summarizeButton.disabled = true;
-                            const originalText = summarizeButton.innerHTML;
-                            summarizeButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Vui lòng chọn ngày bắt đầu và ngày kết thúc để tổng kết.'
+                    });
+                    return;
+                }
 
-                            // Send request to summarize
-                            fetch(`{{ route('admin.shipment-reports.summarize', $customer) }}`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                },
-                                body: JSON.stringify({
-                                    statement_start_date: startDate,
-                                    statement_end_date: endDate,
-                                    shipment_type: parseInt(shipmentType),
-                                    customer_id: customerId,
-                                    month: monthSelect ? monthSelect.value : ''
-                                })
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        // Debug log for success response
-                                        console.log('Debug success response:', {
-                                            data,
-                                            shipmentType,
-                                            shipmentTypeLabel: getShipmentTypeLabel(shipmentType)
-                                        });
+                if (!shipmentType || shipmentType === '') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Vui lòng chọn loại chuyến xe để tổng kết.'
+                    });
+                    return;
+                }
 
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Thành công',
-                                            html: `
+                if (new Date(startDate) > new Date(endDate)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.'
+                    });
+                    return;
+                }
+
+                const shipmentTypeLabel = getShipmentTypeLabel(shipmentType);
+
+                Swal.fire({
+                    title: 'Xác nhận tổng kết bảng kê?',
+                    html: `
+                        <div class="text-start">
+                            <p><strong>Thời gian:</strong> ${startDate} - ${endDate}</p>
+                            <p><strong>Loại chuyến xe:</strong> ${shipmentTypeLabel}</p>
+                            <p class="text-warning"><i class="las la-exclamation-triangle"></i> Chỉ tổng kết cho loại chuyến xe này</p>
+                        </div>
+                    `,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Tổng kết',
+                    cancelButtonText: 'Hủy',
+                    customClass: {
+                        confirmButton: 'btn btn-secondary',
+                        cancelButton: 'btn btn-light'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const originalText = $('#summarizeReport').html();
+                        $('#summarizeReport')
+                            .prop('disabled', true)
+                            .html('<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...');
+
+                        $.ajax({
+                            url: `{{ route('admin.shipment-reports.summarize', $customer) }}`,
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                statement_start_date: startDate,
+                                statement_end_date: endDate,
+                                shipment_type: parseInt(shipmentType),
+                                customer_id: customerId,
+                                month: monthSelect ? monthSelect.value : ''
+                            }),
+                            success: function (data) {
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Thành công',
+                                        html: `
                                             <div class="text-start">
                                                 <p><strong>Thời gian:</strong> ${startDate} - ${endDate}</p>
                                                 <p><strong>Loại chuyến xe:</strong> ${getShipmentTypeLabel(shipmentType)}</p>
@@ -1257,159 +1165,152 @@
                                                 <p><strong>Tổng tiền:</strong> ${numberFormat(data.data.total_amount)} VND</p>
                                             </div>
                                         `,
-                                            showConfirmButton: true,
-                                            confirmButtonText: 'Đóng'
-                                        }).then((result) => {
-                                            // Optional: Reload page or update UI
-                                            if (result.isConfirmed) {
-                                                window.location.reload();
-                                            }
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Lỗi',
-                                            text: data.message || 'Đã xảy ra lỗi khi tổng kết bảng kê.'
-                                        });
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Error:', error);
+                                        showConfirmButton: true,
+                                        confirmButtonText: 'Đóng'
+                                    }).then((res) => {
+                                        if (res.isConfirmed) {
+                                            window.location.reload();
+                                        }
+                                    });
+                                } else {
                                     Swal.fire({
                                         icon: 'error',
                                         title: 'Lỗi',
-                                        text: 'Đã xảy ra lỗi khi tổng kết bảng kê.'
+                                        text: data.message || 'Đã xảy ra lỗi khi tổng kết bảng kê.'
                                     });
-                                })
-                                .finally(() => {
-                                    // Re-enable button
-                                    summarizeButton.disabled = false;
-                                    summarizeButton.innerHTML = originalText;
-                                    setTimeout(() => {
-                                        // Tự động làm mới trang sau 2 giây để cập nhật dữ liệu
-                                        window.location.reload();
-                                    }, 3000);
+                                }
+                            },
+                            error: function (err) {
+                                console.error('Error:', err);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Lỗi',
+                                    text: 'Đã xảy ra lỗi khi tổng kết bảng kê.'
                                 });
-                        }
-                    });
+                            },
+                            complete: function () {
+                                $('#summarizeReport')
+                                    .prop('disabled', false)
+                                    .html(originalText);
+                                setTimeout(() => {
+                                    // window.location.reload();
+                                }, 3000);
+                            }
+                        });
+                    }
                 });
-            }
+            });
 
-            // Handle invoice export button click
-            const invoiceButton = document.getElementById('exportInvoice');
-            if (invoiceButton) {
-                invoiceButton.addEventListener('click', function () {
-                    // Get selected dates and shipment type
-                    const startDate = document.getElementById('statement_start_date').value;
-                    const endDate = document.getElementById('statement_end_date').value;
-                    const shipmentType = document.querySelector('select[name="shipment_type"]').value;
 
-                    if (!startDate || !endDate) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi',
-                            text: 'Vui lòng chọn ngày bắt đầu và ngày kết thúc để xuất.'
-                        });
-                        return;
+            $('#exportInvoice').on('click', function () {
+                const startDate = $('#statement_start_date').data('backend-value');
+                const endDate = $('#statement_end_date').data('backend-value');
+                const shipmentType = $('#shipment_type').val();
+                const monthSelect = $('#month')[0];
+
+                if (!startDate || !endDate) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Vui lòng chọn ngày bắt đầu và ngày kết thúc để xuất.'
+                    });
+                    return;
+                }
+
+                if (!shipmentType) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Vui lòng chọn loại chuyến xe để xuất.'
+                    });
+                    return;
+                }
+
+                // Lấy label của shipment type
+                const shipmentTypeLabel = getShipmentTypeLabel(shipmentType);
+
+                // Cấu hình Swal
+                const swalOptions = {
+                    title: 'Xác nhận xuất bảng kê?',
+                    html: `
+                        <div class="text-start">
+                            <p><strong>Thời gian:</strong> ${startDate} - ${endDate}</p>
+                            <p><strong>Loại chuyến xe:</strong> ${shipmentTypeLabel}</p>
+                        </div>
+                    `,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Có, xuất ngay',
+                    cancelButtonText: 'Hủy bỏ',
+                    customClass: {
+                        confirmButton: 'btn btn-secondary',
+                        cancelButton: 'btn btn-light'
                     }
+                };
 
-                    if (!shipmentType) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi',
-                            text: 'Vui lòng chọn loại chuyến xe để xuất.'
-                        });
-                        return;
-                    }
-
-                    // Get shipment type label
-                    const shipmentTypeLabel = getShipmentTypeLabel(shipmentType);
-
-                    // Prepare Swal options based on shipment type
-                    const swalOptions = {
-                        title: 'Xác nhận xuất bảng kê?',
-                        html: `
-                            <div class="text-start">
-                                <p><strong>Thời gian:</strong> ${startDate} - ${endDate}</p>
-                                <p><strong>Loại chuyến xe:</strong> ${shipmentTypeLabel}</p>
-                            </div>
-                        `,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Có, xuất ngay',
-                        cancelButtonText: 'Hủy bỏ',
-                        customClass: {
-                            confirmButton: 'btn btn-secondary',
-                            cancelButton: 'btn btn-light'
-                        }
+                // Nếu shipmentType = 1, thêm select template
+                if (shipmentType == 1) {
+                    swalOptions.input = "select";
+                    swalOptions.inputOptions = {
+                        '1': 'TOPBAND',
+                        '2': 'WOOJIN',
+                        '3': 'Khác',
                     };
+                    swalOptions.inputPlaceholder = "Chọn mẫu bảng kê";
+                    swalOptions.inputValidator = (value) => {
+                        return new Promise((resolve) => {
+                            if (value !== "") {
+                                resolve();
+                            } else {
+                                resolve("Vui lòng chọn mẫu bảng kê.");
+                            }
+                        });
+                    };
+                }
 
-                    // Only add input options if shipmentType is 1
-                    if (shipmentType == 1) {
-                        swalOptions.input = "select";
-                        swalOptions.inputOptions = {
-                            '1': 'TOPBAND',
-                            '2': 'WOOJIN',
-                            '3': 'Khác',
-                        };
-                        swalOptions.inputPlaceholder = "Chọn mẫu bảng kê";
-                        swalOptions.inputValidator = (value) => {
-                            return new Promise((resolve) => {
-                                if (value !== "") {
-                                    resolve();
-                                } else {
-                                    resolve("Vui lòng chọn mẫu bảng kê.");
-                                }
-                            });
-                        };
-                    }
+                // Hiển thị Swal
+                Swal.fire(swalOptions).then((result) => {
+                    console.log('Export confirmation result:', result);
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Đang xử lý...',
+                            text: 'Vui lòng chờ trong giây lát',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
 
-                    // Show confirmation dialog
-                    Swal.fire(swalOptions).then((result) => {
-                        console.log('Export confirmation result:', result);
-                        if (result.isConfirmed) {
-                            Swal.fire({
-                                title: 'Đang xử lý...',
-                                text: 'Vui lòng chờ trong giây lát',
-                                allowOutsideClick: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
+                                const params = new URLSearchParams({
+                                    statement_start_date: startDate,
+                                    statement_end_date: endDate,
+                                    shipment_type: shipmentType,
+                                    month: monthSelect ? monthSelect.value : '',
+                                    excel_template: result.value || ''
+                                });
 
-                                    // Create download link
-                                    const params = new URLSearchParams({
-                                        statement_start_date: startDate,
-                                        statement_end_date: endDate,
-                                        shipment_type: shipmentType,
-                                        month: monthSelect ? monthSelect.value : '',
-                                        excel_template: result.value || '' // Handle case when no template is selected
+                                const downloadUrl = `{{ route('admin.shipment-reports.export', $customer) }}?${params.toString()}`;
+
+                                // Tạo link tạm và trigger download
+                                const link = document.createElement('a');
+                                link.href = downloadUrl;
+                                link.style.display = 'none';
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+
+                                setTimeout(() => {
+                                    Swal.close();
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Xuất bảng kê thành công',
+                                        showConfirmButton: false,
+                                        timer: 2000
                                     });
-
-                                    const downloadUrl = `{{ route('admin.shipment-reports.export', $customer) }}?${params.toString()}`;
-
-                                    // Create a temporary link and trigger download
-                                    const link = document.createElement('a');
-                                    link.href = downloadUrl;
-                                    link.style.display = 'none';
-                                    document.body.appendChild(link);
-                                    link.click();
-                                    document.body.removeChild(link);
-
-                                    // Show success message after download starts
-                                    setTimeout(() => {
-                                        Swal.close();
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Xuất bảng kê thành công',
-                                            showConfirmButton: false,
-                                            timer: 2000
-                                        });
-                                    }, 1000);
-                                }
-                            });
-                        }
-                    });
+                                }, 1000);
+                            }
+                        });
+                    }
                 });
-            }
+            });
 
             // Helper function to get shipment type label
             function getShipmentTypeLabel(type) {
@@ -1780,55 +1681,13 @@
 
 
             // Main event: Use window.onload to ensure everything is ready
-            window.addEventListener('load', function() {
+            window.addEventListener('load', function () {
                 console.log('=== Window loaded - Main event ===');
-                const monthSelect = document.getElementById('month');
-                console.log('Month select element:', monthSelect);
-                console.log('Month select value:', monthSelect ? monthSelect.value : 'null');
 
-                // Always set default dates to current month first
-                const currentDate = new Date();
-                const year = currentDate.getFullYear();
-                const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-                const startDate = `${year}/${month}/01`;
-                const lastDay = new Date(year, month, 0).getDate();
-                const endDate = `${year}/${month}/${lastDay}`;
+                performSearch('', '', '');
 
-                console.log('Current date info:', { currentDate, year, month, startDate, lastDay, endDate });
-
-                // Get input elements
-                const startDateInput = document.getElementById('statement_start_date');
-                const endDateInput = document.getElementById('statement_end_date');
-
-                console.log('Input elements:', { startDateInput, endDateInput });
-
-                if (startDateInput && endDateInput) {
-                    console.log('Setting default dates:', startDate, 'to', endDate);
-                    startDateInput.value = startDate;
-                    endDateInput.value = endDate;
-
-                    // Verify values were set
-                    console.log('After setting - Start date value:', startDateInput.value);
-                    console.log('After setting - End date value:', endDateInput.value);
-                } else {
-                    console.error('Input elements not found!');
-                }
-
-                // Check if month select has a meaningful value and trigger change event
-                if (monthSelect && monthSelect.value && monthSelect.value !== '' && !monthSelect.dataset.loaded) {
-                    console.log('Month select has value, triggering change event for month:', monthSelect.value);
-                    monthSelect.dataset.loaded = 'true';
-                    monthSelect.dispatchEvent(new Event('change'));
-                } else {
-                    console.log('No month select value or empty value, auto-searching with current month dates');
-                    // Auto-search with all types when no specific month is selected
-                    performSearch(startDate, endDate, '');
-                }
-
-                // Load initial debt summary (tổng công nợ từ trước đến nay)
                 loadDebtSummary();
 
-                // Mark that we've already handled the initial load
                 window.initialLoadHandled = true;
             });
 

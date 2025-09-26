@@ -52,9 +52,9 @@
                             </span>
                         @endif
                     </td>
-                    <td>@formatDate($carRental->start_date)</td>
-                    <td>@formatDate($carRental->end_date)</td>
-                    <td>@formatDate($carRental->created_at)</td>
+                    <td>{{ format_date($carRental->start_date, 'd/m/Y') }}</td>
+                    <td>{{ format_date($carRental->end_date, 'd/m/Y') }}</td>
+                    <td>{{ format_date($carRental->created_at, 'd/m/Y') }}</td>
                     <td>
                         @if ($carRental->file)
                             <a href="{{ $carRental->file }}" class="" target="_blank">Tải báo giá</a>

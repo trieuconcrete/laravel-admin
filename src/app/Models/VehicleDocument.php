@@ -100,22 +100,6 @@ class VehicleDocument extends Model
         ];
     }
 
-    protected function issueDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
-            set: fn ($value) => $value ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d') : null,
-        );
-    }
-
-    protected function expiryDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value ? Carbon::parse($value)->format('Y-m-d') : null,
-            set: fn ($value) => $value ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d') : null,
-        );
-    }
-
     /**
      * Get the vehicle that owns the document.
      */

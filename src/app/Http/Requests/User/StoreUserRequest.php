@@ -49,12 +49,12 @@ class StoreUserRequest extends FormRequest
             ],
             'id_number' => ['required', 'max:20'],
             'email' => [
-                'nullable', 
+                'nullable',
                 'email',
                 Rule::unique('users', 'email')->whereNull('deleted_at')
             ],
-            'birthday' => ['nullable', $this->getSystemDateFormatRule()],
-            'join_date' => ['nullable', $this->getSystemDateFormatRule()],
+            'birthday' => ['nullable', 'date'],
+            'join_date' => ['nullable', 'date'],
             'salary_base' => ['nullable', 'numeric'],
             'salary_type' => ['nullable', 'integer', 'in:1,2'],
             'salary_by_percent' => ['nullable', 'numeric', 'min:1', 'max:100'],
@@ -63,7 +63,7 @@ class StoreUserRequest extends FormRequest
             'address' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
             'has_insurance' => ['nullable', 'boolean'],
-            'insurance_start_date' => ['nullable', $this->getSystemDateFormatRule()],
+            'insurance_start_date' => ['nullable', 'date'],
             'social_insurance_amount' => ['nullable', 'numeric', 'min:0'],
             'social_insurance_number' => ['nullable', 'string', 'max:20'],
         ];
@@ -73,8 +73,8 @@ class StoreUserRequest extends FormRequest
             return array_merge($common, [
                 'license_number' => ['nullable', 'string', 'max:50'],
                 'license_type' => ['nullable', 'string'],
-                'issue_date' => ['nullable', $this->getSystemDateFormatRule()],
-                'license_expire_date' => ['nullable', $this->getSystemDateFormatRule()],
+                'issue_date' => ['nullable', 'date'],
+                'license_expire_date' => ['nullable', 'date'],
                 'issued_by' => ['nullable', 'string', 'max:255'],
                 'license_status' => ['nullable', 'string'],
                 'license_file' => ['nullable', 'file', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
