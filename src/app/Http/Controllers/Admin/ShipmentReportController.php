@@ -26,7 +26,7 @@ class ShipmentReportController extends Controller
     public function summarize(SummarizeReportRequest $request, Customer $customer): JsonResponse
     {
         $validated = $request->validated();
-        
+
         $result = $this->shipmentReportService->summarizeReport(
             $customer->id,
             $validated['statement_start_date'],
@@ -91,7 +91,7 @@ class ShipmentReportController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Error exporting report: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi xuất Excel: ' . $e->getMessage()
@@ -128,11 +128,11 @@ class ShipmentReportController extends Controller
             ->map(function ($shipment) use ($shipmentType) {
                 // Nếu không có shipment_type, sử dụng loại từ database
                 $currentShipmentType = $shipmentType ?: $shipment->shipment_type;
-                
+
                 return [
                     'id' => $shipment->id,
                     'shipment_code' => $shipment->shipment_code,
-                    'departure_time' => $shipment->departure_time->format('d/m/Y'),
+                    'departure_time' => $shipment->departure_time,
                     'origin' => $shipment->origin,
                     'destination' => $shipment->destination,
                     'trip_count' => $shipment->trip_count ?? 1,
@@ -172,4 +172,4 @@ class ShipmentReportController extends Controller
         }
         return $totalAmount + $shipment->total_expense_deductions;
     }
-} 
+}
