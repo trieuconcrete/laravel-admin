@@ -225,13 +225,13 @@
                                 <div class="col-md-3">
                                     <div class="">
                                         <label class="">Ngày bắt đầu <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control date-input" name="statement_start_date" id="statement_start_date" value="" required autocomplete="off">
+                                        <input type="date" class="form-control date-input" name="statement_start_date" id="statement_start_date" value="{{ \Carbon\Carbon::now()->startOfMonth()->format('Y-m-d') }}" required autocomplete="off">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="">
                                         <label class="">Ngày kết thúc <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control date-input" name="statement_end_date" id="statement_end_date" value="" required autocomplete="off">
+                                        <input type="date" class="form-control date-input" name="statement_end_date" id="statement_end_date" value="{{ \Carbon\Carbon::now()->endOfMonth()->format('Y-m-d') }}" required autocomplete="off">
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -1684,7 +1684,10 @@
             window.addEventListener('load', function () {
                 console.log('=== Window loaded - Main event ===');
 
-                performSearch('', '', '');
+                const startDate = $('#statement_start_date').data('backend-value');
+                const endDate = $('#statement_end_date').data('backend-value');
+
+                performSearch(startDate, endDate, '');
 
                 loadDebtSummary();
 
