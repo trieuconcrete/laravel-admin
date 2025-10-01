@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\VehicleController;
+use App\Http\Controllers\Api\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,3 +26,8 @@ Route::get('/vehicles/by-car-rental', [VehicleController::class, 'getByCarRental
 
 Route::get('/vehicles/get-driver-by-vehicle', [VehicleController::class, 'getDriverByVehicle']);
 
+Route::prefix('driver')->group(function () {
+    Route::post('login', [AuthController::class, 'loginDriver']);
+});
+
+Route::get('/refresh', [AuthController::class, 'refresh']);
