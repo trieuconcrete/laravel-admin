@@ -83,7 +83,7 @@ class SanctumTokenService implements TokenServiceInterface
         return [
             'access_token' => $accessToken,
             'token_type'   => 'Bearer',
-            'expires_at'   => 7200,
+            'expires_at'   => (int) Carbon::now()->diffInSeconds(Carbon::now()->addHours(2)),
         ];
     }
 }
