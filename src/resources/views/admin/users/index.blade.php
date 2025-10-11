@@ -100,11 +100,11 @@
                                                 </div>
                                             </td>
                                             <td class="">{{ $user->full_name }}</td>
-                                            <td class="">{{ $user->birthday }}</td>
+                                            <td class="">{{ format_date($user->birthday, 'd/m/Y') }}</td>
                                             <td class="">{{ $user->getGenderLabel() }}</td>
                                              <td class="">{{ ucfirst(optional($user->position)->name) }}</td>
                                              <td class="">{{ $user->id_number }}</td>
-                                             <td class="">{{ $user->id_number_issuance_date }}</td>
+                                             <td class="">{{ format_date($user->id_number_issuance_date, 'd/m/Y') }}</td>
                                              <td class="">{{  optional($user->license)->license_type }}</td>
                                             <td class="">
                                                 @if (optional($user->license)->status == 'expired')

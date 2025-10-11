@@ -176,7 +176,7 @@
                                                 <div class="col-xxl-6" id="insuranceStartDateContainer" style="{{ old('has_insurance', $user->has_insurance) ? '' : 'display: none;' }}">
                                                     <div class="mb-3">
                                                         <label for="insuranceStartDate" class="form-label">Ngày bắt đầu đóng bảo hiểm</label>
-                                                        <input type="date" class="form-control" name="insurance_start_date" id="insuranceStartDate" value="{{ old('insurance_start_date', $user->insurance_start_date) }}">
+                                                        <input type="date" class="form-control" name="insurance_start_date" id="insuranceStartDate" value="{{ old('insurance_start_date', format_date($user->insurance_start_date), 'd/m/Y') }}">
                                                         @error('insurance_start_date')
                                                             <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                                         @enderror
