@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\VehicleController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DriverShipmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,3 +32,8 @@ Route::prefix('driver')->group(function () {
 });
 
 Route::get('/refresh', [AuthController::class, 'refresh']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/driver/shipments', [DriverShipmentController::class, 'index']);
+    Route::get('/driver/shipments/{shipment}', [DriverShipmentController::class, 'show']);
+});
