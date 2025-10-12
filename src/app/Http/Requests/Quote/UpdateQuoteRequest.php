@@ -21,8 +21,8 @@ class UpdateQuoteRequest extends FormRequest
     {
         return [
             'customer_id' => 'required',
-            'pickup_datetime' => 'required|' . $this->getSystemDateFormatRule(),
-            'valid_until' => 'nullable|after_or_equal:pickup_datetime|' . $this->getSystemDateFormatRule(),
+            'pickup_datetime' => 'required|date',
+            'valid_until' => 'nullable|after_or_equal:pickup_datetime|date',
             'cargo_description' => 'nullable|string',
             'notes' => 'nullable|string',
             'document_file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx|max:10240'
@@ -47,4 +47,4 @@ class UpdateQuoteRequest extends FormRequest
             'document_file.max' => 'File đính kèm không được vượt quá 10MB'
         ];
     }
-} 
+}

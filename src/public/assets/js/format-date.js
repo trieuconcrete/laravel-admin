@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
+function initDateInputs() {
     // Set system date format to dd/mm/YYYY
     const dateFormatPlaceholder = 'dd/mm/YYYY';
     const systemDateFormat = 'd/m/Y';
@@ -454,4 +454,8 @@ document.addEventListener('DOMContentLoaded', function () {
             form._dateHiddenInputs = null;
         }
     };
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    initDateInputs();
 });

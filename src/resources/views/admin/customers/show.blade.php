@@ -133,7 +133,7 @@
                                         <div class="mb-3">
                                             <label for="fullnameInput" class="form-label">Ngày thành lập</label>
                                             <input type="date" class="form-control" name="establishment_date"
-                                                value="{{ $customer->establishment_date }}">
+                                                value="@formatDateForInput($customer?->establishment_date)">
                                             @error('establishment_date')
                                                 <p class="text-danger text-sm mt-1">{{ $message }}</p>
                                             @enderror
