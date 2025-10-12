@@ -149,30 +149,6 @@ class DriverLicense extends Model
                     ->where('status', '!=', self::STATUS_EXPIRED);
     }
 
-    protected function issueDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value
-                ? Carbon::parse($value)->format('Y-m-d')
-                : null,
-            set: fn ($value) => $value
-                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
-                : null,
-        );
-    }
-
-    protected function expiryDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value
-                ? Carbon::parse($value)->format('Y-m-d')
-                : null,
-            set: fn ($value) => $value
-                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
-                : null,
-        );
-    }
-
     /**
      * Get status label
      *

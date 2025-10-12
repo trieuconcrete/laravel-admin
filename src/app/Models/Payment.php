@@ -135,18 +135,4 @@ class Payment extends Model
             default => 'secondary'
         };
     }
-
-    protected function paymentDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value
-                ? Carbon::parse($value)->format('Y-m-d')
-                : null,
-
-            // Mutator (Form -> DB)
-            set: fn ($value) => $value
-                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
-                : null,
-        );
-    }
 }

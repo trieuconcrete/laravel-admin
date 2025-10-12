@@ -91,19 +91,6 @@ class SalaryAdvanceDeduction extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    protected function deductionMonth(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value
-                ? Carbon::parse($value)->format('Y-m-d')
-                : null,
-
-            set: fn ($value) => $value
-                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
-                : null,
-        );
-    }
-
     /**
      * Get deduction type label attribute
      *

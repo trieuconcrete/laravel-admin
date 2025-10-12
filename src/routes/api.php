@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\VehicleController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DriverShipmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,3 +27,13 @@ Route::get('/vehicles/by-car-rental', [VehicleController::class, 'getByCarRental
 
 Route::get('/vehicles/get-driver-by-vehicle', [VehicleController::class, 'getDriverByVehicle']);
 
+Route::prefix('driver')->group(function () {
+    Route::post('login', [AuthController::class, 'loginDriver']);
+});
+
+Route::get('/refresh', [AuthController::class, 'refresh']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/driver/shipments', [DriverShipmentController::class, 'index']);
+    Route::get('/driver/shipments/{shipment}', [DriverShipmentController::class, 'show']);
+});

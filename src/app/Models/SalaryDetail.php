@@ -146,19 +146,6 @@ class SalaryDetail extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    protected function paymentDate(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value
-                ? Carbon::parse($value)->format('Y-m-d')
-                : null,
-
-            set: fn ($value) => $value
-                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
-                : null,
-        );
-    }
-
     /**
      * Lấy thông tin người phê duyệt bảng lương.
      */

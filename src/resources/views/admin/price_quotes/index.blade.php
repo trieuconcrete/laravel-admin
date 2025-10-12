@@ -74,9 +74,9 @@
                                     <tr>
                                         <td>
                                             <div class="btn-group">
-                                                <button 
-                                                    class="btn btn-sm btn-outline-primary btn-show-quote" 
-                                                    data-bs-toggle="modal" 
+                                                <button
+                                                    class="btn btn-sm btn-outline-primary btn-show-quote"
+                                                    data-bs-toggle="modal"
                                                     data-bs-target="#detailModal"
                                                     data-id="{{ $quote->id }}"
                                                 >
@@ -87,7 +87,7 @@
                                                         data-quote-id="{{ $quote->id }}">
                                                     Xóa
                                                 </button>
-                                                
+
                                                 <form action="{{ route('admin.quotes.destroy', $quote) }}"
                                                     method="POST"
                                                     class="delete-quote-form"
@@ -201,10 +201,10 @@
     $(document).ready(function () {
         $('.delete-quote-btn').click(function (e) {
             e.preventDefault();
-    
+
             const quoteId = $(this).data('quote-id');
             const form = $('#delete-form-' + quoteId);
-    
+
             Swal.fire({
                 title: 'Bạn chắc chắn muốn xóa?',
                 // text: "Hành động này không thể hoàn tác!",
@@ -229,6 +229,8 @@
 
                     const url = $form.attr('action');
                     const formData = new FormData(this);
+                    formData.set('pickup_datetime', $form.find('input[name="pickup_datetime"]').data('backend-value') || '');
+                    formData.set('valid_until', $form.find('input[name="valid_until"]').data('backend-value') || '');
 
                     // Xóa lỗi cũ
                     $form.find('.error').text('');
@@ -252,7 +254,7 @@
                             // Reset form
                             $form[0].reset();
 
-                            // 
+                            //
                             Swal.fire({
                                 title: "Tạo thành công!",
                                 icon: "success",
@@ -284,33 +286,21 @@
             let modal = $('#detailModal');
 
             modal.find('.modal-title').text('Thông tin chi tiết báo giá');
-            
+
             $('#detailContentModal').html('<div class="d-flex justify-content-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div></div>');
-            
+
 
             $('#editDetailBtn').data('id', id);
 
             // show modal
             modal.modal('show');
-            
+
             $.ajax({
                 url: `/admin/quotes/${id}`,
                 type: 'GET',
                 success: function(response) {
                     $('#detailContentModal').html(response);
-
-                    const dateFormatPlaceholder = '{{ \App\Helpers\DateHelper::getDateFormatPlaceholder() }}';
-                    const systemDateFormat = '{{ \App\Helpers\DateHelper::getSystemDateFormat() }}';
-
-                    $('#detailContentModal').find('input[type="date"]').each(function () {
-                        this.type = 'text';
-                        this.placeholder = dateFormatPlaceholder;
-                        flatpickr(this, {
-                            dateFormat: systemDateFormat,
-                            allowInput: true,
-                            defaultDate: this.value || null
-                        });
-                    });
+                    initDateInputs();
                 },
                 error: function(xhr) {
                     $('#detailContentModal').html('<div class="alert alert-danger">Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại sau.</div>');
@@ -322,14 +312,21 @@
         $('#editDetailBtn').on('click', function () {
             var quoteId = $(this).data('id');
             var $form = $('#editQuoteForm');
-            var formData = $form.serialize();
+            var formData = new FormData($form[0]);
+
+            console.log($form.find('input[name="pickup_datetime"]') || 'Không có', $form)
+            formData.set('pickup_datetime', $form.find('input[name="pickup_datetime"]').data('backend-value') || '');
+            formData.set('valid_until', $form.find('input[name="valid_until"]').data('backend-value') || '');
 
             $.ajax({
                 url: '/admin/quotes/' + quoteId,
-                method: 'PUT',
+                method: 'POST',
                 data: formData,
+                processData: false,
+                contentType: false,
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                    'X-HTTP-Method-Override': 'PUT',
                     'Accept': 'application/json',
                 },
                 success: function (data) {
@@ -341,14 +338,13 @@
                     // Reset form
                     $form[0].reset();
 
-                    // 
+                    // Alert
                     Swal.fire({
                         title: "Cập nhật thành công!",
                         icon: "success",
                         draggable: true
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Reload table
                             location.reload();
                         }
                     });
