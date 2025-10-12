@@ -16,11 +16,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable, SoftDeletes, HasApiTokens;
 
     /**
      * Role constants
@@ -90,6 +91,8 @@ class User extends Authenticatable
             'has_insurance' => 'boolean',
             'insurance_start_date' => 'date',
             'social_insurance_amount' => 'decimal:0',
+            'is_locked' => 'boolean',
+            'failed_attempts' => 'integer',
         ];
     }
 
