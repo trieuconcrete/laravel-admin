@@ -90,8 +90,10 @@
                                             </div>
                                             <div class="col-xxl-6">
                                                 <label class="form-label">Ngày cấp </label>
-                                                <input type="date" name="id_number_issuance_date" class="form-control" value="{{ old('id_number', $user->id_number_issuance_date) }}">
-                                                <div class="text-danger error" data-field="id_number_issuance_date"></div>
+                                                <input type="date" name="id_number_issuance_date" class="form-control" value="{{ old('id_number_issuance_date', $user->id_number_issuance_date) }}">
+                                                @error('id_number_issuance_date')
+                                                    <p class="text-danger text-sm mt-1">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-6">
