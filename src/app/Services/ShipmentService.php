@@ -7,6 +7,7 @@ use App\Models\Shipment;
 use App\Models\ShipmentGood;
 use App\Models\ShipmentDeduction;
 use App\Models\DeductionDetail;
+use App\Models\ShipmentDeductionType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Laravel\Pail\File;
@@ -336,8 +337,8 @@ class ShipmentService
             unset($shipmentData['goods'], $shipmentData['deductions'], $shipmentData['drivers'], $shipmentData['image']);
             $shipment->update($shipmentData);
 
-            if(!empty($data['image'])) {
-                if($shipment->image) {
+            if (!empty($data['image'])) {
+                if ($shipment->image) {
                     $this->fileUploadService->delete($shipment->image);
                 }
                 $path = $this->fileUploadService->upload($data['image'], 'shipments');
@@ -494,5 +495,43 @@ class ShipmentService
         \App\Models\ShipmentReport::where('customer_id', $customerId)
             ->where('monthly', $month)
             ->update(['is_finalized' => false]);
+    }
+
+    public function clone(int $shipmentId): ?array
+    {
+        $shipment = Shipment::with([
+            'goods',
+            'shipmentDeductions' => fn($q) => $q->whereNotNull('shipment_deduction_type_id'),
+        ])->find($shipmentId);
+
+        if (!$shipment) {
+            return null;
+        }
+
+        $drivers = $shipment->shipmentDeductions()
+            ->whereHas('shipmentDeductionType', fn($q) => $q->where('type', ShipmentDeductionType::TYPE_DRIVER))
+            ->whereNotNull('user_id')
+            ->get()
+            ->groupBy('user_id')
+            ->map(function ($deductions, $userId) {
+                return [
+                    'user_id' => $userId,
+                    'deductions' => $deductions->mapWithKeys(fn($deduction) => [
+                        $deduction->shipment_deduction_type_id => $deduction->amount,
+                        'is_main_driver' => $deduction->is_main_driver,
+                        'notes' => $deduction->notes,
+                    ])->toArray()
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        $shipment['drivers'] = $drivers;
+
+        $shipment['deductions'] = $shipment->shipmentDeductions()->whereNull('user_id')->get()->keyBy('shipment_deduction_type_id')->map(fn($deduction) => $deduction->amount)->toArray();
+
+        $cloneData = $shipment->toArray();
+
+        return $cloneData;
     }
 }
