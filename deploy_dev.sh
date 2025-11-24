@@ -1,7 +1,7 @@
 #!/bin/bash
-
+# deploy for production environment
 cd /var/www/webroot/vantai_hoangphulong_dev || exit
-git pull origin project/vantai_hpl_dev
+git pull origin project/vantai_hpl
 cd src
 composer install --no-dev
 php artisan migrate --force

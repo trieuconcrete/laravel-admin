@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# deploy for development environment
 cd /var/www/webroot/vantai_hoangphulong || exit
 git pull origin project/vantai_hpl
 cd src
