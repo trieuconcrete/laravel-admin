@@ -1371,6 +1371,8 @@
             e.preventDefault();
 
             const form = $(this);
+            const formData = new FormData(form[0]);
+            formData.set('advance_month', form.find('input[name="advance_month"]').data('backend-value') || '');
             const submitBtn = $('#submitSalaryAdvanceRequest');
             const errorContainer = $('#salaryAdvanceRequestError');
 
@@ -1381,8 +1383,10 @@
             $.ajax({
                 url: form.attr('action'),
                 type: 'POST',
-                data: form.serialize(),
+                data: formData,
                 dataType: 'json',
+                processData: false,
+                contentType: false,
                 success: function(response) {
 
                     // Show success message

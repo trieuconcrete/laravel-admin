@@ -16,6 +16,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -141,6 +142,11 @@ class User extends Authenticatable
     public function posts()
     {
         return $this->hasMany(Post::class, 'author_id');
+    }
+
+    public function shipmentTemplates(): HasMany
+    {
+        return $this->hasMany(ShipmentTemplate::class);
     }
 
     /**
