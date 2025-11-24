@@ -76,6 +76,11 @@ class ShipmentController extends Controller
             $templateData = $template?->data;
         }
 
+        if ($request->clone_from) {
+            $templateData = $this->shipmentService->clone($request->clone_from);
+        }
+
+
         // Get drivers (tài xế)
         $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
             ->where('status', UserStatus::ACTIVE)
