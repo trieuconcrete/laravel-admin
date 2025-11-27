@@ -418,34 +418,39 @@ function initDateInputs() {
     document.addEventListener('submit', function (e) {
         const form = e.target;
 
-        // Find all date inputs in this form
         const formDateInputs = dateInputs.filter(input => form.contains(input));
 
-        // Create hidden inputs for backend values
         const hiddenInputs = [];
+        const removedNames = [];
 
         formDateInputs.forEach(input => {
             const backendValue = input.getAttribute('data-backend-value');
 
             if (backendValue && input.name) {
-                // Create hidden input with the backend value
+                removedNames.push({ input: input, name: input.name });
+
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
                 hiddenInput.name = input.name;
                 hiddenInput.value = backendValue;
 
-                // Remove name from original input to prevent conflict
                 input.removeAttribute('name');
 
-                // Add hidden input to form
                 form.appendChild(hiddenInput);
                 hiddenInputs.push(hiddenInput);
             }
         });
 
-        // Store reference for cleanup
         form._dateHiddenInputs = hiddenInputs;
+        form._removedDateNames = removedNames;
+
+        setTimeout(() => {
+            removedNames.forEach(item => {
+                item.input.setAttribute('name', item.name);
+            });
+        }, 0);
     });
+
 
     // Cleanup function (optional, for SPA or dynamic forms)
     window.cleanupDateInputs = function (form) {
@@ -456,6 +461,6 @@ function initDateInputs() {
     };
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initDateInputs();
 });
