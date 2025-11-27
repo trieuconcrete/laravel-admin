@@ -64,8 +64,8 @@ class ShipmentController extends Controller
     {
         $customers = Customer::where('is_active', 1)->pluck('name', 'id');
         $vehicles = $this->vehicleRepository->getVehiclesByIsCarRental(false);
-        
-        // Get drivers (tài xế)  
+
+        // Get drivers (tài xế)
         $users = User::whereIn('role', ['driver', 'assistant', 'helper'])
             ->where('status', UserStatus::ACTIVE)
             ->whereHas('position', function ($query) {
@@ -73,7 +73,7 @@ class ShipmentController extends Controller
             })
             ->pluck('full_name', 'id')
             ->toArray();
-            
+
         $deductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_EXPENSE)
             ->where('status', 'active')
             ->orderBy('order', 'asc')
@@ -83,17 +83,17 @@ class ShipmentController extends Controller
             ->where('status', 'active')
             ->orderBy('order', 'asc')
             ->get();
-            
+
         $personDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_DRIVER)
             ->where('status', 'active')
             ->orderBy('order', 'asc')
             ->get();
-            
+
         $subPersonDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_BUS_DRIVER)
             ->where('status', 'active')
             ->orderBy('order', 'asc')
             ->get();
-            
+
         $userPXs = User::whereIn('role', ['driver', 'assistant', 'helper', 'staff'])
             ->where('status', UserStatus::ACTIVE)
             ->whereHas('position', function ($query) {
@@ -101,20 +101,20 @@ class ShipmentController extends Controller
             })
             ->pluck('full_name', 'id')
             ->toArray();
-            
+
         // Debug log to check users
         if (app()->environment('local')) {
             logger('Users loaded in create method:', ['count' => count($users), 'users' => $users]);
         }
-            
+
         return view('admin.shipments.create', compact(
-            'customers', 
-            'vehicles', 
-            'users', 
+            'customers',
+            'vehicles',
+            'users',
             'deductionTypes',
             'carRentalDeductionTypes',
-            'personDeductionTypes', 
-            'subPersonDeductionTypes', 
+            'personDeductionTypes',
+            'subPersonDeductionTypes',
             'userPXs'
         ));
     }
@@ -153,7 +153,7 @@ class ShipmentController extends Controller
             })
             ->pluck('full_name', 'id')
             ->toArray(); // Chuyển Collection thành array
-            
+
         // Debug log để kiểm tra
         if (app()->environment('local')) {
             logger('Users in edit method:', [
@@ -162,7 +162,7 @@ class ShipmentController extends Controller
                 'count' => count($users),
                 'data' => $users
             ]);
-            
+
             logger('Vehicles in edit method:', [
                 'count' => $vehicles->count(),
                 'vehicle_ids' => $vehicles->pluck('vehicle_id')->toArray(),
@@ -178,7 +178,7 @@ class ShipmentController extends Controller
         $personDeductionTypes =ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_DRIVER)
             ->where('status', 'active')
             ->get();
-        
+
         $subPersonDeductionTypes = ShipmentDeductionType::where('type', ShipmentDeductionType::TYPE_BUS_DRIVER)
             ->where('status', 'active')
             ->get();
@@ -190,10 +190,10 @@ class ShipmentController extends Controller
             })
             ->pluck('full_name', 'id')
             ->toArray();
-            
+
         $shipmentStatus = Shipment::$statuses;
         $shipmentTypes = Shipment::$shipmentTypes;
-        
+
         // Chuẩn bị dữ liệu cho form edit
         $shipmentDeductions = $shipment->shipmentDeductions()->whereNull('user_id')->get()->keyBy('shipment_deduction_type_id');
         $driverDeductions = $shipment->shipmentDeductions()
@@ -203,7 +203,7 @@ class ShipmentController extends Controller
             ->whereNotNull('user_id')
             ->get()
             ->groupBy('user_id');
-        
+
         $driverPXDeductions = $shipment->shipmentDeductions()
             ->whereHas('shipmentDeductionType', function ($query) {
                 $query->where('type', ShipmentDeductionType::TYPE_BUS_DRIVER);
@@ -213,8 +213,8 @@ class ShipmentController extends Controller
             ->groupBy('user_id');
 
         return view('admin.shipments.edit', compact(
-            'shipment', 'customers', 'vehicles', 'users', 
-            'deductionTypes', 'carRentalDeductionTypes', 'personDeductionTypes', 
+            'shipment', 'customers', 'vehicles', 'users',
+            'deductionTypes', 'carRentalDeductionTypes', 'personDeductionTypes',
             'subPersonDeductionTypes', 'shipmentDeductions', 'driverDeductions', 'shipmentStatus', 'userPXs', 'driverPXDeductions'
         ));
     }
@@ -236,7 +236,7 @@ class ShipmentController extends Controller
                     'driver_row_indexes' => $request->input('driver_row_indexes'),
                     'shipment_id' => $shipment->id
                 ]);
-                
+
                 Log::info('Shipment update - Validated data:', [
                     'validated_data' => $request->validated(),
                     'drivers_validated' => $request->validated()['drivers'] ?? [],

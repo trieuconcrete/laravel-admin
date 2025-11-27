@@ -184,8 +184,8 @@ chown -R www-data:www-data storage bootstrap/cache
 Phân quyền:
 
 ```bash
-chmod +x /var/www/webroot/vantai_hoangphulong/deploy.sh
-chmod +x /var/www/webroot/vantai_hoangphulong_dev/deploy_dev.sh
+chmod +x /var/www/webroot/vantai_hoangphulong/deploy.sh # deploy for dev
+chmod +x /var/www/webroot/vantai_hoangphulong_dev/deploy_dev.sh # deploy for prod
 ```
 
 ## ✅ Bước 12: Restart services khi cần

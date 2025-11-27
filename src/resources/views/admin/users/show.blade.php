@@ -1338,7 +1338,7 @@
         });
 
         // Handle type selection to show/hide remaining amount checkbox
-        $(document).on('change', 'select[name="type"]', function() {
+        $(document).on('change', 'select[name="type"]:not(#salaryAdvanceRequestForm select[name="type"])', function() {
             const selectedType = $(this).val();
             const modalBody = $(this).closest('.modal-body');
             const payRemainingCheckbox = modalBody.find('#payRemainingCheckbox, #payRemainingCheckboxEdit');
