@@ -23,6 +23,10 @@ class FileUploadService
             case 'timestamp':
                 $fileName = time() . '.' . $extension;
                 break;
+            case 'original_timestamp':
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME); // tách tên gốc không có extension
+                $fileName = $originalName . '_' . time() . '.' . $extension;
+                break;
             case 'original':
             default:
                 $fileName = $file->getClientOriginalName();

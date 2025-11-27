@@ -155,9 +155,15 @@ class ShipmentService
 
             $shipment = Shipment::create($shipmentData);
 
-            if (!empty($data['image'])) {
-                $path = $this->fileUploadService->upload($data['image'], 'shipments');
-                $shipment->image = $path['file_path'];
+            if (!empty($data['images'])) {
+                $imagePaths = [];
+
+                foreach ($data['images'] as $image) {
+                    $uploaded = $this->fileUploadService->upload($image, 'shipments', 'original_timestamp');
+                    $imagePaths[] = $uploaded['file_path'];
+                }
+
+                $shipment->images = $imagePaths;
                 $shipment->save();
             }
 
@@ -317,6 +323,7 @@ class ShipmentService
             Log::info('Drivers data trong update:', $data['drivers']);
         }
         return DB::transaction(function () use ($shipment, $data) {
+            // dd('Bắt đầu cập nhật shipment', $data);
             // Tính toán OT mới theo yêu cầu issue #180
             if (!empty($data['start_time']) && !empty($data['end_time']) && !empty($data['run_date'])) {
                 $carRentalId = $data['car_rental_id'] ?? null;
@@ -334,17 +341,29 @@ class ShipmentService
             // 1. Cập nhật thông tin cơ bản của shipment
             $shipmentData = $data;
             $shipmentData['unit_price_for_driver'] = $data['unit_price_for_driver'] ?? $data['unit_price']; // Ensure unit_price_for_driver is set
-            unset($shipmentData['goods'], $shipmentData['deductions'], $shipmentData['drivers'], $shipmentData['image']);
+            unset($shipmentData['goods'], $shipmentData['deductions'], $shipmentData['drivers'], $shipmentData['images']);
             $shipment->update($shipmentData);
 
-            if (!empty($data['image'])) {
-                if ($shipment->image) {
-                    $this->fileUploadService->delete($shipment->image);
+            $currentImages = $shipment->images ?? [];
+            if (!empty($data['deleted_images'])) {
+                $deletedPaths = json_decode($data['deleted_images'], true);
+
+                if (is_array($deletedPaths)) {
+                    foreach ($deletedPaths as $path) {
+                        $this->fileUploadService->delete($path);
+                        $currentImages = array_filter($currentImages, fn($img) => $img !== $path);
+                    }
                 }
-                $path = $this->fileUploadService->upload($data['image'], 'shipments');
-                $shipment->image = $path['file_path'];
-                $shipment->save();
             }
+
+            if (!empty($data['images'])) {
+                foreach ($data['images'] as $file) {
+                    $upload = $this->fileUploadService->upload($file, 'shipments', 'original_timestamp');
+                    $currentImages[] = $upload['file_path'];
+                }
+            }
+            $shipment->images = $currentImages;
+            $shipment->save();
 
             // 2. Xóa và cập nhật lại các chi phí chuyến hàng (ShipmentDeduction)
             $shipment->shipmentDeductions()->where('user_id', null)->delete();

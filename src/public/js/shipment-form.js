@@ -640,7 +640,6 @@ function validateShipmentForm(form) {
 
     // 1. Kiểm tra các trường ở tab thông tin vận chuyển
     const customerId = form.querySelector('select[name="customer_id"]')?.value;
-    const image = form.querySelector('input[name="image"]')?.value;
     const origin = form.querySelector('input[name="origin"]')?.value;
     // const destination = form.querySelector('input[name="destination"]')?.value;
     const departureTime = form.querySelector('input[name="departure_time"]')?.value;
@@ -655,7 +654,7 @@ function validateShipmentForm(form) {
     const hasGoods = true; // Tạm thời bỏ qua kiểm tra hàng hóa để dễ dàng test form
 
     // Kiểm tra các trường ở tab thông tin vận chuyển
-    if (!customerId || !origin || !departureTime || !estimatedArrivalTime || !hasGoods || !image) {
+    if (!customerId || !origin || !departureTime || !estimatedArrivalTime || !hasGoods) {
         let errorMessage = '';
         let errorField = null;
         let tabId = 'driverAllowance'; // ID của tab thông tin vận chuyển
@@ -663,9 +662,6 @@ function validateShipmentForm(form) {
         if (!customerId) {
             errorMessage = 'Vui lòng chọn khách hàng!';
             errorField = 'select[name="customer_id"]';
-        } else if (!image) {
-            errorMessage = 'Vui lòng chọn hình ảnh!';
-            errorField = 'input[name="image"]';
         } else if (!origin) {
             errorMessage = 'Vui lòng nhập điểm khởi hành!';
             errorField = 'input[name="origin"]';
@@ -800,348 +796,156 @@ function validateShipmentForm(form) {
  */
 function initShipmentForm(initialDriverCount = 1) {
     try {
-        console.log('Initializing shipment form with', initialDriverCount, 'initial drivers');
-        console.log('Available users:', window.users);
+        console.log("INIT SHIPMENT FORM");
 
-        // Kiểm tra checkbox "Xe HPL Thuê"
-        const isCarRental = document.querySelector('input[name="is_car_rental"]')?.checked;
-
-        // Nếu là xe HPL thuê, load vehicles từ API
-        if (isCarRental) {
-            console.log('Xe HPL thuê - loading vehicles from API');
-            loadVehiclesFromAPI(true);
-
-            // Bỏ required cho driver fields khi ẩn
-            const driversSection = document.querySelector('#drivers');
-            if (driversSection) {
-                driversSection.style.display = 'none';
-                driversSection.querySelectorAll('[required]').forEach(field => {
-                    field.removeAttribute('required');
-                });
-            }
-        }
-
-        // Thêm event listener cho checkbox is_car_rental
+        const form = document.getElementById("shipmentForm");
         const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
-        if (isCarRentalCheckbox) {
-            isCarRentalCheckbox.addEventListener('change', function() {
-                const isRental = this.checked;
-                console.log('is_car_rental changed:', isRental);
+        const driversSection = document.querySelector("#drivers");
 
-                // Load vehicles từ API khi checkbox thay đổi
-                loadVehiclesFromAPI(isRental);
-
-                // Toggle hiển thị driver section
-                const driversSection = document.querySelector('#drivers');
-                if (driversSection) {
-                    if (isRental) {
-                        driversSection.style.display = 'none';
-                        // Bỏ required cho tất cả driver fields khi ẩn
-                        driversSection.querySelectorAll('[required]').forEach(field => {
-                            field.removeAttribute('required');
-                        });
-                    } else {
-                        driversSection.style.display = 'block';
-                        // Thêm lại required cho driver fields khi hiện
-                        driversSection.querySelectorAll('select[name*="[user_id]"]').forEach(field => {
-                            field.setAttribute('required', '');
-                        });
-                    }
-                }
-            });
-        }
-
-        // Nếu là xe HPL thuê, không cần khởi tạo dữ liệu tài xế
-        if (isCarRental) {
-            console.log('Xe HPL thuê - bỏ qua khởi tạo dữ liệu tài xế');
-
-            // Chỉ khởi tạo các event listener cần thiết
-            // Thêm event listener cho tất cả các trường số hiện có (ngoại trừ unit-input)
-            document.querySelectorAll('input[type="number"]:not(.unit-input)').forEach(input => {
-                input.addEventListener('input', function() {
-                    this.value = this.value.replace(/[^0-9.]/g, '');
-                });
-            });
-
-            // Thêm event listener cho các trường thời gian
-            addTimeInputListeners();
-
-            // Thêm event listener cho các unit input hiện có
-            document.querySelectorAll('.unit-input').forEach(input => {
-                input.addEventListener('input', function() {
-                    // Fallback if the global function is not available
-                    let value = this.value;
-
-                    // Remove non-numeric characters and handle decimal part
-                    value = value.replace(/[^0-9.]/g, '');
-
-                    // If there's a decimal part, handle it
-                    if (value.includes('.')) {
-                        // Split into integer and decimal parts
-                        let parts = value.split('.');
-                        // If decimal part is .00, remove it completely
-                        if (parts[1] === '00' || parts[1] === '0') {
-                            value = parts[0];
-                        } else {
-                            // Otherwise keep only integer part
-                            value = parts[0];
-                        }
-                    }
-
-                    // Allow up to 9 digits for the unit input
-                    if (value.length > 9) {
-                        value = value.substring(0, 9);
-                    }
-
-                    this.value = value;
-                });
-            });
-
+        if (!form) {
+            console.error("Form #shipmentForm không tồn tại!");
             return;
         }
 
-        // Thêm các dòng tài xế ban đầu nếu cần
-        const personTable = document.querySelector('#personTable tbody');
-        if (personTable && personTable.rows.length === 0) {
-            // Chỉ thêm dòng tài xế nếu có sẵn tài xế
-            if (window.users && Object.keys(window.users).length > 0) {
-                for (let i = 0; i < initialDriverCount; i++) {
-                    // Kiểm tra xem còn tài xế nào chưa được chọn không
-                    const selectedIds = getSelectedUserIds();
-                    const remainingUsers = Object.keys(window.users).filter(id => !selectedIds.includes(id));
+        /** --------------------------------------------------------------------
+         * XỬ LÝ XE HPL THUÊ
+         * ------------------------------------------------------------------ */
+        function toggleCarRental(isRental) {
+            loadVehiclesFromAPI(isRental);
 
-                    if (remainingUsers.length > 0) {
-                        addDriverRow(personTable, window.personDeductionTypes, window.users);
-                    } else {
-                        console.warn('No more available users to add as drivers');
-                        break;
-                    }
-                }
+            if (!driversSection) return;
+
+            if (isRental) {
+                driversSection.style.display = "none";
+                driversSection.querySelectorAll("[required]").forEach(el => el.removeAttribute("required"));
             } else {
-                console.warn('No users available to add as initial drivers');
-                // Hiển thị thông báo không có tài xế
-                updateAddPersonButtonState();
-
-                // Thêm hàng thông báo nếu không có tài xế nào
-                const noDriversRow = document.createElement('tr');
-                noDriversRow.id = 'no-drivers-row';
-                noDriversRow.innerHTML = `
-                    <td colspan="8" class="text-center">
-                        <div class="alert alert-warning mb-0">
-                            Không có tài xế nào khả dụng. Vui lòng thêm tài xế trước.
-                        </div>
-                    </td>`;
-                personTable.appendChild(noDriversRow);
+                driversSection.style.display = "block";
+                driversSection.querySelectorAll('select[name*="[user_id]"]').forEach(el => el.setAttribute("required", ""));
             }
         }
 
-        // Cập nhật trạng thái nút thêm tài xế
-        updateAddPersonButtonState();
+        // Khởi tạo state ban đầu
+        toggleCarRental(isCarRentalCheckbox?.checked);
 
-    } catch (error) {
-        console.error('Error initializing shipment form:', error);
-
-        // Đảm bảo nút thêm tài xế không bị disable nếu có lỗi
-        const addPersonBtn = document.getElementById('addPersonBtn');
-        if (addPersonBtn) {
-            addPersonBtn.disabled = false;
-            addPersonBtn.classList.remove('btn-outline-secondary');
-            addPersonBtn.classList.add('btn-outline-primary');
-        }
-    }
-
-    // Khởi tạo giá trị ban đầu cho driverRowCount - sử dụng global nếu có
-    if (window.driverRowCount !== undefined) {
-        driverRowCount = window.driverRowCount;
-    } else {
-        driverRowCount = initialDriverCount - 1;
-    }
-
-    // Khởi tạo các dropdown user_id
-    updateUserDropdowns();
-
-    // Thêm event listener cho tất cả các trường số hiện có (ngoại trừ unit-input)
-    document.querySelectorAll('input[type="number"]:not(.unit-input)').forEach(input => {
-        input.addEventListener('input', function() {
-            this.value = this.value.replace(/[^0-9.]/g, '');
+        // Theo dõi thay đổi checkbox
+        isCarRentalCheckbox?.addEventListener("change", e => {
+            toggleCarRental(e.target.checked);
         });
-    });
 
-    // Thêm event listener cho các trường thời gian
-    addTimeInputListeners();
+        /** --------------------------------------------------------------------
+         * KHỞI TẠO DÒNG TÀI XẾ BAN ĐẦU (nếu không phải xe thuê)
+         * ------------------------------------------------------------------ */
+        if (!isCarRentalCheckbox?.checked) {
+            const personTable = document.querySelector("#personTable tbody");
 
-    // Thêm event listener cho các unit input hiện có
-    document.querySelectorAll('.unit-input').forEach(input => {
-        input.addEventListener('input', function() {
-            // Fallback if the global function is not available
-            let value = this.value;
+            if (personTable && personTable.rows.length === 0) {
+                const users = window.users ?? {};
 
-            // Remove non-numeric characters and handle decimal part
-            value = value.replace(/[^0-9.]/g, '');
-
-            // If there's a decimal part, handle it
-            if (value.includes('.')) {
-                // Split into integer and decimal parts
-                let parts = value.split('.');
-                // If decimal part is .00, remove it completely
-                if (parts[1] === '00' || parts[1] === '0') {
-                    value = parts[0];
+                if (Object.keys(users).length > 0) {
+                    for (let i = 0; i < initialDriverCount; i++) {
+                        addDriverRow(personTable, window.personDeductionTypes, users);
+                    }
                 } else {
-                    // Otherwise keep only integer part
-                    value = parts[0];
+                    personTable.innerHTML = `
+                        <tr id="no-drivers-row">
+                            <td colspan="8" class="text-center">
+                                <div class="alert alert-warning mb-0">
+                                    Không có tài xế nào khả dụng. Vui lòng thêm tài xế trước.
+                                </div>
+                            </td>
+                        </tr>`;
                 }
             }
+        }
 
-            // Allow up to 9 digits for the unit input
-            if (value.length > 9) {
+        updateUserDropdowns();
+
+        /** --------------------------------------------------------------------
+         * CLEAN INPUTS
+         * ------------------------------------------------------------------ */
+
+        // Làm sạch input number
+        document.querySelectorAll('input[type="number"]:not(.unit-input)').forEach(input => {
+            input.addEventListener("input", () => {
+                input.value = input.value.replace(/[^0-9.]/g, "");
+            });
+        });
+
+        // Định dạng unit-input
+        document.querySelectorAll(".unit-input").forEach(input => {
+            input.addEventListener("input", () => {
+                let value = input.value.replace(/[^0-9.]/g, "");
+
+                if (value.includes(".")) {
+                    const [intPart] = value.split(".");
+                    value = intPart;
+                }
+
                 value = value.substring(0, 9);
-            }
 
-            // Format with commas
-            if (value) {
-                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            }
-
-            this.value = value;
-        });
-    });
-
-    // Thêm event listener cho tất cả các dropdown user_id hiện có
-    document.querySelectorAll('select[name$="[user_id]"]').forEach(select => {
-        select.addEventListener('change', updateUserDropdowns);
-    });
-
-    // Cập nhật dropdown ban đầu
-    updateUserDropdowns();
-
-    // Xử lý form trước khi submit
-    const form = document.getElementById('shipmentForm');
-    form.addEventListener('submit', function(e) {
-        // Đảm bảo tất cả các tab đều được hiển thị trước khi validate
-        const tabPanes = document.querySelectorAll('.tab-pane');
-        const originalDisplayStates = [];
-        const originalVisibilityStates = [];
-        const originalPositionStates = [];
-
-        // Lưu trạng thái hiển thị ban đầu của các tab
-        tabPanes.forEach(pane => {
-            originalDisplayStates.push(pane.style.display);
-            originalVisibilityStates.push(pane.style.visibility);
-            originalPositionStates.push(pane.style.position);
-
-            // Hiển thị tất cả các tab nhưng đặt vị trí ở ngoài màn hình để người dùng không thấy
-            if (!pane.classList.contains('active')) {
-                pane.style.display = 'block';
-                pane.style.visibility = 'hidden';
-                pane.style.position = 'absolute';
-                pane.style.top = '-9999px';
-                pane.style.left = '-9999px';
-            }
+                input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            });
         });
 
-        // Chuẩn bị form trước khi submit
-        prepareFormBeforeSubmit(this);
+        addTimeInputListeners();
 
-        // Khôi phục trạng thái hiển thị ban đầu của các tab
-        tabPanes.forEach((pane, index) => {
-            pane.style.display = originalDisplayStates[index];
-            pane.style.visibility = originalVisibilityStates[index];
-            pane.style.position = originalPositionStates[index];
-        });
-    });
+        /** --------------------------------------------------------------------
+         * VALIDATE & SUBMIT
+         * ------------------------------------------------------------------ */
 
-    // Sử dụng nút submit để kiểm tra và hiển thị thông báo lỗi
-    const submitBtn = document.getElementById('submitBtn');
-    const submitSaveBtn = document.getElementById('submitSaveBtn');
-    if (submitBtn) {
-        submitBtn.addEventListener('click', function(e) {
+        // Đảm bảo không bị thêm nhiều input action
+        function removeOldAction() {
+            form.querySelectorAll('input[name="action"]').forEach(el => el.remove());
+        }
+
+        // Submit chính
+        document.getElementById("submitBtn")?.addEventListener("click", e => {
             e.preventDefault();
-            e.stopPropagation();
 
-            // Tìm form
-            let form = document.getElementById('shipmentForm') || this.closest('form') || document.querySelector('form');
-            if (!form) {
-                console.error('Form element not found');
-                return;
-            }
+            removeOldAction();
 
-            // Kiểm tra validate form
-            if (!validateShipmentForm(form)) {
-                return;
-            }
+            if (!validateShipmentForm(form)) return;
 
-            // Hiển thị Swal hỏi có muốn lưu template không
-            Swal.fire({
-                title: 'Bạn có muốn lưu mẫu không?',
-                text: "Dữ liệu sẽ được lưu làm template để có thể sử dụng lại.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Có',
-                cancelButtonText: 'Không'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Nếu chọn có, hỏi tên template
-                    Swal.fire({
-                        title: 'Nhập tên template',
-                        input: 'text',
-                        inputLabel: 'Tên template',
-                        inputPlaceholder: 'Template mới',
-                        showCancelButton: true,
-                        confirmButtonText: 'Lưu',
-                        cancelButtonText: 'Hủy',
-                        inputValidator: (value) => {
-                            if (!value) {
-                                return 'Bạn phải nhập tên template!';
-                            }
-                        }
-                    }).then((templateResult) => {
-                        if (templateResult.isConfirmed) {
-                            // Thêm input ẩn lưu template
-                            $(form).append(`<input type="hidden" name="save_as_template" value="1">`);
-                            $(form).append(`<input type="hidden" name="template_name" value="${templateResult.value}">`);
-                            form.submit();
-                        }
-                    });
-                } else {
-                    // Nếu chọn không, submit bình thường
-                    form.submit();
+            form.submit();
+        });
+
+        // Submit as new template
+        $("#submitSaveBtn").on("click", function (e) {
+            e.preventDefault();
+
+            removeOldAction();
+            form.insertAdjacentHTML("beforeend", `<input type="hidden" name="action" value="save_new">`);
+
+            if (!validateShipmentForm(form)) return;
+
+            form.submit();
+        });
+
+        /** --------------------------------------------------------------------
+         * XỬ LÝ TAB TRƯỚC KHI SUBMIT (để tránh HTML5 bỏ qua validate)
+         * ------------------------------------------------------------------ */
+        form.addEventListener("submit", e => {
+            const tabs = document.querySelectorAll(".tab-pane");
+
+            tabs.forEach(tab => {
+                if (!tab.classList.contains("active")) {
+                    tab.dataset._prevState = tab.style.display;
+                    tab.style.display = "block";
+                }
+            });
+
+            prepareFormBeforeSubmit(form);
+
+            tabs.forEach(tab => {
+                if (tab.dataset._prevState !== undefined) {
+                    tab.style.display = tab.dataset._prevState;
+                    delete tab.dataset._prevState;
                 }
             });
         });
-    } else {
-        console.error('Submit button not found with ID "submitBtn"');
-    }
 
-    if (submitSaveBtn) {
-        submitSaveBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        $('#shipmentForm').append(`<input type="hidden" name="action" value="save_new">`);
-
-        // Tìm form bằng nhiều cách
-        let form = document.getElementById('shipmentForm');
-        if (!form) {
-            // Thử tìm form chứa submit button
-            form = this.closest('form');
-        }
-        if (!form) {
-            // Thử tìm form đầu tiên
-            form = document.querySelector('form');
-        }
-
-        console.log('Submit button clicked, form element:', form);
-
-        if (!form) {
-            console.error('Form element not found');
-            return;
-        }
-
-        if (validateShipmentForm(form)) {
-            form.submit();
-        }
-    });
-    } else {
-        console.error('Submit button not found with ID "submitSaveBtn"');
+    } catch (err) {
+        console.error("Error in initShipmentForm:", err);
     }
 }
 
