@@ -2,6 +2,65 @@
 @section('title', 'Tạo chuyến xe')
 @section('content')
 
+@push('styles')
+    <style>
+        #personTable th,
+        #personTable td {
+            white-space: nowrap !important;
+        }
+
+        #personTable th.notes-col,
+        #personTable td.notes-col {
+            width: 350px !important;
+            min-width: 350px !important;
+        }
+
+        #personTable th.driver-col, #personTable td.driver-col {
+            width: 250px !important;
+            min-width: 250px !important;
+        }
+
+        .form-images .upload {
+            display: none
+        }
+
+        .image-upload-wrapper {
+            border: 1px dashed #405189;
+            border-radius: 8px;
+            padding: 10px;
+            aspect-ratio: 2/1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .image-upload-wrapper .preview-area {
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .image-upload-wrapper.has-preview .preview-area {
+            display: unset;
+        }
+
+        .image-upload-wrapper .upload-message {
+            text-align: center;
+            color: #405189;
+        }
+
+        .image-upload-wrapper .preview-area img {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+    </style>
+@endpush
+
 <div class="container-fluid">
     @if ($errors->any())
         <div class="alert alert-danger">
@@ -26,7 +85,7 @@
                                     <div class="row g-3 mb-0 align-items-center">
                                         <div class="col-auto">
                                             <button type="submit" class="btn btn-success" id="submitBtn">
-                                                <i class="ri-save-3-line align-middle me-1"></i>Lưu 
+                                                <i class="ri-save-3-line align-middle me-1"></i>Lưu
                                             </button>
                                         </div>
                                         <!--end col-->
@@ -114,7 +173,7 @@
                                                 @php
                                                 $defaultDeparture = date('Y-m-d');
                                                 $defaultArrival = $defaultDeparture;
-                                                
+
                                                 // Nếu có giá trị old(), ưu tiên sử dụng nó
                                                 $departureDateValue = old('departure_time', $defaultDeparture);
                                                 $arrivalDateValue = old('estimated_arrival_time', $defaultArrival);
@@ -380,10 +439,10 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-2">
                                                     <div class="form-check form-check-secondary mb-3">
-                                                        <input class="form-check-input" 
-                                                        name="is_car_rental" 
-                                                        type="checkbox" 
-                                                        value="1" 
+                                                        <input class="form-check-input"
+                                                        name="is_car_rental"
+                                                        type="checkbox"
+                                                        value="1"
                                                         id="is_car_rental">
                                                         <label class="form-check-label" for="is_car_rental">
                                                             Xe HPL Thuê
@@ -394,7 +453,7 @@
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                             <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
-                                                            <select class="form-select" name="vehicle_id" id="vehicles">
+                                                            <select class="form-select js-example-basic-single" name="vehicle_id" id="vehicles">
                                                                 <option value="">Chọn phương tiện</option>
                                                                 @foreach($vehicles as $vehicle)
                                                                     <option value="{{ (int)$vehicle->vehicle_id }}" {{ old('vehicle_id') == (int)$vehicle->vehicle_id ? 'selected' : '' }}>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
@@ -432,7 +491,7 @@
                                                                     @foreach($personDeductionTypes as $type)
                                                                         <th>{{ $type->name }}</th>
                                                                     @endforeach
-                                                                    <th>Ghi chú</th>
+                                                                    <th class="notes-col">Ghi chú</th>
                                                                     <th></th>
                                                                 </tr>
                                                             </thead>
@@ -445,7 +504,7 @@
                                                                 @foreach($drivers as $i => $driver)
                                                                     <tr>
                                                                         <td>
-                                                                            <select name="drivers[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
+                                                                            <select name="drivers[{{ $i }}][user_id]" class="form-select js-example-basic-single" style="min-width: 180px;" required>
                                                                                 <option value="">Chọn nhân sự</option>
                                                                                 @foreach($users as $id => $name)
                                                                                     <option value="{{ $id }}" {{ old('drivers.'.$i.'.user_id', $driver['user_id'] ?? '') == $id ? 'selected' : '' }}>{{ $name }}</option>
@@ -455,7 +514,7 @@
                                                                         </td>
                                                                         <td class="text-center">
                                                                             <div class="form-check form-switch d-inline-block">
-                                                                                <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input" value="1" 
+                                                                                <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input" value="1"
                                                                                     {{ old('drivers.'.$i.'.deductions.is_main_driver', $driver['deductions']['is_main_driver'] ?? false) ? 'checked' : '' }}>
                                                                             </div>
                                                                             @error('drivers.{{ $i }}.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
@@ -466,7 +525,7 @@
                                                                                 @error('drivers.'.$i.'.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                             </td>
                                                                         @endforeach
-                                                                        <td>
+                                                                        <td class="notes-col">
                                                                             <input type="text" name="drivers[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.Ghi chú', $driver['deductions'][$type->id]['Ghi chú'] ?? '') }}">
                                                                             @error('drivers.{{ $i }}.deductions.notes')<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
@@ -479,7 +538,7 @@
                                                             @else
                                                                 <tr>
                                                                     <td>
-                                                                        <select name="drivers[0][user_id]" class="form-select form-select-sm" required>
+                                                                        <select name="drivers[0][user_id]" class="form-select js-example-basic-single" required>
                                                                             <option value="">Chọn nhân sự</option>
                                                                             @foreach($users as $id => $name)
                                                                                 <option value="{{ $id }}">{{ $name }}</option>
@@ -489,7 +548,7 @@
                                                                     </td>
                                                                     <td class="text-center">
                                                                         <div class="form-check form-switch d-inline-block">
-                                                                            <input type="checkbox" name="drivers[0][deductions][is_main_driver]" class="form-check-input deduction-input" value="1" 
+                                                                            <input type="checkbox" name="drivers[0][deductions][is_main_driver]" class="form-check-input deduction-input" value="1"
                                                                                 {{ old('drivers.0.deductions.is_main_driver', $driver['deductions']['is_main_driver'] ?? false) ? 'checked' : '' }}>
                                                                         </div>
                                                                         @error('drivers.0.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
@@ -543,7 +602,7 @@
                                                                 @foreach($drivers as $i => $driver)
                                                                     <tr>
                                                                         <td>
-                                                                            <select name="driverPXs[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
+                                                                            <select name="driverPXs[{{ $i }}][user_id]" class="form-select js-example-basic-single" style="min-width: 180px;" required>
                                                                                 <option value="">Chọn nhân sự</option>
                                                                                 @foreach($userPXs as $id => $name)
                                                                                     <option value="{{ $id }}" {{ old('driverPXs.'.$i.'.user_id', $driver['user_id'] ?? '') == $id ? 'selected' : '' }}>{{ $name }}</option>
@@ -633,10 +692,10 @@
         // Function to format price inputs with VND formatting and 9-digit limit
         function formatPriceInput(input) {
             let value = input.val();
-            
+
             // Remove non-numeric characters and handle decimal part
             value = value.replace(/[^0-9.]/g, '');
-            
+
             // If there's a decimal part, handle it
             if (value.includes('.')) {
                 // Split into integer and decimal parts
@@ -649,32 +708,32 @@
                     value = parts[0];
                 }
             }
-            
+
             // Limit to 9 digits
             if (value.length > 9) {
                 value = value.substring(0, 9);
             }
-            
+
             // Format with commas
             if (value) {
                 value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             }
-            
+
             input.val(value);
         }
-        
+
         // Format deduction inputs and unit inputs on keyup
         $('.deduction-input, .unit-input, .number').on('input', function () {
             formatPriceInput($(this));
         });
-        
+
         // Initial formatting for deduction inputs and unit inputs
         $('.deduction-input, .unit-input, .number').each(function() {
             let value = $(this).val();
             if (value) {
                 // Remove existing formatting
                 value = value.replace(/,/g, '');
-                
+
                 // Handle decimal part if exists
                 if (value.includes('.')) {
                     let parts = value.split('.');
@@ -686,18 +745,18 @@
                         value = parts[0];
                     }
                 }
-                
+
                 // Limit to 9 digits
                 if (value.length > 9) {
                     value = value.substring(0, 9);
                 }
-                
+
                 // Apply formatting
                 value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                 $(this).val(value);
             }
         });
-        
+
         // Make the formatPriceInput function globally available
         window.formatPriceInput = function(input) {
             formatPriceInput($(input));
@@ -710,10 +769,10 @@
     let goodsCount = {{ count(old('goods', [])) ?: 1 }};
     const personTable = document.querySelector('#personTable tbody');
     const personPxTable = document.querySelector('#personPxTable tbody');
-    
+
     // Lưu trữ dữ liệu cũ từ validation errors
     window.laravelOld = @json(session()->getOldInput());
-    
+
     // Khai báo các loại khấu trừ cho tài xế
     const personDeductionTypes = [
         @foreach($personDeductionTypes as $type)
@@ -726,7 +785,7 @@
             { id: "{{ $type->id }}", name: "{{ $type->name }}" },
         @endforeach
     ];
-    
+
     // Gán danh sách người dùng vào biến toàn cục
     // Đảm bảo users là một object với id làm key
     window.users = {};
@@ -742,31 +801,31 @@
             window.userPXs[{{ $id }}] = '{{ addslashes($name) }}';
         @endforeach
     @endif
-    
+
     console.log('Available users:', window.users);
-    
+
     // Khởi tạo các sự kiện khi trang đã tải xong
     document.addEventListener('DOMContentLoaded', function() {
         // Khởi tạo form với số lượng driver ban đầu
         initShipmentForm({{ count(old('drivers', [])) ?: 1 }});
-        
+
         // Cập nhật trạng thái nút thêm tài xế
         updateAddPersonButtonState();
-        
+
         // Thêm event listener cho nút thêm hàng hóa
         document.getElementById('addGoodBtn').onclick = function() {
             goodsCount = addGoodRow(goodsTable, goodsCount);
         };
-        
+
         // Thêm event listener cho nút thêm người
         document.getElementById('addPersonBtn').onclick = function() {
             // Kiểm tra số lượng user trước khi thêm
             const selectedIds = getSelectedUserIds(personTable, 'driver');
             const totalUsers = Object.keys(window.users).length;
             const currentRows = personTable.querySelectorAll('tr').length;
-            
+
             console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUsers, 'Current Rows:', currentRows);
-            
+
             // Kiểm tra số lượng hàng hiện tại với tổng số users
             if (currentRows >= totalUsers) {
                 Swal.fire({
@@ -787,7 +846,7 @@
                 });
                 return false;
             }
-            
+
             // Kiểm tra nếu đã sử dụng hết tất cả người dùng
             if (selectedIds.length >= totalUsers) {
                 Swal.fire({
@@ -798,22 +857,22 @@
                 });
                 return false;
             }
-            
+
             // Log users object for debugging
             console.log('Users object:', window.users);
             // Nếu còn người dùng khả dụng, thêm hàng mới
             addDriverRow(personTable, personDeductionTypes, window.users);
         };
-        
+
         // Thêm event listener cho nút thêm lơ xe
         document.getElementById('addPersonPxBtn').onclick = function() {
             // Kiểm tra số lượng user trước khi thêm
             const selectedIds = getSelectedUserIds(personPxTable, 'driverPXs');
             const totalUserPXs = Object.keys(window.userPXs).length;
             const currentRows = personPxTable.querySelectorAll('tbody tr').length;
-            
+
             console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUserPXs, 'Current Rows:', currentRows);
-            
+
             // Kiểm tra số lượng hàng hiện tại với tổng số users
             if (currentRows >= totalUserPXs) {
                 Swal.fire({
@@ -834,7 +893,7 @@
                 });
                 return false;
             }
-            
+
             // Kiểm tra nếu đã sử dụng hết tất cả người dùng
             if (selectedIds.length >= totalUserPXs) {
                 Swal.fire({
@@ -845,22 +904,22 @@
                 });
                 return false;
             }
-            
+
             // Log users object for debugging
             console.log('Users object:', window.userPXs);
             // Nếu còn người dùng khả dụng, thêm hàng mới
             addDriverPXRow(personPxTable, personPxDeductionTypes, window.userPXs);
         };
-        
+
         // Kiểm tra và cập nhật trạng thái nút thêm nhân sự dựa trên số lượng người dùng khả dụng
         updateAddPersonButtonState();
-        
+
         // Định dạng tất cả các trường số khi trang được tải
         formatAllNumericInputs();
-        
+
         // Kiểm tra và chuyển đến tab có lỗi nếu có
         handleFormErrors();
-        
+
         // Xử lý checkbox "Xe HPL Thuê"
         const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
         const driverSection = document.getElementById('drivers');
@@ -871,7 +930,7 @@
             if (!isCarRentalCheckbox || !driverSection) {
                 return; // Exit if elements don't exist
             }
-            
+
             const isChecked = isCarRentalCheckbox.checked;
             if (isChecked) {
                 // Nếu là xe thuê, ẩn phần tài xế
@@ -885,14 +944,14 @@
                 unitPriceForDriverDiv.style.display = 'block';
             }
         }
-        
+
         // Thêm event listener cho checkbox
         if (isCarRentalCheckbox) {
             isCarRentalCheckbox.addEventListener('change', toggleDriverSections);
             // Chạy lần đầu khi trang load
             toggleDriverSections();
         }
-        
+
         // Xử lý submit form
         document.getElementById('shipmentForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -905,14 +964,14 @@
 
     document.getElementById('avatarInput')?.addEventListener('change', function(event) {
         const file = event.target.files[0];
-    
+
         if (file) {
             const reader = new FileReader();
-            
+
             reader.onload = function(e) {
                 document.getElementById('avatarPreview').src = e.target.result;
             }
-            
+
             reader.readAsDataURL(file);
         }
     });
@@ -926,7 +985,7 @@
     .highlight-error {
         animation: highlight-error-animation 1.5s ease;
     }
-    
+
     @keyframes highlight-error-animation {
         0% { background-color: rgba(255, 0, 0, 0.1); }
         50% { background-color: rgba(255, 0, 0, 0.2); }

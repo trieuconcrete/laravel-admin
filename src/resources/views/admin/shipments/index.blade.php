@@ -9,13 +9,13 @@
             @php
                 // Đếm tổng số chuyến xe
                 $totalShipments = $shipments->total();
-                
+
                 // Đếm số chuyến xe đang vận chuyển
                 $inTransitCount = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_IN_TRANSIT)->count();
-                
+
                 // Đếm số chuyến xe chờ xác nhận
                 $pendingCount = App\Models\Shipment::where('status', App\Models\Shipment::STATUS_PENDING)->count();
-                
+
                 // Đếm số chuyến xe hoàn thành trong tháng hiện tại
                 $startOfMonth = now()->startOfMonth();
                 $endOfMonth = now()->endOfMonth();
@@ -23,7 +23,7 @@
                     ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
                     ->count();
             @endphp
-            
+
             <div class="row">
                 <div class="col-md-6 col-lg-3 mb-3">
                     <div class="card card-dashboard h-100" style="border-left-color: #4e73df;">
@@ -140,7 +140,7 @@
                                     <i class="ri-search-line me-1"></i>Tìm kiếm
                                 </button>
                                 <a href="{{ route('admin.shipments.create') }}" class="btn btn-primary">
-                                    <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe 
+                                    <i class="ri-add-circle-line align-middle me-1"></i>Thêm chuyến xe
                                 </a>
                             </div>
                         </div>
@@ -182,7 +182,7 @@
                                                     @disabled($shipment->status != \App\Models\Shipment::STATUS_PENDING)>
                                                 Xóa
                                             </button>
-                                            
+
                                             <form action="{{ route('admin.shipments.destroy', $shipment) }}"
                                                 method="POST"
                                                 class="delete-shipment-form"
@@ -249,10 +249,10 @@
     $(document).ready(function () {
         $('.delete-shipment-btn').click(function (e) {
             e.preventDefault();
-    
+
             const shipmentId = $(this).data('shipment-id');
             const form = $('#delete-form-' + shipmentId);
-    
+
             Swal.fire({
                 title: 'Bạn chắc chắn muốn xóa?',
                 // text: "Hành động này không thể hoàn tác!",

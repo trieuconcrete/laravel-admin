@@ -45,7 +45,7 @@ class StoreSalaryAdvanceRequestRequest extends FormRequest
             'amount' => 'required|numeric|min:1|max:999999999',
             'type' => 'required|string|in:' . implode(',', array_keys(SalaryAdvanceRequest::getTypes())),
             'status' => 'required|string|in:' . implode(',', array_keys(SalaryAdvanceRequest::getStatuses())),
-            'advance_month' => ['required', $this->getSystemDateFormatRule()],
+            'advance_month' => ['required'],
             'reason' => 'required|string|max:500',
             'user_id' => 'required|exists:users,id',
         ];
