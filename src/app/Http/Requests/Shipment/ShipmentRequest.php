@@ -290,7 +290,9 @@ class ShipmentRequest extends FormRequest
             'goods.*.notes' => 'nullable|string|max:255',
             'goods.*.weight' => 'nullable|numeric|min:0',
             'goods.*.amount' => 'nullable|numeric|min:0',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images' => 'nullable|array|max:10',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'deleted_images' => 'nullable|string'
         ];
 
         // Nếu không phải xe thuê, thì yêu cầu thông tin tài xế và phương tiện

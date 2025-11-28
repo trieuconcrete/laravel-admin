@@ -152,10 +152,13 @@ class ShipmentController extends Controller
                     $request->except(['save_as_template', 'template_name','_token', 'image', 'action'])
                 );
             }
-            if($request->input('action') === 'save_new') {
+            if ($request->input('action') === 'save_new') {
                 $keepInput = $request->except(['save_new', '_token']);
-                Log::info('Tạo chuyến hàng thành công và chuyển đến trang tạo mới.', ['shipment_id' => $shipment->id, 'keep_input' => $keepInput]);
-                return redirect()->route('admin.shipments.create')->with('success', 'Đã tạo chuyến hàng. Bạn có thể nhập chuyến tiếp theo.')->withInput($keepInput);
+
+                return redirect()
+                    ->route('admin.shipments.create', ['clone_from' => $shipment->id])
+                    ->with('success', 'Đã tạo chuyến hàng. Bạn có thể nhập chuyến tiếp theo.')
+                    ->withInput($keepInput);
             }
             return redirect()->route('admin.shipments.edit', $shipment)->with('success', 'Tạo chuyến hàng thành công.');
         } catch (\Exception $e) {
@@ -258,6 +261,7 @@ class ShipmentController extends Controller
     {
         try {
             // Debug: Log received data
+            // dd('Received data for update:', $request->all());
             if (app()->environment('local')) {
                 Log::info('Shipment update - Raw request data:', [
                     'all_data' => $request->all(),

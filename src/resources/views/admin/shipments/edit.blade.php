@@ -15,47 +15,89 @@
             min-width: 350px !important;
         }
 
-        .form-images .upload {
-            display: none
-        }
-
         .image-upload-wrapper {
-            border: 1px dashed #405189;
+            border: 2px dashed #ccc;
             border-radius: 8px;
             padding: 10px;
-            aspect-ratio: 2/1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .image-upload-wrapper .preview-area {
-            width: 100%;
-            height: 100%;
-            display: none;
-        }
-
-        .image-upload-wrapper.has-preview .preview-area {
-            display: unset;
-        }
-
-        .image-upload-wrapper .upload-message {
             text-align: center;
-            color: #405189;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .image-upload-wrapper.has-preview .upload-message {
-            display: none;
+        .image-upload-wrapper.dragover {
+            border-color: #007bff;
+            background-color: #f0f8ff;
         }
 
-        .image-upload-wrapper .preview-area img {
+        .image-upload-wrapper.has-preview {
+            border-style: solid;
+        }
+
+        .upload-message {
+            color: #666;
+            padding: 40px 0;
+            font-size: 16px;
+        }
+
+        .preview-area {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        .preview-item {
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f9f9f9;
+            aspect-ratio: 1 / 1;
+        }
+
+        .preview-item.new-image {
+            border-color: #007bff;
+        }
+
+        .preview-item img {
             width: 100%;
             height: 100%;
-            aspect-ratio: 1;
-            border-radius: 8px;
             object-fit: cover;
+            display: block;
+        }
+
+        .preview-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(119, 119, 119, 0.8);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+
+        .preview-item .image-badge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .upload {
+            display: none;
         }
     </style>
 @endpush
@@ -145,23 +187,6 @@
                                             </div>
                                             <h5 class="mb-3 fs-5">Thông tin vận chuyển</h5>
                                             <div class="row mb-3">
-                                                <div class="col-md-6 form-images mb-3">
-                                                    <label class="form-label">Hình ảnh</label>
-                                                    <input type="file" name="image" accept="image/*" id="uploadImages" class="upload">
-                                                    <div class="image-upload-wrapper {{{ $shipment->image ? "has-preview" : ""}}}" id="uploadArea">
-                                                        <div class="upload-message">
-                                                            Kéo thả hoặc nhấn vào đây để chọn hình ảnh
-                                                        </div>
-                                                        <div class="preview-area" id="previewArea">
-                                                            @if($shipment->image)
-                                                                <img src="{{ asset('storage/' . $shipment->image) }}" alt="Shipment Image">
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                    @error('images')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
                                                 <div class="col-md-6">
                                                     <div class="col mb-3">
                                                         <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
@@ -189,27 +214,33 @@
                                                         </select>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6 form-images mb-3">
+                                                    <label class="form-label">Hình ảnh</label>
+                                                    <input type="file" name="images[]" accept="image/*" id="uploadImages" class="upload" multiple>
+                                                    <div id="realFilesContainer"></div>
+                                                    <div class="image-upload-wrapper {{ !empty($shipment->images) ? 'has-preview' : '' }}"
+                                                        id="uploadArea">
+
+                                                        <div class="upload-message">
+                                                            Kéo thả hoặc nhấn vào đây để chọn hình ảnh
+                                                        </div>
+
+                                                        <div class="preview-area" id="previewArea">
+                                                            @if (!empty($shipment->images))
+                                                                @foreach($shipment->images as $img)
+                                                                    <div class="preview-item">
+                                                                        <img src="{{ asset('storage/' . $img) }}" alt="Shipment Image">
+                                                                    </div>
+                                                                @endforeach
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    @error('images')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
-                                            {{-- <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
-                                                    <select class="form-select js-example-basic-single" name="customer_id" required>
-                                                        <option value="">Chọn khách hàng</option>
-                                                        @foreach($customers as $id => $name)
-                                                            <option value="{{ $id }}" {{ old('customer_id', $shipment->customer_id) == $id ? 'selected' : '' }}>{{ $name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('customer_id')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                                                    <select class="form-select" name="status" required>
-                                                        @foreach($shipmentStatus as $key => $value)
-                                                            <option value="{{ $key }}" {{ old('status', $shipment->status) == $key ? 'selected' : '' }}>{{ $value }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div> --}}
                                             <div class="row mb-3">
                                                 @php
                                                 $departure_time = old('departure_time', $shipment?->departure_time);
@@ -798,34 +829,145 @@
         window.formatPriceInput = function(input) {
             formatPriceInput($(input));
         };
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        const uploadArea = $('#uploadArea');
+        const uploadInput = $('#uploadImages');
+        const previewArea = $('#previewArea');
+        const realFilesContainer = $('#realFilesContainer');
+        let deletedImages = [];
 
-        // Upload image uploadImages
-        const $imageInput = $('#uploadImages');
-        const $previewArea = $('#previewArea');
-        const $uploadMessage = $('#uploadArea .upload-message');
-        const $uploadArea = $('#uploadArea');
+        $('#deletedImagesInput').remove();
 
-        $uploadArea.on('click', function() {
-            $imageInput.click()
-        });
-
-        $imageInput.on('change', function() {
-            const files = this.files;
-
-            $previewArea.empty();
-
-            if (files.length > 0) {
-                $uploadMessage.hide();
-                $uploadArea.addClass('has-preview')
-                const image = files[0];
-                const objectUrl = URL.createObjectURL(image);
-                const img = $('<img>').attr('src', objectUrl);
-                $previewArea.append(img);
-            } else {
-                $uploadMessage.show();
-                $uploadArea.removeClass('has-preview')
+        uploadArea.on('click', function (e) {
+            if (!$(e.target).closest('.remove-btn').length) {
+                uploadInput.click();
             }
         });
+
+        uploadInput.on('change', function (e) {
+            const files = Array.from(e.target.files);
+
+            files.forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const preview = $(`
+                        <div class="preview-item new-image">
+                            <img src="${ev.target.result}">
+                            <button type="button" class="remove-btn" data-new="true">x</button>
+                        </div>
+                    `);
+
+                    previewArea.append(preview);
+                    updateVisibility();
+                };
+                reader.readAsDataURL(file);
+
+                const realInput = $('<input>')
+                    .attr({
+                        type: 'file',
+                        name: 'images[]'
+                    })
+                    .css('display', 'none');
+
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                realInput[0].files = dt.files;
+
+                realFilesContainer.append(realInput);
+            });
+
+            uploadInput.val('');
+        });
+
+        uploadArea.on('dragover', function (e) {
+            e.preventDefault();
+            $(this).addClass('dragover');
+        });
+
+        uploadArea.on('dragleave drop', function (e) {
+            e.preventDefault();
+            $(this).removeClass('dragover');
+        });
+
+        uploadArea.on('drop', function (e) {
+            uploadInput[0].files = e.originalEvent.dataTransfer.files;
+            uploadInput.trigger('change');
+        });
+
+        $('.preview-item').each(function () {
+            if (!$(this).find('.remove-btn').length) {
+                const imgSrc = $(this).find('img').attr('src');
+                const imgPath = imgSrc.replace(window.location.origin + '/storage/', '');
+
+                $(this).append(`
+                    <button type="button" class="remove-btn" data-path="${imgPath}">
+                        x
+                    </button>
+                `);
+            }
+        });
+
+        previewArea.on('click', '.remove-btn', function (e) {
+            e.stopPropagation();
+            const $btn = $(this);
+            const $item = $btn.closest('.preview-item');
+
+            if ($btn.data('new')) {
+                const index = $item.index('.preview-item.new-image');
+                realFilesContainer.find('input[type="file"]').eq(index).remove();
+                $item.remove();
+            } else {
+                const imgPath = $btn.data('path');
+                if (imgPath) {
+                    deletedImages.push(imgPath);
+                    updateDeletedImagesInput();
+                }
+                $item.remove();
+            }
+
+            updateVisibility();
+        });
+
+        function updateDeletedImagesInput() {
+            $('#deletedImagesInput').remove();
+
+            if (deletedImages.length > 0) {
+                $('<input>')
+                    .attr({
+                        type: 'hidden',
+                        id: 'deletedImagesInput',
+                        name: 'deleted_images',
+                        value: JSON.stringify(deletedImages)
+                    })
+                    .appendTo(uploadArea.closest('form'));
+            }
+        }
+
+        function updateVisibility() {
+            const hasImages = $('.preview-item').length > 0;
+
+            if (hasImages) {
+                $('.upload-message').hide();
+                previewArea.show();
+                uploadArea.addClass('has-preview');
+            } else {
+                $('.upload-message').show();
+                previewArea.hide();
+                uploadArea.removeClass('has-preview');
+            }
+        }
+
+        uploadArea.closest('form').on('submit', function () {
+            console.log('Submitting with deleted images:', deletedImages);
+            console.log('Files count (real inputs):', realFilesContainer.find('input').length);
+        });
+
+        updateVisibility();
     });
 </script>
 <script>

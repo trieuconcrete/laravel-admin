@@ -20,41 +20,70 @@
             min-width: 250px !important;
         }
 
-        .form-images .upload {
-            display: none
-        }
-
         .image-upload-wrapper {
-            border: 1px dashed #405189;
+            border: 2px dashed #405189;
             border-radius: 8px;
             padding: 10px;
-            aspect-ratio: 2/1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .image-upload-wrapper .preview-area {
-            width: 100%;
-            height: 100%;
-            display: none;
-        }
-
-        .image-upload-wrapper.has-preview .preview-area {
-            display: unset;
-        }
-
-        .image-upload-wrapper .upload-message {
             text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .image-upload-wrapper.dragover {
+            border-color: #007bff;
+            background-color: #f0f8ff;
+        }
+
+        .upload-message {
             color: #405189;
+            font-size: 16px;
+            padding: 40px 0;
+        }
+
+        .preview-area {
+            display: grid;
+            grid-template-columns: repeat(5,1fr);
+            gap: 15px;
+        }
+
+        .image-preview-card {
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f9f9f9;
+            aspect-ratio: 1 / 1;
+        }
+
+        .image-preview-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .image-preview-card .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(119, 119, 119, 0.8);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload {
+            display: none;
         }
 
         .image-upload-wrapper .preview-area img {
             width: 100%;
             height: 100%;
-            aspect-ratio: 1;
             border-radius: 8px;
             object-fit: cover;
         }
@@ -83,23 +112,23 @@
                                 </div>
                                 <div class="mt-3 mt-lg-0">
                                     <div class="row g-3 mb-0 align-items-center">
-                                        <div class="col-auto">
-                                                <select id="templateSelect" class="form-select">
-                                                    <option value="">Mặc định</option>
-                                                    @foreach($templates as $tpl)
-                                                        <option value="{{ $tpl->id }}"
-                                                            @selected(request('template_id') == $tpl->id)>
-                                                            {{ $tpl->template_name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
+                                        {{-- <div class="col-auto">
+                                            <select id="templateSelect" class="form-select">
+                                                <option value="">Mặc định</option>
+                                                @foreach($templates as $tpl)
+                                                    <option value="{{ $tpl->id }}"
+                                                        @selected(request('template_id') == $tpl->id)>
+                                                        {{ $tpl->template_name }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div> --}}
                                         <div class="col-auto">
                                             <button type="submit" class="btn btn-success" id="submitBtn">
                                                 <i class="ri-save-3-line align-middle me-1"></i>
                                                 <span>Lưu</span>
                                             </button>
-                                            <button type="submit" class="btn btn-primary ms-2" id="submitSaveBtn">
+                                            <button type="button" class="btn btn-primary ms-2" id="submitSaveBtn">
                                                 <i class="ri-save-3-line align-middle me-1"></i>
                                                 <span>Lưu và thêm mới</span>
                                             </button>
@@ -161,19 +190,6 @@
                                             </div>
                                             <h5 class="mb-3 fs-5">Thông tin vận chuyển</h5>
                                             <div class="row mb-3">
-                                                <div class="col-md-6 form-images mb-3">
-                                                    <label class="form-label">Hình ảnh<span class="text-danger">*</span></label>
-                                                    <input type="file" name="image" accept="image/*" id="uploadImages" class="upload">
-                                                    <div class="image-upload-wrapper" id="uploadArea">
-                                                        <div class="upload-message">
-                                                            Kéo thả hoặc nhấn vào đây để chọn hình ảnh
-                                                        </div>
-                                                        <div class="preview-area" id="previewArea"></div>
-                                                    </div>
-                                                    @error('image')
-                                                        <span class="text-danger">{{ $message }}</span>
-                                                    @enderror
-                                                </div>
                                                 <div class="col-md-6">
                                                     <div class="col mb-3">
                                                         <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
@@ -206,16 +222,21 @@
                                                         </select>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6 form-images mb-3">
+                                                    <label class="form-label">Hình ảnh</label>
+                                                    <input type="file" name="images[]" accept="image/*" id="uploadImages" class="upload" multiple>
+                                                    <div class="image-upload-wrapper" id="uploadArea">
+                                                        <div class="upload-message">
+                                                            Kéo thả hoặc nhấn vào đây để chọn hình ảnh
+                                                        </div>
+                                                        <div class="preview-area" id="previewArea"></div>
+                                                    </div>
+                                                    @error('images')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
+                                                </div>
                                             </div>
                                             <div class="row mb-3">
-                                                {{-- @php
-                                                $defaultDeparture = date('Y-m-d');
-                                                $defaultArrival = $defaultDeparture;
-
-                                                // Nếu có giá trị old(), ưu tiên sử dụng nó
-                                                $departureDateValue = old('departure_time', $defaultDeparture);
-                                                $arrivalDateValue = old('estimated_arrival_time', $defaultArrival);
-                                                @endphp --}}
                                                 @php
                                                     $departureDateValue = old('departure_time', $templateData['departure_time'] ?? date('Y-m-d'));
                                                     $arrivalDateValue = old('estimated_arrival_time', $templateData['estimated_arrival_time'] ?? date('Y-m-d'));
@@ -244,6 +265,7 @@
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
                                                     <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
+                                                    <input type="hidden" class="hidden" id="total-amount-edit" value="{{ old('unit_price', isset($templateData['unit_price']) ? $templateData['unit_price'] : '') }}">
                                                     <input type="text" id="total-amount" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $templateData['unit_price'] ?? '') }}">
                                                     @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
@@ -810,34 +832,6 @@
             formatPriceInput($(input));
         };
 
-        // Upload image uploadImages
-        const $imageInput = $('#uploadImages');
-        const $previewArea = $('#previewArea');
-        const $uploadMessage = $('#uploadArea .upload-message');
-        const $uploadArea = $('#uploadArea');
-
-        $uploadArea.on('click', function() {
-            $imageInput.click()
-        });
-
-        $imageInput.on('change', function() {
-            const files = this.files;
-
-            $previewArea.empty();
-
-            if (files.length > 0) {
-                $uploadMessage.hide();
-                $uploadArea.addClass('has-preview')
-                const image = files[0];
-                const objectUrl = URL.createObjectURL(image);
-                const img = $('<img>').attr('src', objectUrl);
-                $previewArea.append(img);
-            } else {
-                $uploadMessage.show();
-                $uploadArea.removeClass('has-preview')
-            }
-        });
-
         $('#templateSelect').on('change', function() {
             var id = $(this).val();
             if (!id) {
@@ -846,6 +840,110 @@
                 window.location = "?template_id=" + id;
             }
         });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        let selectedFiles = [];
+        const uploadArea = $('#uploadArea');
+        const uploadInput = $('#uploadImages');
+        const previewArea = $('#previewArea');
+
+        uploadArea.on('click', function(e) {
+            if (!$(e.target).hasClass('remove-image')) {
+                uploadInput.click();
+            }
+        });
+
+        uploadInput.on('change', function(e) {
+            handleFiles(e.target.files);
+        });
+
+        uploadArea.on('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).addClass('dragover');
+        });
+
+        uploadArea.on('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('dragover');
+        });
+
+        uploadArea.on('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('dragover');
+
+            const files = e.originalEvent.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    selectedFiles.push(file);
+                    previewImage(file, selectedFiles.length - 1);
+                }
+            });
+            updateFileInput();
+        }
+
+        function previewImage(file, index) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const imageCard = $(`
+                    <div class="image-preview-card" data-index="${index}">
+                        <img src="${e.target.result}" alt="Preview">
+                        <button type="button" class="remove-image" data-index="${index}">
+                            x
+                        </button>
+                    </div>
+                `);
+
+                previewArea.append(imageCard);
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        previewArea.on('click', '.remove-image', function(e) {
+            e.stopPropagation();
+            const index = $(this).data('index');
+
+            selectedFiles.splice(index, 1);
+
+            $(this).closest('.image-preview-card').remove();
+
+            $('.image-preview-card').each(function(i) {
+                $(this).attr('data-index', i);
+                $(this).find('.remove-image').attr('data-index', i);
+            });
+
+            updateFileInput();
+        });
+
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            uploadInput[0].files = dataTransfer.files;
+
+            if (selectedFiles.length > 0) {
+                $('.upload-message').hide();
+                previewArea.show();
+            } else {
+                $('.upload-message').show();
+                previewArea.hide();
+            }
+        }
+
+        if (selectedFiles.length === 0) {
+            previewArea.hide();
+        }
     });
 </script>
 <script>
@@ -1042,6 +1140,11 @@
             e.preventDefault();
             if (validateShipmentForm()) {
                 prepareFormBeforeSubmit();
+                const fd = new FormData(this);
+        console.log("=== FORM DATA SẼ GỬI LÊN ===");
+        for (let [key, value] of fd.entries()) {
+            console.log(key, value);
+        }
                 this.submit();
             }
         });
