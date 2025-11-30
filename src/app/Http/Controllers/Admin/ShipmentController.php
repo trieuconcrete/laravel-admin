@@ -78,6 +78,7 @@ class ShipmentController extends Controller
 
         if ($request->clone_from) {
             $templateData = $this->shipmentService->clone($request->clone_from);
+            // dd($templateData);
         }
 
 
@@ -121,6 +122,10 @@ class ShipmentController extends Controller
         // Debug log to check users
         if (app()->environment('local')) {
             logger('Users loaded in create method:', ['count' => count($users), 'users' => $users]);
+        }
+
+        if ($request->template_id || $request->clone_from) {
+            session()->forget('_old_input');
         }
 
         return view('admin.shipments.create', compact(

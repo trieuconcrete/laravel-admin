@@ -214,13 +214,6 @@
                                                             <option value="completed" @selected(old('status', $templateData['status'] ?? null) == 'completed')>Hoàn thành</option>
                                                         </select>
                                                     </div>
-                                                    <div class="col">
-                                                        <label class="form-label">Loại xe<span class="text-danger">*</span></label>
-                                                        <select name="truck_type" required class="form-select">
-                                                            <option value="cont" @selected(old('truck_type', $templateData['truck_type'] ?? null) == 'cont')>Xe Container</option>
-                                                            <option value="thung" @selected(old('truck_type', $templateData['truck_type'] ?? null) == 'thung')>Xe Thùng</option>
-                                                        </select>
-                                                    </div>
                                                 </div>
                                                 <div class="col-md-6 form-images mb-3">
                                                     <label class="form-label">Hình ảnh</label>
@@ -243,7 +236,7 @@
                                                 @endphp
                                                 <div class="col-md-3">
                                                     <label class="form-label">Ngày khởi hành<span class="text-danger">*</span></label>
-                                                    <input type="date" class="form-control date-input" name="departure_time" value="@formatDateForInput($departureDateValue)" required autocomplete="off">
+                                                    <input type="date" class="form-control date-input" name="departure_time" value="{{ format_date($departureDateValue) }}" required autocomplete="off">
                                                     @error('departure_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-3">
@@ -253,7 +246,7 @@
                                                 </div>
                                                 <div class="col-md-3">
                                                     <label class="form-label">Ngày dự kiến đến</label>
-                                                    <input type="date" class="form-control date-input" name="estimated_arrival_time" value="@formatDateForInput($arrivalDateValue)" required autocomplete="off">
+                                                    <input type="date" class="form-control date-input" name="estimated_arrival_time" value="{{ format_date($arrivalDateValue) }}" required autocomplete="off">
                                                     @error('estimated_arrival_time')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                                 <div class="col-md-3">
