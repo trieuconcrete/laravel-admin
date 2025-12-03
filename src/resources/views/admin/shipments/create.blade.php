@@ -576,6 +576,7 @@
                                                                         <td class="text-center">
                                                                             <div class="form-check form-switch d-inline-block">
                                                                                 <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input" value="1"
+                                                                                <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input" value="1"
                                                                                     {{ old('drivers.'.$i.'.deductions.is_main_driver', $driver['deductions']['is_main_driver'] ?? false) ? 'checked' : '' }}>
                                                                             </div>
                                                                             @error('drivers.'.$i.'.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
@@ -663,7 +664,7 @@
                                                                 @foreach($driverPXs as $i => $px)
                                                                     <tr>
                                                                         <td>
-                                                                            <select name="driverPXs[{{ $i }}][user_id]" class="form-select form-select-sm" style="min-width: 180px;" required>
+                                                                            <select name="driverPXs[{{ $i }}][user_id]" class="form-select js-example-basic-single" style="min-width: 180px;" required>
                                                                                 <option value="">Chọn nhân sự</option>
                                                                                 @foreach($userPXs as $id => $name)
                                                                                     <option value="{{ $id }}" {{ old('driverPXs.'.$i.'.user_id', $px['user_id'] ?? '') == $id ? 'selected' : '' }}>{{ $name }}</option>
@@ -756,8 +757,10 @@
         function formatPriceInput(input) {
             let value = input.val();
 
+
             // Remove non-numeric characters and handle decimal part
             value = value.replace(/[^0-9.]/g, '');
+
 
             // If there's a decimal part, handle it
             if (value.includes('.')) {
@@ -772,23 +775,28 @@
                 }
             }
 
+
             // Limit to 9 digits
             if (value.length > 9) {
                 value = value.substring(0, 9);
             }
+
 
             // Format with commas
             if (value) {
                 value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             }
 
+
             input.val(value);
         }
+
 
         // Format deduction inputs and unit inputs on keyup
         $('.deduction-input, .unit-input, .number').on('input', function () {
             formatPriceInput($(this));
         });
+
 
         // Initial formatting for deduction inputs and unit inputs
         $('.deduction-input, .unit-input, .number').each(function() {
@@ -796,6 +804,7 @@
             if (value) {
                 // Remove existing formatting
                 value = value.replace(/,/g, '');
+
 
                 // Handle decimal part if exists
                 if (value.includes('.')) {
@@ -809,16 +818,19 @@
                     }
                 }
 
+
                 // Limit to 9 digits
                 if (value.length > 9) {
                     value = value.substring(0, 9);
                 }
+
 
                 // Apply formatting
                 value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                 $(this).val(value);
             }
         });
+
 
         // Make the formatPriceInput function globally available
         window.formatPriceInput = function(input) {
@@ -946,8 +958,10 @@
     const personTable = document.querySelector('#personTable tbody');
     const personPxTable = document.querySelector('#personPxTable tbody');
 
+
     // Lưu trữ dữ liệu cũ từ validation errors
     window.laravelOld = @json(session()->getOldInput());
+
 
     // Khai báo các loại khấu trừ cho tài xế
     const personDeductionTypes = [
@@ -961,6 +975,7 @@
             { id: "{{ $type->id }}", name: "{{ $type->name }}" },
         @endforeach
     ];
+
 
     // Gán danh sách người dùng vào biến toàn cục
     // Đảm bảo users là một object với id làm key
@@ -978,20 +993,25 @@
         @endforeach
     @endif
 
+
     console.log('Available users:', window.users);
+
 
     // Khởi tạo các sự kiện khi trang đã tải xong
     document.addEventListener('DOMContentLoaded', function() {
         // Khởi tạo form với số lượng driver ban đầu
         initShipmentForm({{ count(old('drivers', [])) ?: 1 }});
 
+
         // Cập nhật trạng thái nút thêm tài xế
         updateAddPersonButtonState();
+
 
         // Thêm event listener cho nút thêm hàng hóa
         document.getElementById('addGoodBtn').onclick = function() {
             goodsCount = addGoodRow(goodsTable, goodsCount);
         };
+
 
         // Thêm event listener cho nút thêm người
         document.getElementById('addPersonBtn').onclick = function() {
@@ -1000,7 +1020,9 @@
             const totalUsers = Object.keys(window.users).length;
             const currentRows = personTable.querySelectorAll('tr').length;
 
+
             console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUsers, 'Current Rows:', currentRows);
+
 
             // Kiểm tra số lượng hàng hiện tại với tổng số users
             if (currentRows >= totalUsers) {
@@ -1023,6 +1045,7 @@
                 return false;
             }
 
+
             // Kiểm tra nếu đã sử dụng hết tất cả người dùng
             if (selectedIds.length >= totalUsers) {
                 Swal.fire({
@@ -1034,11 +1057,13 @@
                 return false;
             }
 
+
             // Log users object for debugging
             console.log('Users object:', window.users);
             // Nếu còn người dùng khả dụng, thêm hàng mới
             addDriverRow(personTable, personDeductionTypes, window.users);
         };
+
 
         // Thêm event listener cho nút thêm lơ xe
         document.getElementById('addPersonPxBtn').onclick = function() {
@@ -1047,7 +1072,9 @@
             const totalUserPXs = Object.keys(window.userPXs).length;
             const currentRows = personPxTable.querySelectorAll('tbody tr').length;
 
+
             console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUserPXs, 'Current Rows:', currentRows);
+
 
             // Kiểm tra số lượng hàng hiện tại với tổng số users
             if (currentRows >= totalUserPXs) {
@@ -1070,6 +1097,7 @@
                 return false;
             }
 
+
             // Kiểm tra nếu đã sử dụng hết tất cả người dùng
             if (selectedIds.length >= totalUserPXs) {
                 Swal.fire({
@@ -1081,20 +1109,25 @@
                 return false;
             }
 
+
             // Log users object for debugging
             console.log('Users object:', window.userPXs);
             // Nếu còn người dùng khả dụng, thêm hàng mới
             addDriverPXRow(personPxTable, personPxDeductionTypes, window.userPXs);
         };
 
+
         // Kiểm tra và cập nhật trạng thái nút thêm nhân sự dựa trên số lượng người dùng khả dụng
         updateAddPersonButtonState();
+
 
         // Định dạng tất cả các trường số khi trang được tải
         formatAllNumericInputs();
 
+
         // Kiểm tra và chuyển đến tab có lỗi nếu có
         handleFormErrors();
+
 
         // Xử lý checkbox "Xe HPL Thuê"
         const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
@@ -1106,6 +1139,7 @@
             if (!isCarRentalCheckbox || !driverSection) {
                 return; // Exit if elements don't exist
             }
+
 
             const isChecked = isCarRentalCheckbox.checked;
             if (isChecked) {
@@ -1121,12 +1155,14 @@
             }
         }
 
+
         // Thêm event listener cho checkbox
         if (isCarRentalCheckbox) {
             isCarRentalCheckbox.addEventListener('change', toggleDriverSections);
             // Chạy lần đầu khi trang load
             toggleDriverSections();
         }
+
 
         // Xử lý submit form
         document.getElementById('shipmentForm').addEventListener('submit', function(e) {
@@ -1146,12 +1182,15 @@
     document.getElementById('avatarInput')?.addEventListener('change', function(event) {
         const file = event.target.files[0];
 
+
         if (file) {
             const reader = new FileReader();
+
 
             reader.onload = function(e) {
                 document.getElementById('avatarPreview').src = e.target.result;
             }
+
 
             reader.readAsDataURL(file);
         }
@@ -1166,6 +1205,7 @@
     .highlight-error {
         animation: highlight-error-animation 1.5s ease;
     }
+
 
     @keyframes highlight-error-animation {
         0% { background-color: rgba(255, 0, 0, 0.1); }
