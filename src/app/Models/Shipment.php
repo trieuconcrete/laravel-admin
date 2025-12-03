@@ -80,7 +80,8 @@ class Shipment extends Model
         'parking_fee',
         'weighing_fee', // Phí cân hàng
         'testing_surcharge', // Phụ phí kiểm tra
-        'is_overtime_at_noon'
+        'is_overtime_at_noon',
+        'images',
     ];
 
     /**
@@ -116,6 +117,7 @@ class Shipment extends Model
         'weighing_fee' => 'decimal:2',
         'testing_surcharge' => 'decimal:2',
         'is_overtime_at_noon' => 'boolean',
+        'images' => 'array',
     ];
 
     /**

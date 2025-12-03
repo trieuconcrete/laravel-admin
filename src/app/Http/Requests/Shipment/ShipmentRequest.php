@@ -13,7 +13,7 @@ class ShipmentRequest extends FormRequest
     {
         return true;
     }
-    
+
     /**
      * Prepare the data for validation.
      * This method will filter drivers array to only include rows that were actually submitted.
@@ -34,7 +34,7 @@ class ShipmentRequest extends FormRequest
                 $this->merge(['vehicle_id' => (int)$vehicleId]);
             }
         }
-        
+
         // Xử lý format thời gian start_time và end_time
         if ($this->has('start_time') && $this->input('start_time')) {
             $startTime = $this->input('start_time');
@@ -49,7 +49,7 @@ class ShipmentRequest extends FormRequest
                 }
             }
         }
-        
+
         if ($this->has('end_time') && $this->input('end_time')) {
             $endTime = $this->input('end_time');
             // Đảm bảo format H:i
@@ -63,7 +63,7 @@ class ShipmentRequest extends FormRequest
                 }
             }
         }
-        
+
         // Xử lý is_car_rental để đảm bảo không null
         if ($this->has('is_car_rental')) {
             $isCarRental = $this->input('is_car_rental');
@@ -76,14 +76,14 @@ class ShipmentRequest extends FormRequest
             // Nếu không có field is_car_rental, set default là false
             $this->merge(['is_car_rental' => false]);
         }
-        
+
         // TEMPORARY: Disable filtering to test if this is the issue
         // Filter drivers array based on submitted rows
         if ($this->has('driver_row_indexes')) {
             $indexes = explode(',', $this->input('driver_row_indexes'));
             $drivers = $this->input('drivers', []);
             $filteredDrivers = [];
-            
+
             // Debug logging
             if (app()->environment('local')) {
                 Log::info('ShipmentRequest - prepareForValidation:', [
@@ -93,14 +93,14 @@ class ShipmentRequest extends FormRequest
                     'drivers_keys' => array_keys($drivers)
                 ]);
             }
-            
+
             foreach ($indexes as $index) {
                 $cleanIndex = trim($index);
                 if (isset($drivers[$cleanIndex])) {
                     $filteredDrivers[$cleanIndex] = $drivers[$cleanIndex];
                 }
             }
-            
+
             // Debug logging
             if (app()->environment('local')) {
                 Log::info('ShipmentRequest - after filtering:', [
@@ -109,18 +109,18 @@ class ShipmentRequest extends FormRequest
                     'filtered_count' => count($filteredDrivers)
                 ]);
             }
-            
+
             // Re-enable filtering for proper testing
             $this->merge([
                 'drivers' => $filteredDrivers
             ]);
         }
-        
+
         // Remove commas from deduction values (except for "Ghi chú")
         if ($this->has('deductions')) {
             $deductions = $this->input('deductions', []);
             $deductionTypes = \App\Models\ShipmentDeductionType::where('status', 'active')->get()->keyBy('id');
-            
+
             foreach ($deductions as $key => $value) {
                 if (!empty($value)) {
                     $deductionType = $deductionTypes->get($key);
@@ -134,7 +134,7 @@ class ShipmentRequest extends FormRequest
                 'deductions' => $deductions
             ]);
         }
-        
+
         // Remove commas from goods unit values
         if ($this->has('goods')) {
             $goods = $this->input('goods', []);
@@ -150,7 +150,7 @@ class ShipmentRequest extends FormRequest
                 'goods' => $goods
             ]);
         }
-        
+
         // Remove commas from driver deduction values
         if ($this->has('drivers')) {
             $drivers = $this->input('drivers', []);
@@ -227,7 +227,7 @@ class ShipmentRequest extends FormRequest
             if ($vehicleId) {
                 $vehicleExists = \App\Models\Vehicle::where('vehicle_id', $vehicleId)->exists();
             }
-            
+
             Log::info('ShipmentRequest - rules:', [
                 'all_data' => $this->all(),
                 'is_car_rental' => $this->input('is_car_rental'),
@@ -242,7 +242,7 @@ class ShipmentRequest extends FormRequest
                 'end_time' => $this->input('end_time'),
             ]);
         }
-        
+
         $rules = [
             'customer_id' => 'required|exists:customers,id',
             'vehicle_id' => 'nullable|exists:vehicles,vehicle_id',
@@ -289,6 +289,9 @@ class ShipmentRequest extends FormRequest
             'goods.*.notes' => 'nullable|string|max:255',
             'goods.*.weight' => 'nullable|numeric|min:0',
             'goods.*.amount' => 'nullable|numeric|min:0',
+            'images' => 'nullable|array|max:10',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'deleted_images' => 'nullable|string'
         ];
 
         // Nếu không phải xe thuê, thì yêu cầu thông tin tài xế và phương tiện
@@ -298,7 +301,7 @@ class ShipmentRequest extends FormRequest
             $rules['drivers.*.user_id'] = 'required|exists:users,id';
             $rules['drivers.*.deductions'] = 'array';
             $rules['drivers.*.deductions.*'] = 'nullable';
-            
+
             $rules['driverPXs'] = 'array|nullable';
             $rules['driverPXs.*.user_id'] = 'nullable|exists:users,id';
             $rules['driverPXs.*.deductions'] = 'array';

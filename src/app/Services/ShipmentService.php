@@ -7,12 +7,14 @@ use App\Models\Shipment;
 use App\Models\ShipmentGood;
 use App\Models\ShipmentDeduction;
 use App\Models\DeductionDetail;
+use App\Models\ShipmentDeductionType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ShipmentService
 {
     protected $shipmentRepository;
+    protected FileUploadService $fileUploadService;
 
     public function __construct(ShipmentRepositoryInterface $shipmentRepository)
     {
@@ -51,14 +53,14 @@ class ShipmentService
     {
         $startDateTime = \Carbon\Carbon::parse($runDate . ' ' . $startTime);
         $endDateTime = \Carbon\Carbon::parse($runDate . ' ' . $endTime);
-        
+
         // Tính tổng thời gian làm việc
         $totalWorkingHours = $startDateTime->floatDiffInRealHours($endDateTime);
-        
+
         // Lấy start_working_hour và end_working_hour từ car rental
         $startWorkingHour = '07:00'; // Default fallback
         $endWorkingHour = '17:30'; // Default fallback
-        
+
         if ($carRentalId) {
             $carRental = \App\Models\CarRental::find($carRentalId);
             if ($carRental) {
@@ -70,31 +72,31 @@ class ShipmentService
                 }
             }
         }
-        
+
         $startWorkingDateTime = \Carbon\Carbon::parse($runDate . ' ' . $startWorkingHour);
         $endWorkingDateTime = \Carbon\Carbon::parse($runDate . ' ' . $endWorkingHour);
-        
+
         $overtimeHours = 0;
-        
+
         // Tính OT buổi sáng (khi bắt đầu sớm hơn start_working_hour)
         if ($startDateTime->lessThan($startWorkingDateTime)) {
             $morningOvertime = $startWorkingDateTime->floatDiffInRealHours($startDateTime);
             $overtimeHours += $morningOvertime;
         }
-        
+
         // Tính OT buổi chiều (khi kết thúc muộn hơn end_working_hour)
         if ($endDateTime->greaterThan($endWorkingDateTime)) {
             $afternoonOvertime = $endDateTime->floatDiffInRealHours($endWorkingDateTime);
             $overtimeHours += $afternoonOvertime;
         }
-        
+
         // Thêm tăng ca trưa 1h nếu có chọn checkbox
         if ($isOvertimeAtNoon) {
             $overtimeHours += 1;
         }
-        
+
         $totalOvertimeCost = $overtimeRate * $overtimeHours;
-        
+
         return [
             'start_time' => $startTime,
             'end_time' => $endTime,
@@ -151,14 +153,26 @@ class ShipmentService
 
             $shipment = Shipment::create($shipmentData);
 
+            if (!empty($data['images'])) {
+                $imagePaths = [];
+
+                foreach ($data['images'] as $image) {
+                    $uploaded = $this->fileUploadService->upload($image, 'shipments', 'original_timestamp');
+                    $imagePaths[] = $uploaded['file_path'];
+                }
+
+                $shipment->images = $imagePaths;
+                $shipment->save();
+            }
+
             // Tính toán OT mới theo yêu cầu issue #180
             if (!empty($data['start_time']) && !empty($data['end_time']) && !empty($data['run_date'])) {
                 $carRentalId = $data['car_rental_id'] ?? null;
                 $overtimeData = $this->calculateOvertime(
-                    $data['run_date'], 
-                    $data['start_time'], 
-                    $data['end_time'], 
-                    $data['overtime_rate'], 
+                    $data['run_date'],
+                    $data['start_time'],
+                    $data['end_time'],
+                    $data['overtime_rate'],
                     $data['is_overtime_at_noon'] ?? false,
                     $carRentalId
                 );
@@ -171,7 +185,7 @@ class ShipmentService
                     // Kiểm tra xem deduction_type_id có phải là số nguyên dương và amount có giá trị
                     if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0 && $amount !== null && $amount !== '') {
                         $deductionType = \App\Models\ShipmentDeductionType::find($deduction_type_id);
-                        
+
                         // Nếu là "Ghi chú", lưu vào column notes
                         if ($deductionType && $deductionType->name === 'Ghi chú') {
                             ShipmentDeduction::create([
@@ -217,7 +231,7 @@ class ShipmentService
                     // Kiểm tra user_id có tồn tại và là số nguyên dương
                     if (isset($person['user_id']) && is_numeric($person['user_id']) && (int)$person['user_id'] > 0) {
                         $user_id = (int)$person['user_id'];
-                        
+
                         if (!empty($person['deductions'])) {
                             // Extract notes from deductions array if it exists
                             $notes = null;
@@ -231,7 +245,7 @@ class ShipmentService
                                 $isMainDriver = (bool) $person['deductions']['is_main_driver'];
                                 unset($person['deductions']['is_main_driver']); // Remove notes from deductions array
                             }
-                            
+
                             foreach ($person['deductions'] as $deduction_type_id => $amount) {
                                 // Kiểm tra deduction_type_id và amount có hợp lệ
                                 if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0) {
@@ -256,7 +270,7 @@ class ShipmentService
                     // Kiểm tra user_id có tồn tại và là số nguyên dương
                     if (isset($driverPX['user_id']) && is_numeric($driverPX['user_id']) && (int)$driverPX['user_id'] > 0) {
                         $user_id = (int)$driverPX['user_id'];
-                        
+
                         if (!empty($driverPX['deductions'])) {
                             // Extract notes from deductions array if it exists
                             $notes = null;
@@ -264,7 +278,7 @@ class ShipmentService
                                 $notes = $driverPX['deductions']['notes'];
                                 unset($driverPX['deductions']['notes']); // Remove notes from deductions array
                             }
-                            
+
                             foreach ($driverPX['deductions'] as $deduction_type_id => $amount) {
                                 // Kiểm tra deduction_type_id và amount có hợp lệ
                                 if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0) {
@@ -284,7 +298,7 @@ class ShipmentService
             }
 
             $this->resetMonthlyReportFinalized($shipment->customer_id, $shipment->departure_time);
-            
+
 
             return $shipment;
         });
@@ -293,7 +307,7 @@ class ShipmentService
     public function update(Shipment $shipment, array $data)
     {
         Log::info('Dữ liệu cập nhật shipment: ' . json_encode($data));
-        
+
         // Debug log cho is_car_rental
         Log::info('is_car_rental debug:', [
             'raw_value' => $data['is_car_rental'] ?? 'NOT_SET',
@@ -301,20 +315,21 @@ class ShipmentService
             'bool_value' => (bool)($data['is_car_rental'] ?? false),
             'will_save_drivers' => !($data['is_car_rental'] ?? false)
         ]);
-        
+
         // Debug log cho drivers data
         if (!empty($data['drivers'])) {
             Log::info('Drivers data trong update:', $data['drivers']);
         }
         return DB::transaction(function () use ($shipment, $data) {
+            // dd('Bắt đầu cập nhật shipment', $data);
             // Tính toán OT mới theo yêu cầu issue #180
             if (!empty($data['start_time']) && !empty($data['end_time']) && !empty($data['run_date'])) {
                 $carRentalId = $data['car_rental_id'] ?? null;
                 $overtimeData = $this->calculateOvertime(
-                    $data['run_date'], 
-                    $data['start_time'], 
-                    $data['end_time'], 
-                    $data['overtime_rate'], 
+                    $data['run_date'],
+                    $data['start_time'],
+                    $data['end_time'],
+                    $data['overtime_rate'],
                     $data['is_overtime_at_noon'] ?? false,
                     $carRentalId
                 );
@@ -324,18 +339,39 @@ class ShipmentService
             // 1. Cập nhật thông tin cơ bản của shipment
             $shipmentData = $data;
             $shipmentData['unit_price_for_driver'] = $data['unit_price_for_driver'] ?? $data['unit_price']; // Ensure unit_price_for_driver is set
-            unset($shipmentData['goods'], $shipmentData['deductions'], $shipmentData['drivers']);
+            unset($shipmentData['goods'], $shipmentData['deductions'], $shipmentData['drivers'], $shipmentData['images']);
             $shipment->update($shipmentData);
-            
+
+            $currentImages = $shipment->images ?? [];
+            if (!empty($data['deleted_images'])) {
+                $deletedPaths = json_decode($data['deleted_images'], true);
+
+                if (is_array($deletedPaths)) {
+                    foreach ($deletedPaths as $path) {
+                        $this->fileUploadService->delete($path);
+                        $currentImages = array_filter($currentImages, fn($img) => $img !== $path);
+                    }
+                }
+            }
+
+            if (!empty($data['images'])) {
+                foreach ($data['images'] as $file) {
+                    $upload = $this->fileUploadService->upload($file, 'shipments', 'original_timestamp');
+                    $currentImages[] = $upload['file_path'];
+                }
+            }
+            $shipment->images = $currentImages;
+            $shipment->save();
+
             // 2. Xóa và cập nhật lại các chi phí chuyến hàng (ShipmentDeduction)
             $shipment->shipmentDeductions()->where('user_id', null)->delete();
-            
+
             if (!empty($data['deductions'])) {
                 foreach ($data['deductions'] as $deduction_type_id => $amount) {
                     // Kiểm tra xem deduction_type_id có phải là số nguyên dương và amount có giá trị
                     if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0 && $amount !== null && $amount !== '') {
                         $deductionType = \App\Models\ShipmentDeductionType::find($deduction_type_id);
-                        
+
                         // Nếu là "Ghi chú", lưu vào column notes
                         if ($deductionType && $deductionType->name === 'Ghi chú') {
                             ShipmentDeduction::create([
@@ -357,10 +393,10 @@ class ShipmentService
                     }
                 }
             }
-            
+
             // 3. Xóa và cập nhật lại danh sách hàng hóa (ShipmentGood)
             $shipment->goods()->delete();
-            
+
             if (!empty($data['goods'])) {
                 foreach ($data['goods'] as $good) {
                     if ($good['name']) {
@@ -376,16 +412,16 @@ class ShipmentService
                     }
                 }
             }
-            
+
             // 4. Xóa và cập nhật lại các phụ cấp tài xế/lơ xe (chỉ khi không phải xe thuê)
             $shipment->shipmentDeductions()->whereNotNull('user_id')->delete();
-            
+
             if (!empty($data['drivers']) && !($data['is_car_rental'] ?? false)) {
                 foreach ($data['drivers'] as $person) {
                     // Kiểm tra user_id có tồn tại và là số nguyên dương
                     if (isset($person['user_id']) && is_numeric($person['user_id']) && (int)$person['user_id'] > 0) {
                         $user_id = (int)$person['user_id'];
-                        
+
                         if (!empty($person['deductions'])) {
                             // Extract notes from deductions array if it exists
                             $notes = null;
@@ -399,7 +435,7 @@ class ShipmentService
                                 $isMainDriver = (bool) $person['deductions']['is_main_driver'];
                                 unset($person['deductions']['is_main_driver']); // Remove is_main_driver from deductions array
                             }
-                            
+
                             foreach ($person['deductions'] as $deduction_type_id => $amount) {
                                 // Kiểm tra deduction_type_id và amount có hợp lệ
                                 if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0) {
@@ -424,7 +460,7 @@ class ShipmentService
                     // Kiểm tra user_id có tồn tại và là số nguyên dương
                     if (isset($driverPX['user_id']) && is_numeric($driverPX['user_id']) && (int)$driverPX['user_id'] > 0) {
                         $user_id = (int)$driverPX['user_id'];
-                        
+
                         if (!empty($driverPX['deductions'])) {
                             // Extract notes from deductions array if it exists
                             $notes = null;
@@ -432,7 +468,7 @@ class ShipmentService
                                 $notes = $driverPX['deductions']['notes'];
                                 unset($driverPX['deductions']['notes']); // Remove notes from deductions array
                             }
-                            
+
                             foreach ($driverPX['deductions'] as $deduction_type_id => $amount) {
                                 // Kiểm tra deduction_type_id và amount có hợp lệ
                                 if (is_numeric($deduction_type_id) && (int)$deduction_type_id > 0) {
@@ -452,7 +488,7 @@ class ShipmentService
             }
 
             $this->resetMonthlyReportFinalized($shipment->customer_id, $shipment->departure_time);
-            
+
             return $shipment->refresh();
         });
     }
@@ -476,5 +512,43 @@ class ShipmentService
         \App\Models\ShipmentReport::where('customer_id', $customerId)
             ->where('monthly', $month)
             ->update(['is_finalized' => false]);
+    }
+
+    public function clone(int $shipmentId): ?array
+    {
+        $shipment = Shipment::with([
+            'goods',
+            'shipmentDeductions' => fn($q) => $q->whereNotNull('shipment_deduction_type_id'),
+        ])->find($shipmentId);
+
+        if (!$shipment) {
+            return null;
+        }
+
+        $drivers = $shipment->shipmentDeductions()
+            ->whereHas('shipmentDeductionType', fn($q) => $q->where('type', ShipmentDeductionType::TYPE_DRIVER))
+            ->whereNotNull('user_id')
+            ->get()
+            ->groupBy('user_id')
+            ->map(function ($deductions, $userId) {
+                return [
+                    'user_id' => $userId,
+                    'deductions' => $deductions->mapWithKeys(fn($deduction) => [
+                        $deduction->shipment_deduction_type_id => $deduction->amount,
+                        'is_main_driver' => $deduction->is_main_driver,
+                        'notes' => $deduction->notes,
+                    ])->toArray()
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        $shipment['drivers'] = $drivers;
+
+        $shipment['deductions'] = $shipment->shipmentDeductions()->whereNull('user_id')->get()->keyBy('shipment_deduction_type_id')->map(fn($deduction) => $deduction->amount)->toArray();
+
+        $cloneData = $shipment->toArray();
+
+        return $cloneData;
     }
 }
