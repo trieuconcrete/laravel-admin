@@ -176,6 +176,7 @@
                                             @else
                                                 <a href="{{ route('admin.shipments.edit', $shipment) }}" class="btn btn-sm btn-outline-primary ">Chi tiết</a>
                                             @endif
+                                            <a href="{{ route('admin.shipments.create', ['clone_from' => $shipment->id]) }}" class="btn btn-sm btn-outline-success">Copy</a>
                                             <button type="button"
                                                     class="btn btn-sm btn-outline-danger delete-shipment-btn"
                                                     data-shipment-id="{{ $shipment->id }}"

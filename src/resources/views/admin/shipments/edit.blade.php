@@ -15,47 +15,89 @@
             min-width: 350px !important;
         }
 
-        .form-images .upload {
-            display: none
-        }
-
         .image-upload-wrapper {
-            border: 1px dashed #405189;
+            border: 2px dashed #ccc;
             border-radius: 8px;
             padding: 10px;
-            aspect-ratio: 2/1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .image-upload-wrapper .preview-area {
-            width: 100%;
-            height: 100%;
-            display: none;
-        }
-
-        .image-upload-wrapper.has-preview .preview-area {
-            display: unset;
-        }
-
-        .image-upload-wrapper .upload-message {
             text-align: center;
-            color: #405189;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .image-upload-wrapper.has-preview .upload-message {
-            display: none;
+        .image-upload-wrapper.dragover {
+            border-color: #007bff;
+            background-color: #f0f8ff;
         }
 
-        .image-upload-wrapper .preview-area img {
+        .image-upload-wrapper.has-preview {
+            border-style: solid;
+        }
+
+        .upload-message {
+            color: #666;
+            padding: 40px 0;
+            font-size: 16px;
+        }
+
+        .preview-area {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+        }
+
+        .preview-item {
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f9f9f9;
+            aspect-ratio: 1 / 1;
+        }
+
+        .preview-item.new-image {
+            border-color: #007bff;
+        }
+
+        .preview-item img {
             width: 100%;
             height: 100%;
-            aspect-ratio: 1;
-            border-radius: 8px;
             object-fit: cover;
+            display: block;
+        }
+
+        .preview-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(119, 119, 119, 0.8);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+
+        .preview-item .image-badge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: #007bff;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .upload {
+            display: none;
         }
     </style>
 @endpush
@@ -86,6 +128,7 @@
                                         <div class="col-auto">
                                             <button type="submit" class="btn btn-success" id="submitBtn">
                                                 <i class="ri-save-3-line align-middle me-1"></i>Lưu
+                                                <i class="ri-save-3-line align-middle me-1"></i>Lưu
                                             </button>
                                         </div>
                                         <!--end col-->
@@ -103,6 +146,7 @@
                                     <ul class="nav nav-tabs-custom rounded card-header-tabs border-bottom-0" role="tablist">
                                         <li class="nav-item">
                                             <a class="nav-link active" data-bs-toggle="tab" href="#driverAllowance" role="tab">
+                                                <i class="far fa-user"></i> Thông tin vận chuyển
                                                 <i class="far fa-user"></i> Thông tin vận chuyển
                                             </a>
                                         </li>
@@ -146,22 +190,57 @@
                                             <h5 class="mb-3 fs-5">Thông tin vận chuyển</h5>
                                             <div class="row mb-3">
                                                 <div class="col-md-6">
-                                                    <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
-                                                    <select class="form-select js-example-basic-single" name="customer_id" required>
-                                                        <option value="">Chọn khách hàng</option>
-                                                        @foreach($customers as $id => $name)
-                                                            <option value="{{ $id }}" {{ old('customer_id', $shipment->customer_id) == $id ? 'selected' : '' }}>{{ $name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @error('customer_id')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    <div class="col mb-3">
+                                                        <label class="form-label">Chọn khách hàng<span class="text-danger">*</span></label>
+                                                        <select class="form-select js-example-basic-single" name="customer_id" required>
+                                                            <option value="">Chọn khách hàng</option>
+                                                            @foreach($customers as $id => $name)
+                                                                <option value="{{ $id }}" {{ old('customer_id', $shipment->customer_id) == $id ? 'selected' : '' }}>{{ $name }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        @error('customer_id')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    </div>
+                                                    <div class="col mb-3">
+                                                        <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
+                                                        <select class="form-select" name="status" required>
+                                                            @foreach($shipmentStatus as $key => $value)
+                                                                <option value="{{ $key }}" {{ old('status', $shipment->status) == $key ? 'selected' : '' }}>{{ $value }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="col">
+                                                        <label class="form-label">Loại xe<span class="text-danger">*</span></label>
+                                                        <select name="truck_type" required class="form-select">
+                                                            <option value="cont" {{ old('truck_type') == 'cont' ? 'selected' : '' }}>Xe Container </option>
+                                                            <option value="thung" {{ old('truck_type') == 'thung' ? 'selected' : '' }}>Xe Thùng</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                                                    <select class="form-select" name="status" required>
-                                                        @foreach($shipmentStatus as $key => $value)
-                                                            <option value="{{ $key }}" {{ old('status', $shipment->status) == $key ? 'selected' : '' }}>{{ $value }}</option>
-                                                        @endforeach
-                                                    </select>
+                                                <div class="col-md-6 form-images mb-3">
+                                                    <label class="form-label">Hình ảnh</label>
+                                                    <input type="file" name="images[]" accept="image/*" id="uploadImages" class="upload" multiple>
+                                                    <div id="realFilesContainer"></div>
+                                                    <div class="image-upload-wrapper {{ !empty($shipment->images) ? 'has-preview' : '' }}"
+                                                        id="uploadArea">
+
+                                                        <div class="upload-message">
+                                                            Kéo thả hoặc nhấn vào đây để chọn hình ảnh
+                                                        </div>
+
+                                                        <div class="preview-area" id="previewArea">
+                                                            @if (!empty($shipment->images))
+                                                                @foreach($shipment->images as $img)
+                                                                    <div class="preview-item">
+                                                                        <img src="{{ asset('storage/' . $img) }}" alt="Shipment Image">
+                                                                    </div>
+                                                                @endforeach
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    @error('images')
+                                                        <span class="text-danger">{{ $message }}</span>
+                                                    @enderror
                                                 </div>
                                             </div>
                                             <div class="row mb-3">
@@ -263,6 +342,7 @@
                                                         <input type="text" class="form-control" placeholder="Nhập địa chỉ điểm đi" name="address_origin2" value="{{ old('address_origin2', $shipment->address_origin2) }}">
                                                         @error('address_origin2')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
+
 
                                                     <div class="col-md-2">
                                                         <input type="text" class="form-control" placeholder="Nhập điểm đến 2" name="destination2" value="{{ old('destination2', $shipment->destination2) }}">
@@ -487,6 +567,7 @@
                                                                         <th>{{ $type->name }}</th>
                                                                     @endforeach
                                                                     <th class="notes-col">Ghi chú</th>
+                                                                    <th class="notes-col">Ghi chú</th>
                                                                     <th></th>
                                                                 </tr>
                                                             </thead>
@@ -504,8 +585,10 @@
                                                                 }
                                                             @endphp
 
+
                                                             @if(count($driversArray) > 0)
                                                                 @foreach($driversArray as $i => $driver)
+
 
                                                                     <tr>
                                                                         <td>
@@ -521,6 +604,8 @@
                                                                             <div class="form-check form-switch d-inline-block">
                                                                                 <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input"
                                                                                     value="1"
+                                                                                <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input"
+                                                                                    value="1"
                                                                                     {{ old('drivers.'.$i.'.deductions.is_main_driver', $driver['is_main_driver']) ? 'checked' : '' }}>
                                                                             </div>
                                                                             @error('drivers.{{ $i }}.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
@@ -531,6 +616,7 @@
                                                                                 @error('drivers.'.$i.'.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                             </td>
                                                                         @endforeach
+                                                                        <td class="notes-col">
                                                                         <td class="notes-col">
                                                                             <input type="text" name="drivers[{{ $i }}][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.'.$i.'.deductions.Ghi chú', $driver['deductions']->first() ? $driver['deductions']->first()->notes : '') }}">
                                                                             @error('drivers.{{ $i }}.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
@@ -556,6 +642,8 @@
                                                                         <div class="form-check form-switch d-inline-block">
                                                                             <input type="checkbox" name="drivers[0][deductions][is_main_driver]" class="form-check-input deduction-input"
                                                                                 value="1"
+                                                                            <input type="checkbox" name="drivers[0][deductions][is_main_driver]" class="form-check-input deduction-input"
+                                                                                value="1"
                                                                                 {{ old('drivers.0.deductions.is_main_driver', false) ? 'checked' : '' }}>
                                                                         </div>
                                                                         @error('drivers.0.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
@@ -566,7 +654,7 @@
                                                                             @error('drivers.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
                                                                     @endforeach
-                                                                    <td>
+                                                                    <td class="notes-col">
                                                                         <input type="text" name="drivers[0][deductions][notes]" class="form-control form-control-sm " value="{{ old('drivers.0.deductions.Ghi chú', '') }}">
                                                                         @error('drivers.0.deductions.Ghi chú')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
@@ -609,6 +697,7 @@
                                                                     ];
                                                                 }
                                                             @endphp
+
 
                                                             @if(count($driverPXsArray) > 0)
                                                                 @foreach($driverPXsArray as $i => $driver)
@@ -705,29 +794,36 @@
         function formatPriceInput(input) {
             let value = input.val();
 
+
             // Remove non-numeric characters except commas
             value = value.replace(/[^0-9,]/g, '');
 
+
             // Remove existing commas to work with clean number
             value = value.replace(/,/g, '');
+
 
             // Limit to 9 digits
             if (value.length > 9) {
                 value = value.substring(0, 9);
             }
 
+
             // Format with commas
             if (value) {
                 value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             }
 
+
             input.val(value);
         }
+
 
         // Format deduction inputs and unit inputs on keyup
         $('.deduction-input, .unit-input').on('input', function () {
             formatPriceInput($(this));
         });
+
 
         // Initial formatting for deduction inputs and unit inputs
         $('.deduction-input, .unit-input').each(function() {
@@ -736,11 +832,13 @@
                 // Remove existing formatting
                 value = value.replace(/,/g, '');
 
+
                 // Handle decimal part if exists
                 if (value.includes('.')) {
                     let parts = value.split('.');
                     value = parts[0]; // Keep only integer part
                 }
+
 
                 // Apply formatting
                 value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -748,10 +846,150 @@
             }
         });
 
+
         // Make the formatPriceInput function globally available
         window.formatPriceInput = function(input) {
             formatPriceInput($(input));
         };
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        const uploadArea = $('#uploadArea');
+        const uploadInput = $('#uploadImages');
+        const previewArea = $('#previewArea');
+        const realFilesContainer = $('#realFilesContainer');
+        let deletedImages = [];
+
+        $('#deletedImagesInput').remove();
+
+        uploadArea.on('click', function (e) {
+            if (!$(e.target).closest('.remove-btn').length) {
+                uploadInput.click();
+            }
+        });
+
+        uploadInput.on('change', function (e) {
+            const files = Array.from(e.target.files);
+
+            files.forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const preview = $(`
+                        <div class="preview-item new-image">
+                            <img src="${ev.target.result}">
+                            <button type="button" class="remove-btn" data-new="true">x</button>
+                        </div>
+                    `);
+
+                    previewArea.append(preview);
+                    updateVisibility();
+                };
+                reader.readAsDataURL(file);
+
+                const realInput = $('<input>')
+                    .attr({
+                        type: 'file',
+                        name: 'images[]'
+                    })
+                    .css('display', 'none');
+
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                realInput[0].files = dt.files;
+
+                realFilesContainer.append(realInput);
+            });
+
+            uploadInput.val('');
+        });
+
+        uploadArea.on('dragover', function (e) {
+            e.preventDefault();
+            $(this).addClass('dragover');
+        });
+
+        uploadArea.on('dragleave drop', function (e) {
+            e.preventDefault();
+            $(this).removeClass('dragover');
+        });
+
+        uploadArea.on('drop', function (e) {
+            uploadInput[0].files = e.originalEvent.dataTransfer.files;
+            uploadInput.trigger('change');
+        });
+
+        $('.preview-item').each(function () {
+            if (!$(this).find('.remove-btn').length) {
+                const imgSrc = $(this).find('img').attr('src');
+                const imgPath = imgSrc.replace(window.location.origin + '/storage/', '');
+
+                $(this).append(`
+                    <button type="button" class="remove-btn" data-path="${imgPath}">
+                        x
+                    </button>
+                `);
+            }
+        });
+
+        previewArea.on('click', '.remove-btn', function (e) {
+            e.stopPropagation();
+            const $btn = $(this);
+            const $item = $btn.closest('.preview-item');
+
+            if ($btn.data('new')) {
+                const index = $item.index('.preview-item.new-image');
+                realFilesContainer.find('input[type="file"]').eq(index).remove();
+                $item.remove();
+            } else {
+                const imgPath = $btn.data('path');
+                if (imgPath) {
+                    deletedImages.push(imgPath);
+                    updateDeletedImagesInput();
+                }
+                $item.remove();
+            }
+
+            updateVisibility();
+        });
+
+        function updateDeletedImagesInput() {
+            $('#deletedImagesInput').remove();
+
+            if (deletedImages.length > 0) {
+                $('<input>')
+                    .attr({
+                        type: 'hidden',
+                        id: 'deletedImagesInput',
+                        name: 'deleted_images',
+                        value: JSON.stringify(deletedImages)
+                    })
+                    .appendTo(uploadArea.closest('form'));
+            }
+        }
+
+        function updateVisibility() {
+            const hasImages = $('.preview-item').length > 0;
+
+            if (hasImages) {
+                $('.upload-message').hide();
+                previewArea.show();
+                uploadArea.addClass('has-preview');
+            } else {
+                $('.upload-message').show();
+                previewArea.hide();
+                uploadArea.removeClass('has-preview');
+            }
+        }
+
+        uploadArea.closest('form').on('submit', function () {
+            console.log('Submitting with deleted images:', deletedImages);
+            console.log('Files count (real inputs):', realFilesContainer.find('input').length);
+        });
+
+        updateVisibility();
     });
 </script>
 <script>
@@ -762,8 +1000,10 @@
 
     const personPxTable = document.querySelector('#personPxTable tbody');
 
+
     // Lưu trữ dữ liệu cũ từ validation errors
     window.laravelOld = @json(session()->getOldInput());
+
 
     // Khai báo các loại khấu trừ cho tài xế
     const personDeductionTypes = [
@@ -777,6 +1017,7 @@
             { id: "{{ $type->id }}", name: "{{ $type->name }}" },
         @endforeach
     ];
+
 
     // Gán danh sách người dùng vào biến toàn cục
     window.users = {};
@@ -802,6 +1043,7 @@
         console.log('Users data from PHP:', @json($users));
     @endif
 
+
     // Khởi tạo driverRowCount từ số driver hiện có
     const existingDriverRows = document.querySelectorAll('input[name="driver_rows[]"]');
     if (existingDriverRows.length > 0) {
@@ -821,11 +1063,14 @@
     document.querySelector('form').addEventListener('submit', function(e) {
         console.log('Form data being submitted:');
 
+
         // Debug drivers data
         const drivers = document.querySelectorAll('select[name*="drivers"][name*="user_id"]');
         const driverRowInputs = document.querySelectorAll('input[name="driver_rows[]"]');
 
+
         console.log('Driver rows found:', driverRowInputs.length);
+
 
         drivers.forEach((select, index) => {
             const userId = select.value;
@@ -833,8 +1078,10 @@
             const match = name.match(/drivers\[(\d+)\]/);
             const rowIndex = match ? match[1] : index;
 
+
             const isMainDriverCheckbox = document.querySelector(`input[name="drivers[${rowIndex}][deductions][is_main_driver]"]`);
             const isMainDriver = isMainDriverCheckbox ? isMainDriverCheckbox.checked : false;
+
 
             console.log(`Driver ${rowIndex}:`, {
                 user_id: userId,
@@ -844,10 +1091,12 @@
             });
         });
 
+
         // Debug driver_rows inputs
         driverRowInputs.forEach((input, index) => {
             console.log(`Driver row input ${index}:`, input.value);
         });
+
 
         // Debug FormData được gửi
         const formData = new FormData(this);
@@ -858,23 +1107,28 @@
             }
         }
 
+
         // Debug driver_row_indexes
         const driverRowIndexes = Array.from(driverRowInputs).map(input => input.value).join(',');
         console.log('driver_row_indexes:', driverRowIndexes);
 
+
         const hiddenDriverRowIndexes = document.querySelector('input[name="driver_row_indexes"]');
         console.log('hidden driver_row_indexes:', hiddenDriverRowIndexes ? hiddenDriverRowIndexes.value : 'Not found');
     });
+
 
     // Khởi tạo các sự kiện khi trang đã tải xong
     document.addEventListener('DOMContentLoaded', function() {
         // Khởi tạo form với số lượng driver ban đầu
         initShipmentForm({{ count(old('drivers', $shipment->drivers ?? [])) }});
 
+
         // Thêm event listener cho nút thêm hàng hóa
         document.getElementById('addGoodBtn').onclick = function() {
             goodsCount = addGoodRow(goodsTable, goodsCount);
         };
+
 
         // Thêm event listener cho nút thêm người
         document.getElementById('addPersonBtn').onclick = function() {
@@ -883,7 +1137,9 @@
             const totalUsers = Object.keys(window.users).length;
             const currentRows = personTable.querySelectorAll('tr').length;
 
+
             console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUsers, 'Current Rows:', currentRows);
+
 
             // Kiểm tra số lượng hàng hiện tại với tổng số users
             if (currentRows >= totalUsers) {
@@ -906,6 +1162,7 @@
                 return false;
             }
 
+
             // Kiểm tra nếu đã sử dụng hết tất cả người dùng
             if (selectedIds.length >= totalUsers) {
                 Swal.fire({
@@ -917,11 +1174,13 @@
                 return false;
             }
 
+
             // Log users object for debugging
             console.log('Users object:', window.users);
             // Nếu còn người dùng khả dụng, thêm hàng mới
             addDriverRow(personTable, personDeductionTypes, window.users);
         };
+
 
         // Thêm event listener cho nút thêm lơ xe
         document.getElementById('addPersonPxBtn').onclick = function() {
@@ -930,7 +1189,9 @@
             const totalUserPXs = Object.keys(window.userPXs).length;
             const currentRows = Array.from(personPxTable.querySelectorAll('tbody tr')).length;
 
+
             console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUserPXs, 'Current Rows:', currentRows);
+
 
             // Kiểm tra số lượng hàng hiện tại với tổng số users
             if (currentRows >= totalUserPXs) {
@@ -953,6 +1214,7 @@
                 return false;
             }
 
+
             // Kiểm tra nếu đã sử dụng hết tất cả người dùng
             if (selectedIds.length >= totalUserPXs) {
                 Swal.fire({
@@ -964,20 +1226,25 @@
                 return false;
             }
 
+
             // Log users object for debugging
             console.log('Users object:', window.userPXs);
             // Nếu còn người dùng khả dụng, thêm hàng mới
             addDriverPXRow(personPxTable, personPxDeductionTypes, window.userPXs);
         };
 
+
         // Kiểm tra và cập nhật trạng thái nút thêm nhân sự dựa trên số lượng người dùng khả dụng
         updateAddPersonButtonState();
+
 
         // Định dạng tất cả các trường số khi trang được tải
         formatAllNumericInputs();
 
+
         // Kiểm tra và chuyển đến tab có lỗi nếu có
         handleFormErrors();
+
 
         // Xử lý checkbox "Xe HPL Thuê"
         const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
@@ -988,6 +1255,7 @@
             if (!isCarRentalCheckbox || !driverSection) {
                 return; // Exit if elements don't exist
             }
+
 
             const isChecked = isCarRentalCheckbox.checked;
             if (isChecked) {
@@ -1001,12 +1269,14 @@
             }
         }
 
+
         // Thêm event listener cho checkbox
         if (isCarRentalCheckbox) {
             isCarRentalCheckbox.addEventListener('change', toggleDriverSections);
             // Chạy lần đầu khi trang load
             toggleDriverSections();
         }
+
 
         // Xử lý submit form
         document.getElementById('shipmentForm').addEventListener('submit', function(e) {
@@ -1021,12 +1291,15 @@
     document.getElementById('avatarInput')?.addEventListener('change', function(event) {
         const file = event.target.files[0];
 
+
         if (file) {
             const reader = new FileReader();
+
 
             reader.onload = function(e) {
                 document.getElementById('avatarPreview').src = e.target.result;
             }
+
 
             reader.readAsDataURL(file);
         }
