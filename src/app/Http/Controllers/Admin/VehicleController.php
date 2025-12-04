@@ -45,7 +45,7 @@ class VehicleController extends Controller
         $vehicleTypes = VehicleType::pluck('name', 'vehicle_type_id');
         $vehicleStatuses = Vehicle::getStatuses();
         $drivers = $this->userRepository->getAvailableDrivers()->pluck('full_name', 'id');
-        
+
         // Get car rental customers for modal
         $carRentalCustomers = \App\Models\Customer::where('type', Customer::TYPE_CARRENTAL)
             ->where('is_active', true)
@@ -66,7 +66,7 @@ class VehicleController extends Controller
             'role' => User::ROLE_DRIVER,
             'status' => UserStatus::ACTIVE
         ])->pluck('full_name', 'id');
-        
+
         // Get car rental customers
         $carRentalCustomers = \App\Models\Customer::where('type', Customer::TYPE_CARRENTAL)
             ->where('is_active', true)
@@ -105,11 +105,11 @@ class VehicleController extends Controller
     {
         // return redirect()->route('admin.vehicles.index')->with('error', 'Trang không hợp lệ.');
         $vehicle = Vehicle::with(['vehicleType', 'maintenanceRecords'])->findOrFail($id);
-    
+
         if (request()->ajax()) {
             return view('admin.vehicles.partials.vehicle_detail', compact('vehicle'))->render();
         }
-        
+
         return abort(404);
     }
 
@@ -147,11 +147,11 @@ class VehicleController extends Controller
                 'request_data' => $request->all(),
                 'vehicle_id' => $vehicle->vehicle_id
             ]);
-            
+
             $this->vehicleService->update($request, $vehicle);
 
             DB::commit();
-            
+
             return redirect()->route('admin.vehicles.index')->with('success', 'Cập nhật phương tiện thành công.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -179,7 +179,7 @@ class VehicleController extends Controller
     {
         try {
             $isRental = $request->boolean('is_car_rental');
-            
+
             $vehicles = Vehicle::query()
                 ->where('is_car_rental', $isRental)
                 ->where('status', 'active') // Only active vehicles
@@ -195,17 +195,17 @@ class VehicleController extends Controller
                         'driver_name' => $vehicle->driver->name ?? 'Chưa phân công',
                     ];
                 });
-            
+
             return response()->json([
                 'success' => true,
                 'vehicles' => $vehicles,
                 'count' => $vehicles->count(),
                 'message' => $vehicles->isEmpty() ? 'Không có phương tiện phù hợp' : ''
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error('Error in getByRentalStatus: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi tải dữ liệu',
@@ -217,15 +217,16 @@ class VehicleController extends Controller
     public function getDriverByVehicle(Request $request)
     {
         $vehicleId = $request->get('vehicle_id');
-        $vehicle = Vehicle::with('driver')->find($vehicleId);
-        
+        $vehicle = Vehicle::with(['driver'])->find($vehicleId);
+
         if ($vehicle && $vehicle->driver) {
             return response()->json([
                 'success' => true,
-                'driver' => $vehicle->driver
+                'driver' => $vehicle->driver,
+                'vehicle_type_id' => $vehicle->vehicle_type_id
             ]);
         }
-        
+
         return response()->json([
             'success' => true,
             'driver' => null

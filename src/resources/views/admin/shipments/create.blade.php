@@ -112,17 +112,6 @@
                                 </div>
                                 <div class="mt-3 mt-lg-0">
                                     <div class="row g-3 mb-0 align-items-center">
-                                        {{-- <div class="col-auto">
-                                            <select id="templateSelect" class="form-select">
-                                                <option value="">Mặc định</option>
-                                                @foreach($templates as $tpl)
-                                                    <option value="{{ $tpl->id }}"
-                                                        @selected(request('template_id') == $tpl->id)>
-                                                        {{ $tpl->template_name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div> --}}
                                         <div class="col-auto">
                                             <button type="submit" class="btn btn-success" id="submitBtn">
                                                 <i class="ri-save-3-line align-middle me-1"></i>
@@ -550,7 +539,7 @@
                                                                 <th style="padding-right:100px;" class="driver-col">Nhân sự <span class="text-danger">*</span></th>
                                                                 <th>Lái chính </th>
                                                                 @foreach($personDeductionTypes as $type)
-                                                                    <th>{{ $type->name }}</th>
+                                                                    <th class="{{$type->id}}">{{ $type->name }}</th>
                                                                 @endforeach
                                                                 <th class="notes-col">Ghi chú</th>
                                                                 <th></th>
@@ -581,7 +570,7 @@
                                                                             @error('drivers.'.$i.'.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
                                                                         @foreach($personDeductionTypes as $type)
-                                                                            <td>
+                                                                            <td class="{{$type->id}}">
                                                                                 <input type="text" name="drivers[{{ $i }}][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0" value="{{ old('drivers.'.$i.'.deductions.'.$type->id, $driver['deductions'][$type->id] ?? '') }}">
                                                                                 @error('drivers.'.$i.'.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                             </td>
@@ -614,7 +603,7 @@
                                                                         @error('drivers.0.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
                                                                     </td>
                                                                     @foreach($personDeductionTypes as $type)
-                                                                        <td>
+                                                                        <td class="{{$type->id}}">
                                                                             <input type="text" name="drivers[0][deductions][{{ $type->id }}]" class="form-control form-control-sm deduction-input" min="0">
                                                                             @error('drivers.0.deductions.'.$type->id)<div class="text-danger">{{ $message }}</div>@enderror
                                                                         </td>
