@@ -33,7 +33,7 @@
                                     <div class="row g-3 mb-0 align-items-center">
                                         <div class="col-auto">
                                             <button type="submit" class="btn btn-success" id="submitBtn">
-                                                <i class="ri-save-3-line align-middle me-1"></i>Lưu 
+                                                <i class="ri-save-3-line align-middle me-1"></i>Lưu
                                             </button>
                                         </div>
                                         <!--end col-->
@@ -115,10 +115,10 @@
                                                 <div class="col-md-6">
                                                     <label for=""></label>
                                                     <div class="form-check form-check-secondary mb-3">
-                                                        <input class="form-check-input" 
-                                                        name="is_overtime_at_noon" 
-                                                        type="checkbox" 
-                                                        value="1" 
+                                                        <input class="form-check-input"
+                                                        name="is_overtime_at_noon"
+                                                        type="checkbox"
+                                                        value="1"
                                                         id="is_overtime_at_noon"
                                                         {{ old('is_overtime_at_noon') ? 'checked' : '' }}>
                                                         <label class="form-check-label" for="is_overtime_at_noon">
@@ -247,17 +247,17 @@
                                                 <label class="form-label">Ghi chú</label>
                                                 <textarea class="form-control" name="notes" rows="3">{{ old('notes') }}</textarea>
                                             </div>
-                                            
-                                            
+
+
                                         </div>
                                         <div class="tab-pane" id="shipmentDetail" role="tabpanel">
                                             <div class="row mb-3">
                                                 <div class="col-md-2">
                                                     <div class="form-check form-check-secondary mb-3">
-                                                        <input class="form-check-input" 
-                                                        name="is_car_rental" 
-                                                        type="checkbox" 
-                                                        value="1" 
+                                                        <input class="form-check-input"
+                                                        name="is_car_rental"
+                                                        type="checkbox"
+                                                        value="1"
                                                         id="is_car_rental"
                                                         {{ old('is_car_rental') ? 'checked' : '' }}
                                                         >
@@ -275,7 +275,7 @@
                                                         @endforeach
                                                     </select>
                                                     @error('vehicle_id')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    
+
                                                     <!-- Loading spinner (hidden by default) -->
                                                     <div class="spinner-border spinner-border-sm text-primary mt-2" id="vehicle_loading" style="display: none;">
                                                         <span class="visually-hidden">Loading...</span>
@@ -323,7 +323,7 @@
                                                                         </td>
                                                                         <td class="text-center">
                                                                             <div class="form-check form-switch d-inline-block">
-                                                                                <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input" value="1" 
+                                                                                <input type="checkbox" name="drivers[{{ $i }}][deductions][is_main_driver]" class="form-check-input deduction-input" value="1"
                                                                                     {{ old('drivers.'.$i.'.deductions.is_main_driver', $driver['deductions']['is_main_driver'] ?? false) ? 'checked' : '' }}>
                                                                             </div>
                                                                             @error('drivers.{{ $i }}.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
@@ -357,7 +357,7 @@
                                                                     </td>
                                                                     <td class="text-center">
                                                                         <div class="form-check form-switch d-inline-block">
-                                                                            <input type="checkbox" name="drivers[0][deductions][is_main_driver]" class="form-check-input deduction-input" value="1" 
+                                                                            <input type="checkbox" name="drivers[0][deductions][is_main_driver]" class="form-check-input deduction-input" value="1"
                                                                                 {{ old('drivers.0.deductions.is_main_driver', $driver['deductions']['is_main_driver'] ?? false) ? 'checked' : '' }}>
                                                                         </div>
                                                                         @error('drivers.0.deductions.is_main_driver')<div class="text-danger">{{ $message }}</div>@enderror
@@ -453,7 +453,7 @@
                                                 </div>
                                                 <hr>
                                                 <div class="mb-3">
-                                                    <label class="form-label fs-5">Chi phí chuyến xe</label> 
+                                                    <label class="form-label fs-5">Chi phí chuyến xe</label>
                                                     <small class="text-muted">Chi phí HPL trả cho đối tác cho thuê xe</small>
                                                     <div class="table-responsive">
                                                         <table class="table table-bordered">
@@ -507,33 +507,33 @@
         const overtimeRate = overtimeRateElement ? overtimeRateElement.value.replace(/,/g, '') || 50000 : 50000;
         const isOvertimeAtNoonElement = document.getElementById('is_overtime_at_noon');
         const isOvertimeAtNoon = isOvertimeAtNoonElement ? isOvertimeAtNoonElement.checked : false;
-        
+
         console.log('calculateAndDisplayOT called with:', { startTime, endTime, overtimeRate, isOvertimeAtNoon });
-        
+
         // Lấy start_working_hour và end_working_hour từ car rental
         const startWorkingHour = '{{ $carRental->start_working_hour ? \Carbon\Carbon::parse($carRental->start_working_hour)->format('H:i') : "07:00" }}';
         const endWorkingHour = '{{ $carRental->end_working_hour ? \Carbon\Carbon::parse($carRental->end_working_hour)->format('H:i') : "17:30" }}';
-        
+
         console.log('Working hours:', { startWorkingHour, endWorkingHour });
-        
+
         // Cập nhật hiển thị working hours (format H:i)
         const startWorkingHourDisplay = document.getElementById('start_working_hour_display');
         const endWorkingHourDisplay = document.getElementById('end_working_hour_display');
-        
+
         if (startWorkingHourDisplay) {
             const formattedStartTime = startWorkingHour.split(':').slice(0, 2).join(':');
             startWorkingHourDisplay.textContent = formattedStartTime;
         }
-        
+
         if (endWorkingHourDisplay) {
             const formattedEndTime = endWorkingHour.split(':').slice(0, 2).join(':');
             endWorkingHourDisplay.textContent = formattedEndTime;
         }
-        
+
         let overtimeHours = 0;
         let morningOvertime = 0;
         let afternoonOvertime = 0;
-        
+
         // Tính OT buổi sáng (chỉ cần start_time)
         if (startTime) {
             // So sánh trực tiếp thời gian (HH:MM) không cần ngày
@@ -541,13 +541,13 @@
                 // Chuyển đổi thời gian thành phút để tính toán chính xác
                 const startMinutes = parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1]);
                 const startWorkingMinutes = parseInt(startWorkingHour.split(':')[0]) * 60 + parseInt(startWorkingHour.split(':')[1]);
-                
+
                 morningOvertime = (startWorkingMinutes - startMinutes) / 60; // Convert to hours
                 overtimeHours += morningOvertime;
                 console.log('Morning OT calculated:', morningOvertime);
             }
         }
-        
+
         // Tính OT buổi chiều (chỉ cần end_time)
         if (endTime) {
             // So sánh trực tiếp thời gian (HH:MM) không cần ngày
@@ -555,21 +555,21 @@
                 // Chuyển đổi thời gian thành phút để tính toán chính xác
                 const endMinutes = parseInt(endTime.split(':')[0]) * 60 + parseInt(endTime.split(':')[1]);
                 const endWorkingMinutes = parseInt(endWorkingHour.split(':')[0]) * 60 + parseInt(endWorkingHour.split(':')[1]);
-                
+
                 afternoonOvertime = (endMinutes - endWorkingMinutes) / 60; // Convert to hours
                 overtimeHours += afternoonOvertime;
                 console.log('Afternoon OT calculated:', afternoonOvertime);
             }
         }
-        
+
         // Thêm tăng ca trưa (không phụ thuộc vào thời gian)
         if (isOvertimeAtNoon) {
             overtimeHours += 1;
             console.log('Noon OT added: 1 hour');
         }
-        
+
         const totalOvertimeCost = overtimeHours * overtimeRate;
-        
+
         console.log('OT calculation results:', {
             morningOvertime,
             afternoonOvertime,
@@ -577,7 +577,7 @@
             overtimeHours,
             totalOvertimeCost
         });
-        
+
         // Cập nhật hiển thị
         const overtimeHoursDisplay = document.getElementById('overtime_hours_display');
         const totalOvertimeCostDisplay = document.getElementById('total_overtime_cost_display');
@@ -585,27 +585,27 @@
         const afternoonOvertimeDisplay = document.getElementById('afternoon_overtime_display');
         const noonOvertimeDisplay = document.getElementById('noon_overtime_display');
         const totalOvertimeDisplay = document.getElementById('total_overtime_display');
-        
+
         if (overtimeHoursDisplay) overtimeHoursDisplay.textContent = overtimeHours.toFixed(2) + ' giờ';
         if (totalOvertimeCostDisplay) totalOvertimeCostDisplay.textContent = totalOvertimeCost.toLocaleString() + ' VNĐ';
         if (morningOvertimeDisplay) morningOvertimeDisplay.textContent = morningOvertime.toFixed(2) + ' giờ';
         if (afternoonOvertimeDisplay) afternoonOvertimeDisplay.textContent = afternoonOvertime.toFixed(2) + ' giờ';
         if (noonOvertimeDisplay) noonOvertimeDisplay.textContent = (isOvertimeAtNoon ? 1 : 0).toFixed(2) + ' giờ';
         if (totalOvertimeDisplay) totalOvertimeDisplay.textContent = overtimeHours.toFixed(2) + ' giờ';
-        
+
         // Cập nhật hidden fields
         const calculatedOvertimeHours = document.querySelector('input[name="calculated_overtime_hours"]');
         const calculatedTotalOvertimeCost = document.querySelector('input[name="calculated_total_overtime_cost"]');
         const morningOvertimeHours = document.querySelector('input[name="morning_overtime_hours"]');
         const afternoonOvertimeHours = document.querySelector('input[name="afternoon_overtime_hours"]');
         const noonOvertimeHours = document.querySelector('input[name="noon_overtime_hours"]');
-        
+
         if (calculatedOvertimeHours) calculatedOvertimeHours.value = overtimeHours;
         if (calculatedTotalOvertimeCost) calculatedTotalOvertimeCost.value = totalOvertimeCost;
         if (morningOvertimeHours) morningOvertimeHours.value = morningOvertime;
         if (afternoonOvertimeHours) afternoonOvertimeHours.value = afternoonOvertime;
         if (noonOvertimeHours) noonOvertimeHours.value = isOvertimeAtNoon ? 1 : 0;
-        
+
         console.log('Display updated successfully');
     }
 
@@ -624,7 +624,7 @@
                 { id: "{{ $type->id }}", name: "{{ $type->name }}" },
             @endforeach
         ];
-        
+
         // Set users
         window.users = {};
         @if(!empty($users))
@@ -640,13 +640,13 @@
                 window.userPXs[{{ $id }}] = '{{ addslashes($name) }}';
             @endforeach
         @endif
-        
+
         // Set goodsCount
         window.goodsCount = {{ count(old('goods', [])) ?: 1 }};
-        
+
         // Set laravelOld
         window.laravelOld = @json(session()->getOldInput());
-        
+
         console.log('Car rental form data initialized:', {
             personDeductionTypes: window.personDeductionTypes,
             personPxDeductionTypes: window.personPxDeductionTypes,
@@ -654,25 +654,25 @@
             userPXs: window.userPXs,
             goodsCount: window.goodsCount
         });
-        
+
         // Debug carRentalDeductionTypes
         console.log('carRentalDeductionTypes from Blade:', @json($carRentalDeductionTypes ?? []));
-        
+
         // Xử lý checkbox is_car_rental khi trang load
         const isCarRentalCheckbox = document.querySelector('input[name="is_car_rental"]');
         console.log('Checkbox is_car_rental found:', isCarRentalCheckbox);
         console.log('Checkbox checked state:', isCarRentalCheckbox ? isCarRentalCheckbox.checked : 'not found');
-        
+
         // Kiểm tra old value từ Laravel
         const isCarRentalOldValue = {{ old('is_car_rental') ? 'true' : 'false' }};
         console.log('Old is_car_rental value:', isCarRentalOldValue);
-        
+
         if ((isCarRentalCheckbox && isCarRentalCheckbox.checked) || isCarRentalOldValue) {
             // Nếu checkbox được checked, ẩn phần tài xế
             const driverSection = document.getElementById('drivers');
             if (driverSection) {
                 driverSection.style.display = 'none';
-                
+
                 // Bỏ required và disable tất cả các trường tài xế
                 const driverFields = driverSection.querySelectorAll('select[name*="[user_id]"], input[name*="[allowance]"], input[name*="[deduction]"]');
                 driverFields.forEach(field => {
@@ -680,7 +680,7 @@
                     field.disabled = true;
                 });
             }
-            
+
             // Hiển thị phần chi phí chuyến xe
             const carRentalCosts = document.getElementById('carRentalCosts');
             console.log('carRentalCosts element found:', carRentalCosts);
@@ -689,14 +689,14 @@
                 console.log('carRentalCosts display set to block');
             }
         }
-        
+
         // Thêm event listener cho checkbox is_car_rental
         if (isCarRentalCheckbox) {
             isCarRentalCheckbox.addEventListener('change', function() {
                 const driverSection = document.getElementById('drivers');
                 const carRentalCosts = document.getElementById('carRentalCosts');
                 const isCarRentalValue = document.getElementById('is_car_rental_value');
-                
+
                 if (this.checked) {
                     // Xe HPL thuê - ẩn phần tài xế, hiển thị chi phí chuyến xe
                     if (driverSection) {
@@ -707,11 +707,11 @@
                             field.disabled = true;
                         });
                     }
-                    
+
                     if (carRentalCosts) {
                         carRentalCosts.style.display = 'block';
                     }
-                    
+
                     if (isCarRentalValue) {
                         isCarRentalValue.value = '1';
                     }
@@ -725,55 +725,55 @@
                             field.disabled = false;
                         });
                     }
-                    
+
                     if (carRentalCosts) {
                         carRentalCosts.style.display = 'none';
                     }
-                    
+
                     if (isCarRentalValue) {
                         isCarRentalValue.value = '0';
                     }
                 }
             });
         }
-        
+
         // Thêm event listeners cho các trường thời gian để tính OT real-time
         const startTimeInput = document.getElementById('start_time');
         const endTimeInput = document.getElementById('end_time');
         const overtimeRateInput = document.getElementById('overtime_rate');
         const isOvertimeAtNoonInput = document.getElementById('is_overtime_at_noon');
-        
+
         if (startTimeInput) {
             startTimeInput.addEventListener('change', calculateAndDisplayOT);
             startTimeInput.addEventListener('input', calculateAndDisplayOT);
             console.log('Event listener added to start_time');
         }
-        
+
         if (endTimeInput) {
             endTimeInput.addEventListener('change', calculateAndDisplayOT);
             endTimeInput.addEventListener('input', calculateAndDisplayOT);
             console.log('Event listener added to end_time');
         }
-        
+
         if (overtimeRateInput) {
             overtimeRateInput.addEventListener('input', calculateAndDisplayOT);
             console.log('Event listener added to overtime_rate');
         }
-        
+
         if (isOvertimeAtNoonInput) {
             isOvertimeAtNoonInput.addEventListener('change', calculateAndDisplayOT);
             console.log('Event listener added to is_overtime_at_noon');
         }
-        
+
         // Tính toán ban đầu
         console.log('Initial OT calculation...');
         calculateAndDisplayOT();
-        
+
         // Format thời gian về H:i trước khi submit form
         document.getElementById('shipmentForm').addEventListener('submit', function(e) {
             const startTimeInput = document.getElementById('start_time');
             const endTimeInput = document.getElementById('end_time');
-            
+
             // Format start_time về H:i nếu có giây
             if (startTimeInput && startTimeInput.value) {
                 const startTime = startTimeInput.value;
@@ -781,7 +781,7 @@
                     startTimeInput.value = startTime.substring(0, 5);
                 }
             }
-            
+
             // Format end_time về H:i nếu có giây
             if (endTimeInput && endTimeInput.value) {
                 const endTime = endTimeInput.value;
@@ -794,14 +794,14 @@
 </script>
 <script>
     $(document).ready(function() {
-        // $('#vehicles').trigger('change');
+        // $('#driverAllowance_vehicles').trigger('change');
         // Function to format price inputs with VND formatting and 9-digit limit
         function formatPriceInput(input) {
             let value = input.val();
-            
+
             // Remove non-numeric characters and handle decimal part
             value = value.replace(/[^0-9.]/g, '');
-            
+
             // If there's a decimal part, handle it
             if (value.includes('.')) {
                 // Split into integer and decimal parts
@@ -814,27 +814,27 @@
                     value = parts[0];
                 }
             }
-            
+
             // Limit to 9 digits
             if (value.length > 9) {
                 value = value.substring(0, 9);
             }
-            
+
             // Format with commas
             if (value) {
                 value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             }
-            
+
             input.val(value);
         }
-        
+
         // Function to format odometer inputs with comma formatting
         function formatOdometerInput(input) {
             let value = input.val();
-            
+
             // Remove non-numeric characters and decimal part
             value = value.replace(/[^0-9.]/g, '');
-            
+
             // Handle decimal part - if it's .00 or .0, remove it completely
             if (value.includes('.')) {
                 let parts = value.split('.');
@@ -844,32 +844,32 @@
                     value = parts[0]; // Keep only integer part
                 }
             }
-            
+
             // Format with commas
             if (value) {
                 value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             }
-            
+
             input.val(value);
         }
-        
+
         // Format deduction inputs and unit inputs on keyup
         $('.deduction-input, .unit-input').on('input', function () {
             formatPriceInput($(this));
         });
-        
+
         // Format odometer inputs on keyup
         $('.odometer-input').on('input', function () {
             formatOdometerInput($(this));
         });
-        
+
         // Initial formatting for deduction inputs and unit inputs
         $('.deduction-input, .unit-input').each(function() {
             let value = $(this).val();
             if (value) {
                 // Remove existing formatting
                 value = value.replace(/,/g, '');
-                
+
                 // Handle decimal part if exists
                 if (value.includes('.')) {
                     let parts = value.split('.');
@@ -881,25 +881,25 @@
                         value = parts[0];
                     }
                 }
-                
+
                 // Limit to 9 digits
                 if (value.length > 9) {
                     value = value.substring(0, 9);
                 }
-                
+
                 // Apply formatting
                 value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                 $(this).val(value);
             }
         });
-        
+
         // Initial formatting for odometer inputs
         $('.odometer-input').each(function() {
             let value = $(this).val();
             if (value) {
                 // Remove existing formatting
                 value = value.replace(/,/g, '');
-                
+
                 // Handle decimal part - if it's .00 or .0, remove it completely
                 if (value.includes('.')) {
                     let parts = value.split('.');
@@ -909,20 +909,20 @@
                         value = parts[0]; // Keep only integer part
                     }
                 }
-                
+
                 // Apply formatting
                 value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                 $(this).val(value);
             }
         });
-        
+
         // Initial formatting for parking fee input
         $('.parking-fee-input').each(function() {
             let value = $(this).val();
             if (value) {
                 // Remove existing formatting
                 value = value.replace(/,/g, '');
-                
+
                 // Handle decimal part - if it's .00 or .0, remove it completely
                 if (value.includes('.')) {
                     let parts = value.split('.');
@@ -932,34 +932,34 @@
                         value = parts[0]; // Keep only integer part
                     }
                 }
-                
+
                 // Apply formatting
                 value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
                 $(this).val(value);
             }
         });
-        
+
         // Make the format functions globally available
         window.formatPriceInput = function(input) {
             formatPriceInput($(input));
         };
-        
+
         window.formatOdometerInput = function(input) {
             formatOdometerInput($(input));
         };
-        
+
         // Thêm event listener cho nút thêm tài xế
         const personTable = document.querySelector('#personTable tbody');
         const personDeductionTypes = window.personDeductionTypes || [];
-        
+
         document.getElementById('addPersonBtn').onclick = function() {
             // Kiểm tra số lượng user trước khi thêm
             const selectedIds = getSelectedUserIds(personTable, 'driver');
             const totalUsers = Object.keys(window.users).length;
             const currentRows = personTable.querySelectorAll('tr').length;
-            
+
             console.log('Button click - Selected IDs:', selectedIds.length, 'Total Users:', totalUsers, 'Current Rows:', currentRows);
-            
+
             // Kiểm tra số lượng hàng hiện tại với tổng số users
             if (currentRows >= totalUsers) {
                 Swal.fire({
@@ -980,7 +980,7 @@
                 });
                 return false;
             }
-            
+
             // Kiểm tra nếu đã sử dụng hết tất cả người dùng
             if (selectedIds.length >= totalUsers) {
                 Swal.fire({
@@ -991,25 +991,25 @@
                 });
                 return false;
             }
-            
+
             // Log users object for debugging
             console.log('Users object:', window.users);
             // Nếu còn người dùng khả dụng, thêm hàng mới
             addDriverRow(personTable, personDeductionTypes, window.users);
         };
-        
+
         // Thêm event listener cho nút thêm lơ xe
         const personPxTable = document.querySelector('#personPxTable tbody');
         const personPxDeductionTypes = window.personPxDeductionTypes || [];
-        
+
         document.getElementById('addPersonPxBtn').onclick = function() {
             // Kiểm tra số lượng user PX trước khi thêm
             const selectedIds = getSelectedUserIds(personPxTable, 'driverPX');
             const totalUserPXs = Object.keys(window.userPXs).length;
             const currentRows = personPxTable.querySelectorAll('tr').length;
-            
+
             console.log('Button click - Selected IDs:', selectedIds.length, 'Total User PXs:', totalUserPXs, 'Current Rows:', currentRows);
-            
+
             // Kiểm tra số lượng hàng hiện tại với tổng số users
             if (currentRows >= totalUserPXs) {
                 Swal.fire({
@@ -1030,7 +1030,7 @@
                 });
                 return false;
             }
-            
+
             // Kiểm tra nếu đã sử dụng hết tất cả người dùng
             if (selectedIds.length >= totalUserPXs) {
                 Swal.fire({
@@ -1041,7 +1041,7 @@
                 });
                 return false;
             }
-            
+
             // Log users object for debugging
             console.log('Users object:', window.userPXs);
             // Nếu còn người dùng khả dụng, thêm hàng mới
@@ -1057,7 +1057,7 @@
     .highlight-error {
         animation: highlight-error-animation 1.5s ease;
     }
-    
+
     @keyframes highlight-error-animation {
         0% { background-color: rgba(255, 0, 0, 0.1); }
         50% { background-color: rgba(255, 0, 0, 0.2); }

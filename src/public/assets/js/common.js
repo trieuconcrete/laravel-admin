@@ -147,7 +147,8 @@ $(document).ready(function() {
 
     // Cache elements
     const $rentalCheckbox = $('#is_car_rental');
-    const $vehicleSelect = $('#vehicles');
+    const $vehicleSelect = $('#driverAllowance_vehicles');
+    const $vehicleSelectShipment = $('#shipmentDetail_vehicles');
     const $driversDiv = $('#drivers');
     const $loadingSpinner = $('#vehicle_loading');
     const isRental = $rentalCheckbox.is(':checked');
@@ -175,6 +176,7 @@ $(document).ready(function() {
             beforeSend: function() {
                 $loadingSpinner.show();
                 $vehicleSelect.prop('disabled', true);
+                $vehicleSelectShipment.prop('disabled', true);
             }
         });
     }
@@ -201,6 +203,7 @@ $(document).ready(function() {
                 .always(function() {
                     $loadingSpinner.hide();
                     $vehicleSelect.prop('disabled', false);
+                    $vehicleSelectShipment.prop('disabled', false);
                 });
         }, 300); // 300ms delay
     });
@@ -208,8 +211,10 @@ $(document).ready(function() {
     // Helper function to update vehicle options
     function updateVehicleOptions(vehicles) {
         const currentValue = $vehicleSelect.val();
+        const currentValueShipment = $vehicleSelectShipment.val();
 
         $vehicleSelect.empty().append('<option value="">Chọn phương tiện</option>');
+         $vehicleSelectShipment.empty().append('<option value="">Chọn phương tiện</option>');
 
         if (vehicles && vehicles.length > 0) {
             vehicles.forEach(function(vehicle) {
@@ -223,18 +228,24 @@ $(document).ready(function() {
                 $option.attr('data-driver', vehicle.driver_name);
 
                 $vehicleSelect.append($option);
+                $vehicleSelectShipment.append($optShipment);
             });
 
             // Restore selection if possible
             if (currentValue && $vehicleSelect.find(`option[value="${currentValue}"]`).length) {
                 $vehicleSelect.val(currentValue);
             }
+            if (currentValueShipment && $vehicleSelectShipment.find(`option[value="${currentValueShipment}"]`).length) {
+                $vehicleSelectShipment.val(currentValueShipment);
+            }
         } else {
             $vehicleSelect.append('<option value="" disabled>Không có phương tiện phù hợp</option>');
+            $vehicleSelectShipment.append('<option value="" disabled>Không có phương tiện phù hợp</option>');
         }
 
         // Trigger change event if using select2 or similar
         $vehicleSelect.trigger('change');
+        $vehicleSelectShipment.trigger('change');
     }
 
     // Error handler
@@ -259,7 +270,7 @@ $(document).ready(function() {
 // Đoạn code jQuery xử lý AJAX
 $(document).ready(function() {
     // Xử lý khi thay đổi phương tiện
-    $('#vehicles').on('change', function() {
+    $('#driverAllowance_vehicles, #shipmentDetail_vehicles').on('change', function() {
         var vehicleId = $(this).val();
         var isCarRental = $('#is_car_rental').is(':checked');
 
@@ -325,7 +336,8 @@ $(document).ready(function() {
     // Xử lý khi thay đổi checkbox "Xe HPL Thuê"
     $('#is_car_rental').on('change', function() {
         var isChecked = $(this).is(':checked');
-        var vehicleId = $('#vehicles').val();
+        var vehicleId = $('#driverAllowance_vehicles').val();
+        var vehicleIdShipment = $('#shipmentDetail_vehicles').val();
 
         // Hiển thị/ẩn phần chi phí xe thuê
         if (isChecked) {
@@ -336,7 +348,10 @@ $(document).ready(function() {
             $('#carRentalCosts').slideUp();
             // Nếu đã chọn phương tiện, load lại tài xế
             if (vehicleId) {
-                $('#vehicles').trigger('change');
+                $('#driverAllowance_vehicles').trigger('change');
+            }
+            if (vehicleIdShipment) {
+                $('#shipmentDetail_vehicles').trigger('change');
             }
         }
     });
@@ -483,8 +498,9 @@ $(document).ready(function() {
     }
 
     // Trigger change event khi load page nếu đã có vehicle được chọn
-    if ($('#vehicles').val() && !$('#is_car_rental').is(':checked')) {
-        $('#vehicles').trigger('change');
+    if (!$('#is_car_rental').is(':checked') && ($('#driverAllowance_vehicles').val() || $('#shipmentDetail_vehicles').val())) {
+        $('#driverAllowance_vehicles').trigger('change');
+        $('#shipmentDetail_vehicles').trigger('change');
     }
 
     // Hàm hiển thị thông báo
