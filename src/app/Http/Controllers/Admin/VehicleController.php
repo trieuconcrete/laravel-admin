@@ -16,6 +16,7 @@ use App\Repositories\Interface\UserRepositoryInterface as UserRepository;
 use App\Models\User;
 use App\Http\Requests\Vehicle\UpdateVehicleRequest;
 use App\Enum\UserStatus;
+use App\Enum\VehicleTypeEnum;
 use App\Models\Customer;
 
 class VehicleController extends Controller
@@ -219,11 +220,20 @@ class VehicleController extends Controller
         $vehicleId = $request->get('vehicle_id');
         $vehicle = Vehicle::with(['driver'])->find($vehicleId);
 
+        $getDeductionColumns = $this->vehicleService->getDeductionsByVehicleType(
+            VehicleTypeEnum::from($vehicle->vehicle_type_id)
+        );
+
+        $getAllDeductionColumns = $this->vehicleService->getDeductionsByVehicleType(
+            VehicleTypeEnum::ALL
+        );
+
         if ($vehicle && $vehicle->driver) {
             return response()->json([
                 'success' => true,
                 'driver' => $vehicle->driver,
-                'vehicle_type_id' => $vehicle->vehicle_type_id
+                'deduction_columns' => $getDeductionColumns,
+                'all_deduction_columns' => $getAllDeductionColumns
             ]);
         }
 

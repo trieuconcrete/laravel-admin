@@ -281,7 +281,8 @@ $(document).ready(function() {
                         // Nếu có tài xế, tự động chọn tài xế đó
                         updateDriverSelection({
                             ...response.driver,
-                            vehicle_type_id: response.vehicle_type_id
+                            duduction_columns: response.deduction_columns,
+                            all_deduction_columns: response.all_deduction_columns
                         });
                     } else {
                         // Reset selection nếu không có tài xế
@@ -384,36 +385,10 @@ $(document).ready(function() {
         $('#personTable tbody tr:first-child input[type="number"]').val('');
     }
 
-    function mapDeductionType(typeId) {
-        switch (typeId) {
-            case 3: // Xe thùng
-                return {
-                    type: 'truck',
-                    column: [13, 15, 22, 16, 20, 12, 19, 23]
-                };
-            case 4: // Container
-                return {
-                    type: 'container',
-                    column: [9, 10, 13, 15, 14, 11, 16, 18, 17, 12, 19]
-                };
-            default:
-                return {
-                    type: 'all',
-                    column: [
-                        9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
-                    ]
-                };
-        }
-    }
-
-    function renderDeductionColumns(vehicleTypeId, tableId) {
-        const { column } = mapDeductionType(vehicleTypeId);
-
+    function renderDeductionColumns(tableId, allColumn, column) {
         const table = $("#" + tableId);
 
-        const allColumnIds = [9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
-
-        allColumnIds.forEach(id => {
+        allColumn.forEach(id => {
             table.find("th." + id + ", td." + id).hide();
         });
 
@@ -425,7 +400,7 @@ $(document).ready(function() {
     // Hàm hiển thị thông tin tài xế
     function showDriverInfo(driver) {
         var message = 'Đã tự động chọn tài xế: ' + driver.full_name;
-        renderDeductionColumns(driver.vehicle_type_id, 'personTable');
+        renderDeductionColumns('personTable', driver.all_deduction_columns, driver.duduction_columns);
 
         if (driver.phone) {
             message += ' - SĐT: ' + driver.phone;

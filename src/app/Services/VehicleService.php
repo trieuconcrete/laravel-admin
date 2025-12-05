@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enum\DeductionTypeDriver;
+use App\Enum\VehicleTypeEnum;
 use App\Repositories\Interface\VehicleRepositoryInterface as VehicleRepository;
 use App\Repositories\Interface\VehicleDocumentRepositoryInterface as VehicleDocumentRepository;
 use App\Helpers\ImageHelper;
@@ -27,14 +29,14 @@ class VehicleService
     {
         $data = $request->all();
         $documents = [];
-        
+
         // Handle is_car_rental checkbox logic
         // If checkbox is not checked, it won't be sent in the request
         // So we need to explicitly set it to false if not present
         if (!$request->has('is_car_rental')) {
             $data['is_car_rental'] = false;
         }
-        
+
         // Handle customer data for car rental vehicles
         if ($request->has('is_car_rental') && $request->is_car_rental) {
             $customerData = $this->handleCustomerData($request);
@@ -48,7 +50,7 @@ class VehicleService
             // If is_car_rental is false, always set customer_id to null
             $data['customer_id'] = null;
         }
-        
+
         // Handle documents array if it exists
         if ($request->has('documents')) {
             foreach ($request->documents as $index => $doc) {
@@ -56,7 +58,7 @@ class VehicleService
                 if (isset($doc['document_file']) && $request->hasFile('documents.' . $index . '.document_file')) {
                     $doc['document_file'] = ImageHelper::upload($doc['document_file']);
                 }
-                
+
                 $documents[] = $doc;
             }
         }
@@ -88,7 +90,7 @@ class VehicleService
         if ($request->has('customer_id') && $request->customer_id) {
             return \App\Models\Customer::find($request->customer_id);
         }
-        
+
         // If customer data is provided, create new customer
         if ($request->has('customer_name') && $request->customer_name) {
             $customerData = [
@@ -100,10 +102,10 @@ class VehicleService
                 'is_active' => true,
                 'created_by' => auth('admin')->id(),
             ];
-            
+
             return \App\Models\Customer::create($customerData);
         }
-        
+
         return null;
     }
 
@@ -152,12 +154,12 @@ class VehicleService
             foreach ($request->documents as $index => $doc) {
                 // Make sure vehicle_id is set
                 $doc['vehicle_id'] = $vehicle->vehicle_id;
-                
+
                 // Only process document_file if it's an actual uploaded file
                 if (isset($doc['document_file']) && $request->hasFile('documents.' . $index . '.document_file')) {
                     $doc['document_file'] = ImageHelper::upload($doc['document_file']);
                 }
-                
+
                 $documents[] = $doc;
             }
         }
@@ -168,7 +170,7 @@ class VehicleService
         unset($vehicleData['customer_phone']);
         unset($vehicleData['customer_email']);
         unset($vehicleData['customer_address']);
-        
+
         // Remove temp document fields if present
         if (isset($vehicleData['_documentFile0_temp'])) unset($vehicleData['_documentFile0_temp']);
         if (isset($vehicleData['_documentFile1_temp'])) unset($vehicleData['_documentFile1_temp']);
@@ -184,5 +186,42 @@ class VehicleService
         }
 
         return $vehicle;
+    }
+
+    function getDeductionsByVehicleType(VehicleTypeEnum $vehicleType): array
+    {
+        $truckDeductions = [
+            DeductionTypeDriver::SUNDAY_ALLOWANCE,
+            DeductionTypeDriver::EARLY_NIGHT_ALLOWANCE,
+            DeductionTypeDriver::MOOC_SHORT_RUN,
+            DeductionTypeDriver::LO_ALLOWANCE,
+            DeductionTypeDriver::SELF_TOLL,
+            DeductionTypeDriver::TOLL_FEE,
+            DeductionTypeDriver::OTHER_COST,
+            DeductionTypeDriver::LOADING_BONUS,
+            DeductionTypeDriver::EXTRA_TOLL,
+        ];
+
+        $containerDeductions = [
+            DeductionTypeDriver::ALLOWANCE_DRIVER_2,
+            DeductionTypeDriver::ALLOWANCE_DRIVER_3,
+            DeductionTypeDriver::SUNDAY_ALLOWANCE,
+            DeductionTypeDriver::EARLY_NIGHT_ALLOWANCE,
+            DeductionTypeDriver::LONG_TRIP_ALLOWANCE,
+            DeductionTypeDriver::LOADER,
+            DeductionTypeDriver::LO_ALLOWANCE,
+            DeductionTypeDriver::DAY_MEAL_ALLOWANCE,
+            DeductionTypeDriver::DINNER_ALLOWANCE,
+            DeductionTypeDriver::TOLL_FEE,
+            DeductionTypeDriver::OTHER_COST,
+        ];
+
+        $allDeductions = DeductionTypeDriver::cases();
+
+        return match ($vehicleType) {
+            VehicleTypeEnum::BOX_TRUCK => $truckDeductions,
+            VehicleTypeEnum::CONTAINER => $containerDeductions,
+            default => $allDeductions,
+        };
     }
 }
