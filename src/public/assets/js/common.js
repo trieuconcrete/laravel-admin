@@ -214,7 +214,7 @@ $(document).ready(function() {
         const currentValueShipment = $vehicleSelectShipment.val();
 
         $vehicleSelect.empty().append('<option value="">Chọn phương tiện</option>');
-         $vehicleSelectShipment.empty().append('<option value="">Chọn phương tiện</option>');
+        $vehicleSelectShipment.empty().append('<option value="">Chọn phương tiện</option>');
 
         if (vehicles && vehicles.length > 0) {
             vehicles.forEach(function(vehicle) {
@@ -228,7 +228,7 @@ $(document).ready(function() {
                 $option.attr('data-driver', vehicle.driver_name);
 
                 $vehicleSelect.append($option);
-                $vehicleSelectShipment.append($optShipment);
+                $vehicleSelectShipment.append($option);
             });
 
             // Restore selection if possible
