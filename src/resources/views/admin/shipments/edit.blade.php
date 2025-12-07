@@ -559,7 +559,7 @@
                                                     <div class="row">
                                                         <div class="col-md-6">
                                                              <label class="form-label">Phương tiện<span class="text-danger">*</span></label>
-                                                            <select class="form-select" name="vehicle_id" id="vehicles">
+                                                            <select class="form-select" name="vehicle_id" id="shipmentDetail_vehicles">
                                                                 <option value="">Chọn phương tiện</option>
                                                                 @foreach($vehicles as $vehicle)
                                                                     <option value="{{ (int)$vehicle->vehicle_id }}" @selected(old('vehicle_id', $shipment->vehicle_id) == (int)$vehicle->vehicle_id)>{{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}</option>
