@@ -339,30 +339,26 @@
                                                 </div>
                                             </div>
                                             <div class="row mb-3" id="tripInfoSection">
-                                                <div class="row mb-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
-                                                        <input type="hidden" class="hidden" id="total-amount-edit" value="{{ old('unit_price', isset($templateData['unit_price']) ? $templateData['unit_price'] : '') }}">
-                                                        <input type="text" id="total-amount" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $templateData['unit_price'] ?? '') }}">
-                                                        @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Số lượng chuyến</label>
-                                                        <input type="text" class="form-control float-input" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $templateData['trip_count'] ?? 1) }}">
-                                                        @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
+                                                    <input type="hidden" class="hidden" id="total-amount-edit" value="{{ old('unit_price', isset($templateData['unit_price']) ? $templateData['unit_price'] : '') }}">
+                                                    <input type="text" id="total-amount" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $templateData['unit_price'] ?? '') }}">
+                                                    @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Số KM</label>
-                                                        <input type="number" class="form-control" placeholder="Nhập số KM" name="distance" value="{{ old('distance', $templateData['distance'] ?? '') }}">
-                                                        @error('distance')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Khối lượng chuyến (tấn)</label>
-                                                        <input type="text" class="form-control float-input" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $templateData['cargo_weight'] ?? '') }}">
-                                                        @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Số lượng chuyến</label>
+                                                    <input type="text" class="form-control float-input" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $templateData['trip_count'] ?? 1) }}">
+                                                    @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Số KM</label>
+                                                    <input type="number" class="form-control" placeholder="Nhập số KM" name="distance" value="{{ old('distance', $templateData['distance'] ?? '') }}">
+                                                    @error('distance')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Khối lượng chuyến (tấn)</label>
+                                                    <input type="text" class="form-control float-input" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $templateData['cargo_weight'] ?? '') }}">
+                                                    @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
                                             <!-- End -->
@@ -465,34 +461,33 @@
                                                     </table>
                                                 </div>
                                             </div>
-                                            <div class="mb-3 bg-light p-3">
-                                                <label class="form-label fs-5">Chi phí chuyến xe</label> <small class="text-muted">Chi phí khách hàng trả cho HPL</small>
-                                                <div class="table-responsive">
-                                                    <table class="table">
-                                                        <thead>
-                                                            <tr>
-                                                                @foreach($deductionTypes as $type)
-                                                                    <th>{{ $type->name }}</th>
-                                                                @endforeach
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                @foreach($deductionTypes as $type)
-                                                                    <td>
-                                                                        <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
-                                                                        @if($type->name === 'Ghi chú')
-                                                                            <textarea name="deductions[{{ $type->id }}]">{{ old('deductions.'.$type->id, $templateData['deductions'][$type->id] ?? '') }}</textarea>
-                                                                        @else
-                                                                            <input type="text" name="deductions[{{ $type->id }}]" value="{{ old('deductions.'.$type->id, $templateData['deductions'][$type->id] ?? '') }}" class="form-control unit-input">
-                                                                        @endif
-                                                                        @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
-                                                                    </td>
-                                                                @endforeach
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                            <div class="row">
+                                                @foreach($deductionTypes as $type)
+                                                    <div class="col-md-3 mb-3">
+                                                        <label class="form-label first-letter-cap">{{ $type->name }}</label>
+                                                        <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
+                                                        @if($type->name === 'Ghi chú')
+                                                            <textarea
+                                                                class="form-control"
+                                                                name="deductions[{{ $type->id }}]"
+                                                                placeholder="Nhập ghi chú"
+                                                                rows="2"
+                                                            >{{ old('deductions.'.$type->id, $templateData['deductions'][$type->id] ?? '') }}</textarea>
+                                                        @else
+                                                            <input
+                                                                type="text"
+                                                                class="form-control unit-input"
+                                                                name="deductions[{{ $type->id }}]"
+                                                                value="{{ old('deductions.'.$type->id, $templateData['deductions'][$type->id] ?? '') }}"
+                                                                placeholder="Nhập giá trị"
+                                                            >
+                                                        @endif
+
+                                                        @error('deductions.'.$type->id)
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                @endforeach
                                             </div>
                                             <div class="row mb-3">
                                                 <div class="col-md-3">

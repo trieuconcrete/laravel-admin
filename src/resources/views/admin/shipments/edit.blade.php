@@ -206,7 +206,7 @@
                                                                     <option value="">Chọn phương tiện</option>
                                                                     @foreach($vehicles as $vehicle)
                                                                         <option value="{{ (int)$vehicle->vehicle_id }}"
-                                                                            {{ old('vehicle_id', $templateData['vehicle_id'] ?? '') == (int)$vehicle->vehicle_id ? 'selected' : '' }}>
+                                                                            {{ old('vehicle_id', $shipment['vehicle_id'] ?? '') == (int)$vehicle->vehicle_id ? 'selected' : '' }}>
                                                                             {{ $vehicle->plate_number . '-' . $vehicle->vehicleType->name }}
                                                                         </option>
                                                                     @endforeach
@@ -219,11 +219,11 @@
                                                             <div class="col-md-6">
                                                                 <label class="form-label">Trạng thái <span class="text-danger">*</span></label>
                                                                 <select class="form-select" name="status" required>
-                                                                    <option value="pending" @selected(old('status', $templateData['status'] ?? 'pending') == 'pending')>Tạo mới</option>
-                                                                    <option value="in_transit" @selected(old('status', $templateData['status'] ?? null) == 'in_transit')>Đang vận chuyển</option>
-                                                                    <option value="cancelled" @selected(old('status', $templateData['status'] ?? null) == 'cancelled')>Đã hủy</option>
-                                                                    <option value="delayed" @selected(old('status', $templateData['status'] ?? null) == 'delayed')>Bị trễ</option>
-                                                                    <option value="completed" @selected(old('status', $templateData['status'] ?? null) == 'completed')>Hoàn thành</option>
+                                                                    <option value="pending" @selected(old('status', $shipment['status'] ?? 'pending') == 'pending')>Tạo mới</option>
+                                                                    <option value="in_transit" @selected(old('status', $shipment['status'] ?? null) == 'in_transit')>Đang vận chuyển</option>
+                                                                    <option value="cancelled" @selected(old('status', $shipment['status'] ?? null) == 'cancelled')>Đã hủy</option>
+                                                                    <option value="delayed" @selected(old('status', $shipment['status'] ?? null) == 'delayed')>Bị trễ</option>
+                                                                    <option value="completed" @selected(old('status', $shipment['status'] ?? null) == 'completed')>Hoàn thành</option>
                                                                 </select>
                                                             </div>
                                                         </div>
@@ -286,18 +286,6 @@
                                                     <label class="form-label">Giờ đến</label>
                                                     <input type="time" class="form-control" name="end_time" value="{{ old('end_time', $shipment->end_time) }}">
                                                     @error('end_time')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Số KM</label>
-                                                    <input type="text" class="form-control" placeholder="Nhập số KM" name="distance" value="{{ old('distance', $shipment->distance) }}">
-                                                    @error('distance')<span class="text-danger">{{ $message }}</span>@enderror
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label">Khối lượng chuyến (tấn)</label>
-                                                    <input type="text" class="form-control float-input" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $shipment->cargo_weight) }}">
-                                                    @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
                                             <!-- Additional fields for origin and destination -->
@@ -376,30 +364,26 @@
                                                 </div>
                                             </div>
                                             <div class="row mb-3" id="tripInfoSection">
-                                                <div class="row mb-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
-                                                        <input type="hidden" class="hidden" id="total-amount-edit" value="{{ old('unit_price', isset($templateData['unit_price']) ? $templateData['unit_price'] : '') }}">
-                                                        <input type="text" id="total-amount" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $templateData['unit_price'] ?? '') }}">
-                                                        @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Số lượng chuyến</label>
-                                                        <input type="text" class="form-control float-input" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $templateData['trip_count'] ?? 1) }}">
-                                                        @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Giá chuyến <span class="text-danger">*</span></label>
+                                                    <input type="hidden" class="hidden" id="total-amount-edit" value="{{ old('unit_price', isset($shipment['unit_price']) ? $shipment['unit_price'] : '') }}">
+                                                    <input type="text" id="total-amount" class="form-control unit-input" placeholder="Nhập giá chuyến" name="unit_price" value="{{ old('unit_price', $shipment['unit_price'] ?? '') }}">
+                                                    @error('unit_price')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
-                                                <div class="row">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Số KM</label>
-                                                        <input type="number" class="form-control" placeholder="Nhập số KM" name="distance" value="{{ old('distance', $templateData['distance'] ?? '') }}">
-                                                        @error('distance')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label">Khối lượng chuyến (tấn)</label>
-                                                        <input type="text" class="form-control float-input" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $templateData['cargo_weight'] ?? '') }}">
-                                                        @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Số lượng chuyến</label>
+                                                    <input type="text" class="form-control float-input" placeholder="Nhập số lượng chuyến" name="trip_count" value="{{ old('trip_count', $shipment['trip_count'] ?? 1) }}">
+                                                    @error('trip_count')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Số KM</label>
+                                                    <input type="number" class="form-control" placeholder="Nhập số KM" name="distance" value="{{ old('distance', $shipment['distance'] ?? '') }}">
+                                                    @error('distance')<span class="text-danger">{{ $message }}</span>@enderror
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Khối lượng chuyến (tấn)</label>
+                                                    <input type="text" class="form-control float-input" placeholder="Nhập khối lượng" name="cargo_weight" value="{{ old('cargo_weight', $shipment['cargo_weight'] ?? '') }}">
+                                                    @error('cargo_weight')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>
                                             <!-- End -->
@@ -499,40 +483,41 @@
                                                     </table>
                                                 </div>
                                             </div>
-                                            <div class="mb-3 bg-light p-3">
-                                                <label class="form-label fs-5">Chi phí chuyến xe</label> <small class="text-muted">Chi phí khách hàng trả cho HPL</small>
-                                                <div class="table-responsive">
-                                                    <table class="table">
-                                                        <thead>
-                                                            <tr>
-                                                                @foreach($deductionTypes as $type)
-                                                                    <th>{{ $type->name }}</th>
-                                                                @endforeach
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                @foreach($deductionTypes as $type)
-                                                                    <td>
-                                                                        <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
-                                                                        @if($type->name === 'Ghi chú')
-                                                                            <textarea class="form-control form-control-sm" name="deductions[{{ $type->id }}]" rows="3" placeholder="Nhập ghi chú...">{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->notes : '') }}</textarea>
-                                                                        @else
-                                                                            <input type="text" class="form-control form-control-sm deduction-input" name="deductions[{{ $type->id }}]" min="0" value="{{ old('deductions.'.$type->id, isset($shipmentDeductions[$type->id]) ? $shipmentDeductions[$type->id]->amount : '') }}" class="form-control unit-input">
-                                                                        @endif
-                                                                        @error('deductions.'.$type->id)<span class="text-danger">{{ $message }}</span>@enderror
-                                                                    </td>
-                                                                @endforeach
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                            <div class="row g-3">
+                                                @foreach($deductionTypes as $type)
+                                                    <div class="col-md-3 mb-3">
+                                                        <label class="form-label first-letter-cap">{{ $type->name }}</label>
+                                                        <input type="hidden" name="deduction_type_ids[]" value="{{ $type->id }}">
+                                                        @if($type->name === 'Ghi chú')
+                                                            <textarea
+                                                                class="form-control"
+                                                                name="deductions[{{ $type->id }}]"
+                                                                rows="3"
+                                                                placeholder="Nhập ghi chú..."
+                                                            >{{ old('deductions.'.$type->id, $shipmentDeductions[$type->id]->notes ?? '') }}</textarea>
+
+                                                        @else
+                                                            <input
+                                                                type="text"
+                                                                class="form-control unit-input"
+                                                                name="deductions[{{ $type->id }}]"
+                                                                value="{{ old('deductions.'.$type->id, $shipmentDeductions[$type->id]->amount ?? '') }}"
+                                                                placeholder="Nhập giá trị..."
+                                                            >
+                                                        @endif
+
+                                                        @error('deductions.'.$type->id)
+                                                            <span class="text-danger">{{ $message }}</span>
+                                                        @enderror
+                                                    </div>
+                                                @endforeach
+
                                             </div>
                                             <div class="row mb-3">
                                                 <div class="col-md-3">
                                                     <label class="form-label">Thành tiền</label>
-                                                    <input type="hidden" class="hidden" id="trip-total-edit" value="{{ old('trip_total', isset($templateData['trip_total']) ? $templateData['trip_total'] : '') }}">
-                                                    <input type="text" id="trip-total" class="form-control unit-input" placeholder="Tổng thành tiền" name="trip_total" value="{{ old('trip_total', $templateData['trip_total'] ?? '') }}">
+                                                    <input type="hidden" class="hidden" id="trip-total-edit" value="{{ old('trip_total', isset($shipment['trip_total']) ? $shipment['trip_total'] : '') }}">
+                                                    <input type="text" id="trip-total" class="form-control unit-input" placeholder="Tổng thành tiền" name="trip_total" value="{{ old('trip_total', $shipment['trip_total'] ?? '') }}">
                                                     @error('trip_total')<span class="text-danger">{{ $message }}</span>@enderror
                                                 </div>
                                             </div>

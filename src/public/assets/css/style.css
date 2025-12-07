@@ -15,3 +15,11 @@ img.object-cover {
 .table-fixed {
     table-layout: fixed;
 }
+
+.first-letter-cap {
+    text-transform: lowercase;
+}
+
+.first-letter-cap::first-letter {
+    text-transform: uppercase;
+}
