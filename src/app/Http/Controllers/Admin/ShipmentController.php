@@ -123,6 +123,10 @@ class ShipmentController extends Controller
             logger('Users loaded in create method:', ['count' => count($users), 'users' => $users]);
         }
 
+        if ($request->template_id || $request->clone_from) {
+            session()->forget('_old_input');
+        }
+
         return view('admin.shipments.create', compact(
             'customers',
             'vehicles',
