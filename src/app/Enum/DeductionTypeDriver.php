@@ -19,4 +19,7 @@ enum DeductionTypeDriver: int
     case EXTRA_TOLL = 21;
     case MOOC_SHORT_RUN = 22;
     case LOADING_BONUS = 23;
+    case EARLY_NIGHT_EXTRA = 24;
+    case ADVANCE_MONEY = 25;
+    case POLICE_FEE = 26;
 }

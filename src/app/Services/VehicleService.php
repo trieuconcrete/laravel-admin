@@ -190,19 +190,20 @@ class VehicleService
 
     function getDeductionsByVehicleType(VehicleTypeEnum $vehicleType): array
     {
-        $truckDeductions = [
+        $containerDeductions = [
             DeductionTypeDriver::SUNDAY_ALLOWANCE,
-            DeductionTypeDriver::EARLY_NIGHT_ALLOWANCE,
             DeductionTypeDriver::MOOC_SHORT_RUN,
             DeductionTypeDriver::LO_ALLOWANCE,
-            DeductionTypeDriver::SELF_TOLL,
             DeductionTypeDriver::TOLL_FEE,
             DeductionTypeDriver::OTHER_COST,
             DeductionTypeDriver::LOADING_BONUS,
             DeductionTypeDriver::EXTRA_TOLL,
+            DeductionTypeDriver::ADVANCE_MONEY,
+            DeductionTypeDriver::POLICE_FEE,
+            DeductionTypeDriver::EARLY_NIGHT_EXTRA,
         ];
 
-        $containerDeductions = [
+        $truckDeductions = [
             DeductionTypeDriver::ALLOWANCE_DRIVER_2,
             DeductionTypeDriver::ALLOWANCE_DRIVER_3,
             DeductionTypeDriver::SUNDAY_ALLOWANCE,
@@ -213,6 +214,7 @@ class VehicleService
             DeductionTypeDriver::DAY_MEAL_ALLOWANCE,
             DeductionTypeDriver::DINNER_ALLOWANCE,
             DeductionTypeDriver::TOLL_FEE,
+            DeductionTypeDriver::ADVANCE_MONEY,
             DeductionTypeDriver::OTHER_COST,
         ];
 

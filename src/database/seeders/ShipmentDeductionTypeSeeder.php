@@ -12,7 +12,7 @@ class ShipmentDeductionTypeSeeder extends Seeder
         if (!app()->has('seeder.skip_truncate')) {
             ShipmentDeductionType::truncate();
         }
-        
+
         ShipmentDeductionType::whereNotNull('id')->update([
             'status' => 'inactive',
         ]);
@@ -22,7 +22,7 @@ class ShipmentDeductionTypeSeeder extends Seeder
         ];
         // Phụ cấp cho tài xế
         $driverAndBusboyTypes = [
-            'PHỤ CẤP TÀI 2', 'PHỤ CẤP TÀI 3', 'BỐC XẾP', 'PHÍ CẦU ĐƯỜNG', 'PHỤ CẤP CHỦ NHẬT', 'PHỤ CẤP ĐI XA', 'PHỤ CẤP SỚM/ĐÊM', 'PHỤ CẤP LƠ', 'PHỤ CẤP CƠM TỐI', 'PHỤ CẤP CƠM NGÀY', 'CHI PHÍ KHÁC', 'TIỀN TỰ CẦU', 'TIỀN CẦU THÊM', 'PC CHẠY MOOC LÙN', 'BỒI DƯỞNG LÊN XUỐNG HÀNG',
+            'PHỤ CẤP TÀI 2', 'PHỤ CẤP TÀI 3', 'BỐC XẾP', 'PHÍ CẦU ĐƯỜNG', 'PHỤ CẤP CHỦ NHẬT', 'PHỤ CẤP ĐI XA', 'PHỤ CẤP SỚM/ĐÊM', 'PHỤ CẤP LƠ', 'PHỤ CẤP CƠM TỐI', 'PHỤ CẤP CƠM NGÀY', 'CHI PHÍ KHÁC', 'TIỀN TỰ CẦU', 'TIỀN CẦU THÊM', 'PC CHẠY MOOC LÙN', 'BỒI DƯỞNG LÊN XUỐNG HÀNG', 'ĐI SỚM - KHUYA ĐÊM', 'TIỀN ỨNG TRƯỚC', 'PHÍ CÔNG AN'
         ];
         // Chi phí thuê xe
         $carRentalexpenseTypes = [
