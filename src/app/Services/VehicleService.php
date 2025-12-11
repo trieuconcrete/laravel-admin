@@ -197,6 +197,7 @@ class VehicleService
             DeductionTypeDriver::TOLL_FEE,
             DeductionTypeDriver::OTHER_COST,
             DeductionTypeDriver::LOADING_BONUS,
+            DeductionTypeDriver::SELF_TOLL,
             DeductionTypeDriver::EXTRA_TOLL,
             DeductionTypeDriver::POLICE_FEE,
             DeductionTypeDriver::EARLY_NIGHT_EXTRA,
