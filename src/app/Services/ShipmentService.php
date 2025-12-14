@@ -111,7 +111,7 @@ class ShipmentService
 
     public function createShipment($data)
     {
-        Log::info($data);
+        Log::info('Dữ liệu tạo shipment: ',$data);
         return DB::transaction(function () use ($data) {
             // 1. Tạo shipment chính
             $shipmentData = [
@@ -146,6 +146,13 @@ class ShipmentService
                 'unit_price' => $data['unit_price'] ?? null,
                 'cargo_weight' => $data['cargo_weight'] ?? null,
                 'trip_count' => $data['trip_count'] ?? null,
+                // trip-specific fields
+                'trip_ton' => $data['trip_ton'] ?? null,
+                'trip_ton2' => $data['trip_ton2'] ?? null,
+                'trip_ton3' => $data['trip_ton3'] ?? null,
+                'trip_price' => $data['trip_price'] ?? null,
+                'trip_price2' => $data['trip_price2'] ?? null,
+                'trip_price3' => $data['trip_price3'] ?? null,
                 'overtime_rate' => $data['overtime_rate'] ?? 50000,
                 'is_overtime_at_noon' => $data['is_overtime_at_noon'] ?? false,
                 'created_by' => auth('admin')->id(),

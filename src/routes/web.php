@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\ShipmentDeductionTypeController;
 use App\Http\Controllers\Admin\PostController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\TagController;
+use App\Http\Controllers\Admin\TripRouteController;
 
 Route::get('/', [HomepageController::class, 'index'])->name('homepage');
 Route::get('/trangchu', [HomepageController::class, 'index1'])->name('homepage1');
@@ -157,6 +158,16 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
     // API routes inside admin
     Route::get('/api/vehicles/by-car-rental', [VehicleController::class, 'getByCarRental'])
         ->name('api.vehicles.by-car-rental');
+
+    Route::prefix('trip-routes')->name('trip-routes.')->group(function () {
+        Route::get('/', [TripRouteController::class, 'index'])->name('index');
+        Route::get('/{tripRoute}', [TripRouteController::class, 'show'])->name('show');
+        Route::get('/create', [TripRouteController::class, 'create'])->name('create');
+        Route::post('/', [TripRouteController::class, 'store'])->name('store');
+        Route::get('/{tripRoute}/edit', [TripRouteController::class, 'edit'])->name('edit');
+        Route::put('/{tripRoute}', [TripRouteController::class, 'update'])->name('update');
+        Route::delete('/{tripRoute}', [TripRouteController::class, 'destroy'])->name('destroy');
+    });
 });
 
 

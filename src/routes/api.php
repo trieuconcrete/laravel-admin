@@ -37,3 +37,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/driver/shipments', [DriverShipmentController::class, 'index']);
     Route::get('/driver/shipments/{shipment}', [DriverShipmentController::class, 'show']);
 });
+
+// Trip routes suggestions (for autocomplete when entering origin/destination)
+use App\Http\Controllers\Api\TripRouteController;
+
+Route::get('/trip-routes/suggest', [TripRouteController::class, 'suggest']);
+Route::get('/trip-routes/destinations-by-origin', [TripRouteController::class, 'destinationsByOrigin']);

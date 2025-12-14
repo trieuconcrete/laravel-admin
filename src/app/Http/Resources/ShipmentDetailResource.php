@@ -46,6 +46,14 @@ class ShipmentDetailResource extends JsonResource
             'product_name2' => $s->product_name2,
             'product_name3' => $s->product_name3,
 
+            // Trip-specific fields
+            'trip_ton' => (float) $s->trip_ton,
+            'trip_ton2' => (float) $s->trip_ton2,
+            'trip_ton3' => (float) $s->trip_ton3,
+            'trip_price' => (float) $s->trip_price,
+            'trip_price2' => (float) $s->trip_price2,
+            'trip_price3' => (float) $s->trip_price3,
+
             // Thông tin liên quan
             'vehicle' => $this->when($this->relationLoaded('vehicle') && $s->vehicle, [
                 'id' => $s->vehicle->vehicle_id,

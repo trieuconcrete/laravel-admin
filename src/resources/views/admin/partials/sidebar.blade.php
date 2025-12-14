@@ -76,6 +76,11 @@
                         <i class="ri-currency-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.salary_management') }}</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link menu-link" href="{{ route('admin.trip-routes.index') }}">
+                        <i class="ri-map-line"></i> </i> <span data-key="t-trips">{{ __('sidebar.trip_route_management') }}</span>
+                    </a>
+                </li>
                 {{-- <li class="nav-item">
                     <a class="nav-link menu-link" href="{{ route('admin.posts.index') }}">
                         <i class="ri-news-fill"></i> </i> <span data-key="t-trips">{{ __('sidebar.post') }}</span>

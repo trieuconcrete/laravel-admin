@@ -42,6 +42,12 @@ class Shipment extends Model
         'address_destination',  // điểm đến địa chỉ 1
         'address_destination2', // điểm đến địa chỉ 2
         'address_destination3', // điểm đến địa chỉ 3
+        'trip_ton', // khối lượng chuyến hàng
+        'trip_ton2', // khối lượng chuyến hàng 2
+        'trip_ton3', // khối lượng chuyến hàng 3
+        'trip_price', // giá tiền theo lộ trình
+        'trip_price2', // giá tiền theo lộ trình 2
+        'trip_price3', // giá tiền theo lộ trình 3
         'product_name', // tên hàng hóa
         'product_name2', // tên hàng hóa 2
         'product_name3', // tên hàng hóa 3
@@ -103,6 +109,12 @@ class Shipment extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'trip_ton' => 'decimal:2',
+        'trip_ton2' => 'decimal:2',
+        'trip_ton3' => 'decimal:2',
+        'trip_price' => 'decimal:2',
+        'trip_price2' => 'decimal:2',
+        'trip_price3' => 'decimal:2',
 
         // Từ CarRentalVehicleLog
         'start_time' => 'string', // time
@@ -278,32 +290,6 @@ class Shipment extends Model
     public function shipmentDeductionTypes()
     {
         return $this->hasMany(ShipmentDeductionType::class);
-    }
-
-    protected function departureTime(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value
-                ? Carbon::parse($value)->format('Y-m-d')
-                : null,
-
-            set: fn ($value) => $value
-                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
-                : null,
-        );
-    }
-
-    protected function estimatedArrivalTime(): Attribute
-    {
-        return Attribute::make(
-            get: fn ($value) => $value
-                ? Carbon::parse($value)->format('Y-m-d')
-                : null,
-
-            set: fn ($value) => $value
-                ? Carbon::createFromFormat('d/m/Y', $value)->format('Y-m-d')
-                : null,
-        );
     }
 
     /**
