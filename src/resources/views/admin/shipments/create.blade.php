@@ -266,31 +266,38 @@
                                             </div>
                                             <!-- Additional fields for origin and destination -->
                                             <div class="origin-destination bg-light p-3 mb-3">
-                                                <label class="form-label fs-5">Thông tin lộ trình</label>
+                                                <div class="row justify-content-between align-items-center">
+                                                    <div class="col-auto">
+                                                        <h4 class="form-label fs-5">Thông tin lộ trình</h4>
+                                                    </div>
+                                                    <div class="col-auto">
+                                                        <button id="add-trip-route" type="button" class="btn btn-sm btn-outline-primary ms-2">
+                                                            Thêm lộ trình
+                                                        </button>
+                                                    </div>
+                                                </div>
                                                 <div class="row mb-3">
                                                     <div class="col-md-3">
                                                         <label class="form-label">Điểm đi<span class="text-danger">*</span></label>
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đi" name="origin" value="{{ old('origin', $templateData['origin'] ?? '') }}" required>
+                                                        <input id="origin" list="origin-list" type="text" class="form-control" placeholder="Nhập điểm đi" name="origin" value="{{ old('origin', $templateData['origin'] ?? '') }}" required>
+                                                        <datalist id="origin-list"></datalist>
                                                         @error('origin')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
-                                                    <div class="col-md-2">
-                                                        <label class="form-label">Địa chỉ điểm đi</label>
-                                                        <input type="text" class="form-control" placeholder="Nhập địa chỉ điểm đi" name="address_origin" value="{{ old('address_origin', $templateData['address_origin'] ?? '') }}">
-                                                        @error('address_origin')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-2">
+                                                    <div class="col-md-3">
                                                         <label class="form-label">Điểm đến</label>
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 1" name="destination" value="{{ old('destination', $templateData['destination'] ?? '') }}">
+                                                        <input id="destination" list="destination-list" type="text" class="form-control" placeholder="Nhập điểm đến 1" name="destination" value="{{ old('destination', $templateData['destination'] ?? '') }}">
+                                                        <datalist id="destination-list"></datalist>
                                                         @error('destination')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
-                                                    <div class="col-md-2">
-                                                        <label class="form-label">Địa chỉ điểm đến</label>
-                                                        <input type="text" class="form-control" placeholder="Nhập địa chỉ điểm đến" name="address_destination" value="{{ old('address_destination', $templateData['address_destination'] ?? '') }}">
-                                                        @error('address_destination')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    <div class="col-md-3">
+                                                        <label class="form-label">Số tấn</label>
+                                                        <input id="tons" type="number" class="form-control unit-input" placeholder="Nhập số tấn" name="trip_ton" value="{{ old('trip_ton', $templateData['trip_ton'] ?? '') }}">
+                                                        @error('trip_ton')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <label class="form-label">Tên hàng hóa</label>
-                                                        <input type="text" class="form-control" placeholder="Nhập tên hàng hóa" name="product_name" value="{{ old('product_name', $templateData['product_name'] ?? '') }}">
+                                                        <label class="form-label">Giá tiền</label>
+                                                        <input id="trip_price" type="text" class="form-control unit-input" placeholder="Giá theo lộ trình" name="trip_price" value="{{ old('trip_price', $templateData['trip_price'] ?? '') }}">
+                                                        @error('trip_price')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
@@ -299,20 +306,19 @@
                                                         <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 2" name="origin2" value="{{ old('origin2', $templateData['origin2'] ?? '') }}">
                                                         @error('origin2')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
-                                                    <div class="col-md-2">
-                                                        <input type="text" class="form-control" placeholder="Nhập địa chỉ điểm đi" name="address_origin2" value="{{ old('address_origin2', $templateData['address_origin2'] ?? '') }}">
-                                                        @error('address_origin2')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-2">
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 2" name="destination2" value="{{ old('destination2', $templateData['destination2'] ?? '') }}">
+                                                    <div class="col-md-3">
+                                                        <input id="destination2" list="destination-list-2" type="text" class="form-control" placeholder="Nhập điểm đến 2" name="destination2" value="{{ old('destination2', $templateData['destination2'] ?? '') }}">
+                                                        <datalist id="destination-list-2"></datalist>
                                                         @error('destination2')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
-                                                    <div class="col-md-2">
-                                                        <input type="text" class="form-control" placeholder="Nhập địa chỉ điểm đến 2" name="address_destination2" value="{{ old('address_destination2', $templateData['address_destination2'] ?? '') }}">
-                                                        @error('address_destination2')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    <div class="col-md-3">
+                                                        <input id="tons2" type="number" class="form-control unit-input" placeholder="Nhập số tấn 2" name="trip_ton2" value="{{ old('trip_ton2', $templateData['trip_ton2'] ?? '') }}">
+                                                        @error('trip_ton2')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <input type="text" class="form-control" placeholder="Nhập tên hàng hóa 2" name="product_name2" value="{{ old('product_name2', $templateData['product_name2'] ?? '') }}">
+                                                        <label class="form-label visually-hidden">Giá tiền 2</label>
+                                                        <input id="trip_price2" type="text" class="form-control unit-input" placeholder="Giá theo lộ trình 2" name="trip_price2" value="{{ old('trip_price2', $templateData['trip_price2'] ?? '') }}">
+                                                        @error('trip_price2')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
                                                 </div>
                                                 <div class="row mb-3">
@@ -321,20 +327,19 @@
                                                         <input hidden type="text" class="form-control" placeholder="Nhập điểm đi 3" name="origin3" value="{{ old('origin3', $templateData['origin3'] ?? '') }}">
                                                         @error('origin3')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
-                                                    <div class="col-md-2">
-                                                        <input type="text" class="form-control" placeholder="Nhập địa chỉ điểm đi" name="address_origin3" value="{{ old('address_origin3', $templateData['address_origin3'] ?? '') }}">
-                                                        @error('address_origin3')<span class="text-danger">{{ $message }}</span>@enderror
-                                                    </div>
-                                                    <div class="col-md-2">
-                                                        <input type="text" class="form-control" placeholder="Nhập điểm đến 3" name="destination3" value="{{ old('destination3', $templateData['destination3'] ?? '') }}">
+                                                    <div class="col-md-3">
+                                                        <input id="destination3" list="destination-list-3" type="text" class="form-control" placeholder="Nhập điểm đến 3" name="destination3" value="{{ old('destination3', $templateData['destination3'] ?? '') }}">
+                                                        <datalist id="destination-list-3"></datalist>
                                                         @error('destination3')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
-                                                    <div class="col-md-2">
-                                                        <input type="text" class="form-control" placeholder="Nhập địa chỉ điểm đến 3" name="address_destination3" value="{{ old('address_destination3', $templateData['address_destination3'] ?? '') }}">
-                                                        @error('address_destination3')<span class="text-danger">{{ $message }}</span>@enderror
+                                                    <div class="col-md-3">
+                                                        <input id="tons3" type="number" class="form-control unit-input" placeholder="Nhập số tấn 3" name="trip_ton3" value="{{ old('trip_ton3', $templateData['trip_ton3'] ?? '') }}">
+                                                        @error('trip_ton3')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
                                                     <div class="col-md-3">
-                                                        <input type="text" class="form-control" placeholder="Nhập tên hàng hóa 3" name="product_name3" value="{{ old('product_name3', $templateData['product_name3'] ?? '') }}">
+                                                        <label class="form-label visually-hidden">Giá tiền 3</label>
+                                                        <input id="trip_price3" type="text" class="form-control unit-input" placeholder="Giá theo lộ trình 3" name="trip_price3" value="{{ old('trip_price3', $templateData['trip_price3'] ?? '') }}">
+                                                        @error('trip_price3')<span class="text-danger">{{ $message }}</span>@enderror
                                                     </div>
                                                 </div>
                                             </div>
@@ -759,6 +764,8 @@
         </div>
     </div>
 </div>
+
+@include('admin.trip-routes.modal')
 
 @endsection
 
@@ -1200,7 +1207,56 @@
 
     });
 </script>
+<script src="{{ asset('js/trip-routes-autocomplete.js') }}"></script>
 <script src="{{ asset('js/shipment-goods.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        $('#trip-route-form').on('submit', function(e) {
+            e.preventDefault();
+            var $form = $(this);
+            $form.find('.is-invalid').removeClass('is-invalid');
+            $form.find('.invalid-feedback').remove();
+
+            var url = $form.attr('action');
+            var data = $form.serialize();
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: data,
+                success: function(response) {
+                    $('#tripRouteModal').modal('hide');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Thành công',
+                        text: response.message || 'Thao tác thành công',
+                    });
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        var errors = xhr.responseJSON.errors || {};
+                        $.each(errors, function(key, msgs) {
+                            var $input = $form.find('[name="' + key + '"]');
+                            if ($input.length) {
+                                $input.addClass('is-invalid');
+                                var msg = Array.isArray(msgs) ? msgs.join('<br>') :
+                                    msgs;
+                                if ($input.next('.invalid-feedback').length === 0) {
+                                    $input.after('<div class="invalid-feedback">' +
+                                        msg + '</div>');
+                                } else {
+                                    $input.next('.invalid-feedback').html(msg);
+                                }
+                            }
+                        });
+                    } else {
+                        Swal.fire('Lỗi', 'Đã xảy ra lỗi khi lưu lộ trình.', 'error');
+                    }
+                }
+            });
+        });
+    });
+</script>
 @endpush
 
 @push('styles')

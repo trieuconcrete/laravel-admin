@@ -215,6 +215,26 @@ class ShipmentRequest extends FormRequest
                 'cargo_weight' => str_replace(',', '', $this->cargo_weight),
             ]);
         }
+        // Remove commas from trip price and ton fields
+        if ($this->trip_price) {
+            $this->merge(['trip_price' => str_replace(',', '', $this->input('trip_price'))]);
+        }
+        if ($this->trip_price2) {
+            $this->merge(['trip_price2' => str_replace(',', '', $this->input('trip_price2'))]);
+        }
+        if ($this->trip_price3) {
+            $this->merge(['trip_price3' => str_replace(',', '', $this->input('trip_price3'))]);
+        }
+
+        if ($this->trip_ton) {
+            $this->merge(['trip_ton' => str_replace(',', '', $this->input('trip_ton'))]);
+        }
+        if ($this->trip_ton2) {
+            $this->merge(['trip_ton2' => str_replace(',', '', $this->input('trip_ton2'))]);
+        }
+        if ($this->trip_ton3) {
+            $this->merge(['trip_ton3' => str_replace(',', '', $this->input('trip_ton3'))]);
+        }
     }
 
     public function rules()
@@ -262,8 +282,8 @@ class ShipmentRequest extends FormRequest
             'product_name' => 'nullable|string|max:255',
             'product_name2' => 'nullable|string|max:255',
             'product_name3' => 'nullable|string|max:255',
-            'departure_time' => 'required|' . $this->getSystemDateFormatRule(),
-            'estimated_arrival_time' => 'nullable|' . $this->getSystemDateFormatRule() . '|after_or_equal:departure_time',
+            'departure_time' => 'required|date',
+            'estimated_arrival_time' => 'nullable|date|after_or_equal:departure_time',
             'start_time' => 'nullable|date_format:H:i',
             'end_time' => 'nullable|date_format:H:i',
             'run_date' => 'nullable|date',
@@ -275,6 +295,13 @@ class ShipmentRequest extends FormRequest
             'cargo_weight' => 'nullable|numeric|min:0',
             'trip_count' => 'nullable|numeric|min:0',
             'unit_price' => 'required|numeric|min:0',
+            // Trip-specific fields
+            'trip_ton' => 'nullable|numeric|min:0',
+            'trip_ton2' => 'nullable|numeric|min:0',
+            'trip_ton3' => 'nullable|numeric|min:0',
+            'trip_price' => 'nullable|numeric|min:0',
+            'trip_price2' => 'nullable|numeric|min:0',
+            'trip_price3' => 'nullable|numeric|min:0',
             'overtime_rate' => 'nullable|numeric|min:0',
             'is_overtime_at_noon' => 'nullable|boolean',
             'unit_price_for_car_rental' => 'nullable|numeric|min:0',
@@ -332,6 +359,13 @@ class ShipmentRequest extends FormRequest
             'product_name' => 'Tên hàng hóa',
             'product_name2' => 'Tên hàng hóa 2',
             'product_name3' => 'Tên hàng hóa 3',
+            // Trip-specific fields
+            'trip_ton' => 'Số tấn chuyến 1',
+            'trip_ton2' => 'Số tấn chuyến 2',
+            'trip_ton3' => 'Số tấn chuyến 3',
+            'trip_price' => 'Giá chuyến 1',
+            'trip_price2' => 'Giá chuyến 2',
+            'trip_price3' => 'Giá chuyến 3',
             'departure_time' => 'Thời gian khởi hành',
             'estimated_arrival_time' => 'Thời gian dự kiến đến',
             'start_time' => 'Giờ khởi hành',

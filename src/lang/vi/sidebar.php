@@ -14,5 +14,6 @@ return [
     'salary_management' => 'Quản lý lương',
     'settings' => 'Cài đặt',
     'customer_management' => 'Quản lý khách hàng',
-    'income_and_expense_management'  => 'Quản lý thu chi và công nợ'
+    'income_and_expense_management'  => 'Quản lý thu chi và công nợ',
+    'trip_route_management' => 'Quản lý lộ trình',
 ];

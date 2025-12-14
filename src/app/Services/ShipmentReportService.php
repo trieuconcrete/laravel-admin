@@ -156,6 +156,13 @@ class ShipmentReportService
                         'product_name' => $shipment->product_name ?? '', // Tên hàng
                         'product_name2' => $shipment->product_name2 ?? '',
                         'product_name3' => $shipment->product_name3 ?? '',
+                        // New trip-specific fields
+                        'trip_ton' => $shipment->trip_ton ?? 0,
+                        'trip_ton2' => $shipment->trip_ton2 ?? 0,
+                        'trip_ton3' => $shipment->trip_ton3 ?? 0,
+                        'trip_price' => $shipment->trip_price ?? 0,
+                        'trip_price2' => $shipment->trip_price2 ?? 0,
+                        'trip_price3' => $shipment->trip_price3 ?? 0,
                         'notes' => $shipment->notes,
                         'status' => $shipment->status,
                         'plate_number' => $shipment->vehicle ? $shipment->vehicle->plate_number : '',
@@ -223,10 +230,13 @@ class ShipmentReportService
         switch ($shipmentType) {
             case 3: // Xe nâng
                 $totalAmount = ($shipment->crane_price ?? 0) * ($shipment->trip_count ?? 1);
+                break;
             case 4: // Xe đường dài
                 $totalAmount = ($shipment->unit_price ?? 0) * ($shipment->distance ?? 0);
+                break;
             default: // Các loại khác
                 $totalAmount = ($shipment->unit_price ?? 0) * ($shipment->trip_count ?? 1);
+                break;
         }
         return $totalAmount + $shipment->total_expense_deductions;
     }

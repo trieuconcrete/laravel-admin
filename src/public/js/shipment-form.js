@@ -3,6 +3,12 @@
  * Contains common functions for shipment create and edit forms
  */
 
+const SHIPMENT_TYPE = Object.freeze({
+    TRIP: 1,
+    FORKLIFT: 3,
+    LONG_DISTANCE: 4,
+});
+
 // Biến để theo dõi số lượng hàng driver đã thêm vào
 let driverRowCount = 0;
 
@@ -515,6 +521,7 @@ function prepareFormBeforeSubmit(form) {
 
     // Kiểm tra checkbox "Xe HPL Thuê"
     const isCarRental = form.querySelector('input[name="is_car_rental"]')?.checked;
+    // const shipmentType = form.querySelector('input[name="shipment_type"]')?.value;
 
     // Nếu là xe HPL thuê, không cần chuẩn bị dữ liệu tài xế và lơ xe
     if (isCarRental) {
@@ -905,6 +912,8 @@ function initShipmentForm(initialDriverCount = 1) {
             removeOldAction();
 
             if (!validateShipmentForm(form)) return;
+            form.insertAdjacentHTML("beforeend", `<input type="text" name="departure_time" value="${form.querySelector('input[name="departure_time"]').dataset.backendValue}">`);
+            form.insertAdjacentHTML("beforeend", `<input type="text" name="estimated_arrival_time" value="${form.querySelector('input[name="estimated_arrival_time"]').dataset.backendValue}">`);
 
             form.submit();
         });

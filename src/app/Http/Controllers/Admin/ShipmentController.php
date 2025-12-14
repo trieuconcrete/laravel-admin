@@ -150,12 +150,6 @@ class ShipmentController extends Controller
     {
         try {
             $shipment = $this->shipmentService->createShipment($request->validated());
-            if ($request->has('save_as_template') && $request->template_name) {
-                $this->shipmentTemplateService->store(
-                    $request->template_name,
-                    $request->except(['save_as_template', 'template_name','_token', 'image', 'action'])
-                );
-            }
             if ($request->input('action') === 'save_new') {
                 $keepInput = $request->except(['save_new', '_token']);
 
@@ -164,9 +158,10 @@ class ShipmentController extends Controller
                     ->with('success', 'Đã tạo chuyến hàng. Bạn có thể nhập chuyến tiếp theo.')
                     ->withInput($keepInput);
             }
+            Log::info('Tạo chuyến hàng thành công, ID: '. $shipment->id);
             return redirect()->route('admin.shipments.edit', $shipment)->with('success', 'Tạo chuyến hàng thành công.');
         } catch (\Exception $e) {
-            Log::error('Tạo chuyến hàng thất bại: '. $e->getMessage());
+            Log::error('Dữ liệu lỗi khi tạo chuyến hàng: '. $e);
             return back()->withInput()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
