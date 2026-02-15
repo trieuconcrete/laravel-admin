@@ -9,6 +9,7 @@ class HomepageController extends Controller
 {
     public function index()
     {
-        return view('frontend.homepage');
+        $lang = app()->getLocale();
+        return view('frontend.homepage', compact('lang'));
     }
 }

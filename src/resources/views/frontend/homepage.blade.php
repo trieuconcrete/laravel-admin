@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="{{ $lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -242,18 +242,18 @@
                 // Services Section
                 'services.title': 'Dịch Vụ Của Chúng Tôi',
                 'services.subtitle': 'Chúng tôi cung cấp giải pháp toàn diện cho nhu cầu thiết kế và phát triển website của bạn',
-                'services.responsive.title': 'Responsive Design',
+                'services.responsive.title': 'Thiết kế Website Chuẩn UX/UI',
                 'services.responsive.desc': 'Website tự động thích ứng với mọi thiết bị từ mobile, tablet đến desktop, đảm bảo trải nghiệm tốt nhất cho người dùng.',
-                'services.seo.title': 'SEO Tối Ưu',
-                'services.seo.desc': 'Tối ưu hóa website để đạt thứ hạng cao trên Google, tăng khả năng tiếp cận khách hàng tiềm năng.',
-                'services.speed.title': 'Tốc Độ Cao',
-                'services.speed.desc': 'Website được tối ưu hóa để tải nhanh, cải thiện trải nghiệm người dùng và thứ hạng SEO.',
-                'services.security.title': 'Bảo Mật Cao',
-                'services.security.desc': 'Áp dụng các biện pháp bảo mật tiên tiến để bảo vệ website và dữ liệu khách hàng.',
-                'services.management.title': 'Quản Lý Dễ Dàng',
-                'services.management.desc': 'Giao diện quản trị thân thiện, dễ sử dụng, giúp bạn cập nhật nội dung một cách nhanh chóng.',
-                'services.support.title': 'Hỗ Trợ 24/7',
-                'services.support.desc': 'Đội ngũ hỗ trợ kỹ thuật luôn sẵn sàng giúp đỡ bạn mọi lúc, mọi nơi.',
+                'services.seo.title': 'Digital Marketing',
+                'services.seo.desc': 'Dịch vụ marketing số toàn diện: SEO, Google Ads, Facebook Ads, Content Marketing. Giúp doanh nghiệp tiếp cận đúng khách hàng mục tiêu.',
+                'services.speed.title': 'Tư vấn Giải pháp CNTT',
+                'services.speed.desc': 'Tư vấn chiến lược số hóa, kiến trúc hệ thống, lựa chọn công nghệ phù hợp. Giúp doanh nghiệp tối ưu hóa quy trình và nâng cao hiệu quả hoạt động.',
+                'services.security.title': 'Cho Thuê Nhân Sự IT (Freelancer)',
+                'services.security.desc': 'Cung cấp đội ngũ lập trình viên Backend, Frontend, DevOps, QA, BrSE chất lượng cao làm việc từ xa. Linh hoạt theo giờ, theo tháng, theo dự án – tiết kiệm chi phí tuyển dụng.',
+                'services.management.title': 'Quản trị Hệ thống',
+                'services.management.desc': 'Dịch vụ aws, vps, domain, SSL, backup dữ liệu. Quản trị server, tối ưu hóa hiệu năng, bảo mật hệ thống 24/7.',
+                'services.support.title': 'Phần mềm Quản lý',
+                'services.support.desc': 'Xây dựng phần mềm quản lý theo yêu cầu: ERP, CRM, HRM. Tích hợp đầy đủ tính năng, giao diện trực quan, phù hợp với quy trình doanh nghiệp.',
                 
                 // Portfolio Section
                 'portfolio.title': 'Portfolio',
@@ -276,11 +276,11 @@
                 'themes.download': 'Tải Về',
                 'themes.loadMore': 'Xem Thêm Theme',
                 'themes.whyChoose': 'Tại Sao Chọn Theme Của Chúng Tôi?',
-                'themes.feature1.title': '100% Responsive',
+                'themes.feature1.title': 'Responsive Design',
                 'themes.feature1.desc': 'Tất cả theme đều tối ưu hoàn hảo trên mọi thiết bị từ mobile đến desktop.',
                 'themes.feature2.title': 'Code Sạch & Tối Ưu',
                 'themes.feature2.desc': 'Mã nguồn được viết theo chuẩn W3C, tải nhanh và dễ tùy chỉnh.',
-                'themes.feature3.title': 'Hỗ Trợ Trọn Đời',
+                'themes.feature3.title': 'Hỗ Trợ 24/7',
                 'themes.feature3.desc': 'Nhận hỗ trợ kỹ thuật và cập nhật miễn phí trọn đời cho tất cả theme.',
                 'themes.new': 'MỚI',
                 'themes.hot': 'HOT',
@@ -331,6 +331,8 @@
                 'about.reason2': 'Tối ưu SEO và tốc độ tải trang',
                 'about.reason3': 'Bảo hành và hỗ trợ dài hạn',
                 'about.reason4': 'Giá cả cạnh tranh, minh bạch',
+                'about.reason5': 'Bảo Mật Cao',
+                'about.reason6': 'Quản Lý Dễ Dàng',
                 
                 // Contact Section
                 'contact.title': 'Liên Hệ Với Chúng Tôi',
@@ -465,11 +467,11 @@
                 'themes.download': 'Download',
                 'themes.loadMore': 'Load More Themes',
                 'themes.whyChoose': 'Why Choose Our Themes?',
-                'themes.feature1.title': '100% Responsive',
+                'themes.feature1.title': 'Responsive Design',
                 'themes.feature1.desc': 'All themes are perfectly optimized on all devices from mobile to desktop.',
                 'themes.feature2.title': 'Clean & Optimized Code',
                 'themes.feature2.desc': 'Source code written according to W3C standards, fast loading and easy to customize.',
-                'themes.feature3.title': 'Lifetime Support',
+                'themes.feature3.title': '24/7 Support',
                 'themes.feature3.desc': 'Get lifetime technical support and free updates for all themes.',
                 'themes.new': 'NEW',
                 'themes.hot': 'HOT',
@@ -520,6 +522,8 @@
                 'about.reason2': 'SEO optimization and page loading speed',
                 'about.reason3': 'Long-term warranty and support',
                 'about.reason4': 'Competitive, transparent pricing',
+                'about.reason5': 'High Security',
+                'about.reason6': 'Easy Management',
                 
                 // Contact Section
                 'contact.title': 'Contact Us',
@@ -646,20 +650,20 @@
                     
                     <!-- Language Switcher -->
                     <div class="lang-switcher">
-                        <button id="lang-toggle" class="flex items-center space-x-2 text-white hover:text-amber-300 transition-colors duration-300">
+                        <a id="lang-toggle" class="flex items-center space-x-2 text-white hover:text-amber-300 transition-colors duration-300">
                             <span class="flag-icon flag-vi" id="current-flag"></span>
                             <span id="current-lang">VI</span>
                             <i class="fas fa-chevron-down text-xs"></i>
-                        </button>
+                        </a>
                         <div id="lang-dropdown" class="lang-dropdown hidden">
-                            <div class="lang-option" data-lang="vi">
+                            <a href="{{ route('locale.switch', ['locale' => 'vi']) }}" class="lang-option" data-lang="vi">
                                 <span class="flag-icon flag-vi"></span>
                                 <span>Tiếng Việt</span>
-                            </div>
-                            <div class="lang-option" data-lang="en">
+                            </a>
+                            <a href="{{ route('locale.switch', ['locale' => 'en']) }}" class="lang-option" data-lang="en">
                                 <span class="flag-icon flag-en"></span>
                                 <span>English</span>
-                            </div>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -860,62 +864,62 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
-                    <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-mobile-alt text-2xl text-white"></i>
+                    <div class="bg-primary w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-desktop text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.responsive.title">Responsive Design</h3>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.responsive.title">Thiết kế Website Chuẩn UX/UI</h3>
                     <p class="text-gray-600 leading-relaxed" data-i18n="services.responsive.desc">
-                        Website tự động thích ứng với mọi thiết bị từ mobile, tablet đến desktop, đảm bảo trải nghiệm tốt nhất cho người dùng.
-                    </p>
-                </div>
-
-                <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
-                    <div class="bg-emerald-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-search text-2xl text-white"></i>
-                    </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.seo.title">SEO Tối Ưu</h3>
-                    <p class="text-gray-600 leading-relaxed" data-i18n="services.seo.desc">
-                        Tối ưu hóa website để đạt thứ hạng cao trên Google, tăng khả năng tiếp cận khách hàng tiềm năng.
+                        Thiết kế giao diện hiện đại, tối ưu trải nghiệm người dùng trên mọi thiết bị. Đáp ứng đa dạng nhu cầu từ website doanh nghiệp, bán hàng đến landing page quảng cáo.
                     </p>
                 </div>
 
                 <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
                     <div class="bg-amber-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-bolt text-2xl text-white"></i>
+                        <i class="fas fa-project-diagram text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.speed.title">Tốc Độ Cao</h3>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.speed.title">Tư vấn Giải pháp CNTT</h3>
                     <p class="text-gray-600 leading-relaxed" data-i18n="services.speed.desc">
-                        Website được tối ưu hóa để tải nhanh, cải thiện trải nghiệm người dùng và thứ hạng SEO.
+                        Tư vấn chiến lược số hóa, kiến trúc hệ thống, lựa chọn công nghệ phù hợp. Giúp doanh nghiệp tối ưu hóa quy trình và nâng cao hiệu quả hoạt động.
                     </p>
                 </div>
 
                 <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
-                    <div class="bg-slate-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-shield-alt text-2xl text-white"></i>
+                    <div class="bg-emerald-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-bullhorn text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.security.title">Bảo Mật Cao</h3>
-                    <p class="text-gray-600 leading-relaxed" data-i18n="services.security.desc">
-                        Áp dụng các biện pháp bảo mật tiên tiến để bảo vệ website và dữ liệu khách hàng.
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.seo.title">Digital Marketing</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.seo.desc">
+                        Dịch vụ marketing số toàn diện: SEO, Google Ads, Facebook Ads, Content Marketing. Giúp doanh nghiệp tiếp cận đúng khách hàng mục tiêu.
                     </p>
                 </div>
 
                 <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
                     <div class="bg-orange-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-cogs text-2xl text-white"></i>
+                        <i class="fas fa-laptop-code text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.management.title">Quản Lý Dễ Dàng</h3>
-                    <p class="text-gray-600 leading-relaxed" data-i18n="services.management.desc">
-                        Giao diện quản trị thân thiện, dễ sử dụng, giúp bạn cập nhật nội dung một cách nhanh chóng.
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.security.title">Cho Thuê Nhân Sự IT (Freelancer)</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.security.desc">
+                        Cung cấp đội ngũ lập trình viên Backend, Frontend, DevOps, QA, BrSE chất lượng cao làm việc từ xa. Linh hoạt theo giờ, theo tháng, theo dự án – tiết kiệm chi phí tuyển dụng.
                     </p>
                 </div>
 
                 <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
                     <div class="bg-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
-                        <i class="fas fa-headset text-2xl text-white"></i>
+                        <i class="fas fa-server text-2xl text-white"></i>
                     </div>
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.support.title">Hỗ Trợ 24/7</h3>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.management.title">Quản trị Hệ thống</h3>
+                    <p class="text-gray-600 leading-relaxed" data-i18n="services.management.desc">
+                        Dịch vụ vps, aws, domain, SSL, backup dữ liệu. Quản trị server, tối ưu hóa hiệu năng, bảo mật hệ thống 24/7.
+                    </p>
+                </div>
+
+                <div class="bg-gray-50 p-8 rounded-2xl hover-scale fade-in border border-gray-100">
+                    <div class="bg-slate-600 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                        <i class="fas fa-cogs text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4" data-i18n="services.support.title">Phần mềm Quản lý</h3>
                     <p class="text-gray-600 leading-relaxed" data-i18n="services.support.desc">
-                        Đội ngũ hỗ trợ kỹ thuật luôn sẵn sàng giúp đỡ bạn mọi lúc, mọi nơi.
+                        Xây dựng phần mềm quản lý theo yêu cầu: ERP, CRM, HRM. Tích hợp đầy đủ tính năng, giao diện trực quan, phù hợp với quy trình doanh nghiệp.
                     </p>
                 </div>
             </div>
@@ -1425,7 +1429,7 @@
                             <div class="bg-amber-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <i class="fas fa-headset text-2xl text-white"></i>
                             </div>
-                            <h4 class="text-xl font-bold text-slate-800 mb-3" data-i18n="themes.feature3.title">Hỗ Trợ Trọn Đời</h4>
+                            <h4 class="text-xl font-bold text-slate-800 mb-3" data-i18n="themes.feature3.title">Hỗ Trợ 24/7</h4>
                             <p class="text-gray-600" data-i18n="themes.feature3.desc">Nhận hỗ trợ kỹ thuật và cập nhật miễn phí trọn đời cho tất cả theme.</p>
                         </div>
                     </div>
@@ -1694,6 +1698,14 @@
                             <li class="flex items-start">
                                 <i class="fas fa-check-circle text-emerald-400 mr-3 mt-1"></i>
                                 <span data-i18n="about.reason4">Giá cả cạnh tranh, minh bạch</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-emerald-400 mr-3 mt-1"></i>
+                                <span data-i18n="about.reason5">Bảo mật cao</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-emerald-400 mr-3 mt-1"></i>
+                                <span data-i18n="about.reason6">Quản lý dễ dàng</span>
                             </li>
                         </ul>
                     </div>
