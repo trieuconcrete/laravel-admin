@@ -17,3 +17,4 @@
 # Docker volumes
 docker/mysql/data/
 /dbdata/
+src/storage/debugbar/
